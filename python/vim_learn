@@ -1,0 +1,3 @@
+vim
+1.sudo vim .bashrc
+2.:wq!强行保存退出
