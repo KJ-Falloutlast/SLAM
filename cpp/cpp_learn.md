@@ -3058,6 +3058,26 @@ int main(){
       - 总结：
         - 1. 代码区：局部变量(**局部变量=普通变量+指针**)+const修饰的局部变量
         - 2. 全局区：全局变量+静态变量（*static+关键子*）+常量(**常量=字符串常量+const修饰的全局变量** )
+        - 3. 注意事项：函数参数的返回值
+           ```cpp
+           #include <iostream>
+           using namespace std;
+           // int func(){    此处是错误的，因为若是返回一个地址或者是引用，必须定义为指针函数或者引用函数
+           //     int a = 1;
+           //     int *p = &a;
+           //     return p;
+           // }
+           int* func(){
+               int a = 1;
+               int *p = &a;
+               return p;
+           }
+           int main(){
+               int *ptr = func();
+               cout << ptr << endl;
+               return 0;
+           }
+           ```
    - 1-2. 程序运行后：
      - 1-2-1.栈区：
          - 由编译器自动分配释放，存放函数的参数值，局部变量
@@ -3196,7 +3216,7 @@ int main(){
               pF03();
               }
        ```
-2. 引用：
+1. 引用：
     * 2-1引用的定义 
       - 定义：给变量起别名
       - 语法：数据类型 &别名 = 原名
@@ -3379,7 +3399,7 @@ int main(){
 
 
 
-3. 函数提高 
+2. 函数提高 
     * 3-1.函数的默认参数
       * >语法 :返回值类型 函数名 (参数 = 默认值)
         ```cpp
@@ -3482,7 +3502,7 @@ int main(){
             return 0;
         }
         ```
-4. 类
+3. 类
     * 4-1.封装
       * 意义:
         * 将属性和行为作为一个整体,
@@ -3560,72 +3580,220 @@ int main(){
             return 0;
         }
         ```  
-    * 封装的意义二：
-      * 访问权限：
-        * public:公共权限，类内可以访问，类外可以访问
-        * protected:保护权限，类内可以访问，类外不可以访问,子类可以访问父类的私有内容
-        * private:私有权限，类内可以访问，类外不可以访问，子类不能访问父类的私有内容
+      * 封装的意义二：
+        * 访问权限：
+          * public:公共权限，类内可以访问，类外可以访问
+          * protected:保护权限，类内可以访问，类外不可以访问,子类可以访问父类的私有内容
+          * private:私有权限，类内可以访问，类外不可以访问，子类不能访问父类的私有内容
+          * 例子：
+            ```cpp
+            #include <iostream>
+            #include <string>
+            using namespace std;
+            class Student{
+                public://公共权限,行为
+                    string  name;
+                protected:
+                    string car;
+                private:
+                    string code;
+                public://无论上述name,car,code是何种权限，都不会影响在类内部函数对属性和方法的访问
+                    void func(){
+                        name = "a";
+                        car = "truck";
+                        code = "1234";
+                    }//在类的内部方法可以访问类内部的属性和方法
+            };
+            int main(){
+                Student s;
+                s.name = "b";
+                s.car = "plane";
+                s.code = "1234";
+                return 0;
+
+            }
+          ```
+          * 总结：
+            * **无论上述name,car,code是何种权限，都不会影响在类内部方法对属性和方法的访问**
+            * 在类的外部可以访问类的public的属性和方法，而protected和private方法不能访问
+          * class和struct的区别
+            * 唯一的区别是：**默认的访问权限不同**
+              * struct的默认权限为公共
+              * class的默认权限为私有
+            * 例子：
+       ```cpp
+       #include <iostream>
+       using namespace std;
+       class C1{
+           int A;//等同于private：int A;
+       };
+       struct C2{
+           int A;//等同于public: int A;
+           private:
+               int a;
+       };
+       int main(){
+           // C1 c1;
+           C2 c2;
+           // c1.A = 1;
+           c2.A = 2;
+           c2.a = 1;
+           // cout << c1.A << endl;
+           cout << c2.A << endl;
+       }
+       ```
+      * 成员属性设置为私有：
+        * 优点1：将所有成员属性设置为私有，可以自己控制读写权限
+        * 优点2：对于写权限，我们可以检测数据的有效性
+        * 在设计类的时候的方法:
+          * 1. 属性设置为私有
+          * 2. 方法设置为公有
         * 例子：
           ```cpp
-          #include <iostream>
-          #include <string>
-          using namespace std;
-          class Student{
-              public://公共权限,行为
-                  string  name;
-              protected:
-                  string car;
-              private:
-                  string code;
-              public://无论上述name,car,code是何种权限，都不会影响在类内部函数对属性和方法的访问
-                  void func(){
-                      name = "a";
-                      car = "truck";
-                      code = "1234";
-                  }//在类的内部方法可以访问类内部的属性和方法
-          };
-          int main(){
-              Student s;
-              s.name = "b";
-              s.car = "plane";
-              s.code = "1234";
-              return 0;
+        #include <iostream>
+        using namespace std;
+        class Person{
+            private:
+                int m_Age;//设为可读可写
+                string m_Name;//设为只写
+                string m_Sex;//设为只读
+            public:
+                void setAge(int age){//写年龄
+                    m_Age = age;
+                }
+                int getAge(){//读年龄
+                    return m_Age;
+                }
+                int getName(){//读名字，因为没有setName所以只能读取不能写入
+                    m_Name = 10;
+                    return m_Name;
+                }     
+                void setSex(string sex){//写性别
+                    m_Sex = sex;
+                }
 
-          }
+        }
+        int main(){
+            Person p;
+            // p.m_Age = 10;这些都是失败的，因为这些属性为私有属性，外界不能访问
+            // p.m_Name = "A";
+            // p.m_Sex = "boy";
+            p.setAge(10);
+            p.getAge();//年纪可读可写
+            p.setName("James")//不行，名字只可读不可写
+            p.getName()
+            p.setSex("boy");
+            p.getSex();//不行，年龄只可写，不可读
+        }
+          ```
+        
+       * 案例
+         * 案例1. 
+        ```cpp     
+        #include <iostream>
+        #include <string>
+        using namespace std;
+        class Cube{
+            private:
+                double m_L;
+                double m_W;
+                double m_H;
+            public:
+                void setL(double l){
+                    m_L = l;
+                }
+                void setW(double w){
+                    m_W = w;
+                }
+                void setH(double h){
+                    m_H = h;
+                }        
+                double getL(){
+                    return m_L;
+                }
+                double getW(){
+                    return m_W;
+                }
+                double getH(){
+                    return m_H;
+                }
+                double calculateV(){
+                    double v = m_L * m_W * m_H;
+                    return v;
+                }
+        };
+        bool isSame(Cube &c1, Cube &c2){
+            if (c1.getL() == c2.getL() && c1.getW() == c2.getW() && c1.getH() == c2.getH()){
+                return true;
+            }
+            return false;
+        }
+
+        int main(){
+            Cube c1;
+            c1.setL(10);
+            c1.setW(10);
+            c1.setH(10);
+            Cube c2;
+            c2.setL(10);
+            c2.setW(10);
+            c2.setH(10);
+            cout << "长方体体积为" << c1.calculateV() << endl;
+            isSame(c1, c2);
+            bool ret = isSame(c1, c2);//用result去接收这个函数的返回值
+            if (ret){
+                cout << "c1=c2" << endl;
+            }
+            else{
+                cout << "c1!=c2" << endl;
+            }
+        }
         ```
-        * 总结：
-          * **无论上述name,car,code是何种权限，都不会影响在类内部方法对属性和方法的访问**
-          * 在类的外部可以访问类的public的属性和方法，而protected和private方法不能访问
-        * class和struct的区别
-          * 唯一的区别是：**默认的访问权限不同**
-            * struct的默认权限为公共
-            * class的默认权限为私有
-          * 例子：
-     ```cpp
-     #include <iostream>
-     using namespace std;
-     class C1{
-         int A;//等同于private：int A;
-     };
-     struct C2{
-         int A;//等同于public: int A;
-         private:
-             int a;
-     };
-     int main(){
-         // C1 c1;
-         C2 c2;
-         // c1.A = 1;
-         c2.A = 2;
-         c2.a = 1;
-         // cout << c1.A << endl;
-         cout << c2.A << endl;
-     }
-     ```
-    * 成员属性设置为私有：
-      * 优点1：将所有成员属性设置为私有，可以自己控制读写权限
-      * 优点2：对于写权限，我们可以检测数据的有效性
-
+    * 4-2.对象的初始化和清理
+      * 4-2-1.构造函数和析构函数
+        * 问题提出：对象的初始化和清理是很重要的问题，一个对象或者变量没有初始化状态，使用结果是未知的；**使用完一个对象或变量，没有及时清理，也会造成一定的安全问题**
+        * 构造函数：主要在于创建对象时为对象的成员属性赋值，构造函数由编译器自动调用，无须手动调用
+          * 语法：类名(){}
+          * 构造函数没有返回值也不写void
+          * 函数名称和类名相同
+          * 构造函数可以有参数,因此可以发生重载
+          * 程序在调用对象时候会自动调用构造，无须手动调用，且只会调用一次
+        * 析构函数：用于在对象销毁之前系统自动调用，执行一些清理操作
+          * 语法：~类名(){}
+          * 析构函数没有返回值也不写void
+          * 函数名称和类名相同，名称前面加~
+          * 析构函数不可以有参数,因此可以发生重载
+          * 程序在对象销毁的时候会自动调用析构，无须手动调用，且只会调用一次
+        * 例：
+          ```cpp
+          #include <iostream>
+          using namespace std;
+          class Person{
+              public:    
+                  Person(){//构造函数
+                      cout << "person构造函数的调用" << endl;
+                  }//若是不写这个函数，编译器会自动写一个这个函数，但是这个函数下面没有语句
+                  ~Person(){//对象执行完了被销毁了才会调用析构函数
+                      cout << "person的析构函数的调用" << endl;
+                  }//若是不写这个函数，编译器会自动写一个这个函数，但是这个函数下面没有语句
+                  
+          };
+          //2.析构函数
+          void test01(){
+              Person p;//只创建这个对象就能自动调用函数,这是一个在栈上的局部变量，
+              //test01()执行完后会自动释放这个对象
+          }
+          int main(){
+              // test01();
+              Person p;
+              return 0;
+          }
+          ```
+      * 4-2-2.构造函数的分类及调用
+        * 两种分类方式：
+          * 按参数分：有参构造和无参构造
+          * 按类型分：普通构造和拷贝构造
+        * 三种调用方式：括号法， 显示法，隐式转换法
   * 12-1.定义：
 
       template <typename type> ret-type func-name(parameter list)

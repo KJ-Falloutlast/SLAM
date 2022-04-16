@@ -40,3 +40,5 @@ ADD_EXECUTABLE(hello ${SRC_LIST})//该应用程序是hello目录下的hello.cpp�
     #生成应用程序 hello
     ADD_EXECUTABLE(ch1_Eigen ${SRC_LIST})
     include_directories( "/usr/include/eigen3" )
+
+    6. g++运行c++脚本的方法

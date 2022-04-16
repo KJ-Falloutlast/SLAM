@@ -85,6 +85,10 @@
       * 1. 修改xml文件和cmake文件：
         * 在cmake中:
         ```cmake 
+        find_package:message_generation
+        add_message_file:Person.msg
+        generate_messages:std_msgs
+        catkin_package:message_runtime
         add_executable(person_talker src/person_talker.cpp)
         add_executable(person_listener src/person_listener.cpp)
 
@@ -100,82 +104,74 @@
         ```
         * 在xml中：message_generation+message_runtime<--->build_depend+build_export_depend+exec_depend
       ```xml
+        <buildtool_depend>catkin</buildtool_depend>
         <build_depend>roscpp</build_depend>
         <build_depend>rospy</build_depend>
         <build_depend>std_msgs</build_depend>
         <build_depend>message_generation</build_depend>
         <build_depend>message_runtime</build_depend>
+
         <build_export_depend>roscpp</build_export_depend>
         <build_export_depend>rospy</build_export_depend>
         <build_export_depend>std_msgs</build_export_depend>
         <build_export_depend>message_generation</build_export_depend>
         <build_export_depend>message_runtime</build_export_depend>
+
         <exec_depend>roscpp</exec_depend>
         <exec_depend>rospy</exec_depend>
         <exec_depend>std_msgs</exec_depend>
         <exec_depend>message_runtime</exec_depend>
         <exec_depend>message_generation</exec_depend>
+
       ```
       * 2. 发布方的实现
       ```cpp
       #include "ros/ros.h"
-      #include "demo02_talker_listener/Person.h"
-
-      int main(int argc, char *argv[])
-      {
+      #include "pub_sub/Person.h"
+      int main(int argc, char *argv[]){
           setlocale(LC_ALL,"");
-
-          //1.初始化 ROS 节点
-          ros::init(argc,argv,"talker_person");
-
-          //2.创建 ROS 句柄
+          ros::init(argc, argv, "publisher");
           ros::NodeHandle nh;
-
-          //3.创建发布者对象
-          ros::Publisher pub = nh.advertise<demo02_talker_listener::Person>("chatter_person",1000);
-
-          //4.组织被发布的消息，编写发布逻辑并发布消息
-          demo02_talker_listener::Person p;
-          p.name = "sunwukong";
-          p.age = 2000;
-          p.height = 1.45;
-          ros::Rate r(1);
-          while (ros::ok())
-          {
-              pub.publish(p);
-              p.age += 1;
-              ROS_INFO("我叫:%s,今年%d岁,高%.2f米", p.name.c_str(), p.age, p.height);
-
-              r.sleep();
-              ros::spinOnce();
+          ros::Publisher pub = nh.advertise<pub_sub::Person>("house", 20);
+          ros::Rate rate(1);
+          pub_sub::Person msg;
+          int count = 0;
+          while (ros::ok()){
+              msg.name = "James";
+              msg.age = 18;
+              msg.height = 1.75;
+              pub.publish(msg);
+              ROS_INFO("published%d", count);
+              rate.sleep();
+              count++;
           }
           return 0;
       }
       ```
       * 3.订阅方的实现
         ```cpp
-        #include "ros/ros.h"
-        #include "demo02_talker_listener/Person.h"
-        
-        void doPerson(const demo02_talker_listener::Person::ConstPtr& person_p){
-            ROS_INFO("订阅的人信息:%s, %d, %.2f", person_p->name.c_str(), person_p->age, person_p->height);
-        }
-
-        int main(int argc, char *argv[])
-        {   
-            setlocale(LC_ALL,"");
-
-            //1.初始化 ROS 节点
-            ros::init(argc,argv,"listener_person");
-            //2.创建 ROS 句柄
-            ros::NodeHandle nh;
-            //3.创建订阅对象
-            ros::Subscriber sub = nh.subscribe<demo02_talker_listener::Person>("chatter_person",10,doPerson);
-
-            //4.回调函数中处理 person
-
-            //5.ros::spin();
-            ros::spin();    
-            return 0;
-        }
+      #include "ros/ros.h"
+      #include "pub_sub/Person.h"
+      void doMsg(const pub_sub::Person::ConstPtr &msg){
+          ROS_INFO("发布的消息是：姓名:%s, 身高:%d, 年龄:%d",msg->name.c_str(), msg->age, msg->height);//char类型必须转换成char.c_str()类型才能输出
+      }
+      int main(int argc, char *argv[]){
+          setlocale(LC_ALL,"");//加上这一段可以避免中文乱码
+          ros::init(argc, argv, "subscriber");
+          ros::NodeHandle nh;
+          ros::Subscriber sub = nh.subscribe<pub_sub::Person>("house", 20, doMsg);
+          ros::spin();
+          return 0;
+      }
         ```
+    * 2-2.总结：
+      * 在pub_sub目录下创建msg/Person.msg
+      * 配置xml和cmake文件
+        * 1.cmake:message_runtime message_generation std_msg , Person.msg;add_excutable,add_dependencies
+        * 2.xml:见上面
+        * 3.catkin_make
+        * 4.将devep/include/**的头文件路径加到cpp_jason文件中
+        * 5.编写pub_msg.cpp+sub_msg.cpp
+        * 6.修改cmakelist文件：Person.msg;add_excutable
+        * 6.catkin_make
+        * 7.rosrun执行
