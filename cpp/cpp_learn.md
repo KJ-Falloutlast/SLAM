@@ -3789,11 +3789,260 @@ int main(){
               return 0;
           }
           ```
+    
       * 4-2-2.构造函数的分类及调用
         * 两种分类方式：
           * 按参数分：有参构造和无参构造
           * 按类型分：普通构造和拷贝构造
         * 三种调用方式：括号法， 显示法，隐式转换法
+        * 例子：
+        ```cpp
+        #include <iostream>
+        using namespace std;
+        class Person{
+            public:
+                Person(){
+                    cout << "这是无参构造函数" << endl;
+                }
+                Person(int a){
+                    age = a;
+                    cout << "这是有参构造函数" << endl;
+                }
+                Person(const Person &p){
+                     age = p.age;
+                     cout << "这是拷贝构造函数" << endl;
+                }
+                ~Person(){
+                    cout << "这是析构函数" << endl;
+                }
+            private:
+                int age;
+        };
+        void test01(){
+            Person p1;
+        }
+        void test02(){
+            //1.括号法
+            Person p2(10);//有参构造
+            Person p3(p2);//拷贝构造
+            //2.显示法
+            Person p4 = Person(10);//有参构造
+            Person p5 = Person(p4);//拷贝构造
+            //3.隐式法
+            Person p6 = 10;//有参构造,p6 = 10 <=> p6(10)<=> Person(10)
+            Person p7 = p6;//拷贝构造,p7 = p6 <=> p7(p6) <=> Person(p6)
+        }
+
+        int main(){
+            test01();
+            test02();
+            return 0;
+        }
+        //一般习惯上用括号法和显示法
+        ```
+        * 注意事项：
+          * 习惯上一般括号法和显示法
+          * Person(10);是匿名对象，当前执行结束后，系统会立即回收匿名对象
+          * Person p1();调用无参构造不能加括号，否则会被认为是函数声明
+ 
+ 
+ 
+
+
+
+      * 4-2-3.拷贝构造函数的调用时机
+        * 1.三种情况
+          * 使用一个已经创建完毕的对象来初始化一个新对象
+          * 值传递的方式给函数参数传值
+          * 以值方式返回局部对象
+        * 2. 例子
+          ```cpp
+          #include <iostream>
+          using namespace std;
+          class Person{
+              public:
+                  Person(){
+                      cout << "这是无参构造函数" << endl;
+                  }
+                  Person(int a){
+                      age = a;
+                      cout << "这是有参构造函数" << endl;
+                  }
+                  Person(const Person &p){
+                       age = p.age;
+                       cout << "这是拷贝构造函数" << endl;
+                  }
+                  ~Person(){
+                      cout << "这是析构函数" << endl;
+                  }
+              private:
+                  int age;
+          };
+          //1.利用创建好的对象初始化一个新对象
+          void func01(){
+              Person p1;//调用无参构造函数
+              Person p2(p1);//调用拷贝构造函数
+          }
+          void test01(){
+              func01();
+          }
+          //2.类的值传递
+          void doWork(Person p){
+              
+          }
+          void test02(){
+              Person p3;//调用无参构造函数
+              doWork(p3);//调用拷贝构造函数
+          }
+          //3.类函数的返回
+          Person doWork2(){
+              Person p1;//调用无参构造函数和析构函数
+              return p1;
+          }
+          void test03(){
+              Person p = doWork2();//声明自定义的类
+          }
+
+          int main(){
+              test01();
+              test02();
+              test03();
+              return 0;
+          }
+          ```
+      * 4-2-4.构造函数的调用规则
+        * 1.默认情况下的调用函数
+          * 默认构造函数(无参，函数体为空)
+          * 默认析构函数(无参，函数体为空)
+          * 默认拷贝构造函数，对属性进行拷贝
+        * 2.构造函数的调用规则如下：
+          * 如果用户定义有参构造函数，c++不再提供默认无参构造，但是会提供默认拷贝构造
+          * 如果用户定义拷贝构造函数，c++不再提供其他构造函数
+          * 析构函数和无参构造函数必须要在类的内部
+        * 3.例子
+        ```C++
+        class Person {
+        public:
+        	//无参（默认）构造函数
+        	Person() {
+        		cout << "无参构造函数!" << endl;
+        	}
+        	//有参构造函数
+        	Person(int a) {
+        		age = a;
+        		cout << "有参构造函数!" << endl;
+        	}
+        	//拷贝构造函数
+        	Person(const Person& p) {
+        		age = p.age;
+        		cout << "拷贝构造函数!" << endl;
+        	}
+        	//析构函数
+        	~Person() {
+        		cout << "析构函数!" << endl;
+        	}
+        public:
+        	int age;
+        };
+
+        void test01()
+        {
+        	Person p1(18);
+        	//如果不写拷贝构造，编译器会自动添加拷贝构造，并且做浅拷贝操作
+        	Person p2(p1);
+
+        	cout << "p2的年龄为： " << p2.age << endl;
+        }
+
+        void test02()
+        {
+        	//如果用户提供有参构造，编译器不会提供默认构造，会提供拷贝构造
+        	Person p1; //此时如果用户自己没有提供默认构造，会出错
+        	Person p2(10); //用户提供的有参
+        	Person p3(p2); //此时如果用户没有提供拷贝构造，编译器会提供
+
+        	//如果用户提供拷贝构造，编译器不会提供其他构造函数
+        	Person p4; //此时如果用户自己没有提供默认构造，会出错
+        	Person p5(10); //此时如果用户自己没有提供有参，会出错
+        	Person p6(p5); //用户自己提供拷贝构造
+        }
+
+        int main() {
+
+        	test01();
+
+        	system("pause");
+
+        	return 0;
+        }
+        ```
+      * 4-2-5.深拷贝和浅拷贝
+        * 浅拷贝：简单的赋值操作
+        * 深拷贝：在堆区重新申请空间，进行拷贝操作
+        * 例子
+        ```cpp
+        #include <iostream>
+        using namespace std;
+        class Person{
+            public:
+                Person(){
+                    cout << "无参构造函数调用" << endl;
+                }
+                Person(int age, int height){
+                    m_Age = age;
+                    m_Height = new int(height);//堆区的数据由程序员手动开辟和释放，而在函数调用完之后，在栈区的数据就会被销毁，此时被销毁前会调用析构函数，所以要堆区数据要在析构函数中被销毁
+                    cout << "有参构造函数调用" << endl;
+                }
+                Person(const Person &p){
+                    m_Height = new int(*p.m_Height);//深拷贝
+                    cout << "拷贝构造函数调用" << endl;
+                }
+                ~Person(){
+                    cout << "析构函数的调用" << endl;
+                    if (m_Height != NULL){
+                        delete m_Height;//此时p1.m_Height->new int(height),p2.m_Height->new int(height),
+                        m_Height = NULL;//防止野指针出现的清空操作
+                    }
+                }
+                int *m_Height;
+                int m_Age;
+        };
+
+        void test01(){
+            Person p1(12, 12);
+            printf("p1的年龄为%d,身高为%d\n",p1.m_Age,*p1.m_Height);
+            Person p2(p1);
+            printf("p1的年龄为%d,身高为%d\n",p1.m_Age,*p1.m_Height);
+        /* 
+        1.执行顺序：由于先进后出的原则，后进入的先出去，所以此时，调用了2次析构函数，就会出现错误
+        2.解决方案：此时在拷贝构造函数中必须再拷贝一份m_Height = new int(*p.Height),这样子，m_Height分别指向new int(height)
+        和new int(*p.Height)，所以这样的话，执行2次析构函数就不会重复销毁m_Height
+        }
+        3.a=1,&a = d1(变量名就是地址), a = 1,所以delete a <=>delete a的值,但是不会删除a的地址  
+        int a = 1, int *b = &a, =>(b = &a, *b = 1, &b = d1),delete b <=>delele &a <=> delete a 
+        */
+
+        int main(){
+            test01();
+        }
+        ```
+        >* 注意事项：
+          * 1.执行顺序：由于先进后出的原则，后进入的先出去，所以此时，调用了2次析构函数，就会出现错误
+          * 2.解决方案：此时在拷贝构造函数中必须再拷贝一份m_Height = new int(*p.Height),这样子，m_Height分别指向new int(height)
+          * 和new int(*p.Height)，所以这样的话，执行2次析构函数就不会重复销毁m_Height
+          }
+          * 3.a=1,&a = d1(变量名就是地址), a = 1,所以delete a <=>delete a的值,但是不会删除a的地址  
+          int a = 1, int *b = &a, =>(b = &a, *b = 1, &b = d1),delete b <=>delele &a <=> delete a 
+    
+    
+  
+  
+  
+  
+  
+  
+      * 4-2-6.初始化列表
+        * 
   * 12-1.定义：
 
       template <typename type> ret-type func-name(parameter list)
@@ -3839,6 +4088,8 @@ int main(){
               - 2.模板必须要确定出T的类型，才可以使用(调用函数时必须要指定类型)
               - 3.模板申明必须要须跟在函数的前面
               - 4.例子:
+
+
         ```cpp
         #include <iostream>
         using namespace std;

@@ -1,5 +1,5 @@
 # 1.通信机制
-## 1-1.话题通信
+## 1.话题通信
 1. 话题通信基本操作
     * 发布数据
 ```cpp
@@ -94,14 +94,41 @@
 
         add_dependencies(person_talker ${PROJECT_NAME}_generate_messages_cpp)
         add_dependencies(person_listener ${PROJECT_NAME}_generate_messages_cpp)
-        
+
         target_link_libraries(person_talker
         ${catkin_LIBRARIES}
         )
         target_link_libraries(person_listener
         ${catkin_LIBRARIES}
         )
+        
+        ```cmake//**总的来看**
+         ## Declare a C++ executable
+         ## With catkin_make all packages are built within a single CMake context
+         ## The recommended prefix ensures that target names across packages don't collide
+         add_executable(server src/server.cpp)
+         add_executable(client src/client.cpp)
+
+         ## Rename C++ executable without prefix
+         ## The above recommended prefix causes long target names, the following renames the
+         ## target back to the shorter version for ease of user use
+         ## e.g. "rosrun someones_pkg node" instead of "rosrun someones_pkg someones_pkg_node"
+         # set_target_properties(${PROJECT_NAME}_node PROPERTIES OUTPUT_NAME node PREFIX "")
+
+         ## Add cmake target dependencies of the executable
+         ## same as for the library above
+         add_dependencies(server ${PROJECT_NAME}_gencpp)
+         add_dependencies(client ${PROJECT_NAME}_gencpp)
+
+         ## Specify libraries to link a library or executable target against
+         target_link_libraries(server
+           ${catkin_LIBRARIES}
+         )
+         target_link_libraries(client
+           ${catkin_LIBRARIES}
+         )
         ```
+        ```xml
         * 在xml中：message_generation+message_runtime<--->build_depend+build_export_depend+exec_depend
       ```xml
         <buildtool_depend>catkin</buildtool_depend>
@@ -165,13 +192,232 @@
       }
         ```
     * 2-2.总结：
-      * 在pub_sub目录下创建msg/Person.msg
-      * 配置xml和cmake文件
-        * 1.cmake:message_runtime message_generation std_msg , Person.msg;add_excutable,add_dependencies
-        * 2.xml:见上面
-        * 3.catkin_make
-        * 4.将devep/include/**的头文件路径加到cpp_jason文件中
-        * 5.编写pub_msg.cpp+sub_msg.cpp
-        * 6.修改cmakelist文件：Person.msg;add_excutable
-        * 6.catkin_make
-        * 7.rosrun执行
+      * 1.在pub_sub目录下创建msg/Person.msg
+      * 2.修改cmake:message_runtime message_generation std_msgadd_dependencies
+      * 3.修改xml:见上面
+      * 4.catkin_make
+      * 5.将devep/include/**的头文件路径加到cpp_jason文件中
+      * 6.编写pub_msg.cpp+sub_msg.cpp
+      * 7.**再次修改cmakelist文件**：Person.msg;add_excutable
+      * 8.catkin_make
+      * 9.rosrun执行
+
+
+## 2.服务通信
+### 2-1. 服务端(**server**)
+
+```cpp
+#include "ros/ros.h"
+#include "server_client/AddInts.h"
+//4.创建服务端
+bool doReq(server_client::AddInts::Request &req, server_client::AddInts::Response &resp){//引用传递
+    int num1 = req.num1;
+    int num2 = req.num2;
+    resp.sum = num1 + num2;
+    ROS_INFO("您输入的信息是num1+num2=%d",resp.sum);
+    return true;
+    }
+           
+int main(int argc, char *argv[]){
+    setlocale(LC_ALL,"");
+    //1.创建节点
+    ros::init(argc, argv, "server");
+    //2.创建节点句柄
+    ros::NodeHandle nh;
+    //3.创建服务端
+    ros::ServiceServer server = nh.advertiseService("AddInts", doReq);//此处无模板,此处话题名称相同
+    //5.回旋
+    ros::spin();
+    return 0;
+}
+```
+### 2-2. 客户端
+```cpp
+#include "ros/ros.h"
+#include "server_client/AddInts.h"
+int main(int argc, char *argv[]){
+    setlocale(LC_ALL, "");
+    //优化实现
+    if (argc != 3){
+        ROS_INFO("提交的参数个数不对！");
+        return 1;
+    }
+    //1.初始化节点
+    ros::init(argc, argv, "client");
+    //2.创建节点句柄
+    ros::NodeHandle nh;
+    //3.创建客户端对象
+    ros::ServiceClient client = nh.serviceClient<server_client::AddInts>("AddInts");//客户端发布数据，所以需要指定数据类型，服务端接收数据，所以无须指定数据类型
+    //client = ServiceClient,serviceClient; server = ServiceServer,advertiseService
+    //4.创建请求逻辑
+    //4-1.创建请求
+    server_client::AddInts req;
+    req.request.num1 = atoi(argv[1]);//argv[1]是字符串类型的，要变成整型值，用atoi(argv[1]),
+    // atoi = ascii to integer,是将字符串转为整形的函数
+    req.request.num2 = atoi(argv[2]);
+    //4-2.处理响应
+    //调用判断服务器状态的函数
+    client.waitForExistence();//如果服务器没启动，就挂起，不启动
+    bool resp = client.call(req);//访问服务器把ai对象提交了,客户端接收返回的结果，是否是true
+    if (resp){//若是客户端先于服务端启动，resp = flase
+        ROS_INFO("响应成功！");
+        ROS_INFO("响应结果 = %d", req.response.sum);//结果被封装在ai.response.sum里面
+    }
+    else{
+        ROS_INFO("处理失败...");
+    }
+    return 0;
+}
+```
+### 2-3.配置cmake和xml,以及srv文件
+1. cmake文件
+* find_package->message_generation
+* add_service_files->AddInts.srv
+* generate_messages->std_msgs
+* catkin_package->message_runtime
+---
+* add_executable(client src/client.cpp)
+*add_dependencies(server ${PROJECT_NAME}_gencpp)
+*target_link_libraries(client
+  ${catkin_LIBRARIES}
+)
+1. xml
+```xml
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>rospy</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>message_generation</build_depend>
+  <build_depend>message_runtime</build_depend>
+
+  <build_export_depend>roscpp</build_export_depend>
+  <build_export_depend>rospy</build_export_depend>
+  <build_export_depend>std_msgs</build_export_depend>
+  <build_export_depend>message_generation</build_export_depend>
+  <build_export_depend>message_runtime</build_export_depend>
+
+  <exec_depend>roscpp</exec_depend>
+  <exec_depend>rospy</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>message_runtime</exec_depend>
+  <exec_depend>message_generation</exec_depend>
+```
+3. srv文件
+```srv
+int32 num1//客户端
+int32 num2
+---
+int32 sum//服务端
+```
+4. 步骤总结：
+   1. client
+      1. 创建节点
+      2. 创建节点句柄
+      3. 创建客户端:ros::ServiceClient client = nh.serviceClient<service_client::AddInts>("house")
+      4. 组织请求数据
+         1. 创建请求数据:service_client::AddInts req
+         2. 返回请求:bool resp = client.call(req) 
+    2. server
+       1. 创建节点
+       2. 创建节点句柄
+       3. 创建服务端：ros::ServiceServer server = nh.advertise("house",doReq)
+       4. 创建回调函数:bool doReq(service_client::AddInts::Request &req,service_client::AddInts::Request &resp){}
+       5. 回旋：ros::spin()
+
+
+## 3.参数服务器
+### 1.参数的增
+1. 方法
+   1. ros::NodeHandle nh -> nh.setParam("keys","values")
+   2. ros::param::set("keys","values");
+2. 调试：rosparam get /keys = xxxx
+3. 案例：
+```cpp
+/*
+    参数服务器操作之新增与修改(二者API一样)_C++实现:
+    在 roscpp 中提供了两套 API 实现参数操作
+    ros::NodeHandle
+        setParam("键",值)
+    ros::param
+        set("键","值")
+
+    示例:分别设置整形、浮点、字符串、bool、列表、字典等类型参数
+        修改(相同的键，不同的值)
+
+*/
+#include "ros/ros.h"
+
+int main(int argc, char *argv[])
+{
+    ros::init(argc,argv,"set_update_param");
+
+    std::vector<std::string> stus;
+    stus.push_back("zhangsan");
+    stus.push_back("李四");
+    stus.push_back("王五");
+    stus.push_back("孙大脑袋");
+
+    std::map<std::string,std::string> friends;
+    friends["guo"] = "huang";
+    friends["yuang"] = "xiao";
+
+    //NodeHandle--------------------------------------------------------
+    ros::NodeHandle nh;
+    nh.setParam("nh_int",10); //整型
+    nh.setParam("nh_double",3.14); //浮点型
+    nh.setParam("nh_bool",true); //bool
+    nh.setParam("nh_string","hello NodeHandle"); //字符串
+    nh.setParam("nh_vector",stus); // vector
+    nh.setParam("nh_map",friends); // map
+
+    //修改演示(相同的键，不同的值)
+    nh.setParam("nh_int",10000);
+
+    //param--------------------------------------------------------
+    ros::param::set("param_int",20);
+    ros::param::set("param_double",3.14);
+    ros::param::set("param_string","Hello Param");
+    ros::param::set("param_bool",false);
+    ros::param::set("param_vector",stus);
+    ros::param::set("param_map",friends);
+
+    //修改演示(相同的键，不同的值)
+    ros::param::set("param_int",20000);
+
+    return 0;
+}
+```
+4. for(auto:)语句
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+void printVec(vector<int> &vec){
+    for (int i = 0; i < vec.size(); i++){
+        cout << vec[i] << endl;
+    }
+}
+int main(){
+    vector<int> vec = {1, 2, 3, 4};
+//*****************第一种，不会改变vec中的值，相当于是值传递
+    for (auto i : vec){
+        i += 1;
+    }
+    printVec(vec);
+//****************第二种,改变vec中的值，相当于是引用传递
+    for (auto &i : vec){
+        i += 1;
+    }
+    printVec(vec);
+//****************第三种，会改变vec中的值，相当于是引用传递
+    for (auto &&i : vec){
+        i += 1;
+    }
+    printVec(vec);
+}
+```
+* 注意：
+  * 1.for(auto &i : vec)相当于python中的for (x in range),&i = x,vec = range,而auto是修饰符号
+  * 2.i为值传递，&i ,&&i相当于是引用传递
+  * 3.修改完ros.cpp后，再catkin_make后再执行rosrun xxxx ros.cpp，此时修改才能生效
+  * 4.vector<int> vec, ros::string<int, int>(xxxx)利用到了模板和变量声明 

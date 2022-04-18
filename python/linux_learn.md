@@ -1343,7 +1343,7 @@ rm: remove regular file `bashrc'? y
 
 将刚刚的目录名称更名为 mvtest2
 
-[root@www tmp]# mv mvtest mvtest2
+[root@www tmp]# mv mvtest mvtest2(文件名的修改)
 
 
 2.Linux 文件内容查看

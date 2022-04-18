@@ -828,7 +828,17 @@ console.log(a,b,c)
 6.命名问题：函数采用小驼峰命名法，类和结构体采用大驼峰命名法
 7.双引号的问题：类，结构体定义后面要接分号，定义函数和语句最后面不要接分号
 8.程序分段错误”（Segmentationfault）的信息
-
+9. argc合argv的关系
+```cpp
+#include <iostream>
+using namespace std;
+int main(int argc, char *argv[]){
+    for (int i = 0; i < argc; i++){
+        cout << argv[i] << endl;
+    }
+    return 0;
+}
+```
 # 其余学习问题
 
 6.进制输入 
