@@ -168,7 +168,7 @@ markdown
       {}  花括号
       []  方括号
       ()  小括号
-      #   井字号
+      \#   井字号
       +   加号
       -   减号
       .   英文句点
@@ -277,34 +277,31 @@ markdown
 ## git 学习
 1. github令牌：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
 2. 设置密码：git remote set-url origin https://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@github.com/KJ-Falloutlast/https://github.com/KJ-Falloutlast/SLAM_learn.git
-2. 步骤：
+3. 初始化步骤：
   * 1. git init 
   * 2. git add .
   * 3. git commit -m "注释语句"
   * 4. git remote add origin https://github.com/KJ-Falloutlast/SLAM.git
   * 5. git branch -M main
   * 6. git push -u origin main
+  * 上传步骤：
+    * git add .
+    * git commit -m "xxxx"
+    * git push
 
-
-3. 步骤
-   * 1. 创建仓库：利用SSH地址
-   * 2. 安装git
-     * 绑定用户：
-
-
-1. 创建阀仓库
+4. 创建阀仓库
    1. 检查SSH公钥
    cd ~/.ssh
-   2. 生成SSH公钥
+   1. 生成SSH公钥
    ssh-keygen -t rsa -C "479875948@qq.com"**一路回车即可** 
     
-   3. 添加SSH公钥到github
+   1. 添加SSH公钥到github
     * cat id_rsa.pub 
     * 在github上添加ssh公钥匙
       * >settings-->SSH and GPG keys-->将生成的公钥匙保存到github中并加上标题
       * 
 
-   4. 测试是否生效
+   2. 测试是否生效
       ssh -T git@github.com当看到这些内容放入时候，直接yes
 
       The authenticity of host 'github.com (207.97.227.239)' can't be established. 
@@ -315,7 +312,7 @@ markdown
       Hi username! 
 
       You've successfully authenticated, but GitHub does not provide shell access.
-    5. 本地项目上传至github
+    1. 本地项目上传至github
       mkdir demo
       cd demo
       echo "# demo" >> README.md
@@ -335,7 +332,7 @@ markdown
 
 
 
-  6. 问题分析：
+  1. 问题分析：
      1. 更新被拒绝
       提示：更新被拒绝，因为您当前分支的最新提交落后于其对应的远程分支。
       提示：再次推送前，先与远程变更合并（如 ‘git pull …’）。详见
@@ -344,4 +341,4 @@ markdown
       *解决方案：
          $git fetch origin    //获取远程更新
          $git merge origin/master -m "message" //把更新的内容合并到本地分支
-      2. 
+      1. 

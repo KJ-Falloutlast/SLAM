@@ -3016,7 +3016,7 @@ int main(){
               return 0;
             }
 # 11. 核心编程
-1. 内存分区模型：内存方向可以分为4个区域
+## 1. 内存分区模型：内存方向可以分为4个区域
    * 代码区：存放函数体的二进制代码，由操作系统进行管理，**代码区 = 局部变量(局部变量=普通变量+指针)+const修饰的局部变量**
    * 全局区域：存放全局变量和静态变量和常量，**全局区=全局变量+静态变量（*static+关键字*）+常量(常量=字符串常量+const修饰的全局变量)**
    * 栈区：有编译器自动分配释放，存放**函数形参，局部变量**
@@ -3024,1182 +3024,1392 @@ int main(){
    ---
    * 内存四区域的意义：不同区域存的数据赋予不同的生命周期，给我们更大的灵活性编程
    ---
-    - 1-1. 程序运行前：程序编译后，生成了exe可执行程序，未执行程序前分为2个区域
-      - 代码区：存放CPU的及其指令
-        - 代码区时**共享**的，共享的目的时对于频繁执行的程序，只需要在内存中有一份代码即可
-        - 代码区时是**只读**的，使其只读的原因是因为防止程序意外地修改了它的指令
-      - 全局区：全局变量和静态变量存放至此
-        - 全局区包括常量区，字符串常量和其他常量也存放至此
-        - <u>该区域的数据在程序结束后由操作系统释放<u>
-      - 例子：
-       ``` c++
-       #include <iostream>
-       using namespace std;
-       int g_a= 10;//全局变量
-       const int c_g_a = 10;//全局常量
-       int main()
-       {
-           int l_a = 10;//局部变量
-           cout << "局部变量a的地址" << &l_a << endl;
-           cout << "全局变量a的地址" << &g_a << endl;
-           //静态变量。全局变量和静态变量，字符串常量，const修饰的全局变量离得很近，都在同一个区域
-           static int s_a = 10;
-           cout << "静态变量c的地址" << &s_a << endl;
-           //字符串常量
-           cout << "字符串常量的地址为" << &"helloworld" << endl;
-           //const修饰的常量：
-           //const修饰的全局常量
-           cout << "const修饰的全局常量的地址为" << &c_g_a << endl;
-           //const修饰的局部变量,const修饰的局部常量和局部变量的地址很近
-           const int c_l_a = 10;//c-const, g = global, l = local
-           cout << "const修饰的局部常量的地址为" << &c_l_a << endl;
-           return 0;}
-       ```
-      - 总结：
-        - 1. 代码区：局部变量(**局部变量=普通变量+指针**)+const修饰的局部变量
-        - 2. 全局区：全局变量+静态变量（*static+关键子*）+常量(**常量=字符串常量+const修饰的全局变量** )
-        - 3. 注意事项：函数参数的返回值
-           ```cpp
-           #include <iostream>
-           using namespace std;
-           // int func(){    此处是错误的，因为若是返回一个地址或者是引用，必须定义为指针函数或者引用函数
-           //     int a = 1;
-           //     int *p = &a;
-           //     return p;
-           // }
-           int* func(){
-               int a = 1;
-               int *p = &a;
-               return p;
-           }
-           int main(){
-               int *ptr = func();
-               cout << ptr << endl;
-               return 0;
-           }
-           ```
-   - 1-2. 程序运行后：
-     - 1-2-1.栈区：
-         - 由编译器自动分配释放，存放函数的参数值，局部变量
-         - 注意事项：不要返回局部变量的地址，栈区开辟的数据由编译器自动释放
-       - 例子
-       ```c++
-       #include <iostream>
-       using namespace std;
-       int * func(int b){
-           b = 100;//形参数据也会放在栈区，栈区放局部变量和形参
-           int a = 1;//局部变量存放在栈区，栈区的数据在函数执行完后自动释放，所以不要返回局部变量的地址
-           return &a;
-       }//指针函数返回的是一个地址
-       int main()
-       {
-           int * p = func(1);
-           cout << *p << endl;//第一次可以打印正确的数字是因为编译器作了保留
-           cout << *p << endl;//第二次这个数据就不再保留了
-           return 0;
-       }
-       ```
-     - 1-2-2.堆区
-       - 定义：由程序员分配释放，若程序员不释放，程序结束时由操作系统回收
-       - 实例：
-       ```cpp
-       #include <iostream>
-       using namespace std;
-       int * func(){
-           //利用new关键字，可以将数据开辟到堆区，
-           int * p = new int(10);//指针本质也是局部变量，放在栈上，指针保存的数据放在堆区
-           return p;
-       }//指针函数返回的是一个地址
-       int main()
-       {
-           //在堆区开辟数据
-           int *p = func();
-           cout << *p << endl;
-       }
-       ```
-
-
-
-     - 1-2-3.new操作符号
-       - 作用：利用new在堆区开辟数据，堆区开辟的数据，由程序员手动开辟，手动释放，释放利用操作符delete;**利用new创建的数据会返回该数据对应类型的指针**
-       - 实例：
-       ```cpp       
-       #include <iostream>
-       using namespace std;
-       int* func(){
-           int * a = new int(10);//new返回该数据类型的指针
-           // int * a = new int;
-           return a;
-       }
-       int* func02(){
-           int * a = new int[10];
-           return a;
-       }
-       void test01(){
-           int * p = func();
-           cout << *p << endl;
-           cout << *p << endl;
-           cout << *p << endl;//不会出现乱码，因为内存没有释放
-           delete p;//如果想释放，用关键字delete
-           cout << *p << endl;//内存被释放，所以此时*p!=10;
-       }
-       void test02(){
-           int * arr =func02();//10代表数组有10个数组
-           for (int i = 0; i < 10; i++){
-               arr[i] = i +100;//给10个元素赋值100-109
-
-           }
-           for (int i = 0; i < 10; i++){
-               cout << arr[i] << endl;
-           }
-           delete[] arr;//释放数组的时候要加[]
-           for (int i = 0; i < 10; i++){//delete后发生溢出
-               cout << arr[i] << endl;
-           }
-       }
-       int main(){
-           //int *p1 = test01();//由于test01()和test02()没有返回值，所以不能成为指针
-           test01();
-           test02();
-              }
-       ```
-       - 1-2-3.总结：
-       ```cpp
-          #include <iostream>
-          using namespace std;
-          int g_a  = 1;
-          const int g_d = 10;
-          int * pF(){
-              int a = 1;
-              int * p = &a;
-              return p;
-          }
-          int * pF01(){
-              int a = 1;
-              return &a;//
-          }//int * pF01和 int * pF其实是等效的
-          int * pF02(){
-              int *a = new int(10);//new返回该数据类型的指针
-              return a;
-          }
-          void pF03(){
-              int * arr = new int[10];
-              for (int i = 0; i < 10; i++){
-                  arr[i] = i;
-              }
-              for (int i = 0; i < 10; i++){
-                  cout << arr[i] << endl;
-              }
-              delete[] arr;
-          }
-          int main(){
-              const int g_b = 10;
-              int g_l_a = 10;
-              static int g_c = 10;
-              int *p1 = pF();//用指针来定义
-              cout << *p1 << endl;
-              cout << *p1 << endl;//溢出
-              cout << p1 << endl;//地址任何时候都是可以输出的，但是在栈中的函数参数在函数执行完后就被销毁
-              cout << p1 << endl;
-              int *p2 = pF01();
-              cout << *p2 << endl;
-              cout << *p2 << endl;//溢出
-              cout << p2 << endl;
-              cout << p2 << endl;
-              ///用new来定义变量地址
-              int *p3 = pF02();
-              cout << *p3 << endl;
-              cout << *p3 << endl;
-              delete p3;
-              cout << *p3 << endl;
-              /////用new来定义数组
-              pF03();
-              }
-       ```
-1. 引用：
-    * 2-1引用的定义 
-      - 定义：给变量起别名
-      - 语法：数据类型 &别名 = 原名
-        - >int &b = a；这样的话，a和b都可以操作这个内存
-      - 实例：
-        ```cpp
-        #include <iostream>
-        using namespace std;
-        int main(){
-          int a = 10;
-          int &b = a;//相当于b是a的别名，所以操纵b就是在操作a
-          cout << "a =" << a << endl;//是20
-          cout << "b =" << b << endl;//是20
-          b = 100;    
-          cout << "a =" << a << endl;//
-          cout << "b =" << b << endl;//是20
-        }
-      ```
-    * 2-2.引用的注意事项：
-      * 引用必须初始化
-      * 引用在初始化后，不可改变
-      * 例子：
-      ```cpp
-      #include <iostream>
-      using namespace std; 
-      int main(){
-         int a = 10;
-         int b = 20;
-         // int &c;//错误，引用必须初始化
-         int &c = a;//一旦初始化，就不可改变,c是a的引用,所以此时c,a值相等
-         c = b;//这是赋值操作，不是更改引用,最后a=b=c=20
-         cout << "a = " << a << endl;
-         cout << "b = " << b << endl;
-         cout << "c = " << c << endl;
+### 1-1. 程序运行前：程序编译后，生成了exe可执行程序，未执行程序前分为2个区域
+- 代码区：存放CPU的及其指令
+  - 代码区时**共享**的，共享的目的时对于频繁执行的程序，只需要在内存中有一份代码即可
+- 全局区：全局变量和静态变量存放至此
+  - 全局区包括常量区，字符串常量和其他常量也存放至此
+  - <u>该区域的数据在程序结束后由操作系统释放<u>
+- 例子：
+ ``` c++
+ #include <iostream>
+ using namespace std;
+ int g_a= 10;//全局变量
+ const int c_g_a = 10;//全局常量
+ int main()
+ {
+     int l_a = 10;//局部变量
+     cout << "局部变量a的地址" << &l_a << endl;
+     cout << "全局变量a的地址" << &g_a << endl;
+     //静态变量。全局变量和静态变量，字符串常量，const修饰的全局变量离得很近，都在同一个区域
+     static int s_a = 10;
+     cout << "静态变量c的地址" << &s_a << endl;
+     //字符串常量
+     cout << "字符串常量的地址为" << &"helloworld" << endl;
+     //const修饰的常量：
+     //const修饰的全局常量
+     cout << "const修饰的全局常量的地址为" << &c_g_a << endl;
+     //const修饰的局部变量,const修饰的局部常量和局部变量的地址很近
+     const int c_l_a = 10;//c-const, g = global, l = local
+     cout << "const修饰的局部常量的地址为" << &c_l_a << endl;
+     return 0;}
+ ```
+- 总结：
+  - 1. 代码区：局部变量(**局部变量=普通变量+指针**)+const修饰的局部变量
+  - 2. 全局区：全局变量+静态变量（*static+关键子*）+常量(**常量=字符串常量+const修饰的全局变量** )
+  - 3. 注意事项：函数参数的返回值
+     ```cpp
+     #include <iostream>
+     using namespace std;
+     // int func(){    此处是错误的，因为若是返回一个地址或者是引用，必须定义为指针函数或者引用函数
+     //     int a = 1;
+     //     int *p = &a;
+     //     return p;
+     // }
+     int* func(){
+         int a = 1;
+         int *p = &a;
+         return p;
+     }
+     int main(){
+         int *ptr = func();
+         cout << ptr << endl;
          return 0;
+     }
+     ```
+### 1-2. 程序运行后：
+- 1-2-1.栈区：
+ - 由编译器自动分配释放，存放函数的参数值，局部变量
+ - 注意事项：不要返回局部变量的地址，栈区开辟的数据由编译器自动释放
+- 例子
+```c++
+#include <iostream>
+using namespace std;
+int * func(int b){
+   b = 100;//形参数据也会放在栈区，栈区放局部变量和形参
+   int a = 1;//局部变量存放在栈区，栈区的数据在函数执行完后自动释放，所以不要返回局部变量的地址
+   return &a;
+}//指针函数返回的是一个地址
+int main()
+{
+   int * p = func(1);
+   cout << *p << endl;//第一次可以打印正确的数字是因为编译器作了保留
+   cout << *p << endl;//第二次这个数据就不再保留了
+   return 0;
+}
+```
+- 1-2-2.堆区
+  - 定义：由程序员分配释放，若程序员不释放，程序结束时由操作系统回收
+  - 实例：
+```cpp
+#include <iostream>
+using namespace std;
+int * func(){
+   //利用new关键字，可以将数据开辟到堆区，
+   int * p = new int(10);//指针本质也是局部变量，放在栈上，指针保存的数据放在堆区
+   return p;
+}//指针函数返回的是一个地址
+int main()
+{
+   //在堆区开辟数据
+   int *p = func();
+   cout << *p << endl;
+}
+```
+
+
+
+- 1-2-3.new操作符号
+  - 作用：利用new在堆区开辟数据，堆区开辟的数据，由程序员手动开辟，手动释放，释放利用操作符delete;**利用new创建的数据会返回该数据对应类型的指针**
+  - 实例：
+```cpp       
+#include <iostream>
+using namespace std;
+int* func(){
+   int * a = new int(10);//new返回该数据类型的指针
+   // int * a = new int;
+   return a;
+}
+int* func02(){
+   int * a = new int[10];
+   return a;
+}
+void test01(){
+   int * p = func();
+   cout << *p << endl;
+   cout << *p << endl;
+   cout << *p << endl;//不会出现乱码，因为内存没有释放
+   delete p;//如果想释放，用关键字delete
+   cout << *p << endl;//内存被释放，所以此时*p!=10;
+}
+void test02(){
+   int * arr =func02();//10代表数组有10个数组
+   for (int i = 0; i < 10; i++){
+       arr[i] = i +100;//给10个元素赋值100-109
+
+   }
+   for (int i = 0; i < 10; i++){
+       cout << arr[i] << endl;
+   }
+   delete[] arr;//释放数组的时候要加[]
+   for (int i = 0; i < 10; i++){//delete后发生溢出
+       cout << arr[i] << endl;
+   }
+}
+int main(){
+   //int *p1 = test01();//由于test01()和test02()没有返回值，所以不能成为指针
+   test01();
+   test02();
       }
-      ```
-    * 2-3.引用作函数参数
-      * 作用:函数传参是,可以利用引用的技术修饰实参
-      * 优点:可以简化指针修改实参
-      * 实例:
-        ```cpp
-        #include <iostream>
-        using namespace std; 
-        void rswap(int &a, int &b){
-            int temp = a;
-            a = b;
-            b = temp;
-        }
-        void dswap(int *a, int *b){
-            int temp = *a;
-            *a = *b;
-            *b = temp;//地址发生互换
-        }
-        void vswap(int a, int b){
-            int temp = a;
-            a = b;
-            b = temp;
-        }
-        int main(){
-            int x = 1, y = 2;
-            vswap(x, y);
-            cout << "x = " << x << " y = " << y << endl;//(1,2),值传递不会改变原来的值
-            dswap(&x, &y);
-            cout << "x = " << x << " y = " << y << endl;//(2,1),第一次改变(1,2)->(2,1)
-            rswap(x, y);
-            cout << "x = " << x << " y = " << y << endl;//(1,2),第二次改变(2,1)->(1,2)
-        }
-        ```
-      * 值传递和引用传递区别:
-        * 值传递传递的是对象的一个副本,所以就算改变了对象副本,也不会改变源对象的值
-        * 对象被引用传递,意味着传递的不是实际的对象,而是对象的引用,所以为外部对引用对象所作的改变可以反映到所有的对象上
-
-
-
-
-    * 2-4.引用作函数的返回值
-      * 注意事项：
-        * 不要返回局部变量；
-        * 引用函数调用作为左值：
-      * 实例：
-        ```cpp
-        #include <iostream>
-        using namespace std;
-        int& func(){
-            static int a = 10;
-            return a;//引用函数和普通函数都是返回的是变量名a,但是指针函数返回的是地址&a
-        }
-        int* func01(){
-            static int a = 1;
-            return &a;
-        }
-        int main(){
-            int *ptr = func01();//指针函数要用指针接收,且要返回地址
-            cout << ptr << endl;
-            cout << *ptr << endl;
-            int &ref = func();//引用函数要用引用接收,且要返回变量值
-            cout << ref << endl;
-            func() = 100;
-            cout << ref << endl;//引用可以作为左值
-        }
-        //错误:warning: address of local variable ‘ch’ returned [-Wreturn-local-addr]
-        //解决方法:加入static int a = 1;
-        //错误例子:
-      <!-- #include <iostream>
-      using namespace std;
-      int* func(){
-          int * a = new int(10);//new返回该数据类型的指针
-          // int * a = new int;
-          return a;//对于指针而言，如果不想返回局部变量地址，可以用new
+```
+- 1-2-3.总结：
+```cpp
+  #include <iostream>
+  using namespace std;
+  int g_a  = 1;
+  const int g_d = 10;
+  int * pF(){
+      int a = 1;
+      int * p = &a;
+      return p;
+  }
+  int * pF01(){
+      int a = 1;
+      return &a;//
+  }//int * pF01和 int * pF其实是等效的
+  int * pF02(){
+      int *a = new int(10);//new返回该数据类型的指针
+      return a;
+  }
+  void pF03(){
+      int * arr = new int[10];
+      for (int i = 0; i < 10; i++){
+          arr[i] = i;
       }
-      int& func01(){
-          static int a = 1;//static要加到被引用的变量上而不能加到int &b = a
-          int &b = a;
-          return b;//对于引用和变量而言，如果不想返回局部变量，可以用static 
+      for (int i = 0; i < 10; i++){
+          cout << arr[i] << endl;
       }
-      int func02(){
-          int a = 1;
-          return a;
+      delete[] arr;
+  }
+  int main(){
+      const int g_b = 10;
+      int g_l_a = 10;
+      static int g_c = 10;
+      int *p1 = pF();//用指针来定义
+      cout << *p1 << endl;
+      cout << *p1 << endl;//溢出
+      cout << p1 << endl;//地址任何时候都是可以输出的，但是在栈中的函数参数在函数执行完后就被销毁
+      cout << p1 << endl;
+      int *p2 = pF01();
+      cout << *p2 << endl;
+      cout << *p2 << endl;//溢出
+      cout << p2 << endl;
+      cout << p2 << endl;
+      ///用new来定义变量地址
+      int *p3 = pF02();
+      cout << *p3 << endl;
+      cout << *p3 << endl;
+      delete p3;
+      cout << *p3 << endl;
+      /////用new来定义数组
+      pF03();
       }
-      int main(){
-          int &ref = func01();
-          int *ptr = func(); 
-          int fun = func02();
-          cout << ref << endl;
-          cout << ref << endl;
-          cout << *ptr << endl;
-          cout << fun << endl;
-          cout << fun << endl;
-          } -->
-        // }以上2种做法都是错误的,因为局部变量地址和引用都不能作为返回值，若是局部变量地址想作为返回值，则申明new,若局部变量的引用可以作为返回值，则要申明static
-        ```
+```
+## 2. 引用：
+### 2-1. 引用的定义 
+   - 定义：给变量起别名
+   - 语法：数据类型 &别名 = 原名
+  - >int &b = a；这样的话，a和b都可以操作这个内存
+   - 实例：
+  ```cpp
+  #include <iostream>
+  using namespace std;
+  int main(){
+    int a = 10;
+    int &b = a;//相当于b是a的别名，所以操纵b就是在操作a
+    cout << "a =" << a << endl;//是20
+    cout << "b =" << b << endl;//是20
+    b = 100;    
+    cout << "a =" << a << endl;//
+    cout << "b =" << b << endl;//是20
+  }
+```
 
-    * 2-5.引用的本质:
-      * 本质:本质是在c++内部实现是一个指针常量
-        * `cpp 例如,int& ref = a <=> int * const ref = &a,所以说明了引用不可更改地址,但是可以改值,故ref = 100,&ref = b(错误)`
-      * 例子
-      ```cpp
-      #include <iostream>
-      using namespace std;
-      void func(int &ref){
-          ref = 100;
-          cout << ref << endl;
-      }
-      int main(){
-          int a = 10000;
-          int b = 10;
-          int &ref = a;
-          ref = 1000;//相当于给引用重新赋值
-          &ref = b;//引用不可更改,否则报错
-          func(ref);
+### 2-2.引用的注意事项：
+* 引用必须初始化
+* 引用在初始化后，不可改变
+* 例子：
 
-      }
-      ```
-    * 2-6.常量引用
-      * 作用:常量引用用于修饰形参,反之失误操作,在函数形参列表中,可以加const修饰形参,防止形参改变实参
-      * 总结:
-        * 1.int & ref = a(正确);int & ref = 10(错误);
-        * 2.&ref = b**错误,因为引用改变
-        * 2. const int & ref = a**是常量引用,所以不能修改值,例如ref= 100是错误的**
-      * 实例
-      ```cpp
-      #include <iostream>
-      using namespace std;
-      void showValue(const int &val){//此时var = a =100不可修改
-          val = 1000;//若此是val修改的话,则会报错,因为此时是常量引用,地址和值都不可修改
-          cout << "val = " << val << endl;
-      }
-      int main(){
-          // int a = 10;
-          // int & ref = 10;//引用必须引用一个合法的内存空间,直接引用一个数字是不行的
-          // int & ref = a;
-          //  const int & ref = 10;
-          // ref = 20;//加入const后变为只读,不可修改
-          int a = 100;
-          showValue(a);
-          cout << " a = " << a << endl;
-      }
-      ```
+```cpp
+#include <iostream>
+using namespace std; 
+int main(){
+   int a = 10;
+   int b = 20;
+   // int &c;//错误，引用必须初始化
+   int &c = a;//一旦初始化，就不可改变,c是a的引用,所以此时c,a值相等
+   c = b;//这是赋值操作，不是更改引用,最后a=b=c=20
+   cout << "a = " << a << endl;
+   cout << "b = " << b << endl;
+   cout << "c = " << c << endl;
+   return 0;
+}
+```
+### 2-3.引用作函数参数
+* 作用:函数传参是,可以利用引用的技术修饰实参
+* 优点:可以简化指针修改实参
+* 实例:
+  ```cpp
+  #include <iostream>
+  using namespace std; 
+  void rswap(int &a, int &b){
+      int temp = a;
+      a = b;
+      b = temp;
+  }
+  void dswap(int *a, int *b){
+      int temp = *a;
+      *a = *b;
+      *b = temp;//地址发生互换
+  }
+  void vswap(int a, int b){
+      int temp = a;
+      a = b;
+      b = temp;
+  }
+  int main(){
+      int x = 1, y = 2;
+      vswap(x, y);
+      cout << "x = " << x << " y = " << y << endl;//(1,2),值传递不会改变原来的值
+      dswap(&x, &y);
+      cout << "x = " << x << " y = " << y << endl;//(2,1),第一次改变(1,2)->(2,1)
+      rswap(x, y);
+      cout << "x = " << x << " y = " << y << endl;//(1,2),第二次改变(2,1)->(1,2)
+  }
+  ```
+* 值传递和引用传递区别:
+  * 值传递传递的是对象的一个副本,所以就算改变了对象副本,也不会改变源对象的值
+  * 对象被引用传递,意味着传递的不是实际的对象,而是对象的引用,所以为外部对引用对象所作的改变可以反映到所有的对象上
 
 
 
-2. 函数提高 
-    * 3-1.函数的默认参数
-      * >语法 :返回值类型 函数名 (参数 = 默认值)
-        ```cpp
-        #include <iostream>
-        using namespace std;
-        int func(int a, int b = 20, int c = 30){
-            return a + b + c;
+
+### 2-4.引用作函数的返回值
+  * 注意事项：
+    * 不要返回局部变量的引用和地址；
+    * 引用函数调用作为左值：
+  * 实例：
+  ```cpp
+  #include <iostream>
+  using namespace std;
+  int& func(){
+      static int a = 10;
+      return a;//引用函数和普通函数都是返回的是变量名a,但是指针函数返回的是地址&a
+  }
+  int* func01(){
+      static int a = 1;
+      return &a;
+  }
+  int main(){
+      int *ptr = func01();//指针函数要用指针接收,且要返回地址
+      cout << ptr << endl;
+      cout << *ptr << endl;
+      int &ref = func();//引用函数要用引用接收,且要返回变量值
+      cout << ref << endl;
+      func() = 100;
+      cout << ref << endl;//引用可以作为左值
+  }
+  //错误:warning: address of local variable ‘ch’ returned [-Wreturn-local-addr]
+  //解决方法:加入static int a = 1;
+  //错误例子:
+<!-- #include <iostream>
+using namespace std;
+int* func(){
+    int * a = new int(10);//new返回该数据类型的指针
+    // int * a = new int;
+    return a;//对于指针而言，如果不想返回局部变量地址，可以用new
+}
+int& func01(){
+    static int a = 1;//static要加到被引用的变量上而不能加到int &b = a
+    int &b = a;
+    return b;//对于引用和变量而言，如果不想返回局部变量，可以用static 
+}
+int func02(){
+    int a = 1;
+    return a;
+}
+int main(){
+    int &ref = func01();
+    int *ptr = func(); 
+    int fun = func02();
+    cout << ref << endl;
+    cout << ref << endl;
+    cout << *ptr << endl;
+    cout << fun << endl;
+    cout << fun << endl;
+    } -->
+  // }以上2种做法都是错误的,因为局部变量地址和引用都不能作为返回值，若是局部变量地址想作为返回值，则申明new,若局部变量的引用可以作为返回值，则要申明static
+  ```
+
+### 2-5.引用的本质:
+  * 本质:本质是在c++内部实现是一个指针常量
+  *  例如,int& ref = a <=> int * const ref = &a,所以说明了引用不可更改地址,但是可以改值,故ref = 100,&ref = b(错误)`
+  * 例子
+```cpp
+  #include <iostream>
+  using namespace std;
+  void func(int &ref){
+      ref = 100;
+      cout << ref << endl;
+  }
+  int main(){
+      int a = 10000;
+      int b = 10;
+      int &ref = a;
+      ref = 1000;//相当于给引用重新赋值
+      &ref = b;//引用不可更改,否则报错
+      func(ref);
+
+  }
+```
+
+### 2-6.常量引用
+* 作用:常量引用用于修饰形参,反之失误操作,在函数形参列表中,可以加const修饰形参,防止形参改变实参
+* 总结:
+  * 1.int & ref = a(正确);int & ref = 10(错误);
+  * 2.&ref = b**错误,因为引用改变
+  * 2. const int & ref = a**是常量引用,所以不能修改值,例如ref= 100是错误的**
+* 实例
+```cpp
+#include <iostream>
+using namespace std;
+void showValue(const int &val){//此时var = a =100不可修改
+    val = 1000;//若此是val修改的话,则会报错,因为此时是常量引用,地址和值都不可修改
+    cout << "val = " << val << endl;
+}
+int main(){
+    // int a = 10;
+    // int & ref = 10;//引用必须引用一个合法的内存空间,直接引用一个数字是不行的
+    // int & ref = a;
+    //  const int & ref = 10;
+    // ref = 20;//加入const后变为只读,不可修改
+    int a = 100;
+    showValue(a);
+    cout << " a = " << a << endl;
+}
+```
+
+
+
+## 3. 函数提高 
+3-1.函数的默认参数
+* >语法 :返回值类型 函数名 (参数 = 默认值)
+  ```cpp
+  #include <iostream>
+  using namespace std;
+  int func(int a, int b = 20, int c = 30){
+      return a + b + c;
+  }
+  //如果函数申明由默认参数,函数实现就不能由默认参数
+  //声明和实现只能由一个默认参数
+  int func2(int a = 10, int b = 1); 
+  int func2(int a, int b){
+      return a + b;
+  }
+  int main(){
+      int c = func2(4, 6);//声明中有了默认参数了,调用函数时可加可不加,加了修改,不加默认
+      cout << c << endl;
+  }
+  ```  
+* 注意:
+  * 如果函数申明由默认参数,函数实现就不能由默认参数
+  * 声明中有了默认参数了,调用函数时可加可不加,加了修改,不加默认
+3-2.函数占位参数
+* 语法:返回值类型 函数名 (数据类型){ }
+* 实例
+  ```cpp
+  #include <iostream>
+  using namespace std;
+  void func(int a, int){//写一个占位参数就不用传参
+      cout << "this is func" << endl;
+  }
+
+  int main(){
+      func(10, 3);
+  ```
+3-3.函数重载
+* 作用:函数名可以相同, 提高复用性
+* 条件:
+  * 同一个作用域
+  * 函数名称相同
+  * **函数参数类型**不同 或者**个数不同**或者**顺序不同**
+* 实例:
+```cpp
+#include <iostream>
+using namespace std;
+void func(){
+    cout << "func的调用" << endl;
+    
+}
+void func(int a){
+    cout << "func(int a)的调用" << endl;
+}
+void func(double a){
+    cout << "func(double a)的调用" << endl;
+}
+void func(int a, double b){
+    cout << "func(int a, double b)的调用" << endl;
+}
+void func(double a, int b){
+    cout << "func(double a, int b)的调用" << endl;
+}
+int main(){
+    func();//根据不同的参数走不同的代码
+    func(19);
+    func(12.2);
+    func(12.2, 2);
+    func(2, 12.3);
+}
+```
+* 函数重载的注意事项
+ * 引用作为函数重载的条件
+ * 函数重载碰到默认参数
+ * 例子:
+  ```cpp
+  #include <iostream>
+  using namespace std;
+  //1.引用作为函数重载的条件
+  //int &a = 10,不合法,int &a = a合法
+  void fun(int &a){
+      cout << "func()调用" << endl;
+  }
+  //const int &a = 10;合法
+  void fun(const int &a){
+      cout << "func(const int &a)调用" << endl;
+  //因为const修饰a,所以a相当于是一个常量值不能修改
+  }
+  //函数重载碰到默认参数
+  void func2(int a, int b = 10){
+      cout << "func(const int &a)调用" << endl;
+  }
+  void func2(int a){
+      cout << "func(const int &a)调用" << endl;
+  }
+  int main(){
+      int a =10;
+      fun(a);
+      fun(10);
+      func2(a);
+  //当函数中重载碰到默认参数,出现二义性,会报错
+      return 0;
+  }
+  ```
+## 4. 类
+### 4-1.封装
+* 意义:
+* 将属性和行为作为一个整体,
+* 将属性和行为加以权限控制
+* 语法:class 类名(访问权限: 属性/行为);
+* 实例:
+```cpp        
+#include <iostream>
+#include <string>
+using namespace std;
+class Student{
+   public:
+       char name[10];    
+       char age[10];    
+       char math;    
+       char english;
+       void input_name();    
+       void input_age();    
+       void input_math();    
+       void input_english();    
+       void input(class Student *stu);//stu为类指针，类似于void(struct student *p)    
+       void student_message_show(class Student *stu);    
+};
+void Student::input_name(){
+   cout << "请输入姓名：" << endl;
+   cin.getline(name, sizeof(name));
+}
+void Student::input_age(){
+   cout << "请输入年龄：" << endl;
+   cin.getline(age, sizeof(age));
+}
+void Student::input_math(){
+   cout << "请输入数学成绩：" << endl;
+   cin >> math;
+}
+void Student::input_english(){
+   cout << "请输入英语成绩：" << endl;
+   cin >> english;
+}
+void Student::input(class Student *stu){
+   stu->input_name();
+   stu->input_age();
+   stu->input_math();
+   stu->input_english();
+}
+void Student::student_message_show(class Student *stu){
+   cout << "学生的姓名是" << stu->name << endl;//指针参数调用属性和函数的方法为,stu-> name(属性);stu->func()(方法)
+   cout << "学生的年龄是" << stu->age << endl;
+   cout << "学生的英语成绩是" << stu->english << endl;
+   cout << "学生的数学成绩是" << stu->math << endl;
+}
+int main(){
+   Student xiaoming;
+   Student *xiaoming_point = &xiaoming;
+   xiaoming.input(xiaoming_point);//相当于xiaoming_point = &xiaoming = stu,所以stu类指针有class Student的所有属性和方法      
+   xiaoming.student_message_show(xiaoming_point);     
+}
+```
+* 上例子的注意：
+* 1.cin.getline:将所输入的值全部追加到一个数组里面
+* 2. >类作为参数传入函数，其实就是用一个指针ptr接收class student类的所有属性和方法，用ptr->xxxx 来调用所有的属性和方法
+* 3. 在设计类的时候，要将属性和方法在类中声明，然后放在类的外部定义
+```cpp
+#include <iostream>
+using namespace std;
+int main(){
+    char arr[10];
+    cout << "请输入一组数字";
+    cin.getline(arr, sizeof(arr));//getline会将输入的参数放入arr里面，自动赋值，然后可以利用for循环输出
+    for (int i = 0; i < sizeof(arr); i++){
+        cout << arr[i] << " ";
+
+    }
+    cout << endl;
+    return 0;
+}
+```  
+* 封装的意义二：
+* 访问权限：
+  * public:公共权限，类内可以访问，类外可以访问
+  * protected:保护权限，类内可以访问，类外不可以访问,子类可以访问父类的私有内容
+  * private:私有权限，类内可以访问，类外不可以访问，子类不能访问父类的私有内容
+  * 例子：
+    ```cpp
+    #include <iostream>
+    #include <string>
+    using namespace std;
+    class Student{
+        public://公共权限,行为
+            string  name;
+        protected:
+            string car;
+        private:
+            string code;
+        public://无论上述name,car,code是何种权限，都不会影响在类内部函数对属性和方法的访问
+            void func(){
+                name = "a";
+                car = "truck";
+                code = "1234";
+            }//在类的内部方法可以访问类内部的属性和方法
+    };
+    int main(){
+        Student s;
+        s.name = "b";
+        s.car = "plane";
+        s.code = "1234";
+        return 0;
+
+    }
+  ```
+  * 总结：
+    * **无论上述name,car,code是何种权限，都不会影响在类内部方法对属性和方法的访问**
+    * 在类的外部可以访问类的public的属性和方法，而protected和private方法不能访问
+  * class和struct的区别
+    * 唯一的区别是：**默认的访问权限不同**
+      * struct的默认权限为公共
+      * class的默认权限为私有
+    * 例子：
+```cpp
+#include <iostream>
+using namespace std;
+class C1{
+   int A;//等同于private：int A;
+};
+struct C2{
+   int A;//等同于public: int A;
+   private:
+       int a;
+};
+int main(){
+   // C1 c1;
+   C2 c2;
+   // c1.A = 1;
+   c2.A = 2;
+   c2.a = 1;
+   // cout << c1.A << endl;
+   cout << c2.A << endl;
+}
+```
+* 成员属性设置为私有：
+* 优点1：将所有成员属性设置为私有，可以自己控制读写权限
+* 优点2：对于写权限，我们可以检测数据的有效性
+* 在设计类的时候的方法:
+  * 1. 属性设置为私有
+  * 2. 方法设置为公有
+* 例子：
+```cpp
+#include <iostream>
+using namespace std;
+class Person{
+    private:
+        int m_Age;//设为可读可写
+        string m_Name;//设为只写
+        string m_Sex;//设为只读
+    public:
+        void setAge(int age){//写年龄
+            m_Age = age;
         }
-        //如果函数申明由默认参数,函数实现就不能由默认参数
-        //声明和实现只能由一个默认参数
-        int func2(int a = 10, int b = 1); 
-        int func2(int a, int b){
-            return a + b;
+        int getAge(){//读年龄
+            return m_Age;
         }
-        int main(){
-            int c = func2(4, 6);//声明中有了默认参数了,调用函数时可加可不加,加了修改,不加默认
-            cout << c << endl;
-        }
-        ```  
-      * 注意:
-        * 如果函数申明由默认参数,函数实现就不能由默认参数
-        * 声明中有了默认参数了,调用函数时可加可不加,加了修改,不加默认
-    * 3-2.函数占位参数
-      * 语法:返回值类型 函数名 (数据类型){ }
-      * 实例
-        ```cpp
-        #include <iostream>
-        using namespace std;
-        void func(int a, int){//写一个占位参数就不用传参
-            cout << "this is func" << endl;
+        int getName(){//读名字，因为没有setName所以只能读取不能写入
+            m_Name = 10;
+            return m_Name;
+        }     
+        void setSex(string sex){//写性别
+            m_Sex = sex;
         }
 
-        int main(){
-            func(10, 3);
-        ```
-    * 3-3.函数重载
-      * 作用:函数名可以相同, 提高复用性
-      * 条件:
-        * 同一个作用域
-        * 函数名称相同
-        * **函数参数类型**不同 或者**个数不同**或者**顺序不同**
-      * 实例:
-      ```cpp
-      #include <iostream>
-      using namespace std;
-      void func(){
-          cout << "func的调用" << endl;
+}
+int main(){
+    Person p;
+    // p.m_Age = 10;这些都是失败的，因为这些属性为私有属性，外界不能访问
+    // p.m_Name = "A";
+    // p.m_Sex = "boy";
+    p.setAge(10);
+    p.getAge();//年纪可读可写
+    p.setName("James")//不行，名字只可读不可写
+    p.getName()
+    p.setSex("boy");
+    p.getSex();//不行，年龄只可写，不可读
+}
+```
+
+* 案例
+ * 案例1. 
+```cpp     
+#include <iostream>
+#include <string>
+using namespace std;
+class Cube{
+    private:
+        double m_L;
+        double m_W;
+        double m_H;
+    public:
+        void setL(double l){
+            m_L = l;
+        }
+        void setW(double w){
+            m_W = w;
+        }
+        void setH(double h){
+            m_H = h;
+        }        
+        double getL(){
+            return m_L;
+        }
+        double getW(){
+            return m_W;
+        }
+        double getH(){
+            return m_H;
+        }
+        double calculateV(){
+            double v = m_L * m_W * m_H;
+            return v;
+        }
+};
+bool isSame(Cube &c1, Cube &c2){
+    if (c1.getL() == c2.getL() && c1.getW() == c2.getW() && c1.getH() == c2.getH()){
+        return true;
+    }
+    return false;
+}
+
+int main(){
+    Cube c1;
+    c1.setL(10);
+    c1.setW(10);
+    c1.setH(10);
+    Cube c2;
+    c2.setL(10);
+    c2.setW(10);
+    c2.setH(10);
+    cout << "长方体体积为" << c1.calculateV() << endl;
+    isSame(c1, c2);
+    bool ret = isSame(c1, c2);//用result去接收这个函数的返回值
+    if (ret){
+        cout << "c1=c2" << endl;
+    }
+    else{
+        cout << "c1!=c2" << endl;
+    }
+}
+```
+### 4-2.对象的初始化和清理
+  * 4-2-1.构造函数和析构函数
+  * 问题提出：对象的初始化和清理是很重要的问题，一个对象或者变量没有初始化状态，使用结果是未知的；**使用完一个对象或变量，没有及时清理，也会造成一定的安全问题**
+  * 构造函数：主要在于创建对象时为对象的成员属性赋值，构造函数由编译器自动调用，无须手动调用
+    * 语法：类名(){}
+    * 构造函数没有返回值也不写void
+    * 函数名称和类名相同
+    * 构造函数可以有参数,因此可以发生重载
+    * 程序在调用对象时候会自动调用构造，无须手动调用，且只会调用一次
+  * 析构函数：用于在对象销毁之前系统自动调用，执行一些清理操作
+    * 语法：~类名(){}
+    * 析构函数没有返回值也不写void
+    * 函数名称和类名相同，名称前面加~
+    * 析构函数不可以有参数,因此可以发生重载
+    * 程序在对象销毁的时候会自动调用析构，无须手动调用，且只会调用一次
+* 例：
+```cpp
+  #include <iostream>
+  using namespace std;
+  class Person{
+      public:    
+          Person(){//构造函数
+              cout << "person构造函数的调用" << endl;
+          }//若是不写这个函数，编译器会自动写一个这个函数，但是这个函数下面没有语句
+          ~Person(){//对象执行完了被销毁了才会调用析构函数
+              cout << "person的析构函数的调用" << endl;
+          }//若是不写这个函数，编译器会自动写一个这个函数，但是这个函数下面没有语句
           
-      }
-      void func(int a){
-          cout << "func(int a)的调用" << endl;
-      }
-      void func(double a){
-          cout << "func(double a)的调用" << endl;
-      }
-      void func(int a, double b){
-          cout << "func(int a, double b)的调用" << endl;
-      }
-      void func(double a, int b){
-          cout << "func(double a, int b)的调用" << endl;
-      }
-      int main(){
-          func();//根据不同的参数走不同的代码
-          func(19);
-          func(12.2);
-          func(12.2, 2);
-          func(2, 12.3);
-      }
-      ```
-     * 函数重载的注意事项
-       * 引用作为函数重载的条件
-       * 函数重载碰到默认参数
-       * 例子:
-        ```cpp
-        #include <iostream>
-        using namespace std;
-        //1.引用作为函数重载的条件
-        //int &a = 10,不合法,int &a = a合法
-        void fun(int &a){
-            cout << "func()调用" << endl;
+  };
+  //2.析构函数
+  void test01(){
+      Person p;//只创建这个对象就能自动调用函数,这是一个在栈上的局部变量，
+      //test01()执行完后会自动释放这个对象
+  }
+  int main(){
+      // test01();
+      Person p;
+      return 0;
+  }
+```
+
+* 4-2-2.构造函数的分类及调用
+* 两种分类方式：
+  * 按参数分：有参构造和无参构造
+  * 按类型分：普通构造和拷贝构造
+* 三种调用方式：括号法， 显示法，隐式转换法
+* 例子：
+```cpp
+#include <iostream>
+using namespace std;
+class Person{
+    public:
+        Person(){
+            cout << "这是无参构造函数" << endl;
         }
-        //const int &a = 10;合法
-        void fun(const int &a){
-            cout << "func(const int &a)调用" << endl;
-        //因为const修饰a,所以a相当于是一个常量值不能修改
+        Person(int a){
+            age = a;
+            cout << "这是有参构造函数" << endl;
         }
-        //函数重载碰到默认参数
-        void func2(int a, int b = 10){
-            cout << "func(const int &a)调用" << endl;
+        Person(const Person &p){
+             age = p.age;
+             cout << "这是拷贝构造函数" << endl;
         }
-        void func2(int a){
-            cout << "func(const int &a)调用" << endl;
+        ~Person(){
+            cout << "这是析构函数" << endl;
         }
-        int main(){
-            int a =10;
-            fun(a);
-            fun(10);
-            func2(a);
-        //当函数中重载碰到默认参数,出现二义性,会报错
-            return 0;
-        }
-        ```
-3. 类
-    * 4-1.封装
-      * 意义:
-        * 将属性和行为作为一个整体,
-        * 将属性和行为加以权限控制
-      * 语法:class 类名(访问权限: 属性/行为);
-      * 实例:
-        ```cpp        
-       #include <iostream>
-       #include <string>
-       using namespace std;
-       class Student{
-           public:
-               char name[10];    
-               char age[10];    
-               char math;    
-               char english;
-               void input_name();    
-               void input_age();    
-               void input_math();    
-               void input_english();    
-               void input(class Student *stu);//stu为类指针，类似于void(struct student *p)    
-               void student_message_show(class Student *stu);    
-       };
-       void Student::input_name(){
-           cout << "请输入姓名：" << endl;
-           cin.getline(name, sizeof(name));
-       }
-       void Student::input_age(){
-           cout << "请输入年龄：" << endl;
-           cin.getline(age, sizeof(age));
-       }
-       void Student::input_math(){
-           cout << "请输入数学成绩：" << endl;
-           cin >> math;
-       }
-       void Student::input_english(){
-           cout << "请输入英语成绩：" << endl;
-           cin >> english;
-       }
-       void Student::input(class Student *stu){
-           stu->input_name();
-           stu->input_age();
-           stu->input_math();
-           stu->input_english();
-       }
-       void Student::student_message_show(class Student *stu){
-           cout << "学生的姓名是" << stu->name << endl;//指针参数调用属性和函数的方法为,stu-> name(属性);stu->func()(方法)
-           cout << "学生的年龄是" << stu->age << endl;
-           cout << "学生的英语成绩是" << stu->english << endl;
-           cout << "学生的数学成绩是" << stu->math << endl;
-       }
-       int main(){
-           Student xiaoming;
-           Student *xiaoming_point = &xiaoming;
-           xiaoming.input(xiaoming_point);//相当于xiaoming_point = &xiaoming = stu,所以stu类指针有class Student的所有属性和方法      
-           xiaoming.student_message_show(xiaoming_point);     
-       }
-      ```
-      * 上例子的注意：
-        * 1.cin.getline:将所输入的值全部追加到一个数组里面
-        * 2. >类作为参数传入函数，其实就是用一个指针ptr接收class student类的所有属性和方法，用ptr->xxxx 来调用所有的属性和方法
-        * 3. 在设计类的时候，要将属性和方法在类中声明，然后放在类的外部定义
-        ```cpp
-        #include <iostream>
-        using namespace std;
-        int main(){
-            char arr[10];
-            cout << "请输入一组数字";
-            cin.getline(arr, sizeof(arr));//getline会将输入的参数放入arr里面，自动赋值，然后可以利用for循环输出
-            for (int i = 0; i < sizeof(arr); i++){
-                cout << arr[i] << " ";
+    private:
+        int age;
+};
+void test01(){
+    Person p1;
+}
+void test02(){
+    //1.括号法
+    Person p2(10);//有参构造
+    Person p3(p2);//拷贝构造
+    //2.显示法
+    Person p4 = Person(10);//有参构造
+    Person p5 = Person(p4);//拷贝构造
+    //3.隐式法
+    Person p6 = 10;//有参构造,p6 = 10 <=> p6(10)<=> Person(10)
+    Person p7 = p6;//拷贝构造,p7 = p6 <=> p7(p6) <=> Person(p6)
+}
 
-            }
-            cout << endl;
-            return 0;
-        }
-        ```  
-      * 封装的意义二：
-        * 访问权限：
-          * public:公共权限，类内可以访问，类外可以访问
-          * protected:保护权限，类内可以访问，类外不可以访问,子类可以访问父类的私有内容
-          * private:私有权限，类内可以访问，类外不可以访问，子类不能访问父类的私有内容
-          * 例子：
-            ```cpp
-            #include <iostream>
-            #include <string>
-            using namespace std;
-            class Student{
-                public://公共权限,行为
-                    string  name;
-                protected:
-                    string car;
-                private:
-                    string code;
-                public://无论上述name,car,code是何种权限，都不会影响在类内部函数对属性和方法的访问
-                    void func(){
-                        name = "a";
-                        car = "truck";
-                        code = "1234";
-                    }//在类的内部方法可以访问类内部的属性和方法
-            };
-            int main(){
-                Student s;
-                s.name = "b";
-                s.car = "plane";
-                s.code = "1234";
-                return 0;
-
-            }
-          ```
-          * 总结：
-            * **无论上述name,car,code是何种权限，都不会影响在类内部方法对属性和方法的访问**
-            * 在类的外部可以访问类的public的属性和方法，而protected和private方法不能访问
-          * class和struct的区别
-            * 唯一的区别是：**默认的访问权限不同**
-              * struct的默认权限为公共
-              * class的默认权限为私有
-            * 例子：
-       ```cpp
-       #include <iostream>
-       using namespace std;
-       class C1{
-           int A;//等同于private：int A;
-       };
-       struct C2{
-           int A;//等同于public: int A;
-           private:
-               int a;
-       };
-       int main(){
-           // C1 c1;
-           C2 c2;
-           // c1.A = 1;
-           c2.A = 2;
-           c2.a = 1;
-           // cout << c1.A << endl;
-           cout << c2.A << endl;
-       }
-       ```
-      * 成员属性设置为私有：
-        * 优点1：将所有成员属性设置为私有，可以自己控制读写权限
-        * 优点2：对于写权限，我们可以检测数据的有效性
-        * 在设计类的时候的方法:
-          * 1. 属性设置为私有
-          * 2. 方法设置为公有
-        * 例子：
-          ```cpp
-        #include <iostream>
-        using namespace std;
-        class Person{
-            private:
-                int m_Age;//设为可读可写
-                string m_Name;//设为只写
-                string m_Sex;//设为只读
-            public:
-                void setAge(int age){//写年龄
-                    m_Age = age;
-                }
-                int getAge(){//读年龄
-                    return m_Age;
-                }
-                int getName(){//读名字，因为没有setName所以只能读取不能写入
-                    m_Name = 10;
-                    return m_Name;
-                }     
-                void setSex(string sex){//写性别
-                    m_Sex = sex;
-                }
-
-        }
-        int main(){
-            Person p;
-            // p.m_Age = 10;这些都是失败的，因为这些属性为私有属性，外界不能访问
-            // p.m_Name = "A";
-            // p.m_Sex = "boy";
-            p.setAge(10);
-            p.getAge();//年纪可读可写
-            p.setName("James")//不行，名字只可读不可写
-            p.getName()
-            p.setSex("boy");
-            p.getSex();//不行，年龄只可写，不可读
-        }
-          ```
-        
-       * 案例
-         * 案例1. 
-        ```cpp     
-        #include <iostream>
-        #include <string>
-        using namespace std;
-        class Cube{
-            private:
-                double m_L;
-                double m_W;
-                double m_H;
-            public:
-                void setL(double l){
-                    m_L = l;
-                }
-                void setW(double w){
-                    m_W = w;
-                }
-                void setH(double h){
-                    m_H = h;
-                }        
-                double getL(){
-                    return m_L;
-                }
-                double getW(){
-                    return m_W;
-                }
-                double getH(){
-                    return m_H;
-                }
-                double calculateV(){
-                    double v = m_L * m_W * m_H;
-                    return v;
-                }
-        };
-        bool isSame(Cube &c1, Cube &c2){
-            if (c1.getL() == c2.getL() && c1.getW() == c2.getW() && c1.getH() == c2.getH()){
-                return true;
-            }
-            return false;
-        }
-
-        int main(){
-            Cube c1;
-            c1.setL(10);
-            c1.setW(10);
-            c1.setH(10);
-            Cube c2;
-            c2.setL(10);
-            c2.setW(10);
-            c2.setH(10);
-            cout << "长方体体积为" << c1.calculateV() << endl;
-            isSame(c1, c2);
-            bool ret = isSame(c1, c2);//用result去接收这个函数的返回值
-            if (ret){
-                cout << "c1=c2" << endl;
-            }
-            else{
-                cout << "c1!=c2" << endl;
-            }
-        }
-        ```
-    * 4-2.对象的初始化和清理
-      * 4-2-1.构造函数和析构函数
-        * 问题提出：对象的初始化和清理是很重要的问题，一个对象或者变量没有初始化状态，使用结果是未知的；**使用完一个对象或变量，没有及时清理，也会造成一定的安全问题**
-        * 构造函数：主要在于创建对象时为对象的成员属性赋值，构造函数由编译器自动调用，无须手动调用
-          * 语法：类名(){}
-          * 构造函数没有返回值也不写void
-          * 函数名称和类名相同
-          * 构造函数可以有参数,因此可以发生重载
-          * 程序在调用对象时候会自动调用构造，无须手动调用，且只会调用一次
-        * 析构函数：用于在对象销毁之前系统自动调用，执行一些清理操作
-          * 语法：~类名(){}
-          * 析构函数没有返回值也不写void
-          * 函数名称和类名相同，名称前面加~
-          * 析构函数不可以有参数,因此可以发生重载
-          * 程序在对象销毁的时候会自动调用析构，无须手动调用，且只会调用一次
-        * 例：
-          ```cpp
-          #include <iostream>
-          using namespace std;
-          class Person{
-              public:    
-                  Person(){//构造函数
-                      cout << "person构造函数的调用" << endl;
-                  }//若是不写这个函数，编译器会自动写一个这个函数，但是这个函数下面没有语句
-                  ~Person(){//对象执行完了被销毁了才会调用析构函数
-                      cout << "person的析构函数的调用" << endl;
-                  }//若是不写这个函数，编译器会自动写一个这个函数，但是这个函数下面没有语句
-                  
-          };
-          //2.析构函数
-          void test01(){
-              Person p;//只创建这个对象就能自动调用函数,这是一个在栈上的局部变量，
-              //test01()执行完后会自动释放这个对象
-          }
-          int main(){
-              // test01();
-              Person p;
-              return 0;
-          }
-          ```
-    
-      * 4-2-2.构造函数的分类及调用
-        * 两种分类方式：
-          * 按参数分：有参构造和无参构造
-          * 按类型分：普通构造和拷贝构造
-        * 三种调用方式：括号法， 显示法，隐式转换法
-        * 例子：
-        ```cpp
-        #include <iostream>
-        using namespace std;
-        class Person{
-            public:
-                Person(){
-                    cout << "这是无参构造函数" << endl;
-                }
-                Person(int a){
-                    age = a;
-                    cout << "这是有参构造函数" << endl;
-                }
-                Person(const Person &p){
-                     age = p.age;
-                     cout << "这是拷贝构造函数" << endl;
-                }
-                ~Person(){
-                    cout << "这是析构函数" << endl;
-                }
-            private:
-                int age;
-        };
-        void test01(){
-            Person p1;
-        }
-        void test02(){
-            //1.括号法
-            Person p2(10);//有参构造
-            Person p3(p2);//拷贝构造
-            //2.显示法
-            Person p4 = Person(10);//有参构造
-            Person p5 = Person(p4);//拷贝构造
-            //3.隐式法
-            Person p6 = 10;//有参构造,p6 = 10 <=> p6(10)<=> Person(10)
-            Person p7 = p6;//拷贝构造,p7 = p6 <=> p7(p6) <=> Person(p6)
-        }
-
-        int main(){
-            test01();
-            test02();
-            return 0;
-        }
-        //一般习惯上用括号法和显示法
-        ```
-        * 注意事项：
-          * 习惯上一般括号法和显示法
-          * Person(10);是匿名对象，当前执行结束后，系统会立即回收匿名对象
-          * Person p1();调用无参构造不能加括号，否则会被认为是函数声明
- 
- 
- 
+int main(){
+    test01();
+    test02();
+    return 0;
+}
+//一般习惯上用括号法和显示法
+```
+* 注意事项：
+  * 习惯上一般括号法和显示法
+  * Person(10);是匿名对象，当前执行结束后，系统会立即回收匿名对象
+  * Person p1();调用无参构造不能加括号，否则会被认为是函数声明
 
 
 
-      * 4-2-3.拷贝构造函数的调用时机
-        * 1.三种情况
-          * 使用一个已经创建完毕的对象来初始化一个新对象
-          * 值传递的方式给函数参数传值
-          * 以值方式返回局部对象
-        * 2. 例子
-          ```cpp
-          #include <iostream>
-          using namespace std;
-          class Person{
-              public:
-                  Person(){
-                      cout << "这是无参构造函数" << endl;
-                  }
-                  Person(int a){
-                      age = a;
-                      cout << "这是有参构造函数" << endl;
-                  }
-                  Person(const Person &p){
-                       age = p.age;
-                       cout << "这是拷贝构造函数" << endl;
-                  }
-                  ~Person(){
-                      cout << "这是析构函数" << endl;
-                  }
-              private:
-                  int age;
-          };
-          //1.利用创建好的对象初始化一个新对象
-          void func01(){
-              Person p1;//调用无参构造函数
-              Person p2(p1);//调用拷贝构造函数
-          }
-          void test01(){
-              func01();
-          }
-          //2.类的值传递
-          void doWork(Person p){
-              
-          }
-          void test02(){
-              Person p3;//调用无参构造函数
-              doWork(p3);//调用拷贝构造函数
-          }
-          //3.类函数的返回
-          Person doWork2(){
-              Person p1;//调用无参构造函数和析构函数
-              return p1;
-          }
-          void test03(){
-              Person p = doWork2();//声明自定义的类
-          }
-
-          int main(){
-              test01();
-              test02();
-              test03();
-              return 0;
-          }
-          ```
-      * 4-2-4.构造函数的调用规则
-        * 1.默认情况下的调用函数
-          * 默认构造函数(无参，函数体为空)
-          * 默认析构函数(无参，函数体为空)
-          * 默认拷贝构造函数，对属性进行拷贝
-        * 2.构造函数的调用规则如下：
-          * 如果用户定义有参构造函数，c++不再提供默认无参构造，但是会提供默认拷贝构造
-          * 如果用户定义拷贝构造函数，c++不再提供其他构造函数
-          * 析构函数和无参构造函数必须要在类的内部
-        * 3.例子
-        ```C++
-        class Person {
-        public:
-        	//无参（默认）构造函数
-        	Person() {
-        		cout << "无参构造函数!" << endl;
-        	}
-        	//有参构造函数
-        	Person(int a) {
-        		age = a;
-        		cout << "有参构造函数!" << endl;
-        	}
-        	//拷贝构造函数
-        	Person(const Person& p) {
-        		age = p.age;
-        		cout << "拷贝构造函数!" << endl;
-        	}
-        	//析构函数
-        	~Person() {
-        		cout << "析构函数!" << endl;
-        	}
-        public:
-        	int age;
-        };
-
-        void test01()
-        {
-        	Person p1(18);
-        	//如果不写拷贝构造，编译器会自动添加拷贝构造，并且做浅拷贝操作
-        	Person p2(p1);
-
-        	cout << "p2的年龄为： " << p2.age << endl;
-        }
-
-        void test02()
-        {
-        	//如果用户提供有参构造，编译器不会提供默认构造，会提供拷贝构造
-        	Person p1; //此时如果用户自己没有提供默认构造，会出错
-        	Person p2(10); //用户提供的有参
-        	Person p3(p2); //此时如果用户没有提供拷贝构造，编译器会提供
-
-        	//如果用户提供拷贝构造，编译器不会提供其他构造函数
-        	Person p4; //此时如果用户自己没有提供默认构造，会出错
-        	Person p5(10); //此时如果用户自己没有提供有参，会出错
-        	Person p6(p5); //用户自己提供拷贝构造
-        }
-
-        int main() {
-
-        	test01();
-
-        	system("pause");
-
-        	return 0;
-        }
-        ```
-      * 4-2-5.深拷贝和浅拷贝
-        * 浅拷贝：简单的赋值操作
-        * 深拷贝：在堆区重新申请空间，进行拷贝操作
-        * 例子
-        ```cpp
-        #include <iostream>
-        using namespace std;
-        class Person{
-            public:
-                Person(){
-                    cout << "无参构造函数调用" << endl;
-                }
-                Person(int age, int height){
-                    m_Age = age;
-                    m_Height = new int(height);//堆区的数据由程序员手动开辟和释放，而在函数调用完之后，在栈区的数据就会被销毁，此时被销毁前会调用析构函数，所以要堆区数据要在析构函数中被销毁
-                    cout << "有参构造函数调用" << endl;
-                }
-                Person(const Person &p){
-                    m_Height = new int(*p.m_Height);//深拷贝
-                    cout << "拷贝构造函数调用" << endl;
-                }
-                ~Person(){
-                    cout << "析构函数的调用" << endl;
-                    if (m_Height != NULL){
-                        delete m_Height;//此时p1.m_Height->new int(height),p2.m_Height->new int(height),
-                        m_Height = NULL;//防止野指针出现的清空操作
-                    }
-                }
-                int *m_Height;
-                int m_Age;
-        };
-
-        void test01(){
-            Person p1(12, 12);
-            printf("p1的年龄为%d,身高为%d\n",p1.m_Age,*p1.m_Height);
-            Person p2(p1);
-            printf("p1的年龄为%d,身高为%d\n",p1.m_Age,*p1.m_Height);
-        /* 
-        1.执行顺序：由于先进后出的原则，后进入的先出去，所以此时，调用了2次析构函数，就会出现错误
-        2.解决方案：此时在拷贝构造函数中必须再拷贝一份m_Height = new int(*p.Height),这样子，m_Height分别指向new int(height)
-        和new int(*p.Height)，所以这样的话，执行2次析构函数就不会重复销毁m_Height
-        }
-        3.a=1,&a = d1(变量名就是地址), a = 1,所以delete a <=>delete a的值,但是不会删除a的地址  
-        int a = 1, int *b = &a, =>(b = &a, *b = 1, &b = d1),delete b <=>delele &a <=> delete a 
-        */
-
-        int main(){
-            test01();
-        }
-        ```
-        >* 注意事项：
-          * 1.执行顺序：由于先进后出的原则，后进入的先出去，所以此时，调用了2次析构函数，就会出现错误
-          * 2.解决方案：此时在拷贝构造函数中必须再拷贝一份m_Height = new int(*p.Height),这样子，m_Height分别指向new int(height)
-          * 和new int(*p.Height)，所以这样的话，执行2次析构函数就不会重复销毁m_Height
-          }
-          * 3.a=1,&a = d1(变量名就是地址), a = 1,所以delete a <=>delete a的值,但是不会删除a的地址  
-          int a = 1, int *b = &a, =>(b = &a, *b = 1, &b = d1),delete b <=>delele &a <=> delete a 
-    
-    
-  
-  
-  
-  
-  
-  
-      * 4-2-6.初始化列表
-        * 
-  * 12-1.定义：
-
-      template <typename type> ret-type func-name(parameter list)
-      {
-         // 函数的主体
-      }
-  * 12-2.分类：
-      * 1.函数模板：
-          - 作用：建立一个通用函数，其函数的返回值类型和形参类型可以不具体指定，用一个虚拟的类型来代表
-          - 语法：template<typename T>//T为通用的数据类型，可以用class来代替，通常为大写字母
-                函数申明或者定义
-              解释：template:申明创建模板；typename:表示其后面的符号是一种数据类型，可以用class代替
-          - 方法：1.显示指定类型 2.自动类型推导
-          - 例子：
-          ```cpp
-          #include <iostream>
-          using namespace std;阀的
-          //函数模板：
-          template<typename T>//申明一个模板，T是一个通用类型
-
-          void mySwap(T &a, T &b){//T可以是int, char,..类型
-              T temp = a;
-              a = b;
-              b = temp;反对分散
-          }
 
 
-          void test01(){
-              int a = 10;
-              int b = 20;
-              // swapInt(a, b);
-              //方法1：自动类型推导入
-              mySwap(a, b);
-              //方法2显示指定类型：
-              mySwap<int>(a, b);//告诉T = int
-              cout << "a = " << a << endl;
-              cout << "b = " << b << endl;
 
-          }
-          ```
-          - 注意事项：
-              - 1.自动类型推导，必须推导出一致的数据类型T，才可以使用
-              - 2.模板必须要确定出T的类型，才可以使用(调用函数时必须要指定类型)
-              - 3.模板申明必须要须跟在函数的前面
-              - 4.例子:
-
-
-        ```cpp
-        #include <iostream>
-        using namespace std;
-        //函数模板：
-        template<typename T>//申明一个模板，T是一个通用类型，写函数模板用typename,写类模板用class
-        void mySwap(T &a, T &b){//T可以是int, char,..类型
-            T temp = a;
-            a = b;
-            b = temp;
-        }
-
-        void test01(){
-            int a = 10;
-            int b = 20;
-            char c = 'c';
-            //1.错误,a和c的数据类型不一样，否则模板使用会失效
-            mySwap(a, c);//
-            mySwap<int>(a, b);
-            mySwap(a, b);//此处因为已经给出了a,b 的类型了，所以无须再加<int>
-            cout << "a = " << a << endl;
-            cout << "b = " << b << endl;
-
-        }
-        //2.函数模板必须要指定T的数据类型才可以使用模板
-        template<class T>
-        void func(){
-            cout << "func调用"<< endl;
-        }
-        void test02(){
-            func<int>();//此处要是不指定int类型的话，编译器会无法时识别
-            // func();为错误的，因为没有指定模板类型
-        }
-        int main(){
-            test02();
-        }
-        ```
-          - 实例：
-          ```cpp
-          #include <iostream>
-          using namespace std;
-          //交换模板
-          template<class T>
-          void mySwap(T &a, T &b){
-              T temp = a;
-              a = b;
-              b = temp;
-          }
-          //排序模板
-          template<class T>//模板申明必须要须跟在函数的前面
-          void mySort(T arr[], int len){
-              for (int i = 0; i < len; i++){
-                  int max = i;
-                  for (int j = i + 1; j < len; j++){
-                      if (arr[max] < arr[j]){
-                          max = j;//更新最大值下标
-                      }
-                  }
-              if (max != i){
-                  mySwap(arr[max], arr[i]);
-                  //
-              }
-              }
-          }
-          //打印模板
-          template<class T>
-          void printArray(T arr[], int len){
-              for (int i = 0; i < len; i++){
-                  cout << arr[i] << "  ";
-              }
-              cout << endl;
-          }
-
-          void test01(){
-              char charArr[] = "asdfsf";
-              int num = sizeof(charArr)/sizeof(char);
-              mySort(charArr,num);
-              printArray(charArr, num);
-          }
-
-          void test02(){
-              int intArr[] = {1, 2, 3, 4};
-              int num = sizeof(intArr)/sizeof(int);
-              mySort(intArr,num);
-              printArray(intArr, num);
-          }
-
-          int main(){
-              test01();
-              test02();
-          }
-          ```
-      1. 类模板：
-      #include <iostream>
-      using namespace std;
-      template <typename T>//T为通用的数据类型，可以用class来代替，通常为大写字母
-      class Op{
+* 4-2-3.拷贝构造函数的调用时机
+  * 1.三种情况
+  * 使用一个已经创建完毕的对象来初始化一个新对象
+  * 值传递的方式给函数参数传值
+  * 以值方式返回局部对象
+  * 2. 例子
+  ```cpp
+  #include <iostream>
+  using namespace std;
+  class Person{
       public:
-          T peocess(T v)
-          {
-              return v * v;
+          Person(){
+              cout << "这是无参构造函数" << endl;
           }
-      };
-      int main()
-      {
-          Op<int> opInt;
-          Op<double> opDouble;
-          cout << "5 * 5 = " << opInt.peocess(5) <<endl;
-          cout << "0.5 * 0.5 = " << opDouble.peocess(0.5) <<endl;
+          Person(int a){
+              age = a;
+              cout << "这是有参构造函数" << endl;
+          }
+          Person(const Person &p){
+               age = p.age;
+               cout << "这是拷贝构造函数" << endl;
+          }
+          ~Person(){
+              cout << "这是析构函数" << endl;
+          }
+      private:
+          int age;
+  };
+  //1.利用创建好的对象初始化一个新对象
+  void func01(){
+      Person p1;//调用无参构造函数
+      Person p2(p1);//调用拷贝构造函数
+  }
+  void test01(){
+      func01();
+  }
+  //2.类的值传递
+  void doWork(Person p){
+      
+  }
+  void test02(){
+      Person p3;//调用无参构造函数
+      doWork(p3);//调用拷贝构造函数
+  }
+  //3.类函数的返回
+  Person doWork2(){
+      Person p1;//调用无参构造函数和析构函数
+      return p1;
+  }
+  void test03(){
+      Person p = doWork2();//声明自定义的类
+  }
+
+  int main(){
+      test01();
+      test02();
+      test03();
+      return 0;
+  }
+  ```
+* 4-2-4.构造函数的调用规则
+  * 1.默认情况下的调用函数
+    * 默认构造函数(无参，函数体为空)
+    * 默认析构函数(无参，函数体为空)
+    * 默认拷贝构造函数，对属性进行拷贝
+  * 2.构造函数的调用规则如下：
+    * 如果用户定义有参构造函数，c++不再提供默认无参构造，但是会提供默认拷贝构造
+    * 如果用户定义拷贝构造函数，c++不再提供其他构造函数
+    * 析构函数和无参构造函数必须要在类的内部
+  * 3.例子
+```C++
+class Person {
+public:
+	//无参（默认）构造函数
+	Person() {
+		cout << "无参构造函数!" << endl;
+	}
+	//有参构造函数
+	Person(int a) {
+		age = a;
+		cout << "有参构造函数!" << endl;
+	}
+	//拷贝构造函数
+	Person(const Person& p) {
+		age = p.age;
+		cout << "拷贝构造函数!" << endl;
+	}
+	//析构函数
+	~Person() {
+		cout << "析构函数!" << endl;
+	}
+public:
+	int age;
+};
+
+void test01()
+{
+	Person p1(18);
+	//如果不写拷贝构造，编译器会自动添加拷贝构造，并且做浅拷贝操作
+	Person p2(p1);
+
+	cout << "p2的年龄为： " << p2.age << endl;
+}
+
+void test02()
+{
+	//如果用户提供有参构造，编译器不会提供默认构造，会提供拷贝构造
+	Person p1; //此时如果用户自己没有提供默认构造，会出错
+	Person p2(10); //用户提供的有参
+	Person p3(p2); //此时如果用户没有提供拷贝构造，编译器会提供
+
+	//如果用户提供拷贝构造，编译器不会提供其他构造函数
+	Person p4; //此时如果用户自己没有提供默认构造，会出错
+	Person p5(10); //此时如果用户自己没有提供有参，会出错
+	Person p6(p5); //用户自己提供拷贝构造
+}
+
+int main() {
+
+	test01();
+
+	system("pause");
+
+	return 0;
+}
+```
+* 4-2-5.深拷贝和浅拷贝
+  * 浅拷贝：简单的赋值操作
+  * 深拷贝：在堆区重新申请空间，进行拷贝操作
+  * 例子
+```cpp
+#include <iostream>
+using namespace std;
+class Person{
+    public:
+        Person(){
+            cout << "无参构造函数调用" << endl;
+        }
+        Person(int age, int height){
+            m_Age = age;
+            m_Height = new int(height);//堆区的数据由程序员手动开辟和释放，而在函数调用完之后，在栈区的数据就会被销毁，此时被销毁前会调用析构函数，所以要堆区数据要在析构函数中被销毁
+            cout << "有参构造函数调用" << endl;
+        }
+        Person(const Person &p){
+            m_Height = new int(*p.m_Height);//深拷贝
+            cout << "拷贝构造函数调用" << endl;
+        }
+        ~Person(){
+            cout << "析构函数的调用" << endl;
+            if (m_Height != NULL){
+                delete m_Height;//此时p1.m_Height->new int(height),p2.m_Height->new int(height),
+                m_Height = NULL;//防止野指针出现的清空操作
+            }
+        }
+        int *m_Height;
+        int m_Age;
+};
+
+void test01(){
+    Person p1(12, 12);
+    printf("p1的年龄为%d,身高为%d\n",p1.m_Age,*p1.m_Height);
+    Person p2(p1);
+    printf("p1的年龄为%d,身高为%d\n",p1.m_Age,*p1.m_Height);
+/* 
+1.执行顺序：由于先进后出的原则，后进入的先出去，所以此时，调用了2次析构函数，就会出现错误
+2.解决方案：此时在拷贝构造函数中必须再拷贝一份m_Height = new int(*p.Height),这样子，m_Height分别指向new int(height)
+和new int(*p.Height)，所以这样的话，执行2次析构函数就不会重复销毁m_Height
+}
+3.a=1,&a = d1(变量名就是地址), a = 1,所以delete a <=>delete a的值,但是不会删除a的地址  
+int a = 1, int *b = &a, =>(b = &a, *b = 1, &b = d1),delete b <=>delele &a <=> delete a 
+*/
+
+int main(){
+    test01();
+}
+```
+>* 注意事项：
+  * 1.执行顺序：由于先进后出的原则，后进入的先出去，所以此时，调用了2次析构函数，就会出现错误
+  * 2.解决方案：此时在拷贝构造函数中必须再拷贝一份m_Height = new int(*p.Height),这样子，m_Height分别指向new int(height)
+  * 和new int(*p.Height)，所以这样的话，执行2次析构函数就不会重复销毁m_Height
+  }
+  * 3.a=1,&a = d1(变量名就是地址), a = 1,所以delete a <=>delete a的值,但是不会删除a的地址  
+  int a = 1, int *b = &a, =>(b = &a, *b = 1, &b = d1),delete b <=>delele &a <=> delete a 
+
+
+
+
+
+
+
+
+* 4-2-6.初始化列表
+* 作用：构造函数()：属性1(值1)，属性2(值2)...{}
+* 例子
+```cpp
+#include <iostream>
+using namespace std;
+class Person{
+    public:
+    //传统的初始化操作
+        // Person(int a, int b, int c){
+        //     int m_A = a;
+        //     int m_B = b;
+        //     int m_C = c;
+        // }//如果写了拷贝构造函数，那么编译器就不提供其他的构造函数了
+    //初始化列表的属性
+        Person(int a, int b, int c): m_A(a), m_B(b), m_C(c){
+            
+        }
+        int m_A;
+        int m_B;
+        int m_C;
+};
+void test01(){
+    // Person p(1, 2, 3);
+    // cout << "m_C = " << p.m_C << endl; 
+    Person p(1, 2, 3);//调用的是默认构造函数
+    cout << "m_A = " << p.m_A << endl; 
+    cout << "m_B = " << p.m_B << endl; 
+    cout << "m_C = " << p.m_C << endl; 
+/*传值过程：1->a---->int a---->m_A中的a----->m_A
+所以此时m_A = a
+*/
+}
+int main(){
+    test01();
+    return 0;
+}
+```
+* 4-2-7. 类对象作为类成员
+>c++类中的成员可以是另一个类的对象，我们称该成员为成员对象
+* 1.例如
+```cpp
+#include <iostream>
+using namespace std;
+class Phone
+{
+public:
+	Phone(string name3)
+	{
+		m_PhoneName = name;
+		cout << "Phone构造" << endl;
+	}
+	~Phone()
+	{
+		cout << "Phone析构" << endl;
+	}
+
+	string m_PhoneName;
+};
+
+class Person
+{
+public:
+
+	//初始化列表可以告诉编译器调用哪一个构造函数
+	Person(string name1, string name2) :m_PersonName(name1), m_Phone(name2)
+	{
+		cout << "Person构造" << endl;
+	}
+
+	~Person()
+	{
+		cout << "Person析构" << endl;
+	}
+
+	void playGame()
+	{
+		cout << m_Name << " 使用" << m_Phone.m_PhoneName << " 牌手机! " << endl;
+	}
+
+	string m_PersonName;
+	Phone m_Phone;//好比是现人身上的躯干才有人的本身，所以会先调用类成员的构造函数，然后再调用类的构造函数
+
+};
+void test01()
+{
+	//当类中成员是其他类对象时，我们称该成员为 对象成员
+	//构造的顺序是 ：先调用对象成员的构造，再调用本类构造
+	//析构顺序与构造相反
+	Person p("张三" , "苹果X");
+	p.playGame();
+
+}
+int main() {
+	test01();
+	return 0;
+}
+```
+* 总结：
+	* 当类中成员是其他类对象时，我们称该成员为成员对象（成员方法，成员属性，成员对象）
+	* 构造的顺序是 ：先调用对象的构造，再调用本类构造
+    * 析构顺序与构造相反
+    * **person p("张三);这样会调用构造函数和析构函数，但是不会调用其他的成员函数**
+    * 执行结果是：
+**Phone构造
+Person构造
+张三 使用苹果X 牌手机! 
+Person析构
+Phone析构**
+
+* 4-2-8. 静态成员函数
+1. 静态成员
+   1. 所有对象共享同一份变量
+   2. 类内声明，类外初始化:类内:static int a;类外：int Person::a = 1;
+   3. 访问方法：  
+      1. 对象访问：Person p; p.func() | 类名访问：Person::func() 
+2. 静态成员函数
+   1. 所有对象共享一个函数
+   2. 静态成员函数只能访问静态成员变量
+   3. 静态成员函数也有访问权限：private:static void func(){}
+，Person::func()无法访问
+3. 例子
+```cpp
+#include <iostream>
+using namespace std;
+class Person
+{
+    public:
+        //静态成员变量
+        static void func(){
+            m_A = 100;//静态成员函数只能访问静态成员变量
+            m_B = 200;//错误，静态成员函数只能访问静态成员变量
+            /*原因：当调用这个静态函数的时候，函数体内部不知道改变的是哪一个对象的m_B,因为无法区分到底m_B
+            到底是哪个成员的，而可以访问m_A的原因是,m_A是静态变量，为所有方法所共用
+            */
+            cout << "static void 调用" << endl;
+        }
+        static int m_A;
+        int m_B;//非静态成员变量
+    //静态成员函数的访问权限：
+    private:
+        static void func2(){
+            cout << "static void fuc2" << endl;
+        }
+};
+int Person::m_A = 0;//静态成员变量要在类内声明，类外初始化
+void test01(){
+    //1.通过对象访问
+    Person p;
+    p.func();
+    //2.通过类名访问：
+    Person::func();//所有对象共享同一个函数
+    Person::func2();//类外不能访问静态私有成员函数
+}
+
+int main(){
+    test01();
+}
+```
+
+
+
+* 4-2-9 this的应用
+1. 定义：是一个const指针，指向当前对象，通过它可以访问当前对象的所有成员，所谓当前对象，是指正在使用的对象，例如，stu.show(),stu就是当前对象，this 指向stu
+2. 注意：
+3. 本例子中，成员函数形参和成员变量重名，只能通过this来区分，以setname(char *name)为例子，它的形参为name,和成员变量name重名，如果name = name,那么就是给形参赋值，如果是this->name = name 就是形参给成员变量赋值
+4. this是一个指针，通过->可以访问所有的成员变量和成员函数，无论是否是public 
+5. this 是 const 指针，它的值是不能被修改的，一切企图修改该指针的操作，如赋值、递增、递减等都是不允许的。
+6. this 只能在成员函数内部使用，用在其他地方没有意义，也是非法的。
+7. 只有当对象被创建后this才有意义
+
+8. 实例
+```cpp
+#include <iostream>
+using namespace std;
+class Student{
+public:
+void setname(char *name);
+void setage(int age);
+void setscore(float score);
+void show();
+private:
+char *name;
+int age;
+float score;
+};
+void Student::setname(char *name){
+this->name = name;
+}
+void Student::setage(int age){
+this->age = age;
+}
+void Student::setscore(float score){
+this->score = score;
+}
+void Student::show(){
+cout<<this->name<<"的年龄是"<<this->age<<"，成绩是"<<this->score<<endl;
+}
+int main(){
+Student *pstu = new Student;
+pstu -> setname("李华");
+pstu -> setage(16);
+pstu -> setscore(96.5);
+pstu -> show();
+return 0;
+}
+```
+
+
+# 模板：
+
+template <typename type> ret-type func-name(parameter list)
+{
+ // 函数的主体
+}
+* 12-2.分类：
+* 1.函数模板：
+  - 作用：建立一个通用函数，其函数的返回值类型和形参类型可以不具体指定，用一个虚拟的类型来代表
+  - 语法：template<typename T>//T为通用的数据类型，可以用class来代替，通常为大写字母
+        函数申明或者定义
+      解释：template:申明创建模板；typename:表示其后面的符号是一种数据类型，可以用class代替
+  - 方法：1.显示指定类型 2.自动类型推导
+  - 例子：
+  ```cpp
+  #include <iostream>
+  using namespace std;阀的
+  //函数模板：
+  template<typename T>//申明一个模板，T是一个通用类型
+
+  void mySwap(T &a, T &b){//T可以是int, char,..类型
+      T temp = a;
+      a = b;
+      b = temp;反对分散
+  }
+
+
+  void test01(){
+      int a = 10;
+      int b = 20;
+      // swapInt(a, b);
+      //方法1：自动类型推导入
+      mySwap(a, b);
+      //方法2显示指定类型：
+      mySwap<int>(a, b);//告诉T = int
+      cout << "a = " << a << endl;
+      cout << "b = " << b << endl;
+
+  }
+  ```
+  - 注意事项：
+      - 1.自动类型推导，必须推导出一致的数据类型T，才可以使用
+      - 2.模板必须要确定出T的类型，才可以使用(调用函数时必须要指定类型)
+      - 3.模板申明必须要须跟在函数的前面
+      - 4.例子:
+
+
+```cpp
+#include <iostream>
+using namespace std;
+//函数模板：
+template<typename T>//申明一个模板，T是一个通用类型，写函数模板用typename,写类模板用class
+void mySwap(T &a, T &b){//T可以是int, char,..类型
+    T temp = a;
+    a = b;
+    b = temp;
+}
+
+void test01(){
+    int a = 10;
+    int b = 20;
+    char c = 'c';
+    //1.错误,a和c的数据类型不一样，否则模板使用会失效
+    mySwap(a, c);//
+    mySwap<int>(a, b);
+    mySwap(a, b);//此处因为已经给出了a,b 的类型了，所以无须再加<int>
+    cout << "a = " << a << endl;
+    cout << "b = " << b << endl;
+
+}
+//2.函数模板必须要指定T的数据类型才可以使用模板
+template<class T>
+void func(){
+    cout << "func调用"<< endl;
+}
+void test02(){
+    func<int>();//此处要是不指定int类型的话，编译器会无法时识别
+    // func();为错误的，因为没有指定模板类型
+}
+int main(){
+    test02();
+}
+```
+  - 实例：
+  ```cpp
+  #include <iostream>
+  using namespace std;
+  //交换模板
+  template<class T>
+  void mySwap(T &a, T &b){
+      T temp = a;
+      a = b;
+      b = temp;
+  }
+  //排序模板
+  template<class T>//模板申明必须要须跟在函数的前面
+  void mySort(T arr[], int len){
+      for (int i = 0; i < len; i++){
+          int max = i;
+          for (int j = i + 1; j < len; j++){
+              if (arr[max] < arr[j]){
+                  max = j;//更新最大值下标
+              }
+          }
+      if (max != i){
+
+          mySwap(arr[max], arr[i]);
+          //
       }
- 
+      }
+  }
+  //打印模板
+  template<class T>
+  void printArray(T arr[], int len){
+      for (int i = 0; i < len; i++){
+          cout << arr[i] << "  ";
+      }
+      cout << endl;
+  }
+
+  void test01(){
+      char charArr[] = "asdfsf";
+      int num = sizeof(charArr)/sizeof(char);
+      mySort(charArr,num);
+      printArray(charArr, num);
+  }
+
+  void test02(){
+      int intArr[] = {1, 2, 3, 4};
+      int num = sizeof(intArr)/sizeof(int);
+      mySort(intArr,num);
+      printArray(intArr, num);
+  }
+
+  int main(){
+      test01();
+      test02();
+  }
+  ```
+1. 类模板：
+#include <iostream>
+using namespace std;
+template <typename T>//T为通用的数据类型，可以用class来代替，通常为大写字母
+class Op{
+public:
+  T peocess(T v)
+  {
+      return v * v;
+  }
+};
+int main()
+{
+  Op<int> opInt;
+  Op<double> opDouble;
+  cout << "5 * 5 = " << opInt.peocess(5) <<endl;
+  cout << "0.5 * 0.5 = " << opDouble.peocess(0.5) <<endl;
+}
+
 
 
 
