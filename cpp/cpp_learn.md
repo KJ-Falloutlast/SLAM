@@ -4205,16 +4205,66 @@ int main(){
 
 
 
-* 4-2-9 this的应用
-1. 定义：是一个const指针，指向当前对象，通过它可以访问当前对象的所有成员，所谓当前对象，是指正在使用的对象，例如，stu.show(),stu就是当前对象，this 指向stu
-2. 注意：
-3. 本例子中，成员函数形参和成员变量重名，只能通过this来区分，以setname(char *name)为例子，它的形参为name,和成员变量name重名，如果name = name,那么就是给形参赋值，如果是this->name = name 就是形参给成员变量赋值
-4. this是一个指针，通过->可以访问所有的成员变量和成员函数，无论是否是public 
-5. this 是 const 指针，它的值是不能被修改的，一切企图修改该指针的操作，如赋值、递增、递减等都是不允许的。
-6. this 只能在成员函数内部使用，用在其他地方没有意义，也是非法的。
-7. 只有当对象被创建后this才有意义
+### 4-3 对象模型和this指针
+### 4-3-1.成员变量和成员函数佛分开存储
 
-8. 实例
+1. 成员变量和成员函数是分开存储的，每一个非静态成员函数只会诞生一份函数实例，也就是说多个同类型的对象会共用一块代码，所以问题是如何区分哪个堆析哪个堆用自己的呢？
+2. 使用this指针来解决上述问题
+   1. 定义:this指针是指向被调用成员函数所属的对象
+   2. 性质
+      1. this指针是隐含每一个非静态成员函数内的一种指针
+      2. this指针不需要定义，直接使用即可
+      3. this指针是指向被调用成员函数所属的对象，若是p1在调用函数，则this指向p1,p2调用函数，则this指向p2
+   3. 用途
+      1. 形参和成员函数同名时，用this指针来区分,若是不用this,可以用**m_Age = age**这种命名方式来构造
+      2. 在类的非静态成员函数中返回对象本身，可使用return *this
+   4. 例子
+```cpp
+#include <iostream>
+using namespace std;
+class Person{
+    public:
+        Person(int age){
+        //age = age;//这3个age是同一个age，所以此时int age并没有赋值给age
+        this->age = age;//左边的age是成员变量，右边的age是形参
+        /*1.this指向被调用的成员函数所属的对象
+        2.若是p1在调用函数，则this指向p1,p2调用函数，则this指向p2
+        */
+        }
+        Person& PersonAddAge(Person &p){
+            this->age += age;
+            return *this;//this = &p2,则 *this = p2
+        }/*
+        1.若返回一个本体，要用引用的方式返回
+        2.若是用值的方式返回，即Person PersonAddAge(Person &p)，
+        则返回的是一个新的对象，即是p2的副本p2`,而非p2本身，所以值不会发生变化
+        3.当为
+        void PersonAddAge(Person &p){
+            this->age += age;
+        }时，因为personAddAge无返回值，所以不能重复调用此函数，即p2.PersonAddAge(p1).PersonAddAge(p1)不成立
+        */
+        int age;//m_Age表示member_Age
+};
+//1.解决名称冲突
+void test01(){
+    Person p1(12);
+    cout << "p1的年龄为" << p1.age << endl;
+}
+//2. 返回对象本身用*this
+void test02(){
+    Person p1(10);
+    Person p2(10);
+    //链式编程思想
+    p2.PersonAddAge(p1).PersonAddAge(p1).PersonAddAge(p1);
+    cout << "p2的年龄为" << p2.age << endl;
+}
+int main(){
+    test01();
+    test02();
+}
+```
+
+3. 实例
 ```cpp
 #include <iostream>
 using namespace std;
@@ -4250,9 +4300,90 @@ pstu -> show();
 return 0;
 }
 ```
+### 4-3-2.空指针访问成员函数
+1. 注意:
+   1. 空指针可以调用成员函数,但是在调用成员属性的时候,要注意有没有用到this指针,若用到this指针,需要加判断
+   2. person *p = NULL;int m_Age;cout <<m_Age  <=> this->m_Age,this = p = NULLk 
+```cpp
+#include <iostream>
+using namespace std;
+class Person{
+    public:
+        void showClassName(){
+            cout << "this is PersonClass" << endl;
+            
+        }
+        //报错的原因是传入的指针为NULL
+        void showPersonAge(){
+            //解决方案:
+            if (this == NULL){
+                return;
+            }
+            cout << "age = "<< m_Age << endl;
+            //m_Age <=> this -> m_Age,但是this = p = NULL，所以不可能访问p里面的对象,但是可以通过加判断来保证代码的健壮性
+        }
+        int m_Age;
+};
+//1.解决名称冲突
+void test01(){
+    Person *p = NULL;
+    p->showClassName();
+    p->showPersonAge();
 
+}
+int main(){
+    test01();
+}
+```
 
-# 模板：
+### 4-3-3. const修饰成员函数
+1. 常函数
+   1. 成员函数加const后称这个函数为常函数
+   2. 常函数内不可以修改成员属性，但成员属性声明时候加关键字mutabel后,在常函数中可以修改
+2. 常对象
+   1. 声明对象前加const称该对象为常对象
+   2. 常对象只能调用常函数，且不能修改非mutabel属性值
+   3. 常对象可以调用
+3. 总结:
+   1. this指针的本质是**指针常量**,所以指针的指向是不能修改的,其本质即为:**Person *const this = this**,所以指向不能改,如果是**const Person *const this = this**,则它的值不能修改
+   2. 在成员函数后面加const,修饰的是this指向,让指针指向的值也不可以更改,此时的函数称为常函数,此时即为**const Person *const this = this**
+4. 例子
+```cpp
+#include <iostream>
+using namespace std;
+//常函数
+class Person{
+    public:
+    /*1.this指针的本质是指针常量,所以指针的指向是不能修改的
+    2.本质即为:Person *const this = this,所以指向不能改,如果是const Person *const this = this,则它的值不能修改
+    3,在成员函数后面加const,修饰的是this指向,让指针指向的值不可以更改,此时的函数称为常函数
+    */
+        void showPerson() const {
+            this->m_B = 100;//加了mutable后就可以修改在常函数中的值
+            // this->m_A = 100;//常函数中不允许修改指针所修改的值
+            // this->NULL;指向不可修改            
+            cout << m_B << endl;
+        }
+        int m_A;
+        mutable int m_B;//特殊变量,即使在常函数中也可以修改这个值
+};
+
+//常函数
+void test01(){
+    Person p;
+    p.showPerson();
+}
+//常对象
+void test02(){
+    const Person p;
+    p.m_A = 100;//对象的属性不允许修改
+    p.m_B = 100;//由于这里是mutable,所以可以修改
+}
+int main(){
+    test01();
+}
+```
+# 12.模板：
 
 template <typename type> ret-type func-name(parameter list)
 {

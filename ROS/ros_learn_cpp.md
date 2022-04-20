@@ -1,70 +1,70 @@
 # 1.通信机制
 ## 1.话题通信
-1. 话题通信基本操作
-    * 发布数据
+### 1-1. 话题通信基本操作
+1. 发布数据
 ```cpp
-    #include "ros/ros.h"
-    #include "std_msgs/String.h"//普通文本类型的消息
-    #include <sstream>
-    int main(int argc, char *argv[]){
-        setlocale(LC_ALL, "");
-        ros::init(argc, argv, "talker");
-        ros::NodeHandle nh;
-        ros::Publisher pub = nh.advertise<std_msgs::String>("chatter",10);
-        std_msgs::String msg;
-        std::string msg_front = "hello";   
-        int count = 0;
-        ros::Rate r(1);
-        while (ros::ok()){
-            std::stringstream ss;//使用stringstream拼接字符串和编号
-            ss << msg_front << count;
-            msg.data = ss.str();
-            //发布消息
-            pub.publish(msg);
-            ROS_INFO("发送的消息:%s",msg.data.c_str());
-            r.sleep()//休眠时间 = 1/频率
-            count++;
-            ros::spinOnce();
-        }
-        return 0;
-    }
+ #include "ros/ros.h"
+ #include "std_msgs/String.h"//普通文本类型的消息
+ #include <sstream>
+ int main(int argc, char *argv[]){
+     setlocale(LC_ALL, "");
+     ros::init(argc, argv, "talker");
+     ros::NodeHandle nh;
+     ros::Publisher pub = nh.advertise<std_msgs::String>("chatter",10);
+     std_msgs::String msg;
+     std::string msg_front = "hello";   
+     int count = 0;
+     ros::Rate r(1);
+     while (ros::ok()){
+         std::stringstream ss;//使用stringstream拼接字符串和编号
+         ss << msg_front << count;
+         msg.data = ss.str();
+         //发布消息
+         pub.publish(msg);
+         ROS_INFO("发送的消息:%s",msg.data.c_str());
+         r.sleep()//休眠时间 = 1/频率
+         count++;
+         ros::spinOnce();
+     }
+     return 0;
+ }
 ```      
-    * 接收数据
+2. 接收数据
 ```cpp
-      #include "ros/ros.h"
-      #include "std_msgs/String.h"
-      #include <sstream>
-      /*
-          訂約方实现：
-          1.包含头文件：
-              ROS中文本类型-->std_msgs/String.h
-          2.初始化节点
-          3.创建节点句柄
-          4.创建訂閱者对象
-          5.處理訂閱數據
+#include "ros/ros.h"
+#include "std_msgs/String.h"
+#include <sstream>
+/*
+    訂約方实现：
+    1.包含头文件：
+        ROS中文本类型-->std_msgs/String.h
+    2.初始化节点
+    3.创建节点句柄
+    4.创建訂閱者对象
+    5.處理訂閱數據
 
-      */
-      void doMsg(const std_msgs::String::ConstPtr &msg){//发布类型为std_msgs下的常量指針的引用
-          //通過msg獲取並操作訂库閱到的數據
-          ROS_INFO("翠花订阅的数据%s", msg->data.c_str());//因为msg是指针的引用，所以需要用->调用，c_str()指的是c风格的字符串
-      }
+*/
+void doMsg(const std_msgs::String::ConstPtr &msg){//发布类型为std_msgs下的常量指針的引用
+    //通過msg獲取並操作訂库閱到的數據
+    ROS_INFO("翠花订阅的数据%s", msg->data.c_str());//因为msg是指针的引用，所以需要用->调用，c_str()指的是c风格的字符串
+}
 
-      int main(int argc, char *argv[])
-      {
-          //2.初始化ROS节点
-          ros::init(argc, argv, "subscriber");
-          //3.创建节点句柄
-          ros::NodeHandle nh;
-          //4.创建订阅者对象
-          ros::Subscriber sub = nh.subscribe<std_msgs::String>("fangzi", 10, doMsg);
-          //5.处理订阅的消息
-          //6.回旋函数
-          ros::spin();//循环执行main()
-          return 0; 
-      }
+int main(int argc, char *argv[])
+{
+    //2.初始化ROS节点
+    ros::init(argc, argv, "subscriber");
+    //3.创建节点句柄
+    ros::NodeHandle nh;
+    //4.创建订阅者对象
+    ros::Subscriber sub = nh.subscribe<std_msgs::String>("fangzi", 10, doMsg);
+    //5.处理订阅的消息
+    //6.回旋函数
+    ros::spin();//循环执行main()
+    return 0; 
+}
 ```
 ---
-    * 调整cmake文件
+3. 调整cmake文件
   ```cmake
   add_executable(Hello_pub
     src/Hello_pub.cpp
@@ -80,127 +80,126 @@
   )
   ```
 
-2. 话题通信自定义msg调用
-    * 2-1.流程：
-      * 1. 修改xml文件和cmake文件：
-        * 在cmake中:
-        ```cmake 
-        find_package:message_generation
-        add_message_file:Person.msg
-        generate_messages:std_msgs
-        catkin_package:message_runtime
-        add_executable(person_talker src/person_talker.cpp)
-        add_executable(person_listener src/person_listener.cpp)
+4. 话题通信自定义msg调用
+流程：
+1. 修改xml文件和cmake文件：
+   1. 在cmake中:
+```cmake 
+find_package:message_generation
+add_message_file:Person.msg
+generate_messages:std_msgs
+catkin_package:message_runtime
+add_executable(person_talker src/person_talker.cpp)
+add_executable(person_listener src/person_listener.cpp)
 
-        add_dependencies(person_talker ${PROJECT_NAME}_generate_messages_cpp)
-        add_dependencies(person_listener ${PROJECT_NAME}_generate_messages_cpp)
+add_dependencies(person_talker ${PROJECT_NAME}_generate_messages_cpp)
+add_dependencies(person_listener ${PROJECT_NAME}_generate_messages_cpp)
 
-        target_link_libraries(person_talker
-        ${catkin_LIBRARIES}
-        )
-        target_link_libraries(person_listener
-        ${catkin_LIBRARIES}
-        )
-        
-        ```cmake//**总的来看**
-         ## Declare a C++ executable
-         ## With catkin_make all packages are built within a single CMake context
-         ## The recommended prefix ensures that target names across packages don't collide
-         add_executable(server src/server.cpp)
-         add_executable(client src/client.cpp)
+target_link_libraries(person_talker
+${catkin_LIBRARIES}
+)
+target_link_libraries(person_listener
+${catkin_LIBRARIES}
+)
 
-         ## Rename C++ executable without prefix
-         ## The above recommended prefix causes long target names, the following renames the
-         ## target back to the shorter version for ease of user use
-         ## e.g. "rosrun someones_pkg node" instead of "rosrun someones_pkg someones_pkg_node"
-         # set_target_properties(${PROJECT_NAME}_node PROPERTIES OUTPUT_NAME node PREFIX "")
+```cmake//**总的来看**
+## Declare a C++ executable
+## With catkin_make all packages are built within a single CMake context
+## The recommended prefix ensures that target names across packages don't collide
+add_executable(server src/server.cpp)
+add_executable(client src/client.cpp)
 
-         ## Add cmake target dependencies of the executable
-         ## same as for the library above
-         add_dependencies(server ${PROJECT_NAME}_gencpp)
-         add_dependencies(client ${PROJECT_NAME}_gencpp)
+## Rename C++ executable without prefix
+## The above recommended prefix causes long target names, the following renames the
+## target back to the shorter version for ease of user use
+## e.g. "rosrun someones_pkg node" instead of "rosrun someones_pkg someones_pkg_node"
+# set_target_properties(${PROJECT_NAME}_node PROPERTIES OUTPUT_NAME node PREFIX "")
 
-         ## Specify libraries to link a library or executable target against
-         target_link_libraries(server
-           ${catkin_LIBRARIES}
-         )
-         target_link_libraries(client
-           ${catkin_LIBRARIES}
-         )
-        ```
-        ```xml
-        * 在xml中：message_generation+message_runtime<--->build_depend+build_export_depend+exec_depend
-      ```xml
-        <buildtool_depend>catkin</buildtool_depend>
-        <build_depend>roscpp</build_depend>
-        <build_depend>rospy</build_depend>
-        <build_depend>std_msgs</build_depend>
-        <build_depend>message_generation</build_depend>
-        <build_depend>message_runtime</build_depend>
+## Add cmake target dependencies of the executable
+## same as for the library above
+add_dependencies(server ${PROJECT_NAME}_gencpp)
+add_dependencies(client ${PROJECT_NAME}_gencpp)
 
-        <build_export_depend>roscpp</build_export_depend>
-        <build_export_depend>rospy</build_export_depend>
-        <build_export_depend>std_msgs</build_export_depend>
-        <build_export_depend>message_generation</build_export_depend>
-        <build_export_depend>message_runtime</build_export_depend>
+## Specify libraries to link a library or executable target against
+target_link_libraries(server
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(client
+  ${catkin_LIBRARIES}
+)
+```
+   2. xml 在xml中：message_generation+message_runtime<--->build_depend+build_export_depend+exec_depend
+   ```xml
+     <buildtool_depend>catkin</buildtool_depend>
+     <build_depend>roscpp</build_depend>
+     <build_depend>rospy</build_depend>
+     <build_depend>std_msgs</build_depend>
+     <build_depend>message_generation</build_depend>
+     <build_depend>message_runtime</build_depend>
 
-        <exec_depend>roscpp</exec_depend>
-        <exec_depend>rospy</exec_depend>
-        <exec_depend>std_msgs</exec_depend>
-        <exec_depend>message_runtime</exec_depend>
-        <exec_depend>message_generation</exec_depend>
+     <build_export_depend>roscpp</build_export_depend>
+     <build_export_depend>rospy</build_export_depend>
+     <build_export_depend>std_msgs</build_export_depend>
+     <build_export_depend>message_generation</build_export_depend>
+     <build_export_depend>message_runtime</build_export_depend>
 
-      ```
-      * 2. 发布方的实现
-      ```cpp
-      #include "ros/ros.h"
-      #include "pub_sub/Person.h"
-      int main(int argc, char *argv[]){
-          setlocale(LC_ALL,"");
-          ros::init(argc, argv, "publisher");
-          ros::NodeHandle nh;
-          ros::Publisher pub = nh.advertise<pub_sub::Person>("house", 20);
-          ros::Rate rate(1);
-          pub_sub::Person msg;
-          int count = 0;
-          while (ros::ok()){
-              msg.name = "James";
-              msg.age = 18;
-              msg.height = 1.75;
-              pub.publish(msg);
-              ROS_INFO("published%d", count);
-              rate.sleep();
-              count++;
-          }
-          return 0;
-      }
-      ```
-      * 3.订阅方的实现
-        ```cpp
-      #include "ros/ros.h"
-      #include "pub_sub/Person.h"
-      void doMsg(const pub_sub::Person::ConstPtr &msg){
-          ROS_INFO("发布的消息是：姓名:%s, 身高:%d, 年龄:%d",msg->name.c_str(), msg->age, msg->height);//char类型必须转换成char.c_str()类型才能输出
-      }
-      int main(int argc, char *argv[]){
-          setlocale(LC_ALL,"");//加上这一段可以避免中文乱码
-          ros::init(argc, argv, "subscriber");
-          ros::NodeHandle nh;
-          ros::Subscriber sub = nh.subscribe<pub_sub::Person>("house", 20, doMsg);
-          ros::spin();
-          return 0;
-      }
-        ```
-    * 2-2.总结：
-      * 1.在pub_sub目录下创建msg/Person.msg
-      * 2.修改cmake:message_runtime message_generation std_msgadd_dependencies
-      * 3.修改xml:见上面
-      * 4.catkin_make
-      * 5.将devep/include/**的头文件路径加到cpp_jason文件中
-      * 6.编写pub_msg.cpp+sub_msg.cpp
-      * 7.**再次修改cmakelist文件**：Person.msg;add_excutable
-      * 8.catkin_make
-      * 9.rosrun执行
+     <exec_depend>roscpp</exec_depend>
+     <exec_depend>rospy</exec_depend>
+     <exec_depend>std_msgs</exec_depend>
+     <exec_depend>message_runtime</exec_depend>
+     <exec_depend>message_generation</exec_depend>
+
+   ```
+2. 发布方的实现
+```cpp
+#include "ros/ros.h"
+#include "pub_sub/Person.h"
+int main(int argc, char *argv[]){
+    setlocale(LC_ALL,"");
+    ros::init(argc, argv, "publisher");
+    ros::NodeHandle nh;
+    ros::Publisher pub = nh.advertise<pub_sub::Person>("house", 20);
+    ros::Rate rate(1);
+    pub_sub::Person msg;
+    int count = 0;
+    while (ros::ok()){
+        msg.name = "James";
+        msg.age = 18;
+        msg.height = 1.75;
+        pub.publish(msg);
+        ROS_INFO("published%d", count);
+        rate.sleep();
+        count++;
+    }
+    return 0;
+}
+```
+3. 订阅方的实现
+```cpp
+ #include "ros/ros.h"
+ #include "pub_sub/Person.h"
+ void doMsg(const pub_sub::Person::ConstPtr &msg){
+     ROS_INFO("发布的消息是：姓名:%s, 身高:%d, 年龄:%d",msg->name.c_str(), msg->age, msg->height);//char类型必须转换成char.c_str()类型才能输出
+ }
+ int main(int argc, char *argv[]){
+     setlocale(LC_ALL,"");//加上这一段可以避免中文乱码
+     ros::init(argc, argv, "subscriber");
+     ros::NodeHandle nh;
+     ros::Subscriber sub = nh.subscribe<pub_sub::Person>("house", 20, doMsg);
+     ros::spin();
+     return 0;
+ }
+```
+4.总结：
+  1. 在pub_sub目录下创建msg/Person.msg
+  2. 修改cmake:message_runtime message_generation std_msgadd_dependencies
+  3. 修改xml:见上面
+  4. catkin_make
+  5. 将devep/include/**的头文件路径加到cpp_jason文件中
+  6. 编写pub_msg.cpp+sub_msg.cpp
+  7. **再次修改cmakelist文件**：Person.msg;add_excutable
+  8. catkin_make
+  9. rosrun执行
 
 
 ## 2.服务通信
@@ -332,62 +331,148 @@ int32 sum//服务端
    2. ros::param::set("keys","values");
 2. 调试：rosparam get /keys = xxxx
 3. 案例：
+   1. 设置参数
 ```cpp
-/*
-    参数服务器操作之新增与修改(二者API一样)_C++实现:
-    在 roscpp 中提供了两套 API 实现参数操作
-    ros::NodeHandle
-        setParam("键",值)
-    ros::param
-        set("键","值")
-
-    示例:分别设置整形、浮点、字符串、bool、列表、字典等类型参数
-        修改(相同的键，不同的值)
-
-*/
 #include "ros/ros.h"
-
-int main(int argc, char *argv[])
-{
-    ros::init(argc,argv,"set_update_param");
-
-    std::vector<std::string> stus;
-    stus.push_back("zhangsan");
-    stus.push_back("李四");
-    stus.push_back("王五");
-    stus.push_back("孙大脑袋");
-
-    std::map<std::string,std::string> friends;
-    friends["guo"] = "huang";
-    friends["yuang"] = "xiao";
-
-    //NodeHandle--------------------------------------------------------
+#include <iostream>
+#include <vector>
+#include <string>
+#include <map>
+using namespace std;
+int main(int argc, char** argv){
+    ros::init(argc, argv, "param");
     ros::NodeHandle nh;
-    nh.setParam("nh_int",10); //整型
-    nh.setParam("nh_double",3.14); //浮点型
-    nh.setParam("nh_bool",true); //bool
-    nh.setParam("nh_string","hello NodeHandle"); //字符串
-    nh.setParam("nh_vector",stus); // vector
-    nh.setParam("nh_map",friends); // map
-
-    //修改演示(相同的键，不同的值)
-    nh.setParam("nh_int",10000);
-
-    //param--------------------------------------------------------
-    ros::param::set("param_int",20);
-    ros::param::set("param_double",3.14);
-    ros::param::set("param_string","Hello Param");
-    ros::param::set("param_bool",false);
-    ros::param::set("param_vector",stus);
-    ros::param::set("param_map",friends);
-
-    //修改演示(相同的键，不同的值)
-    ros::param::set("param_int",20000);
-
+    //******增***********//
+    //方法1:nh
+    nh.setParam("radius", 1);
+    //方法2:ros::param
+    ros::param::set("length", 2);
+    //*******改*******//
+    //方法1&&2同上直接覆盖就行
+    //********查*******//
+    
+}
+```
+   2. 获取
+```cpp
+#include "ros/ros.h"
+#include <iostream>
+#include <vector>
+#include <string>
+#include <map>
+using namespace std;
+int main(int argc, char** argv){
+    setlocale(LC_ALL,"");
+    ros::init(argc, argv, "param");
+    ros::NodeHandle nh;
+    //nh.param***************************//
+    //********查*******//
+    //方法1.param,查询到的话就返回正确值，没查询到的话就返回默认值
+    int radius = nh.param("radius", 1);//查询键为"radius"的函数值，若是没有的，返回1
+    ROS_INFO("radius = %d", radius);
+    //方法2：getParam，查询到的话就返回true,将正确值赋给radius1,否则就是false
+    int radius1 = 0;
+    bool res = nh.getParam("radius", radius1);
+    if (res){
+        ROS_INFO("getParam获取的半径是:%d", radius1);
+    }
+    else{
+        ROS_INFO("被查询的变量不存在");
+    }
+    //方法3：getParamCached()用法同getParam()
+    bool res1 = nh.getParamCached("radius", radius1);
+    if (res1){
+        ROS_INFO("getParamCached获取的半径是:%d", radius1);
+    }
+    else{
+        ROS_INFO("被查询的变量不存在");
+    }
+    //4.getParamNames
+    vector<string> names;
+    nh.getParamNames(names);//获取每一个键的名称
+    names.push_back("a");
+    names.push_back("b");
+    ///方法1:for--auto
+    for (auto &&name : names){
+        ROS_INFO("遍历的元素是%s",name.c_str());
+    }
+    ///方法2：for--iter,容易乱码
+    vector<string>::iterator iter = names.begin();
+    for (;iter != names.end(); iter++){
+        cout << "键:" << *iter << endl;
+    }
+    //5.hasParam，若是存在的话,返回true,否则flase
+    bool flag1 = nh.hasParam("radius");//"radius"的值是int，所以必须返回bool或者int
+    bool flag2 = nh.hasParam("radiusxxx");
+    ROS_INFO("radius存在吗？%d", flag1);
+    ROS_INFO("radius存在吗？%d", flag2);
+    //6.searchParam
+    string key;//由于"radius"的键是字符串，所以必须将返回值定为string
+    nh.searchParam("radius", key);//查询的是radius,用key保存,若存在的话，将radius赋值给key,否则保持默认值
+    ROS_INFO("搜索结果:%s", key.c_str());//若输出是string的话，则要将其转化为c_str(),否则会乱码
+ 
+    //ros::param******************************//ros::param和nh.param模式完全一样
+    //ros::param::param
+    int radius_param = ros::param::param("radius", 11);
+    ROS_INFO("radius_param = %d", radius_param);
+    vector<string> names_param;
+    ros::param::getParamNames(names_param);//得到所有参数的键后将其放入vector容器names_param中,然后就可以直接遍历
+    ///方法1：for--auto
+    for (auto &&name : names_param){
+        ROS_INFO("键:%s", name.c_str());
+    }
+    ///方法2：for--iter
+    vector<string>::iterator iter1 = names_param.begin();
+    for (iter1; iter1 != names_param.end(); iter1++){
+        cout << "键:" << *iter1 << endl;//这里用ROS_INFO势必会乱码，所以如果用for-iter输出，直接用cout;用for-auto输出，用ROS_INFO和cout都可
+    }
+    //ros::param::
     return 0;
 }
 ```
-4. for(auto:)语句
+   3. 删除
+```cpp
+#include "ros/ros.h"
+#include <iostream>
+#include <vector>
+#include <string>
+#include <map>
+using namespace std;
+/*
+ros::NodeHandle---->delParam
+ros::param----del()
+*/
+
+int main(int argc, char** argv){
+    setlocale(LC_ALL,"");
+    ros::init(argc, argv, "param");
+    ros::NodeHandle nh;
+    //******NodeHandle*******//
+    bool flag1 = nh.deleteParam("radius");//delete返回一个bool类型，若删除成功，则返回true
+    if (flag1){
+        ROS_INFO("deleteParam删除成功");
+    }
+    else{
+        ROS_INFO("delelteParam删除失败");
+    }
+    //*******ros::param**********//
+    bool flag2 = ros::param::del("radius");
+    if (flag2){
+        ROS_INFO("rosparam删除成功");
+    }
+    else{
+        ROS_INFO("rosparam删除失败");
+    }
+    
+}
+```
+   4. 总结
+      1. 若是需要修改功能包的名称，修改cmakelist文件的project和xml的<name>param_service</name> 和 <description>The param_service package</description>这三个地方的功能包文件名
+      2. 多个功能包下的执行文件不能重名
+         1. 例如demo01/src/test01 ,demo02/src/test01,这样是不允许的，必须要将2个test01变成不同的值，否则会编译失败
+
+
+1. for(auto:)语句
 ```cpp
 #include <iostream>
 #include <vector>
