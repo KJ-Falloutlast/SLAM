@@ -469,7 +469,14 @@ int main(int argc, char** argv){
    4. 总结
       1. 若是需要修改功能包的名称，修改cmakelist文件的project和xml的<name>param_service</name> 和 <description>The param_service package</description>这三个地方的功能包文件名
       2. 多个功能包下的执行文件不能重名
-         1. 例如demo01/src/test01 ,demo02/src/test01,这样是不允许的，必须要将2个test01变成不同的值，否则会编译失败
+      3. 例如demo01/src/test01 ,demo02/src/test01,这样是不允许的，必须要将2个test01变成不同的值，否则会编译失败
+      4. 功能
+         1. nh.setParam(key,value):
+         2. res = nh.param(key,flag):若能得到key的value，则res = value,否则res = flag, 
+         3. res = nh.getParam(key, flag):若能得到key的值，则res = true,否则为false
+         4. res = nh.getParamCached(key, flag):同上
+         5. nh.getParamNames(vec):得到所有参数的名字，并赋值给vec
+         6. has
 
 
 1. for(auto:)语句

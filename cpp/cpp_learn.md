@@ -4206,7 +4206,7 @@ int main(){
 
 
 ### 4-3 对象模型和this指针
-### 4-3-1.成员变量和成员函数佛分开存储
+#### 4-3-1.成员变量和成员函数分开存储
 
 1. 成员变量和成员函数是分开存储的，每一个非静态成员函数只会诞生一份函数实例，也就是说多个同类型的对象会共用一块代码，所以问题是如何区分哪个堆析哪个堆用自己的呢？
 2. 使用this指针来解决上述问题
@@ -4215,6 +4215,7 @@ int main(){
       1. this指针是隐含每一个非静态成员函数内的一种指针
       2. this指针不需要定义，直接使用即可
       3. this指针是指向被调用成员函数所属的对象，若是p1在调用函数，则this指向p1,p2调用函数，则this指向p2
+      4. 在类的成员函数中:若定义一个int m_A,则,m_A = 100<=>this->m_A = 100;this = &p(p是对象)
    3. 用途
       1. 形参和成员函数同名时，用this指针来区分,若是不用this,可以用**m_Age = age**这种命名方式来构造
       2. 在类的非静态成员函数中返回对象本身，可使用return *this
@@ -4232,7 +4233,7 @@ class Person{
         */
         }
         Person& PersonAddAge(Person &p){
-            this->age += age;
+            this->age += p.age;//age = age + p.age
             return *this;//this = &p2,则 *this = p2
         }/*
         1.若返回一个本体，要用引用的方式返回
@@ -4255,7 +4256,7 @@ void test02(){
     Person p1(10);
     Person p2(10);
     //链式编程思想
-    p2.PersonAddAge(p1).PersonAddAge(p1).PersonAddAge(p1);
+    p2.PersonAddAge(p1).PersonAddAge(p1);
     cout << "p2的年龄为" << p2.age << endl;
 }
 int main(){
@@ -4300,7 +4301,7 @@ pstu -> show();
 return 0;
 }
 ```
-### 4-3-2.空指针访问成员函数
+#### 4-3-2.空指针访问成员函数
 1. 注意:
    1. 空指针可以调用成员函数,但是在调用成员属性的时候,要注意有没有用到this指针,若用到this指针,需要加判断
    2. person *p = NULL;int m_Age;cout <<m_Age  <=> this->m_Age,this = p = NULLk 
@@ -4336,7 +4337,7 @@ int main(){
 }
 ```
 
-### 4-3-3. const修饰成员函数
+#### 4-3-3. const修饰成员函数
 1. 常函数
    1. 成员函数加const后称这个函数为常函数
    2. 常函数内不可以修改成员属性，但成员属性声明时候加关键字mutabel后,在常函数中可以修改
@@ -4381,6 +4382,261 @@ void test02(){
 }
 int main(){
     test01();
+}
+```
+### 4-4.友元
+#### 4-4-1.全局函數作友元
+1. 友元的定義:friend,目的:让一个函数或者类访问另一个类中的私有成员,类似于好朋友能进入自己的private地方,但是外人不能进入
+2. 三种实现:
+   1. 全局函数做友元
+   2. 类做友元
+   3. 成员函数做友元
+3. 例子
+   1. 例1:全局函数做友元
+```cpp
+#include <iostream>
+#include <string>
+using namespace std;
+
+//常函数
+class Building{
+    //goodGay全局函数是Building好朋友,可以访问Building 的私有成员
+    friend void goodGay(Building *building);
+    public:
+        Building(){
+            m_Sittingroom = "客厅";
+            m_Bedroom = "卧室";
+        }//构造函数的目的是为了在创建对象的同时就赋予初值
+        public:
+            string m_Sittingroom;
+        private:
+            string m_Bedroom;
+};
+
+void goodGay(Building *building){
+    cout << "goodGay全局函数正在访问:" << building->m_Sittingroom << endl;//building作为类指针可以访问类的属性和方法
+    // cout << "goodGay全局函数正在访问:" << building->m_Bedroom << endl;
+}
+void test01(){
+    Building building;
+    goodGay(&building);
+}
+int main(){
+    test01();
+}
+```
+   2. 例2:类做友元
+```cpp
+#include <iostream>
+using namespace std;
+class Building;
+class Person{
+    public:
+        Person();//构造函数和普通成员函数区分
+    public:
+        void visit();//方法和属性按照顺序来
+        Building *building;
+};
+//将成员函数定义在类外是个良好的习惯
+
+class Building{
+    friend class Person;
+    public:
+        Building();
+    public:
+        string m_SittingRoom;
+    private:
+        string m_BedRoom;
+};
+////****先写类,后写方法*****/////
+Person::Person(){
+    building = new Building;//此时会默认调用Building构造函数
+}
+
+void Person::visit(){
+    cout << "好朋友正在访问:" << building->m_BedRoom << endl; 
+    cout << "好朋友正在访问:" << building->m_SittingRoom << endl; 
+}
+
+Building::Building(){
+    m_SittingRoom = "客厅";
+    m_BedRoom = "卧室";
+}
+void test01(){
+    Person p;
+    p.visit();
+}
+int main(){
+    test01();
+}
+/*注意:
+1.执行顺序:
+调用Person p:调用构造函数Person(),building = new Building
+------->调用Building的构造函数Building(),初始化m_SitingRoom和m_BedRoom
+--------->调用visit(),使得building->m_SitingRoom和m_BedRoom
+2.定义原则:成员函数在类内声明,类外初始化
+3.顺序:类外定义函数的时候,定义顺序按照类的顺序来
+*/
+```
+   3. 成员函数做友元:friend void GoodGay::visit();
+```cpp
+#include <iostream>
+using namespace std;
+class Building;
+class GoodGay{
+    public:
+        GoodGay();
+        Building *building;
+        void visit();//让visit可以访问Building中的私有成员
+        void visit2();//让visit2不可以访问Building中的私有成员
+};
+class Building{
+    //告诉编译器GoodGay类下的visit成员函数作为本类的好朋友,可以访问私有成员
+    friend void GoodGay::visit();
+    public:
+        Building();
+    public:
+        string m_SittingRoom;
+    private:
+        string m_BedRoom;
+
+};
+Building::Building(){
+    m_SittingRoom = "客厅";
+    m_BedRoom = "卧室";
+}
+GoodGay::GoodGay(){
+    building = new Building;//创建Building对象的堆区,并用building指针来替代
+}
+void GoodGay::visit(){
+    cout << "visit正在访问:" << building->m_SittingRoom << endl;
+    cout << "visit正在访问:" << building->m_BedRoom << endl;
+}
+void GoodGay::visit2(){
+    cout << "visit2正在访问:" << building->m_SittingRoom << endl;
+    cout << "visit2正在访问:" << building->m_BedRoom << endl;//由于vist2不是GoodGay的友元函数,所以不能访问m_BedRoom
+}
+void test01(){
+    GoodGay gg;
+    gg.visit();
+    gg.visit2();
+}
+int main(){
+    test01();
+}
+```
+
+### 4-5.内联函数
+1. 功能：直接将函数调用转换为函数定义的代码而不进行函数在内存上的开辟和回收
+2. 使用场景：
+   1. 代码量在10行以下且重复调用的情况，且函数体内无循环
+   2. 定义在类声明之中的成员函数将自动地成为内联函数
+3. 语法：
+**inline必须将函数定一体放在一起才能是函数成内联
+```cpp
+如下风格的函数Foo 不能成为内联函数：
+inline void Foo(int x, int y); // inline 仅与函数声明放在一起
+void Foo(int x, int y)
+{
+}
+而如下风格的函数Foo 则成为内联函数：
+
+void Foo(int x, int y);
+inline void Foo(int x, int y) // inline 与函数定义体放在
+{
+
+}
+```
+4. 例子：
+```cpp
+#include <iostream>
+using namespace std;
+inline int multiply(int a,int b){
+     return a*b;
+}
+ 
+int main(int argc, char *argv[])
+{    cout<<multiply(3,4)<<endl;
+    return 0;
+}
+//其实加不加inline不会影响程序执行结果
+```
+
+### 4-6.类指针
+1. 定义：一个指向 C++ 类的指针与指向结构的指针类似，访问指向类的指针的成员，需要使用成员访问运算符 ->，就像访问指向结构的指针一样。与所有的指针一样，您必须在使用指针之前，对指针进行初始化。
+2. 例子
+   1. 例子1
+```cpp
+#include <iostream>
+using namespace std;
+class Test{
+public:
+    int a;
+    Test(){
+        a = 1;
+    }
+};
+int main()
+{
+    Test t1;
+    t1.a = 10;
+    
+    Test t2;
+    t2.a = 5;
+    
+    cout << "&t1:" << &t1 << " a = " << t1.a << endl;
+    cout << "&t2:" << &t2 <<  " a = " << t2.a <<endl;
+    
+    cout << "------------------------------" << endl;
+    t2 = t1;
+    cout << "&t1:" << &t1 << " a = " << t1.a << endl;
+    cout << "&t2:" << &t2 <<  " a = " << t2.a <<endl;
+    
+    cout << "------------------------------" << endl;
+    
+    t1.a = 111;
+    t2.a = 222;
+    cout << "&t1:" << &t1 << " a = " << t1.a << endl;
+    cout << "&t2:" << &t2 <<  " a = " << t2.a <<endl;
+    
+    return 0;
+}
+```
+   2. 例子2
+```cpp
+#include <iostream>
+using namespace std;
+class Test{
+public:
+    int a;
+    Test(){
+        a = 1;
+    }
+};
+int main()
+{
+    Test t1;
+    t1.a = 10;
+    
+    Test t2;
+    t2.a = 5;
+    
+    cout << "&t1:" << &t1 << " a = " << t1.a << endl;
+    cout << "&t2:" << &t2 <<  " a = " << t2.a <<endl;
+    
+    cout << "------------------------------" << endl;
+    t2 = t1;
+    cout << "&t1:" << &t1 << " a = " << t1.a << endl;
+    cout << "&t2:" << &t2 <<  " a = " << t2.a <<endl;
+    
+    cout << "------------------------------" << endl;
+    
+    t1.a = 111;
+    t2.a = 222;
+    cout << "&t1:" << &t1 << " a = " << t1.a << endl;
+    cout << "&t2:" << &t2 <<  " a = " << t2.a <<endl;
+    
+    return 0;
 }
 ```
 # 12.模板：
