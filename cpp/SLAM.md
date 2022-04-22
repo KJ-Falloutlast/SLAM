@@ -6,4 +6,5 @@
    2. 各个文件包的功能
       1. include: 放头文件 xxx.h
       2. src:放源文件 xxx.cpp
-      3. lib:放库文件 xxx.a
+      3. lib:放库文件 xxx.a/xxx.so
+      4. 

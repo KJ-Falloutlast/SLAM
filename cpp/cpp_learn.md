@@ -4425,7 +4425,7 @@ int main(){
     test01();
 }
 ```
-   2. 例2:类做友元
+#### 4-4-2:类做友元
 ```cpp
 #include <iostream>
 using namespace std;
@@ -4478,8 +4478,9 @@ int main(){
 3.顺序:类外定义函数的时候,定义顺序按照类的顺序来
 */
 ```
-   3. 成员函数做友元:friend void GoodGay::visit();
+#### 4-4-3 成员函数做友元:friend void GoodGay::visit();
 ```cpp
+//方法1：
 #include <iostream>
 using namespace std;
 class Building;
@@ -4525,7 +4526,57 @@ int main(){
     test01();
 }
 ```
+```cpp
+//方法2
+#include <iostream>
+#include <string>
+using namespace std;
 
+class Building;
+
+class Person{
+    public:
+        void visit();
+        Building *building;//Building类还未创建，所以不能提前声明 Building *building = new Building(),因为此时Person还不知道Building里面的内容  
+        // Person();
+};
+
+class Building{
+    friend void Person::visit();
+    public:
+        string sittingroom = "客厅";
+    private:
+        string bedroom = "卧室";
+};
+
+void Person::visit(){
+    Building *building = new Building();//调用visit的时候定义指针     
+    cout << "myfriend is visiting " << building->sittingroom << endl;
+    cout << "myfriend is visiting " << building->sittingroom << endl;
+}
+
+// Person::Person(){
+//     building = new Building; 
+// }
+void test01(){
+    //方法1：定义一个类指针
+    Person *p = new Person();
+    p->visit();
+    //方法2：定义一个类
+    Person p1;
+    p1.visit();
+     
+}
+int main(){
+    test01();    
+}
+/*关于前置声明：
+   这个声明,有时候被称为前向声明(forward declaration),在程序中引入了类类型的Screen.
+   在声明之后,定义之前,类Screen是一个不完全类型(incompete type),即已知Screen是一个类型,但不知道包含哪些成员.
+   不完全类型只能以有限方式使用,不能定义该类型的对象,不完全类型只能用于定义指向该类型的指针及引用,
+   或者用于声明(而不是定义)使用该类型作为形参类型或返回类型的函数.
+*/
+```
 ### 4-5.内联函数
 1. 功能：直接将函数调用转换为函数定义的代码而不进行函数在内存上的开辟和回收
 2. 使用场景：
@@ -4639,6 +4690,275 @@ int main()
     return 0;
 }
 ```
+   3. 例子3
+```cpp
+#include <iostream> 
+using namespace std;
+class Box{
+    public:
+        Box(double l = 1, double w = 2, double h = 3){
+            length = l;
+            width = w;
+            height = h;
+        }
+        double volume(){
+            return length*width*height;
+        }
+    private:
+        double length;
+        double width;
+        double height;
+};
+
+void test(){
+    //方法1：
+    Box *box1 = new Box(2, 3, 5);
+    cout << "the volume = " << box1->volume() << endl;
+    //方法2：
+    Box box2(2, 3, 5);
+    Box *ptrBox2 = &box2;
+    cout << "the volume = " << ptrBox2->volume() << endl;
+
+}
+int main(){
+    test();
+}
+```
+### 4-7.运算符号重载
+1. 定义
+C++ 允许在同一作用域中的某个函数和运算符指定多个定义，分别称为函数重载和运算符重载。
+重载声明是指一个与之前已经在该作用域内声明过的函数或方法具有相同名称的声明，但是它们的参数列表和定义（实现）不相同。
+#### 1. 函数重载
+1. 定义：在同一个作用域中，可以声明几个功能类似的同名函数，但这些同名函数的形式参数的（个数，类型，顺序)不同，您不能仅通过返回类型的不同来重载函数
+2. 实例：见前面
+
+#### 2.运算符重载
+1. 定义：您可以重定义或重载大部分 C++ 内置的运算符。这样，您就能使用自定义类型的运算符。
+
+重载的运算符是带有特殊名称的函数，函数名是由关键字 operator 和其后要重载的运算符符号构成的。与其他函数一样，重载运算符有一个返回类型和一个参数列表。
+   1. Box operator+(const Box&);
+   2. Box operator+(const Box&, const Box&),声明加法运算符用于把2个Box对象相加，返回最终的Box对象
+   3. 大多数的重载运算符可以被定义为普通的非成员函数或者被定义为类成员函数，那么我们需要为每次操作传递2个参数见上
+2. 分类：
+下面是可重载的运算符列表：
+
+   1. 双目算术运算符	+ (加)，-(减)，*(乘)，/(除)，% (取模)
+   2. 关系运算符	==(等于)，!= (不等于)，< (小于)，> (大于)，<=(小于等于)，>=(大于等于)
+   3. 逻辑运算符	||(逻辑或)，&&(逻辑与)，!(逻辑非)
+   4. 单目运算符	+ (正)，-(负)，*(指针)，&(取地址)
+   5. 自增自减运算符	++(自增)，--(自减)
+   6. 位运算符	| (按位或)，& (按位与)，~(按位取反)，^(按位异或),，<< (左移)，>>(右移)
+   7. 赋值运算符	=, +=, -=, *=, /= , % = , &=, |=, ^=, <<=, >>=
+   8. 空间申请与释放	new, delete, new[ ] , delete[]
+   9. 其他运算符	()(函数调用)，->(成员访问)，,(逗号)，[](下标)
+下面是不可重载的运算符列表：
+   1. .成员访问运算符
+   2. .*, ->*成员指针访问运算符
+   3. ::域运算符
+   4. sizeof 长度运算符
+   5. ?: 条件运算符
+   6. **#  预处理符号**
+3. 格式：
+<返回类型说明符> operator <运算符符号>(<参数表>)
+{
+ 
+     <函数体>
+ 
+#### 3.一元运算符重载
+
+1元运算符值对一个操作数操作，有
+递增运算符（ ++ ）和递减运算符（ -- ）
+一元减运算符，即负号（ - ）
+逻辑非运算符（ ! ）
+1. 例1：-：负号
+```cpp
+#include <iostream>
+using namespace std;
+ 
+class Distance
+{
+   private:
+      int feet;             // 0 到无穷
+      int inches;           // 0 到 12
+   public:
+      // 所需的构造函数
+      Distance(){
+         feet = 0;
+         inches = 0;
+      }
+      Distance(int f, int i){
+         feet = f;
+         inches = i;
+      }
+      // 显示距离的方法
+      void displayDistance()
+      {
+         cout << "F: " << feet << " I:" << inches <<endl;
+      }
+      // 重载负运算符（ - ）
+      Distance operator- ()  
+      {
+         feet = -feet;
+         inches = -inches;
+         return Distance(feet, inches);
+      }
+};
+int main()
+{
+   Distance D1(11, 10), D2(-5, 11);
+ 
+   -D1;                     // 取相反数
+   D1.displayDistance();    // 距离 D1
+ 
+   -D2;                     // 取相反数
+   D2.displayDistance();    // 距离 D2
+ 
+   return 0;
+}
+```
+2. 例2：++
+```cpp
+#include <iostream>
+using namespace std;
+ 
+class Time{
+    private:
+        int hours;
+        double minutes;
+    public:
+        Time(int h = 0, double m = 0){
+            hours = h;
+            minutes = m;
+        }
+        Time operator++ (){
+            ++minutes;//等价于minutes += 1
+            if (minutes >= 60){
+                minutes -= 60;    
+                ++hours;
+            }
+            return Time(hours, minutes);
+        }
+        Time operator++ (int){
+            ++minutes;//等价于minutes += 1
+            if (minutes >= 60){
+                minutes -= 61;    
+                ++hours;
+            }
+            return Time(hours, minutes);//等价于Time T(hours, minutes) ----->return T;
+        }
+        void showTime(){
+            cout << "H:" << hours << " M:" << minutes << endl;
+        }
+};
+void test01(){
+    Time T(11, 59);
+    T++;//不加int成为后缀
+    T.showTime();
+    
+    Time T2(11, 59);
+    ++T2;//加int成为前缀
+    T2.showTime();
+}
+int main(){
+    test01();
+}
+
+```
+3. 注意：
+++前置和后置的区别
+   1. 普通运算：++,--运算符后置时，先使用变量a原有值参与运算操作，运算操作完成后，变量a的值自增1或者自减1；++，--运算符前置时，先将变量a的值自增1或者自减1，然后使用更新后的新值参与运算操作
+   2. 运算符重载：加(int)表示++T，否则是T++
+
+
+#### 3.二元运算符重载
+1. 原理(实现相加的方法)
+   1. int a= 1, b = 2, int c = a + b;
+   2. 类型：
+      1. 通过成员函数重载+
+```cpp
+Person operator+ (person &p){  //即operator = addPerson+
+   Person temp;
+   temp.m_A = this->m_A + p.m_A;
+   temp.m_B = this->m_B + p.m_B;
+   return temp;
+}
+等价关系：
+Person p3 = p1.operator+ (p2)<=====>Person p3 = p1 + p2//等价
+operator <=====> addPerson+
+```
+      2. 通过全局函数重载+
+```cpp
+Person operator+ (Person &p1, Person &p2){
+    Person temp;
+    temp.m_A = p1.m_A + p1.m_A;
+    temp.m_B = p2->m_B + p2.m_B;
+    return temp;
+}
+Person p3 = operator+ (p1, p2)<=======>Person p3 = p1 + p2
+```
+3. 例子
+```cpp
+#include <iostream>
+using namespace std;
+class Person {
+    public:
+        Person() {};//此行不得省略，因为在存在有参构造函数的情况下系统不会生成无参构造函数，否则Person temp;这一行会报错
+        Person(int a, int b)
+        {
+            this->m_A = a;
+            this->m_B = b;
+        }
+        //成员函数实现 + 号运算符重载
+        Person operator+(const Person& p) {
+            Person temp;
+            temp.m_A = this->m_A + p.m_A;
+            temp.m_B = this->m_B + p.m_B;
+            return temp;
+        }
+
+
+    public:
+        int m_A;
+        int m_B;
+};
+
+//全局函数实现 + 号运算符重载
+Person operator+(const Person& p1, const Person& p2) {
+	Person temp(0, 0);
+	temp.m_A = p1.m_A + p2.m_A;
+	temp.m_B = p1.m_B + p2.m_B;
+	return temp;
+}
+
+//运算符重载 可以发生函数重载 
+Person operator+(const Person& p2, int val)  
+{
+	Person temp;
+	temp.m_A = p2.m_A + val;
+	temp.m_B = p2.m_B + val;
+	return temp;
+}
+
+void test() {
+
+	Person p1(10, 10);
+	Person p2(20, 20);
+
+	//成员函数方式
+	Person p3 = p2 + p1;  //相当于 p2.operaor+(p1)
+	cout << "mA:" << p3.m_A << " mB:" << p3.m_B << endl;
+
+
+	Person p4 = p3 + 10; //相当于 operator+(p3,10)
+	cout << "mA:" << p4.m_A << " mB:" << p4.m_B << endl;
+
+}
+int main() {
+
+	test();
+	return 0;
+}
+```
 # 12.模板：
 
 template <typename type> ret-type func-name(parameter list)
@@ -4684,6 +5004,9 @@ template <typename type> ret-type func-name(parameter list)
       - 2.模板必须要确定出T的类型，才可以使用(调用函数时必须要指定类型)
       - 3.模板申明必须要须跟在函数的前面
       - 4.例子:
+
+
+
 
 
 ```cpp

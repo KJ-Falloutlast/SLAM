@@ -3,39 +3,38 @@ using namespace std;
  
 class Box
 {
-   public:
+   double length;      // 长度
+   double breadth;     // 宽度
+   double height;      // 高度
+public:
  
-      double getVolume(void)
-      {
-         return length * breadth * height;
-      }
-      void setLength( double len )
-      {
-          length = len;
-      }
+   double getVolume(void)
+   {
+      return length * breadth * height;
+   }
+   void setLength( double len )
+   {
+       length = len;
+   }
  
-      void setBreadth( double bre )
-      {
-          breadth = bre;
-      }
+   void setBreadth( double bre )
+   {
+       breadth = bre;
+   }
  
-      void setHeight( double hei )
-      {
-          height = hei;
-      }
-      // 重载 + 运算符，用于把两个 Box 对象相加
-      Box operator+(const Box &b)
-      {
-         Box box;
-         box.length = this->length + b.length;
-         box.breadth = this->breadth + b.breadth;
-         box.height = this->height + b.height;
-         return box;
-      }
-   private:
-      double length;      // 长度
-      double breadth;     // 宽度
-      double height;      // 高度
+   void setHeight( double hei )
+   {
+       height = hei;
+   }
+   // 重载 + 运算符，用于把两个 Box 对象相加
+   Box operator+ (const Box& b)
+   {
+      Box box;//也可以先定义后返回
+      box.length = this->length + b.length;//加不加this都是一样
+      box.breadth = this->breadth + b.breadth;
+      box.height = this->height + b.height;
+      return box;
+   }
 };
 // 程序的主函数
 int main( )

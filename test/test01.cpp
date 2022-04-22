@@ -1,43 +1,45 @@
 #include <iostream>
-#include <string>
 using namespace std;
-
-class Student{
-public:
-    void setname(char *name);
-    void setage(int age);
-    void setscore(float score);
-    void printThis();
-    void show();
-private:
-    char *name;
-    int age;
-    float score;
+ 
+class Time{
+    private:
+        int hours;
+        double minutes;
+    public:
+        Time(int h = 0, double m = 0){
+            hours = h;
+            minutes = m;
+        }
+        Time operator++ (){
+            ++minutes;//等价于minutes += 1
+            if (minutes >= 60){
+                minutes -= 60;    
+                ++hours;
+            }
+            return Time(hours, minutes);
+        }
+        Time operator++ (int){
+            ++minutes;//等价于minutes += 1
+            if (minutes >= 60){
+                minutes -= 61;    
+                ++hours;
+            }
+            return Time(hours, minutes);
+        }
+        void showTime(){
+            cout << "H:" << hours << " M:" << minutes << endl;
+        }
 };
-void Student::setname(char *name){
-    this->name = name;//右边形参，左边成员变量，形参赋值给成员变量
-}
-void Student::setage(int age){
-    this->age = age;
-}
-void Student::setscore(float score){
-    this->score = score;
-}
-void Student::show(){
-    cout<<this->name<<"的年龄是"<<this->age<<"，成绩是"<<this->score<<endl;
-}
-void Student::printThis(){
-    cout << this << endl;
+
+void test01(){
+    Time T(11, 59);
+    T++;//不加int成为后缀
+    T.showTime();
+    
+    Time T2(11, 59);
+    ++T2;//加int成为前缀
+    T2.showTime();
 }
 int main(){
-    Student *pstu = new Student;
-    pstu -> setname("李华");
-    pstu -> setage(16);
-    pstu -> setscore(96.5);
-    pstu -> show();
-
-    pstu -> printThis();//this和printThis是同一个地址
-    cout << pstu << endl;
-    
-    return 0;
+    test01();
 }

@@ -1,0 +1,20 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/kim/git/test/mytest1/main.cpp
+myfunc.h
+/home/kim/git/test/mytest1/myfunc.h
+
+/home/kim/git/test/mytest1/myfunc.cpp
+myfunc.h
+/home/kim/git/test/mytest1/myfunc.h
+
+/home/kim/git/test/mytest1/myfunc.h
+iostream
+-
+
