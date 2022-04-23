@@ -1,0 +1,16 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/kim/git/test/mytest2/math/functions.cpp
+functions.h
+/home/kim/git/test/mytest2/math/functions.h
+
+/home/kim/git/test/mytest2/math/functions.h
+iostream
+-
+

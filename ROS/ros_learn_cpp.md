@@ -887,7 +887,7 @@ int main(int argc, char *argv[])
     while (ros::ok())
     {
         pub.publish(msg);
-
+        r.sleep();
         ros::spinOnce();
     }
 
@@ -1113,3 +1113,31 @@ int main(int argc, char *argv[])
 在上面的例子中
 1. publisher和subcriber在这个案例中分别对应publisher和乌龟的节点
 2. 因为没有自定义srv和msg文件，所以在cmake和xml中都无须配置依赖文件，cmake添加add_executabel和target_link_libraries()就行，xml维持不变
+3. 关于方向问题：
+   1. ROS采用右手系：x轴:前方;y轴:左方；z轴：上方
+   2. 角速度方向也采用右手系
+
+# 2.通信机制进阶
+## 1.初始化
+```cpp
+#include "ros/ros.h"
+#include "std_msgs/String.h"
+#include  <sstream>
+int main(int argc, char *argv[]){
+    setlocale(LC_ALL, ""); // 用于显示中文字符
+    ros::init(argc, argv, "publisher", ros::init_options::AnonymousName);//这个选项可以让节点重复启动多次
+    ros::NodeHandle nh;
+    ros::Publisher pub = nh.advertise<std_msgs::String>("house", 20);
+    std_msgs::String msg;
+    ros::Rate rate(1);
+    while (ros::ok()){
+        msg.data = "hello";
+        pub.publish(msg);       
+        rate.sleep();
+        ROS_INFO("发送的数据是:%s", msg.data);
+    }
+    return 0;
+}
+```
+## 2.对象获取
+

@@ -262,6 +262,117 @@ inline限定符
 对于既含有static限定符，又含有const限定符的数据成员，它的初始化和定义同时进行。它也是必须进行合适的初始化
 
 对于既没有static限定符，又没有const限定符的数据成员，它的值只针对本对象可以随意修改，因此我们并不在意它的初始化什么时候进行。
+### 4.用法总结：
+#### 1. 单个源文件
+   1. ./test
+      1. main.cpp
+      2. CMakeLists.txt:
+```cmake
+cmake_minimum_required(VERSION 3.10)
+project(test)
+add_executable_directory(demo main.cpp)
+```
+   2. 执行顺序：在当前目录下cmake .----->make
 
+#### 2. 多个源文件
+   1. 多个文件，一个目录：
+   2. ./test
+      1. CMakeList.txt
+      2. main.cpp
+      3. functions.cpp
+      4. functions.h
+**functions.h**
+```cpp
+#ifndef FUNCTIONS_H
+#define  FUNCTIONS_H
+#include <iostream>
+using namespace std;
 
+class Circle{
+    private:
+        double  r;
+    public:
+        Circle(double r);
+        void showArea();
+};
 
+#endif
+```
+**fuctions.cpp**
+```cpp
+#include "functions.h"
+Circle::Circle(double r){
+    this->r  = r;
+}
+
+void Circle::showArea(){
+    int area = 3.14*r*r;
+    cout << "the area is " << area << endl; 
+}
+```
+**main.cpp**
+```cpp
+#include "math/functions.h"
+int main(){
+    Circle c(100);
+    c.showArea();
+}
+```
+   3. 执行顺序：cmake .------>make 
+#### 3.多个文件，多个目录
+1. ./test
+   1. test---->main.cpp  CMakeLists.txt math
+   2. math----->functions.cpp functions.h CMakeLists.txt
+   3. 执行顺序:当前目录下:cmake . ------> make
+**functions.h**
+```cpp
+#ifndef FUNCTIONS_H
+#define  FUNCTIONS_H
+#include <iostream>
+using namespace std;
+
+class Circle{
+    private:
+        double  r;
+    public:
+        Circle(double r);
+        void showArea();
+};
+
+#endif
+```
+**fuctions.cpp**
+```cpp
+#include "functions.h"
+Circle::Circle(double r){
+    this->r  = r;
+}
+
+void Circle::showArea(){
+    int area = 3.14*r*r;
+    cout << "the area is " << area << endl; 
+}
+```
+**main.cpp**
+```cpp
+#include "functions.h"
+int main(){
+    Circle c(100);
+    c.showArea();
+}
+```
+**test下cmakelists**
+```cmake
+cmake_minimum_required(VERSION 3.10)
+project(fuc)
+aux_source_directory(. DIR_SRCS)
+add_executable(demo ${DIR_SRCS})
+add_subdirectory(math)#只有添加了math才能够检测到myfunctions这个链接库
+target_link_libraries(demo myfuntions)
+```
+**math下cmake**
+
+```cmake
+aux_source_directory(. DIR_LIB_SRCS)#源文件
+add_library(myfuntions ${DIR_LIB_SRCS})
+```

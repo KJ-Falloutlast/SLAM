@@ -4870,7 +4870,7 @@ int main(){
    2. 运算符重载：加(int)表示++T，否则是T++
 
 
-#### 3.二元运算符重载
+#### 4.二元运算符重载
 1. 原理(实现相加的方法)
    1. int a= 1, b = 2, int c = a + b;
    2. 类型：
@@ -4897,6 +4897,7 @@ Person operator+ (Person &p1, Person &p2){
 Person p3 = operator+ (p1, p2)<=======>Person p3 = p1 + p2
 ```
 3. 例子
+   1. 例子1
 ```cpp
 #include <iostream>
 using namespace std;
@@ -4957,6 +4958,308 @@ int main() {
 
 	test();
 	return 0;
+}
+```
+**改进版**
+   2. 例子2
+```cpp
+///改进版
+#include <iostream>
+using namespace std;
+class Person{
+   public:
+      int m_A;
+      int m_B;
+   public:
+      Person();
+      Person(int a, int b);
+      // 成员函数实现运算符重载
+      Person operator+ (const Person &p){
+         Person temp;//若是有无无参构造函数的话，必须初始化
+         temp.m_A = m_A + p.m_A;
+         temp.m_B = m_B + p.m_B;
+         return temp;
+      }
+      void showMsg(const Person &p);
+      void showMsg(const Person *p);//不同的重载函数需要声明
+};
+
+Person::Person(){}
+Person::Person(int a, int b){
+   m_A = a;
+   m_B = b;
+}
+// 全局函数运算符重载
+Person operator+ (const Person &p1, const Person &p2){
+   Person temp;
+   temp.m_A = p1.m_A + p2.m_A;
+   temp.m_B = p1.m_B + p2.m_B;
+   return temp;
+}
+// 运算符重载可以函数重载
+Person operator+ (const Person &p1, int val){
+   Person temp;
+   temp.m_A = p1.m_A + val;
+   temp.m_B = p1.m_B + val;
+   return temp;
+}
+
+void Person::showMsg(const Person &p){
+   cout << "m_A = " << p.m_A <<"   m_B = " <<  p.m_B << endl;
+}
+void Person::showMsg(const Person *p){
+   
+   cout << "m_A = " << p->m_A << "  m_B = " << p->m_B << endl;
+}
+void test01(){
+   Person p1(1, 3);
+   Person p2(1, 3);
+   Person p3 = p1 + p2;//对应全局函数运算符重载和成员函数运算符重载，2个都可以调用
+   p3.showMsg(p3);
+   
+   Person p4 = p3 + 1;//对应重载函数运算符重载
+   p4.showMsg(p4);
+
+   Person *p5 = new Person(1, 3);//利用指针运算符重载,对应全局函数运算符重载和成员函数运算符重载，2个都可以调用
+   *p5 = p1 + p2;
+   p5->showMsg(p5);
+}
+int main(){
+   test01();
+}
+```
+   3. 例子3
+```cpp
+#include <iostream>
+using namespace std;
+ 
+class Box
+{
+    private:
+        double length;      // 长度
+        double width;     // 宽度
+        double height;      // 高度
+    public:
+        double getVolume()
+        {
+            return length * width * height;
+        }
+        Box(){};
+        Box(double l, double w, double h){
+            length = l;
+            width = w;
+            height = h;
+        }
+    
+    friend Box operator+(const Box& a, const Box& b);//因为全局函数无法访问到private变量lenth,width,height,所以只能用友元函数访问，如果是成员函数的话就无须考虑这个问题
+
+};
+
+Box operator+(const Box& a, const Box& b)//类函数返回一个类
+{
+    Box box;
+    box.length = a.length + b.length;
+    box.width = a.width + b.width;
+    box.height = a.height + b.height;
+    // cout << box.length << "--" << box.width << "--" << box.height << endl; 
+    return box;//必须要返回box才能实现相加
+}
+
+// 程序的主函数
+int main( )
+{
+   Box Box1(1, 2, 3);                // 声明 Box1，类型为 Box
+   Box Box2(1, 2, 3);                // 声明 Box2，类型为 Box
+   Box Box3(0, 0, 0);                // 声明 Box3，类型为 Box
+   double volume;     // 把体积存储在该变量中
+   // Box1 的体积
+   volume = Box1.getVolume();
+   cout << "Volume of Box1 : " << volume <<endl;
+ 
+   // Box2 的体积
+   volume = Box2.getVolume();
+   cout << "Volume of Box2 : " << volume <<endl;
+ 
+   // 把两个对象相加，得到 Box3
+   Box3 = Box1 + Box2;
+ 
+   // Box3 的体积
+   volume = Box3.getVolume();
+   cout << "Volume of Box3 : " << volume <<endl;
+ 
+   return 0;
+}
+```
+   4. 例4
+```cpp
+#include<iostream>
+using namespace std;
+class A
+{
+    private:
+      int a;
+    public:
+      A();
+      A(int n);
+      A operator+(const A &obj);
+      A operator+(const int b);
+      void display(); 
+   friend A operator+(const int b, A obj); ,
+} ;
+A::A(){}
+A::A(int n)//构造函数 
+{
+    a=n;
+}
+A A::operator +(const A &obj)//重载+号用于 对象相加，这是类外定义的方法，如果为非构造函数，::前面一定要加void ,double ,类，等修饰
+{
+    return a+obj.a;
+}
+A A::operator+(const int b)//重载+号用于  对象与数相加
+{
+    return A(a+b);
+}
+A operator+(const int b,  A obj)
+{
+    return obj+b;//友元函数调用第二个重载+的成员函数  相当于 obj.operator+(b); 
+}
+void A::display()
+{
+    cout<<a<<endl;
+}
+int main ()
+{
+    A a1(1);
+    A a2(2);
+    A a3,a4,a5;
+    a1.display();
+    a2.display();
+    int m=1;
+    a3=a2+a1;//可以交换顺序，相当月a3=a1.operator+(a2); 
+    a3.display();
+    a4=a1+m;//因为加了个友元函数所以也可以交换顺序了。
+    a4.display();
+    a5=m+a1;
+    a5.display();
+}
+```
+#### 5.关系运算符重载
+1. 例子
+```cpp
+#include <iostream>
+using namespace std;
+class Distance{
+   private:
+      double feet;
+      double inch;
+   public:
+      Distance(double feet, double inch){
+         this->feet = feet;
+         this->inch = inch;
+      }
+      bool operator< (Distance &d){
+         if (feet < d.feet && inch < d.inch){
+            return true;      
+         }
+         return false;
+      }
+};
+void test(){
+   Distance d1(1, 2), d2(3, 4);
+   if (d1 < d2){
+      cout << "d1 < d2" << endl; 
+   }
+   else{
+      cout << "d1 >= d2" << endl;
+   }
+}
+
+int main(){
+   test();
+}
+```
+#### 6.<<,>>重载
+1. 例子1
+```cpp
+#include <iostream>
+using namespace std;
+class Person{
+    private://若此处为私有属性，则要添加友元函数
+/*
+1.利用成员函数重载左移运算符,p.operator<< (cout)<=====>p<< cout,但是最终结果是cout << p,这样会出现先顺序问题，所以我们不会通过
+成员函数重载<<，因为无法实现cout在左侧，所以只能利用全局函数重载<<
+2.ostream是输出对象，且ostream只能有一个，所以不能创建新的出来，所以用引用传递，ostream &cout
+3.正确的结果是：cout << p<=====>cout.operater<< (p) ,而cout默认是ostream类型
+*/
+        int m_A;
+        int m_B;
+    public:
+        Person(int a, int b){
+            m_A = a;
+            m_B = b;
+        }
+    friend ostream& operator<< (ostream &out, Person &p);
+};
+ostream& operator<< (ostream &out, Person &p){//本质：operator<< (cout ,p)<===>cout<<p
+    out << "m_A = " << p.m_A << "   m_B = " << p.m_B;
+    return out;
+    /*
+    1.不能为ostream,必须为ostream&, 因为形参是引用传值，ostream &cout,返回的必须是引用 
+    2.因为引用是起别名，所以，out可以为任意变量
+    */
+}
+void test(){
+    Person p(1, 2);
+    cout << p << "  sfsfsdf" << endl;//若此处是cout << p << endl;,由于operater的返回值是void,所以不能追加endl,若operator的返回值是cout，就可以追加其他内容
+    //cout << p------>cout ,所以就可以是实现无限追加
+}
+int main(){
+    test();
+}
+```
+2. 例子2
+```cpp
+#include <iostream>
+using namespace std;
+ 
+class Distance
+{
+   private:
+      int feet;             // 0 到无穷
+      int inches;           // 0 到 12
+   public:
+      // 所需的构造函数
+      Distance(){
+      }
+      Distance(int f, int i){
+         feet = f;
+         inches = i;
+      }
+      friend ostream& operator<< ( ostream &output, 
+                                       const Distance &D )
+      { 
+         output << "F : " << D.feet << " I : " << D.inches;
+         return output;            
+      }
+ 
+      friend istream& operator>> ( istream  &input, Distance &D )
+      { 
+         input >> D.feet >> D.inches;
+         return input;            
+      }
+};
+int main()
+{
+   Distance D1(11, 10), D2(5, 11), D3;
+ 
+   cout << "Enter the value of object : " << endl;
+   cin >> D3;//调用的是istream
+   cout << "First Distance : " << D1 << endl;//cout << "First Distance : 返回的是cout,所以可以重复输出
+   cout << "Second Distance :" << D2 << endl;//
+   cout << "Third Distance :" << D3 << endl;
+ 
+ 
+   return 0;
 }
 ```
 # 12.模板：

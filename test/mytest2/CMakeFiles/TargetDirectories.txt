@@ -1,0 +1,6 @@
+/home/kim/git/test/mytest2/CMakeFiles/rebuild_cache.dir
+/home/kim/git/test/mytest2/CMakeFiles/edit_cache.dir
+/home/kim/git/test/mytest2/CMakeFiles/demo.dir
+/home/kim/git/test/mytest2/math/CMakeFiles/rebuild_cache.dir
+/home/kim/git/test/mytest2/math/CMakeFiles/edit_cache.dir
+/home/kim/git/test/mytest2/math/CMakeFiles/myfuntions.dir
