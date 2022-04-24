@@ -17,3 +17,7 @@ add_library(hello SHARED src/hello.cpp)
 add_executable(sayHello src/useHello.cpp)
 #将可执行文件链接到动态库上
 target_link_libraries(sayhello hello)
+#[[
+1.注意事项：PROJECT_SOURCE_DIR是指源文件的路径，也就是的当前目录的路径
+2.
+]]

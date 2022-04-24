@@ -12,7 +12,7 @@ cd src
 catkin_create_pkg helloworld roscpp rospy std_msgs
 #helloworld是包名，roscpp rospy std_msgs分别对应使用c++的库，python的库，标准消息库
 #c++库运行效率高，开发效率低，python库反之
-mkdir scripts /helloworld
+mkdir scripts /helloworldqs
 cd scripts
 gedit helloworld.py
 编辑在helloworld下的CamkeList.txt 文件

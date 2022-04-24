@@ -4577,6 +4577,49 @@ int main(){
    或者用于声明(而不是定义)使用该类型作为形参类型或返回类型的函数.
 */
 ```
+```cpp
+//方法3
+#include <iostream>
+using namespace std;
+#include <string>
+class Building;
+class Person{
+    public:
+        Person();//直接利用构造函数进行对指针的初始化
+        void visit();
+        Building *building;
+};
+
+class Building{
+    friend class Person;//此处类做友元和类成员函数做友元都能得到相同的结果
+    public:
+        Building();
+        string sittingRoom;
+    private:
+        string bedRoom;
+};
+
+Person::Person(){
+    building = new Building;
+}
+void Person::visit(){
+    cout << "we are visiting  " << building->sittingRoom << "  "<< building->bedRoom << endl;
+}
+
+Building::Building(){
+    sittingRoom = "room1";
+    bedRoom = "room2";
+}
+
+void test(){
+    Building building;
+    Person p;
+    p.visit();
+}
+int main(){
+    test();
+}
+```
 ### 4-5.内联函数
 1. 功能：直接将函数调用转换为函数定义的代码而不进行函数在内存上的开辟和回收
 2. 使用场景：
@@ -5262,8 +5305,361 @@ int main()
    return 0;
 }
 ```
-# 12.模板：
+#### 7.赋值运算符重载
+1. C++编译器对一个类添加至少4个函数
+   1. 默认构造函数
+   2. 默认析构函数
+   3. 默认拷贝构造函数
+   4. 赋值运算符operator = 对属性进行拷贝(如果类中
+   有属性指向堆区，做赋值操作时也会出现深浅拷贝问题)
+2. 例子
+```cpp
+#include <iostream>
+using namespace std;
+ 
+class Person
+{
+    public:
+        Person(int age){
+            m_Age = new int(age);//把m_Age丢到堆区
+        }
+        ~Person(){
+            if (m_Age != NULL){
+                delete m_Age;//堆区的数据由程序员手动释放，释放的时机是在析构函数中
+                m_Age = NULL;
+            }
+        }
 
+        int *m_Age;
+        //重载赋值运算符
+        Person& operator= (Person &p){
+            m_Age = new int(*p.m_Age);
+            //返回对象本身：
+            return *this;//return *this = return p
+        }
+};
+void test01(){
+    Person p1(12);
+    Person p2(23);
+    Person p3(24);
+    p3 = p2 = p1;//执行到p1 = p2就会出错
+    /*
+    1.p2(p1),p1把所有数据拷贝给p2,此时p1,p2年龄为12岁，此时堆区的内存被重复释放，程序崩溃
+    2.若想实现 p3 = p2 = p1的操作，必须要让=重载运算符有返回值person,
+    只有返回引用Person& operator= (Person &p),才能返回真正的自身，而非引用
+    3.return *this <=> return p
+    4.每加一个"=",都会调用一次=重载运算函数，然后对对象进行深拷贝*/
+    cout << "p3 的年龄为:" << *p3.m_Age << endl;
+    cout << "p2 的年龄为:" << *p2.m_Age << endl;
+    cout << "p1 的年龄为:" << *p1.m_Age << endl;
+}
+int main(){
+    test01();
+}
+```
+#### 8.函数的调用运算符重载
+1. 定义：
+   1. ()可以重载
+   2. 由于重载后使用方式非常像函数的调用，所以称为仿函数
+   3. 仿函数没有固定写法，非常灵活,其实就跟普通函数一样
+2. 案例
+```cpp
+#include <iostream>
+#include <string>
+using namespace std;
+class MyPrint{
+    //重载函数调用运算符
+    public:
+        void operator() (string test){
+            cout << test << endl;
+        }//这个要在public中才能被调用
+};
+void test01(){
+    MyPrint myPrint;
+    myPrint("helloworld");//重载了一个()
+    MyPrint02("helloworld");
+}
+//仿函数的灵活性
+///1.加法类
+class MyAdd{
+    public:
+        int operator() (int num1, int num2){
+            return num1 + num2;
+        }
+};
+void test02(){
+    MyAdd myadd;
+    int ret = myadd(1, 2);
+    cout << "ret = " << ret << endl;
+    //匿名对象
+    cout << MyAdd()(1, 2) << endl;
+}//类名() = 匿名对象，使用完了就被释放，再加个()就是调用仿函数
+int main(){
+    test01();
+    test02();
+    
+}
+```
+3. 匿名对象
+   1. 定义：
+      1. C++中的匿名对象是pure RValue, 因而不能作为引用传进去。
+      2. 区别：
+         1. 命名对象（非new）在离开作用域后，调用析构函数
+         2. 匿名对象在离开定义它的语句后，调用析构函数
+      3. 左值和右值的相关改概念
+         1. C++中有3种数据类型:**lvaue, prvalue(pure)+xvalue(expiring) = rvalue**
+         2. lvalue:传统意义上的左值：
+         3. xvalue:通过**右值引用**产生的对象
+         4. prvalue:传统意义上的右值
+         5. 区别：左值能取址，右值不能
+```cpp
+#include <iostream>
+#include <string>
+using namespace std;
+
+class Teacher
+{
+	string name;
+	string course;
+public:
+	Teacher() {
+		cout << "Default constructor " << endl;
+	}
+	Teacher(const char* n, const char*c) :name(n), course(c) {
+		cout << "constructor " << course << "'s teacher is " << name << endl;
+	}
+	Teacher(const Teacher& t) :name(t.name), course(t.course) {
+		cout << "Copy Constructor " << course << "'s teacher is " << name << endl;
+	}
+	~Teacher() {
+		cout << "Destructor " << course << "'s teacher is " << name << endl;
+	}
+	Teacher& operator=(const Teacher& p)
+	{
+		cout << "Assign" << endl;
+		return *this;
+	}
+};
+int main()
+{
+	Teacher *t5 = new Teacher;  // 或Teacher *t5 = new Teacher(); new没有产生匿名对象，可参考：https://blog.csdn.net/a3192048/article/details/80213288
+	cout << "=======0" << endl;
+	Teacher *t0 = new Teacher("Mr Hu", "Python");
+	cout << "=======1" << endl;
+	Teacher t1("Mr Zhao", "C++");
+	cout << "=======2" << endl; 
+	Teacher t2 = t1;//初始化
+	cout << "=======3" << endl;
+
+	/* 这行代码的运行结果有点“出人意料”，从思维逻辑上说，当匿名对象创建了后，是应该调用自定义拷贝构造函数，或者是默认拷贝构造函数来完成复制过程的，
+    但事实上系统并没有这么做，因为匿名对象使用过后在整个程序中就失去了作用，对于这种情况c++会把代码看成是：
+	Teacher t3("Ms Wang", "Matlab");
+	省略了创建匿名对象这一过程，所以说不会调用拷贝构造函数。 */
+
+	Teacher t3 = Teacher("Ms Wang", "Matlab");//用临时对象来初始化一个新对象，编译器一般会优化成直接用创建临时对象的参数来创建新对象。
+
+	cout << "=======4" << endl;
+	t2 = t3;//不会调用构造函数，因为没有创建新对象，调用=重载函数
+	cout << "=======5" << endl;
+	t2 = Teacher("Ms Li", "Consult");//赋值，临时对象会立即释放，因为没有加Teacher前缀，所以是匿名对象
+	cout << "=======6" << endl;
+	delete(t5);
+	delete(t0);
+
+	return 0;
+}
+```
+4. :和::的作用：
+5. :作用
+   1. 位域定义：
+```cpp
+typedef struct _XXX{undefined
+
+unsigned char a:4;
+
+unsigned char c;
+
+}; 
+```
+   2. 类构造函数(Constructor）的初始化列表
+在构造函数后面紧跟着冒号加初始化列表，各初始化变量之间以逗号(,)隔开。下面举个例子。
+```cpp
+class myClass
+{undefined
+public :
+myClass();// 构造函数，无返回类型，可以有参数列表，这里省去
+~myClass();// 析构函数
+int a;
+const int b;
+}
+myClass::myClass():a(1),b(1)// 初始化列表
+{undefined
+}
+```
+   3. 声明基类。
+假设我们重新定义一个类，继承自myClass类。定义方式如下：
+```cpp
+class derivedClass : public myClass
+{undefined
+// 略去
+}
+这里的冒号起到的就是声名基类的作用，在基类类名前面可以加public/private/protected等标签，用于标识继承的类型，也可以省略，省略的话，用class定义的类默认为private，用struct定义的类默认为public，至于具体各个标签有什么区别这里就不说了。
+与初始化列表一样的，这里也可以声名多个基类，各基类之间用逗号(,)隔开。
+```
+   4. 条件语句(? :)
+与?构成条件语句，作用相当于if else，如下；
+```cpp
+int a,b,c;
+a=3;
+b=2;
+c=a>b?a:b;// 如果a>b成立，则反a赋给c，否则把b赋给c
+条件语句的结构为：
+条件表达式?表达式1:表达式2
+当条件表达式为true时，表达式的值为表达式1的值，否则为表达式2的值。
+```
+   5. 语句标签
+通常跟goto配合使用，如：
+step1: a = f1();
+....
+goto step1;
+这种作法也不是很推荐，原因在于它破坏了语句的顺序执行，这样的代价大家应该清楚吧。不过存在即为合理嘛，既然它还存在，肯定还是有它的用处有它的好处的，比如说，多层嵌套的退出（会比break continue直观一点吧），也可以避免重复代码之类之类的
+
+1. 作用域符号::
+   1. 前面一般是类名称，后面一般是该类的成员名称，C++为例避免不同的类有名称相同的成员而采用作用域的方式进行区分,如：A,B表示两个类，在A,B中都有成员member。那么
+A::member就表示类A中的成员member
+B::member就表示类B中的成员member 
+   2. ::是C++里的“作用域分解运算符，类外定义
+```cpp
+class CA {  
+public:  
+  int ca_var;  
+  int add(int a, int b);  
+  int add(int a);  
+}; 
+  
+//那么在实现这个函数时，必须这样书写：  
+int CA::add(int a, int b)  
+{  
+  return a + b;  
+}  
+  
+//另外，双冒号也常常用于在类变量内部作为当前类实例的元素进行表示，比如:  
+int CA::add(int a)  
+{  
+  return a + ::ca_var;  
+} 
+  
+//表示当前类实例中的变量ca_var。
+```
+3. 全局作用域符号:若是全局变量和局部变量重名，需要用::区分
+```cpp
+
+char zhou; //全局变量 
+void sleep（） 
+｛ 
+char zhou; //局部变量 
+char(局部变量) = char(局部变量) *char(局部变量) ; 
+::char(全局变量) =::char(全局变量) *char(局部变量); 
+｝
+```
+#### 9.->重载
+1. 性质
+   1. 运算符 -> 必须是一个成员函数，如果使用了 -> 运算符，返回类型必须是指针或者是类的对象。
+   2. 运算符 -> 通常与指针引用运算符 * 结合使用，用于实现"智能指针"的功能，这些指针是行为与正常指针相似的对象，唯一不同的是，当您通过指针访问对象时，它们会执行其他的任务。比如，当指针销毁时，或者当指针指向另一个对象时，会自动删除对象。
+   3. 格式：**(p.operator->())->m <====> p->m; ptr* operator-> ()**
+   4. 例如
+```cpp
+间接引用运算符 -> 可被定义为一个一元后缀运算符。也就是说，给出一个类：
+class Ptr{
+   //...
+   X * operator->();
+};
+类 Ptr 的对象可用于访问类 X 的成员，使用方式与指针的用法十分相似。例如：
+
+void f(Ptr p )
+{
+   p->m = 10 ; // (p.operator->())->m = 10
+}
+```
+语句 p->m 被解释为 (p.operator->())->m。同样地，下面的实例演示了如何重载类成员访问运算符 ->。
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+ 
+// 假设一个实际的类
+class Obj {
+   static int i, j;
+public:
+   void f() const { cout << i++ << endl; }
+   void g() const { cout << j++ << endl; }
+};
+ 
+// 静态成员定义
+int Obj::i = 10;
+int Obj::j = 12;
+ 
+// 为上面的类实现一个容器
+class ObjContainer {
+    vector<Obj*> a;
+    public:
+        void add(Obj* obj)
+        { 
+            a.push_back(obj);  // 调用向量的标准方法
+        }
+    friend class SmartPointer;
+};
+ 
+// 实现智能指针，用于访问类 Obj 的成员
+class SmartPointer {
+    ObjContainer oc;
+    int index;
+    public:
+        SmartPointer(ObjContainer& objc)
+        { 
+            oc = objc;
+            index = 0;
+        }
+        // 返回值表示列表结束
+        bool operator++() // 前缀版本
+        { 
+            if(index >= oc.a.size() - 1) return false;
+            if(oc.a[++index] == 0) return false;
+            return true;
+        }
+        bool operator++(int) // 后缀版本
+        { 
+            return operator++();
+        }
+        // 重载运算符 ->
+        Obj* operator->() const 
+        {
+            if(!oc.a[index])
+            {
+                cout << "Zero value";
+                return (Obj*)0;
+            }
+            return oc.a[index];
+        }
+};
+ 
+int main() {
+   const int sz = 10;
+   Obj o[sz];
+   ObjContainer oc;
+   for(int i = 0; i < sz; i++)
+   {
+       oc.add(&o[i]);
+   }
+   SmartPointer sp(oc); // 创建一个迭代器
+   do {
+      sp->f(); // 智能指针调用
+      sp->g();
+   } while(sp++);
+   return 0;
+}
+```
+# 12.模板：
 template <typename type> ret-type func-name(parameter list)
 {
  // 函数的主体

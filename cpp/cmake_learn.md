@@ -109,18 +109,35 @@ add_subdirectory(src)
 **aux_source_directory(. SRC)**,编译SRC变量所代表的源代码文件，生成main可执行文件,**add_executable(main ${SRC})**
 
 ### 2.常用变量
-1. CMAKE_C_FLAGS：gcc编译选项
-   1. CMAKE_CXX_FLAGS：g++编译选项
-   2. 在CMAKE_CXX_FLAGS编译选项后追加-std=c++11
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-
-2. CMAKE_BUILD_TYPE：编译类型(Debug, Release)
-   1. 设定编译类型为debug，因为在调试时需要选择debug，set(CMAKE_BUILD_TYPE Debug)
-   2. 设定编译类型为release，因为在发布时需要选择release，set(CMAKE_BUILD_TYPE release)
-
-3. EXECUTABLE_OUTPUT_PATH：可执行文件输出的存放路径
-
-4. LIBRARY_OUTPUT_PATH：库文件输出的存放路径
+1. PROJECT_SOURCE_DIR 工程的根目录
+2. 
+3. PROJECT_BINARY_DIR 运行cmake命令的目录,通常是${PROJECT_SOURCE_DIR}/build
+4. 
+5. CMAKE_INCLUDE_PATH 环境变量,非cmake变量
+6. 
+7. CMAKE_LIBRARY_PATH 环境变量
+8. 
+9. CMAKE_CURRENT_SOURCE_DIR 当前处理的CMakeLists.txt所在的路径
+10. 
+11. CMAKE_CURRENT_BINARY_DIR target编译目录,使用ADD_SURDIRECTORY(src bin)可以更改此变量的值
+12. 
+13. SET(EXECUTABLE_OUTPUT_PATH <新路径>)并不会对此变量有影响,只是改变了最终目标文件的存储路径
+14. 
+15. CMAKE_CURRENT_LIST_FILE 输出调用这个变量的CMakeLists.txt的完整路径
+16. 
+17. CMAKE_CURRENT_LIST_LINE 输出这个变量所在的行
+18. 
+19. CMAKE_MODULE_PATH 定义自己的cmake模块所在的路径
+20. 
+21. SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake),然后可以用INCLUDE命令来调用自己的模块
+22. 
+23. EXECUTABLE_OUTPUT_PATH 重新定义目标二进制可执行文件的存放位置
+24. 
+25. LIBRARY_OUTPUT_PATH 重新定义目标链接库文件的存放位置
+26. 
+27. PROJECT_NAME 返回通过PROJECT指令定义的项目名称
+28. 
+29. CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS 用来控制IF ELSE语句的书写方式
 
 ### 3.有关源文件和头文件的问题
 
@@ -376,3 +393,5 @@ target_link_libraries(demo myfuntions)
 aux_source_directory(. DIR_LIB_SRCS)#源文件
 add_library(myfuntions ${DIR_LIB_SRCS})
 ```
+
+#### 4.多目录多文件标准工程
