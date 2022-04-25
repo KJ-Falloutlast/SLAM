@@ -336,62 +336,20 @@ int main(){
 }
 ```
    3. 执行顺序：cmake .------>make 
-#### 3.多个文件，多个目录
+#### 3.多个文件，多个目录(多个cmake文件)
 1. ./test
-   1. test---->main.cpp  CMakeLists.txt math
-   2. math----->functions.cpp functions.h CMakeLists.txt
-   3. 执行顺序:当前目录下:cmake . ------> make
-**functions.h**
-```cpp
-#ifndef FUNCTIONS_H
-#define  FUNCTIONS_H
-#include <iostream>
-using namespace std;
-
-class Circle{
-    private:
-        double  r;
-    public:
-        Circle(double r);
-        void showArea();
-};
-
-#endif
-```
-**fuctions.cpp**
-```cpp
-#include "functions.h"
-Circle::Circle(double r){
-    this->r  = r;
-}
-
-void Circle::showArea(){
-    int area = 3.14*r*r;
-    cout << "the area is " << area << endl; 
-}
-```
-**main.cpp**
-```cpp
-#include "functions.h"
-int main(){
-    Circle c(100);
-    c.showArea();
-}
-```
-**test下cmakelists**
-```cmake
-cmake_minimum_required(VERSION 3.10)
-project(fuc)
-aux_source_directory(. DIR_SRCS)
-add_executable(demo ${DIR_SRCS})
-add_subdirectory(math)#只有添加了math才能够检测到myfunctions这个链接库
-target_link_libraries(demo myfuntions)
-```
-**math下cmake**
-
-```cmake
-aux_source_directory(. DIR_LIB_SRCS)#源文件
-add_library(myfuntions ${DIR_LIB_SRCS})
-```
+   1. build
+   2. src
+      1. main.cpp
+      2. CMakeList.txt
+   3. include 
+      1. mymath.h
+      2. mymath.cpp
+      3. CMakeLists.txt
+   4. CMakeLists.txt
+ 
 
 #### 4.多目录多文件标准工程
+1. 目录树
+   1. build
+   2. 

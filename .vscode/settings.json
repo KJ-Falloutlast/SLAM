@@ -2,6 +2,7 @@
     "ros.distro": "noetic",
     "files.associations": {
         "iosfwd": "cpp",
-        "iostream": "cpp"
+        "iostream": "cpp",
+        "ostream": "cpp"
     }
 }

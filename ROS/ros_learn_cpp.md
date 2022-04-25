@@ -1278,7 +1278,7 @@ int main(int argc, char *argv[]){
     return 0;
 }
 ```
-2. 日至相关api
+2. 日志相关api
 ```cpp
 ROS_DEBUG("hello,DEBUG"); //不会输出
 ROS_INFO("hello,INFO"); //默认白色字体
@@ -1286,6 +1286,56 @@ ROS_WARN("Hello,WARN"); //默认黄色字体
 ROS_ERROR("hello,ERROR");//默认红色字体
 ROS_FATAL("hello,FATAL");//默认红色字体
 ```
+## 6. ROS中的头文件和源文件
+1. 自定义头文件调用
+   1. 注意：为了后续包含头文件时不抛出异常，要配置c_pp_properties.json中的includepath：
+"/home/用户/工作空间/src/功能包/include/**"
+
+```cpp
+#ifndef _HELLO_H
+#define _HELLO_H
+
+namespace hello_ns{
+
+class HelloPub {
+
+public:
+    void run();
+};
+
+}
+#endif
+```
+2. 可执行文件
+```cpp
+#include "ros/ros.h"
+#include "test_head/hello.h"
+
+namespace hello_ns {
+
+void HelloPub::run(){
+    ROS_INFO("自定义头文件的使用....");
+}
+
+}
+
+int main(int argc, char *argv[])
+{
+    setlocale(LC_ALL,"");
+    ros::init(argc,argv,"test_head_node");
+    hello_ns::HelloPub helloPub;
+    helloPub.run();
+    return 0;
+}
+```
+3. 配置文件
+include_directories(
+include ${catkin_INCLUDE_DIRS})
+)
+4. 可执行配置文件
+add_executable(hello src/hello.cpp)
+add_dependencies(hello ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(hello ${catkin_LIBRARIES})
 
 # 3.ROS运行管理
 
@@ -1410,10 +1460,10 @@ roslaunch 命令不能保证按照 node 的声明顺序来启动节点(节点的
     </ node >
    3. 启动roslaunch xxx xxx.launch ---------> rosrun turtle teleop_twist_keyboard teleop_twist_keyboard.py
 ```
-2-5.launch文件标签之param
+### 2-5.launch文件标签之param
 <param>标签主要用于在参数服务器上设置参数，参数源可以在标签中通过 value 指定，也可以通过外部文件加载，在<node>标签中时，相当于私有命名空间。
 
-/1.属性
+1. 属性
   name="命名空间/参数名"
   参数名称，可以包含命名空间
 
@@ -1426,8 +1476,9 @@ roslaunch 命令不能保证按照 node 的声明顺序来启动节点(节点的
       ."true" 和 "false" 是 bool 值(不区分大小写)
       .其他是字符串
 
-/2.子级标签
-/3.例子:
+2. 子级标签
+3. 例子:
+```xml
   <launch>
       <param name = "param_A" type = "int" value = "100" />
       <node pkg = "turtlesim" type = "turlesim_node" name = "myturtle" output = "screen">
@@ -1439,10 +1490,10 @@ roslaunch 命令不能保证按照 node 的声明顺序来启动节点(节点的
       <node pkg = "turtlesim" type = "turtle_teleop_key" name = "my_key" output = "screen"/> 
       
   </launch>
-
-2-6.rosparam
-步骤:
-/1.launch文件
+```
+### 2-6.rosparam
+步骤
+1. launch文件
 <launch>
   <node pkg = "turtlesim" type = "turtle_teleop_key" name = "my_key" output = "screen"/>
   <node pkg = "turtlesim" type = "turtlesim_node" name = "my_node" output = "screen">
@@ -1454,19 +1505,20 @@ roslaunch 命令不能保证按照 node 的声明顺序来启动节点(节点的
       <rosparam command = "dump" file = "$(find model01)/launch/params_out.yaml"/>
   </node>
 </launch>
-
-/2.配置yaml文件   /3.roslaunch该文件,直接会导出节点
+```
+2. 配置yaml文件   /3.roslaunch该文件,直接会导出节点
   bg_R: 100
   bg_G: 100
   bg_B: 100
 
-2-7.ros文件标签之group
-/1.属性
+### 2-7.ros文件标签之group
+1. 属性
   ns="名称空间" (可选)
   clear_params="true | false" (可选)
   启动前，是否删除组名称空间的所有参数(慎用....此功能危险)
-/2.子级标签
-/3.例子:
+2. 子级标签
+3. 例子:
+```xml
 <launch>
   <group ns = "first">
       <node pkg = "turtlesim" type = "turtlesim_node" name = "my_turtle" output = "screen" />
@@ -1477,90 +1529,102 @@ roslaunch 命令不能保证按照 node 的声明顺序来启动节点(节点的
       <node pkg = "turtlesim" type = "turtle_teleop_key" name = "my_key" output = "screen" />
   </group>
 </launch>
-#将会产生2个乌龟GUI,且不会重名
+```
+4. 结果：将会产生2个乌龟GUI,且不会重名
 
-2-8.arg标签
-/1.属性
+### 2-8.arg标签
+1. 属性
   name="参数名称"
   default="默认值" (可选)
   value="数值" (可选)
   不可以与 default 并存
   doc="描述"
-/2.子级标签
-/3.示例
-.例子：
-..launch文件实现：
+2. 子级标签
+3. 示例
+   1. xml文件实现
+```xml
 <launch>
   <arg name = "car_length" default = "1034"/>
   <param name = "a" value = "$(arg car_length)" />
   <param name = "b" value = "$(arg car_length)" />
   <param name = "c" value = "$(arg car_length)" />
 </launch>
+```
+2. 命令行实现：roslaunch model01 arg.launch car_length:=100
 
-..命令行实现：roslaunch model01 arg.launch car_length:=100
-
-.launch文件传参语法实现,hello.launch
+3. launch文件传参语法实现,hello.launch
+   1. step1
   <launch>
       <arg name="xxx" />
       <param name="param" value="$(arg xxx)" />
   </launch>
-.命令行调用launch传参
-
+   2. 命令行调用launch传参
 roslaunch hello.launch xxx:=值
-#命名规则：按照大驼峰命名法，例如：Ros_Learning-------Pub_Sub_demo01.cpp
+   3. 命名规则：按照大驼峰命名法，例如：Ros_Learning-------Pub_Sub_demo01.cpp
 
 
-3.ROS工作空间覆盖
-    3-1.问题：特定工作空间的功能包不能重名，但是自定义工作空间的功能包与内置的功能包与内置的功能包
-    可以重名或者不同的自定义的工作空间中也可以出现重名的功能包，那么调用该名称的功能包时候，
-    会调用哪一个功能包？比如说：自定义工作空间A内存在功能包turtlesim,自定义工作空间B内也存在功能包turtlesim，
-    系统内置空间内也存在turtlesim ,那么调用turtlesim时，会调用哪一个工作空间中的呢？
-    3-2.实现
-    .工作空间A中创建turtlsim包，工作空间B中创建turtlsim包
-    .添加source /home/kim/A/devel/setup.zsh
-    source /home/kim/B/devel/setup.zsh在.zshrc文件中#因为已经添加了source在zshrc中，所以打开一次终端相当于source 了一次，故就不用source 
-    #但是当修改zshrc文件后，必须要source才能继续下一次roscd
-    #只当被添加到zshrc中的文件的工作空间才能roscd
-    .roscd turtlesim:会直接进入到工作空间B中
-        原因:ros会先解析.zshrc文件，并生成ROS_PACKAGE_PATH路径，该变量按照.bashrc中配置设置工作空间优先级，
-        在设置时需要遵循一定的原则：ROS_PACKAGE_PATH中值，和.zshrc的配置顺序相反---->后配置的优先级更高
-        所以roscd先去B文件而不去A文件
-    3-3.存在安全隐患，比如当前工作空间B优先级更高，意味着当程序调用 turtlesim 时，
-    不会调用工作空间A也不会调用系统内置的 turtlesim，如果工作空间A在实现时有其他功能包依赖于自身的 turtlesim，而按照ROS工作空间覆盖的涉及原则，
-    那么实际执行时将会调用工作空间B的turtlesim，从而导致执行异常，出现安全隐患。
-    3-4.BUG：在.zshrc中source了多个工作空间，可能出现的情况，在ROS_PACKAGE_PATH中只包括2个工作空间，可以删除自定义工作空间中的devep和build文件
-    重新catkin_make,然后载入.zshrc文件，问题解决
+## 3.ROS工作空间覆盖
+### 3-1.问题：
+   特定工作空间的功能包不能重名，但是自定义工作空间的功能包与内置的功能包与内置的功能包
+   可以重名或者不同的自定义的工作空间中也可以出现重名的功能包，那么调用该名称的功能包时候，
+   会调用哪一个功能包？比如说：自定义工作空间A内存在功能包turtlesim,自定义工作空间B内也存在功能包turtlesim，
+   系统内置空间内也存在turtlesim ,那么调用turtlesim时，会调用哪一个工作空间中的呢？
+### 3-2.实现
+1. 工作空间A中创建turtlsim包，工作空间B中创建turtlsim包
+2. 添加source /home/kim/A/devel/setup.zsh
+3. source /home/kim/B/devel/setup.zsh在.zshrc文件中
+   1. 因为已经添加了source在zshrc中，所以打开一次终端相当于source 了一次，故就不用source,但是当修改zshrc文件后，必须要source才能继续下一次roscd
+   2. 只当被添加到zshrc中的文件的工作空间才能roscd,**roscd turtlesim**:会直接进入到工作空间B中
+4. >原因分析:ros会先解析.zshrc文件，并生成ROS_PACKAGE_PATH路径，该变量按照.bashrc中配置设置工作空间优先级，
+  在设置时需要遵循一定的原则：ROS_PACKAGE_PATH中值，和.zshrc的配置顺序相反---->后配置的优先级更高
+  所以roscd先去B文件而不去A文件
+### 3-3.安全隐患
+比如当前工作空间B优先级更高，意味着当程序调用 turtlesim 时，
+不会调用工作空间A也不会调用系统内置的 turtlesim，如果工作空间A在实现时有其他功能包依赖于自身的 turtlesim，而按照ROS工作空间覆盖的涉及原则，
+那么实际执行时将会调用工作空间B的turtlesim，从而导致执行异常，出现安全隐患。
 
-4.ROS节点名称重名
-    4-1.现象：rospy.init_node("yyy")来定义节点名称，在ROS中，是不允许出现重名节点的，如果出现会发生混淆，所以当启动的时候，重名节点会被直接关闭。
-    命名空间就是为名称添加前缀，名称重映射是为名称起别名。这两种策略都可以解决节点重名问题，两种策略的实现途径有多种:
-    4-2.解决方法：
-    法1：命名空间：添加前缀 |法2：名称重映射:为名称起别名
-    实现途径：rosrun 命令  launch 文件  编码实现
+### 3-4.BUG
+在.zshrc中source了多个工作空间，可能出现的情况，在ROS_PACKAGE_PATH中只包括2个工作空间，可以删除自定义工作空间中的devep和build文件
+重新catkin_make,然后载入.zshrc文件，问题解决
 
-    4-3.设置命名空间与重映射：
-        1.rosrun设置命名空间：
-        rosrun 包名 节点名 __ns:=/xxx | rosrun turtlesim turtlesim_node __ns:=/xxx
-        rosrun 包名 节点名 __ns:=/yyy | rosrun turtlesim turtlesim_node __ns:=/yyy
-        .运行结果：rosnode list : /xxx/turtlesim; /yyy/turtlesim
+## 4.ROS节点名称重名
+### 4-1.现象
+rospy.init_node("yyy")来定义节点名称，在ROS中，是不允许出现重名节点的，如果出现会发生混淆，所以当启动的时候，重名节点会被直接关闭。
+命名空间就是为名称添加前缀，名称重映射是为名称起别名。这两种策略都可以解决节点重名问题，两种策略的实现途径有多种:
+### 4-2.解决方法：
+法1：命名空间：添加前缀 |法2：名称重映射:为名称起别名
+实现途径：rosrun 命令  launch 文件  编码实现
 
-        2.rosrun名称重映射：
-        为节点起别名：rosrun 包名 节点名 __name:="新名称"
-        rosrun turtlesim  turtlesim_node __name:=t1 
-        rosrun turtlesim  turtlesim_node __name:=t2
-        rosnode list : /t1 ; /t2
+### 4-3.设置命名空间与重映射：
+1. rosrun设置命名空间：
+rosrun 包名 节点名 __ns:=/xxx | rosrun turtlesim turtlesim_node __ns:=/xxx
+rosrun 包名 节点名 __ns:=/yyy | rosrun turtlesim turtlesim_node __ns:=/yyy
+.运行结果：rosnode list : /xxx/turtlesim; /yyy/turtlesim
 
-        3.rosrun命名空间同时名称重映射叠加：
-        语法：rosrun 包名 节点名 __ns:=新名称 __name:=新名称
-        例子：rosrun turtlesim turtlesim_node __ns:=/a  __name:=/b;
-        结果：rosnode list:/a/b#__ns为包名，__name为子包名
+2. rosrun名称重映射：
+为节点起别名：rosrun 包名 节点名 __name:="新名称"
+rosrun turtlesim  turtlesim_node __name:=t1 
+rosrun turtlesim  turtlesim_node __name:=t2
+rosnode list : /t1 ; /t2
 
-    问题：[rosrun] Couldn't find executable named turtlesim_node below /home/kim/ROS_Space/test_ws/src/turtlesim
-    这是因为在.zshrc中，已经添加了source A/devel/setup.zsh ，所以会默认进入到A的工作空间中，
+3. rosrun命名空间同时名称重映射叠加：
+语法：rosrun 包名 节点名 __ns:=新名称 __name:=新名称
+例子：rosrun turtlesim turtlesim_node __ns:=/a  __name:=/b;
+结果：rosnode list:/a/b#__ns为包名，__name为子包名
 
-        4.通过launch文件设置命名空间与重映射
-        <launch>
-            <node pkg = "turtlesim" type = "turtlesim_node" name = "t1" ns = "hello" />
-        </launch>
+问题：[rosrun] Couldn't find executable named turtlesim_node below /home/kim/ROS_Space/test_ws/src/turtlesim
+这是因为在.zshrc中，已经添加了source A/devel/setup.zsh ，所以会默认进入到A的工作空间中，
 
-        5.脚本的方式实现命名空间和重映射：rospy.init_node("lisi",anonymous=True)#这个代表可以启动多个同名节点
+4. 通过launch文件设置命名空间与重映射
+```xml
+<launch>
+   <node pkg = "turtlesim" type = "turtlesim_node" name = "t1" ns = "hello" />
+</launch>
+```
+
+5. 脚本的方式实现命名空间和重映射：
+```cpp
+std::map<std::string, std::string> map;
+map["__ns"] = "xxxx";
+ros::init(map,"wangqiang");
+```

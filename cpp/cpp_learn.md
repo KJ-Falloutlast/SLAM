@@ -5342,19 +5342,62 @@ void test01(){
     Person p1(12);
     Person p2(23);
     Person p3(24);
-    p3 = p2 = p1;//执行到p1 = p2就会出错
+    p3 = p2 = p1;//执行到p1 = p2就会出错,
     /*
     1.p2(p1),p1把所有数据拷贝给p2,此时p1,p2年龄为12岁，此时堆区的内存被重复释放，程序崩溃
     2.若想实现 p3 = p2 = p1的操作，必须要让=重载运算符有返回值person,
     只有返回引用Person& operator= (Person &p),才能返回真正的自身，而非引用
     3.return *this <=> return p
-    4.每加一个"=",都会调用一次=重载运算函数，然后对对象进行深拷贝*/
+    4.每加一个"=",都会调用一次=重载运算函数，然后对对象进行深拷贝
+    5.调用函数采用先进后出的原则，先调用对象1，2的构造函数，然后调用对象1，2的成员函数，最后执行完main函数最后一条语句后再调用对象2，1的析构函数
+    6.p3(p2(p1))<=========>p3.operator(p2.operator(p1))*/
     cout << "p3 的年龄为:" << *p3.m_Age << endl;
     cout << "p2 的年龄为:" << *p2.m_Age << endl;
     cout << "p1 的年龄为:" << *p1.m_Age << endl;
 }
 int main(){
     test01();
+}
+```
+方法2
+```cpp
+#include <iostream>
+#include <string>
+using namespace std;
+class Person{
+    public:
+        int a;
+        int *m_Age;
+    public:
+        Person(){};
+        Person(int age, int a){
+             m_Age = new int(age); 
+             cout << "有参构造函数" << age << endl;
+        }
+        ~Person(){
+            if (m_Age != NULL){
+                delete m_Age; 
+                m_Age = NULL;
+            }
+            cout << "析构函数" << a << endl;
+        }
+        Person& operator= (Person &p){
+            m_Age = new int(*p.m_Age);//p1和p2的地址相等，即完全复制出一个p1的*m_Age出来
+            cout << "=重载" << *p.m_Age << endl;
+            return *this;//return p
+        }//这里要返回引用否则会溢出
+        
+};//先进后出的原则，先调用对象1，2的构造函数，然后调用对象1，2的成员函数，执行完main函数最后一条语句后再调用对象2，1的析构函数
+
+void test(){
+    Person p1(1, 1);
+    Person p2(2, 2);
+    Person p3(3, 3);
+    p3 = p2 = p1;
+    cout <<  " the age of p3 is " << *p3.m_Age << endl;
+}
+int main(){
+    test();
 }
 ```
 #### 8.函数的调用运算符重载
@@ -5398,6 +5441,46 @@ int main(){
     test01();
     test02();
     
+}
+```
+```cpp
+//方法2
+#include <iostream>
+#include <string>
+using namespace std;
+class Person{
+    private:
+        int age;
+    public:
+        Person();
+        Person(int age);
+        void operator() (const Person &p);
+        int operator() (int a, int b);       
+};
+Person::Person(){};
+Person::Person(int age){
+    this->age = age;
+}
+void Person::operator() (const Person &p){
+    cout << "the age is " << p.age << endl;
+}
+void test01(){
+    Person p1(19);
+    Person p2;
+    p2(p1);
+
+}
+int Person::operator() (int a, int b){
+    return a + b;
+}
+void test02(){
+    Person p2;
+    int res = p2(1, 3);
+    cout << "the res is " << res << endl;
+}
+int main(){
+    test01();
+    test02();
 }
 ```
 3. 匿名对象
@@ -5659,6 +5742,322 @@ int main() {
    return 0;
 }
 ```
+
+### 4-8.继承
+#### 1.基本语法
+1. 定义：依据一个类再定义另一个类，已经有的类为基类，新建的类为派生类
+2. 例如：
+   1. 例子1
+```cpp
+// 基类
+class Animal {
+    // eat() 函数
+    // sleep() 函数
+};
+//派生类
+class Dog : public Animal {
+    // bark() 函数
+};
+```
+   1. 例子2
+```cpp
+#include <iostream>
+using namespace std;
+// 基类
+class Shape 
+{
+   public:
+      void setWidth(int w)
+      {
+         width = w;
+      }
+      void setHeight(int h)
+      {
+         height = h;
+      }
+   protected:
+      int width;
+      int height;
+};
+ 
+// 派生类
+class Rectangle: public Shape
+{
+   public:
+      int getArea()
+      { 
+         return (width * height); 
+      }
+};
+ 
+int main(void)
+{
+   Rectangle Rect;
+ 
+   Rect.setWidth(5);
+   Rect.setHeight(7);
+ 
+   // 输出对象的面积
+   cout << "Total area: " << Rect.getArea() << endl;
+ 
+   return 0;
+}
+```
+#### 2.访问控制
+1. 注意
+   1. 派生类可以访问基类中的所有非private成员，因此基类成员如果不想被派生类的成员函数访问，要设为private
+   2. 一个派生类继承了所有基类的方法，但下列情况除外
+      1. 基类的构造函数，析构函数，拷贝构造函数
+      2. 基类的重载运算符
+      3. 基类的友元函数
+2. 可以根据访问权限总结不同的访问类型
+   1. 访问     public  protected  private
+   2. 同一个类    y         y         y
+   3. 派生类      y         y         n
+   4. 外部类      y         n         n
+>总结：派生类可以访问到基类的proctected和public成员，外部类只能访问基类的public成员
+
+3. 继承类型
+   1. public, protected, private,**但是我们基本不使用protected和private继承**，无论是那种继承方式，子类都不能访问父类的private成员
+   2. 公有继承(**public**)：当一个类派生自公有基类，基类的公有成员是派生类的**公有成员**，基类的保护成员是派生类的**保护成员**，基类的私有成员不能直接被派生类访问，但是可以通过调用基类的公有和保护成员来访问
+   3. 保护继承:(**protected**):当一个类派生自保护基类时，基类的公有和保护成员将成为派生的**保护成员**
+   4. 私有继承(**private**)：当一个类派生自私有基类时，基类的公有和保护成员将成为派生类的**私有成员**
+4. 例子
+```cpp
+class A{
+    public:
+        int a;
+    protected:
+        int b;
+    private:
+        int c;
+};
+//公有继承
+class B:public A{
+    public:
+        int a;
+    protected:
+        int b;
+    //int c不可访问
+};
+//保护继承
+class B:public A{
+    protected:
+        int a;
+        int b;
+    //int c不可访问
+}
+class C:public A{
+    private:
+        int a;
+        int b;
+    //int c不可访问
+}
+```
+#### 3.继承中的对象模型
+1. 问题：从父类继承过来的成员，哪些属于子类对象中
+2. 例子
+   1. 实现基类到子类的对象的初始化
+```cpp
+#include <iostream>
+ 
+using namespace std;
+ 
+// 基类
+class Shape 
+{
+   public:
+      Shape(int w,int h)
+      {
+          width=w;
+          height=h;
+      }
+      int area(){
+          return width*height;
+      }
+   protected:
+      int width;
+      int height;
+};
+ 
+// 派生类
+class Rectangle: public Shape
+{
+   public:
+      Rectangle(int a,int b):Shape(a,b)//KKK
+      /*
+      1.把基类的构造函数放在子类构造函数的初始化列表中，
+      实现调用基类的构造函数来为子类从基类继承的成员变量初始化
+      2.直接将rectangle的a, b赋给shape的a, b
+      */
+      {
+        
+      }
+};
+int main(){
+    Rectangle rec(1, 3);
+    int area = rec.area();
+    cout << "the area is " << area << endl;
+}
+```
+#### 4. 继承中的构造和析构顺序
+1. 例子
+```cpp
+#include <iostream>
+using namespace std;
+class Base{
+    public:
+        Base(){
+            cout << "Base构造函数" << endl;
+        }
+        ~Base(){
+            cout << "Base析构函数" << endl;
+        }
+};
+class Son:public Base{
+    public:
+        Son(){
+            cout << "Son构造函数" << endl;
+        }
+        ~Son(){
+            cout << "Son析构函数" << endl;
+        }
+};
+void test01(){
+    // Base b;
+    Son s;
+    //顺序：构造的顺序是:先构造父类，再构造子类，析构的顺序是:先析构子类，后析构父类
+}
+int main(){
+    test01();
+}
+```
+2. 结论：构造的顺序是:先构造父类，再构造子类，析构的顺序是:先析构子类，后析构父类
+#### 4. 继承中同名成员的处理方式
+1. 问题：当子类和父类出现同名的成员，如何通过子类对象，访问到父类或子类中的同名数据呢？
+2. 实例：
+```cpp
+#include <iostream>
+using namespace std;
+class Base{
+    public:
+        Base(){
+            m_A = 100;
+        }
+        void func(){
+            cout << "Base函数调用-func()调用" << endl;
+        }
+        void func(int a){//函数重载
+            cout << "Base函数调用-func(int a)调用" << endl;
+        }
+        int m_A;
+
+};
+class Son:public Base{
+    public:
+        Son(){
+            m_A = 200;
+        }
+        void func(){
+            cout << "Son函数调用" << endl;
+        }
+        int m_A;
+};
+//同名成员属性
+void test01(){
+    Son s;
+    cout << "Son's m_A = " << s.m_A << endl;
+    //如果通过子类对象访问到父类中的同名成员要加作用域
+    cout << "Base's m_A = " << s.Base::m_A << endl;
+}
+//同名成员方法
+void test02(){
+    Son s;
+    s.func();
+    s.Base::func();
+    //如果子类中出现和父类同名的成员函数，子类的同名成员函数会隐藏掉父类所有的同名成员函数
+    //如果想访问到父类中被隐藏的同名成员函数要加作用域
+    // s.func(100);错误
+    s.Base::func(199);
+}
+int main(){
+    test01();
+    test02();
+}
+```
+3. 总结：
+   1. 子类对象可以直接访问子类中同名成员:**s.m_Age,s.Base::m_Age**,**s.func(),s.Base::func()** ,**s.func(1),s.Base::func(1)**
+   2. 子类对象加作用域可以访问父类中的同名成员
+   3. 当子类和父类有同名的成员函数时，子类会隐藏掉父类中的同名成员函数，加作用域可以访问到父类中的同名函数
+
+#### 4. 继承中同名静态成员的处理方式
+1. 方法：
+   1. 访问子类同名成员，直接访问即可
+   2. 访问父类同名成员，加作用域
+2. 例子
+```cpp
+#include <iostream>
+ 
+using namespace std;
+ 
+class Base {
+    public:
+        static int m_A;
+        static void func(int a){
+            cout << "Base 访问func(int a)"<< endl;
+        } 
+        static void func(){
+            cout << "Base 访问func()" << endl;
+        }
+
+};
+int Base::m_A = 10;
+
+class Son:public Base {
+    public:
+        static int m_A;
+        static void func(int a){
+            cout << "Son 访问func(int a)"<< endl;
+        }
+        static void func(){
+            cout << "Son 访问func()" << endl;
+        }
+        
+};
+int Son::m_A = 20;
+//1.访问属性
+void test01(){
+    //通过类名
+    Son s;
+    cout << "son's m_A = " << s.m_A << endl;
+    cout << "Base's m_A = " << s.Base::m_A << endl;
+    //作用域访问：
+    cout << "son's m_A = " << Son::m_A << endl;
+    cout << "Base's m_A = " << Son::Base::m_A << endl;
+    //第一个::代表用作用域访问，第二个::表示再访问父类作用域下
+}
+//2.访问方法
+void test02(){
+    //通过类名
+    Son s;
+    s.func();
+    s.Base::func();
+    s.Base::func(12);
+    //通过作用域访问：
+    Son::func();
+    Son::Base::func();//出现同名，子类会隐藏掉父类中所有同名成员函数，需要加作作用域访问
+    Son::Base::func(12);
+}
+int main(){
+    test01();
+    test02();
+}
+```
+#### 5.多继承语法
+1. 语法：class 子类:继承方式 父类1， 继承方式 父类2...
+2. 注意:多继承中可能会引发同名成员出现，所以要加作用域区分
+**所以在c++开发中不建议用多继承**
+3. 
 # 12.模板：
 template <typename type> ret-type func-name(parameter list)
 {
@@ -5818,8 +6217,154 @@ int main()
   cout << "5 * 5 = " << opInt.peocess(5) <<endl;
   cout << "0.5 * 0.5 = " << opDouble.peocess(0.5) <<endl;
 }
+# 13.c++高级教程
+## 1. 命名空间
+1. 提出：当一个班上有2个同名学生时，不得不用其他的信息，比如说，年龄等等来区分他们；在c++中，你可能会有xyz()的函数，在另一个库中也有xyz()的函数，所以需要加命名空间加以区分
+2. 定义：
+```cpp
+namespace name{
+    void code(){
+
+    }
+}
+name::code();
+```
+3. 例子
+```cpp
+#include <iostream>
+using namespace std;
+// 第一个命名空间
+namespace first_space{
+   void func(){
+      cout << "Inside first_space" << endl;
+   }
+}
+// 第二个命名空间
+namespace second_space{
+   void func(){
+      cout << "Inside second_space" << endl;
+   }
+}
+int main ()
+{
+   // 调用第一个命名空间中的函数
+   first_space::func();
+   
+   // 调用第二个命名空间中的函数
+   second_space::func(); 
+   return 0;
+}
+```
+4. using指令
+   1. 使用方法1
+>利用using namespace，这样在使用命名空间的时候就不用在前面加上命名空间的名称,这个指令会告诉编译器，后续的代码会使用指定命名空间中的名称
+```cpp
+#include <iostream>
+using namespace std;
+// 第一个命名空间
+namespace first_space{
+   void func(){
+      cout << "Inside first_space" << endl;
+   }
+}
+// 第二个命名空间
+namespace second_space{
+   void func(){
+      cout << "Inside second_space" << endl;
+   }
+}
+using namespace first_space;
+int main ()
+{
+   // 调用第一个命名空间中的函数
+   func();  
+   return 0;
+}
+```
+   2. 使用方法2
+using 也可以用来指定命名空间中的特定项目，例如我只想使用std命名空间中的cout,可以用,using std::cout;**这样在随后的代码中，就不用加上命名空间名称作为前缀，但是std命名空间中的其他项目仍然需要加上命名空间作为前缀
+```cpp
+#include <iostream>
+using std::cout;
+int main ()
+{
+ 
+   cout << "std::endl is used with std!" << std::endl;//cout已经声明，所以下面无须再加，但是endl没有声明，所以要加
+   return 0;
+}
+```
+5. 不连续的命名空间
+**命名空间可以定义在几个不同的部分中，因此命名空间是由几个单独定义的部分呢组成，一个命名空间的各个组成部分可以分散在多个文件中，所以如果命名空间的某个名称需要请求定义在另一个文件中的名称，则人需要声明该名称**
+
+6. 嵌套命名空间
+```cpp
+namespace name1{
+    namespace name2{
+        
+    }
+}
+//访问name2
+using namespace name1::name2;
+//访问name1
+using namespace name1;
+```
+例子：
+```cpp
+#include <iostream>
+using namespace std;
+namespace first_space{
+    void func(){
+        cout << "inside first_space" << endl;
+    }
+    namespace second_space{
+        void func(){
+            cout << "inside second_space" << endl;
+        }
+    }
+}
+using namespace first_space::second_space;
+int main(){
+    //调用第二个命名空间的函数
+    func();
+}
+```
+7. 注意事项
+
+```cpp
+#include <iostream>
+using namespace std;
+namespace A {
+    int a = 100;
+    namespace B            //嵌套一个命名空间B
+    {
+        int a = 20;
+    }
+}
+
+int a = 200;//定义一个全局变量
 
 
+int main(int argc, char *argv[]) {
+    cout << "A::a =" << A::a << endl;        //A::a =100
+    cout << "A::B::a =" << A::B::a << endl;  //A::B::a =20
+    cout << "a =" << a << endl;              //a =200,全局变量
+    cout << "::a =" << ::a << endl;          //::a =200，全局变量
+
+    using namespace A;
+    cout << "a =" << a << endl;     // Reference to 'a' is ambiguous // 命名空间冲突，编译期错误，因为A下有2个a,编译器不知道使用哪一个
+    cout << "::a =" << ::a << endl; //::a =200，全局变量
+
+    int a = 30;
+    cout << "a =" << a << endl;     //a =30，当有本地同名变量后，优先使用本地，冲突解除
+    cout << "::a =" << ::a << endl; //::a =200，全局变量
+
+    //即：全局变量 a 表达为 ::a，用于当有同名的局部变量时来区别两者。
+
+    using namespace A;
+    cout << "a =" << a << endl;     // a =30  // 当有本地同名变量后，优先使用本地，冲突解除
+    cout << "::a =" << ::a << endl; //::a =200
 
 
-
+    return 0;
+}
+```

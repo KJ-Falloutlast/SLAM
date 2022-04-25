@@ -1,5 +1,26 @@
-#include "math/functions.h"//目前include的是当前目录下的文件，所以要include--functions.h进来，必须要使用相对路径
+#include <iostream>
+using namespace std;
+namespace A{
+    int a = 1;
+    namespace B{
+        int a = 2;
+    }
+    
+}
+int a = 3;
+
 int main(){
-    Circle c(100);
-    c.showArea();
+    cout << "a = " <<  a << endl;
+    cout << "A::a = " <<  A::a << endl;
+    cout << "A::B::a = " <<  A::B::a << endl;
+    
+    // using namespace A;
+    // cout << "a = " <<  a << endl;
+    // cout << "A::a = " <<  ::a << endl;
+    
+    int a = 1;
+    using namespace A;
+    cout << "a = " <<  a << endl;
+    cout << "::a = " <<  ::a << endl;
+    
 }

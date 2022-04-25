@@ -1,0 +1,1 @@
+/usr/bin/c++     CMakeFiles/sayHello.dir/hello.cpp.o CMakeFiles/sayHello.dir/useHello.cpp.o  -o sayHello  -Wl,-rpath,/home/kim/git/test/mytest5/build libhello.so 
