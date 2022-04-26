@@ -1,0 +1,1 @@
+/usr/bin/c++  -O3 -DNDEBUG   CMakeFiles/sayHello.dir/src/useHello.cpp.o  -o sayHello  -Wl,-rpath,/home/kim/git/test/mytest3/build2 libhello.so 

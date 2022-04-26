@@ -5832,7 +5832,7 @@ class A{
     private:
         int c;
 };
-//公有继承
+//公有继承class B:public A{} <===>等同于
 class B:public A{
     public:
         int a;
@@ -5840,13 +5840,14 @@ class B:public A{
         int b;
     //int c不可访问
 };
-//保护继承
+//保护继承class B:protected A{} <====>等同于
 class B:public A{
     protected:
         int a;
         int b;
     //int c不可访问
 }
+//私有继承class B:private A{}
 class C:public A{
     private:
         int a;
@@ -6057,7 +6058,273 @@ int main(){
 1. 语法：class 子类:继承方式 父类1， 继承方式 父类2...
 2. 注意:多继承中可能会引发同名成员出现，所以要加作用域区分
 **所以在c++开发中不建议用多继承**
-3. 
+3. 案例
+   1. 案例1
+```cpp
+#include <iostream>
+using namespace std;
+class Base1 {
+    public:
+        Base1()
+        {
+            m_A = 100;
+        }
+    public:
+        int m_A;
+};
+
+class Base2 {
+    public:
+        Base2()
+        {
+            m_A = 200;  //开始是m_B 不会出问题，但是改为mA就会出现不明确
+        }
+    public:
+        int m_A;
+};
+
+//语法：class 子类：继承方式 父类1 ，继承方式 父类2 
+class Son : public Base2, public Base1 
+{
+    public:
+        Son()
+        {
+            m_C = 300;
+            m_D = 400;
+        }
+    public:
+        int m_C;
+        int m_D;
+};
+
+
+//多继承容易产生成员同名的情况
+//通过使用类名作用域可以区分调用哪一个基类的成员
+void test01()
+{
+	Son s;
+    //父类的所有属性被子类继承，m_A,m_A,m_C,m_D
+	cout << "sizeof Son = " << sizeof(s) << endl;
+	cout << s.Base1::m_A << endl;//二义性,必须用作用域区分
+	cout << s.Base2::m_A << endl;
+}
+
+int main() {
+
+	test01();
+	return 0;
+}
+```
+   2. 案例2
+```cpp
+#include <iostream>
+using namespace std;
+class Base1{
+    public:
+        int m_A;
+    public:
+        Base1(int a){
+            m_A = a;
+        }
+};
+class Base2{
+    public:
+        int m_A;
+    public: 
+        Base2(int a){
+            m_A = a;
+        }
+};
+class Son : public Base1, public Base2{
+    public:
+        Son(int a, int b):Base1(a), Base2(b){
+
+        }//通过构造函数由子类控制父类的参数
+        int m_A;
+};
+void test(){
+    Son s(12, 13);
+    cout << "s.Base1::m_A = " << s.Base1::m_A << endl;
+    cout << "s.Base2::m_A = " << s.Base2::m_A << endl;
+}
+int main(){
+    test();
+}
+```
+#### 6. 菱形继承
+1. 概念：两个派生类继承同一个基类，又有某个类同时继承2个派生类，这种继承为菱形继承
+   |---A---|
+   B       C
+   |---D---|(图形)
+2. 问题： 
+   1. B, C继承了A的数据，当D使用数据时，会产生二义性
+   2. D继承A的数据继承了2份，但是这份数据我们需要一份就行
+3. 案例
+1. 方案1
+```cpp
+#include <iostream>
+using namespace std;
+//动物类
+class Animal{
+    public:
+        int m_Age;
+};
+//羊类
+class Sheep:public Animal{
+    
+};
+//驼类
+class Tuo:public Animal{
+
+};
+//羊驼类
+class SheepTuo : public Sheep, public Tuo{
+    
+};
+void test01(){
+    SheepTuo st;
+    st.Sheep::m_Age = 19;
+    st.Tuo::m_Age = 18;
+    //当菱形继承时，两个父类拥有相同的数据，需要加作用域区分，菱形继承导致了数据有2份，导致了资源浪费
+    cout << "st.Sheep::m_Age = " << st.Sheep::m_Age << endl;
+    cout << "st.Tuo::m_Age = " << st.Tuo::m_Age << endl;
+    //利用虚继承解决菱形继承问题
+    
+}
+int main(){
+    test01();
+}
+```
+   2. 方案2
+```cpp
+#include <iostream>
+using namespace std;
+class Animal
+{
+public:
+	int m_Age;
+};
+
+//继承前加virtual关键字后，变为虚继承
+//此时公共的父类Animal称为虚基类
+class Sheep : virtual public Animal {};//vbptr--->vbtable---->m_Age
+class Tuo   : virtual public Animal {};
+class SheepTuo : public Sheep, public Tuo {};
+
+void test01()
+{
+	SheepTuo st;
+	st.Sheep::m_Age = 100;
+	st.Tuo::m_Age = 200;//此时m_Age在3个类中只有一份，所以原先的m_Age被新的m_Age所覆盖
+
+	cout << "st.Sheep::m_Age = " << st.Sheep::m_Age << endl;
+	cout << "st.Tuo::m_Age = " <<  st.Tuo::m_Age << endl;
+	cout << "st.m_Age = " << st.m_Age << endl;
+}
+
+/*
+1. 从原理来分析,虚继承实际上是基础了vbptr(virtual base pointer,虚基类指针),
+这个虚基类指针指向了虚基类列表(vbtabel),vbtale中有一个偏移量，SheepTuo通过这个偏移量就可以找父类Animal中的age
+2. 虚继承之后，所有虚子类和父类都共享一份资源
+*/
+int main() {
+
+	test01();
+
+	return 0;
+}
+```
+3. 升级版
+```cpp
+#include <iostream>
+using namespace std;
+class A{
+    public:
+        int m_A;
+};
+class B1: virtual public A{};
+class B2: virtual public A{};
+class C: public B1, public B2{};
+void test(){
+    C c;
+    c.m_A = 1;
+    c.B1::m_A = 2;
+    c.B2::m_A = 3;
+    c.B1::A::m_A = 4;//以下4个输出的数据都被修改为4，因为4个类都共用一份数据m_A
+    cout << "c.m_A = " << c.m_A << endl;
+    cout << "c.B1::m_A = " << c.B1::m_A << endl;
+    cout << "c.B2::m_A = " << c.B2::m_A << endl;
+    cout << "c.B1::A::m_A = " << c.B1::A::m_A << endl;
+}
+int main(){
+    test();
+}
+```
+### 4-9. 多态
+#### 1. 多态的概念
+1. 分类：
+   1. 静态多态：函数重载和运算符重载属于静态多态，复用函数名
+   2. 动态多态：派生类和虚函数实现运行时多态
+2. 区别：
+   1. 静态多态的函数地址早绑定---编译阶段确定函数地址 
+   1. 动态多态的函数地址晚绑定---运行阶段确定函数地址
+3. 案例
+```cpp
+#include <iostream>
+using namespace std;
+class Animal{
+    public: 
+//虚函数，可以实现地址晚绑定,让子类在调用同名函数的时候，可以执行子类的同名函数而非父类的同名函数
+        virtual void speak(){
+            cout << "动物在说话" << endl;
+        }
+};
+//猫类
+class Cat: public Animal{
+    public:
+        void speak(){
+            cout << "小猫在说话" << endl;
+        }
+};
+class Dog: public Animal{
+    public:
+        void speak(){
+            cout << "小狗在说话" << endl;
+        }   
+};
+//执行说话的函数
+/*1.地址早绑定，在编译阶段就确定了函数的地址，所以无论在doSpeak()中传入任何动物，都会执行父类的speak()
+如果想让猫说话，那么这个函数的地址就不能提前绑定，需要在运行阶段绑定
+也就是地址晚绑定
+2.动态多态的满足条件：
+(1).有继承关系
+(2). 子类重写父类的虚函数，函数重写！=函数重载，函数重写是2个函数在函数名，函数体，形参，返回值完全相同。
+所以子类继承父类中的虚寒数时virtual可加可不加，但是父类虚函数必须要加
+3. 动态多态的使用：父类的指针或者引用 指向子类对象
+*/
+void doSpeak(Animal &animal){ //Animal &animal = cat,把子类对象传递给父类的引用
+    animal.speak();
+}
+void test01(){
+    Cat cat;
+    doSpeak(cat);//实现小猫说话
+    Dog dog;
+    doSpeak(dog);//实现小狗说话
+}
+int main(){
+    test01();
+}
+```
+4. 总结：
+   1. 地址早绑定，在编译阶段就确定了函数的地址，所以无论在doSpeak()中传入任何动物，都会执行父类的speak，如果想让猫说话，那么这个函数的地址就不能提前绑定，需要在运行阶段绑定，所以要加**virtual** 把函数地址晚绑定
+   2. 动态多态的满足条件：
+      1. 有继承关系
+      2. 子类重写父类的虚函数。**函数重写！=函数重载，函数重写是2个函数在函数名，形参，返回值完全相同。**，所以子类继承父类中的虚函数时virtual可加可不加，但是父类虚函数必须要加
+      3. 动态多态的使用：父类的指针或者引用 指向子类对象，**Animal &animal = cat** 
+#### 2.多态的原理
+1. 案例
+```cpp
+
 # 12.模板：
 template <typename type> ret-type func-name(parameter list)
 {
@@ -6368,3 +6635,6 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 ```
+网页
+```cpp
+https://blog.csdn.net/Bruski/article/details/115840667?spm=1001.2101.3001.6650.5&utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7ERate-5.pc_relevant_antiscanv2&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7ERate-5.pc_relevant_antiscanv2&utm_relevant_index=7```

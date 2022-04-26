@@ -1,0 +1,4 @@
+/home/kim/CMake_Tutorial-master/mydemo04/build/CMakeFiles/rebuild_cache.dir
+/home/kim/CMake_Tutorial-master/mydemo04/build/CMakeFiles/edit_cache.dir
+/home/kim/CMake_Tutorial-master/mydemo04/build/CMakeFiles/main.dir
+/home/kim/CMake_Tutorial-master/mydemo04/build/CMakeFiles/mymath.dir

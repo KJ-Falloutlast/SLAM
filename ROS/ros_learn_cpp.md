@@ -1287,7 +1287,7 @@ ROS_ERROR("hello,ERROR");//默认红色字体
 ROS_FATAL("hello,FATAL");//默认红色字体
 ```
 ## 6. ROS中的头文件和源文件
-1. 自定义头文件调用
+### 1. 自定义头文件调用
    1. 注意：为了后续包含头文件时不抛出异常，要配置c_pp_properties.json中的includepath：
 "/home/用户/工作空间/src/功能包/include/**"
 
@@ -1336,6 +1336,30 @@ include ${catkin_INCLUDE_DIRS})
 add_executable(hello src/hello.cpp)
 add_dependencies(hello ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(hello ${catkin_LIBRARIES})
+
+5. 总结：
+   1. 关于命名空间的使用
+```cpp
+./include/mymath.h
+namespace fun_ns{
+    class MyFunc{
+        void test();
+    };
+}
+./src/mymath.cpp
+namespace fun_ns{
+    void MyFunc::test(){
+        cout << "test" << endl;
+    }
+}
+int main(){
+fun_ns::MyFunc myfunc
+myfunc.test()
+}
+```
+2. 关于头文件路径：
+**如果文件地址已经被包括进cpp_properties中了，就直接写文件名就行，否则写相对绝对路径**
+### 2.自定义源文件调用
 
 # 3.ROS运行管理
 

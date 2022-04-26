@@ -291,13 +291,12 @@ add_executable_directory(demo main.cpp)
 ```
    2. 执行顺序：在当前目录下cmake .----->make
 
-#### 2. 多个源文件
-   1. 多个文件，一个目录：
-   2. ./test
-      1. CMakeList.txt
-      2. main.cpp
-      3. functions.cpp
-      4. functions.h
+#### 2.多个文件，一个目录
+1. ./test
+   1. CMakeList.txt
+   2. main.cpp
+   3. functions.cpp
+   4. functions.h
 **functions.h**
 ```cpp
 #ifndef FUNCTIONS_H
@@ -319,25 +318,26 @@ class Circle{
 ```cpp
 #include "functions.h"
 Circle::Circle(double r){
-    this->r  = r;
-}
-
-void Circle::showArea(){
-    int area = 3.14*r*r;
-    cout << "the area is " << area << endl; 
-}
-```
-**main.cpp**
-```cpp
+    this->r  
 #include "math/functions.h"
 int main(){
     Circle c(100);
     c.showArea();
 }
 ```
-   3. 执行顺序：cmake .------>make 
+2. 执行顺序：cmake .------>make
+**cmakelists.txt** 
+```cmake
+cmake_version_required(VERSION 3.10)
+
+project(demo2)
+
+aux_source_directory(./ DIR_SRCS)
+
+add_executable(demo2  ${DIR_SRCS})
+```
 #### 3.多个文件，多个目录(多个cmake文件)
-1. ./test
+1. ./mydemo2
    1. build
    2. src
       1. main.cpp
@@ -347,9 +347,142 @@ int main(){
       2. mymath.cpp
       3. CMakeLists.txt
    4. CMakeLists.txt
- 
+**include/CMakeLists.txt**
+```cmake
+aux_source_directory(. DIR_LIB_SRCS)
+add_library(Mylib STATIC ${DIR_LIB_SRCS})
+```
+**src/CMakeLists.txt**
+```cmake
+include_directories(../include)
+aux_source_directory(./ DIR_SRCS)
+add_executable(mydemo2 ${DIR_SRCS})
+target_link_libraries(mydemo2 Mylib)
 
-#### 4.多目录多文件标准工程
+#让include中的库文件Mylib和mydemo2链接起来
+```
+**./CMakeLists.txt**
+cmake_minimum_required(VERSION 3.10)
+project(mydemo2)
+add_subdirectory(./include)
+add_subdirectory(./src)
+
+**include/mymath.h**
+```cpp
+#ifndef MYMATH_H
+#define MYMATH_H
+#include <iostream>
+using namespace std;
+
+double power(double a, double b);
+
+#endif
+```
+**include/mymath.cpp**
+```cpp
+#include "mymath.h"
+double power(double a, double b){ 
+    int res = a;
+    for (int i = 0; i < b; i++){
+        res = res*a;
+    }
+    return res;
+}
+```
+
+**src/main.cpp**
+```cpp
+#include "../include/mymath.h"
+int main(int argc, char** argv){
+    if (argc < 3){
+        cout << "您的输入有错误:" << endl;
+        return 0;
+    }
+    double a = atof(argv[1]);
+    double b = atof(argv[2]);
+    double res = power(a, b);
+    cout << "您的输出结果是:" << res << endl;
+}
+```
+2. 执行顺序：cd build----->cmake ..---------->make **这样就可以在build文件夹下将动态库libhello.so和可执行文件sayHello生成
+#### 4.多目录多文件（单个cmake文件)
 1. 目录树
    1. build
-   2. 
+   2. include
+      1. mymath.h
+   3. src
+      1. mymath.cpp
+      2. main.cpp
+   4. CMakeLists.txt
+2. 文件
+**include/hello.h**
+```cpp
+#ifndef MYMATH_H
+#define MYMATH_H
+class Circle{
+    private:
+        int r;
+    public:
+        Circle(int r);
+        int showArea();
+        
+};
+
+#endif
+```
+**src/mymath.cpp**
+```cpp
+#include "../include/mymath.h"
+Circle::Circle(int r){
+    this->r = r;
+}
+int Circle::showArea(){
+    return 3.14*r*r;
+}
+```
+**src/main.cpp**
+```cpp
+#include "../include/mymath.h"
+#include <iostream>
+using namespace std;
+int main(){
+    Circle c(100);
+    int res = c.showArea();
+    cout << "the area is " << res << endl;
+}
+```
+**CMakeLists.txt
+```cmake
+
+project(sayhello)
+
+cmake_minimum_required(VERSION 3.10)
+
+<!-- set(CMAKE_BUILD_TYPE "RELEASE") -->
+
+#提供头文件的路径
+include_directories(./include)
+
+<!-- #设置生成的可执行文件的输出路径
+set(EXECUTABLE_OUTPUT_PATH ./build)
+
+# 设置生成的动态库文件的输出路径
+set(LIBRARY_OUTPUT_PATH ./lib) --> #这3条可以省略
+
+add_library(mymath SHARED src/mymath.cpp)#libhello.so
+
+#生成可执行文件
+add_executable(main src/main.cpp)
+
+#将可执行文件链接到动态库上
+target_link_libraries(main mymath)
+```
+4. 总结
+   1. 2+4最重要信息
+      1. project(sayhello)
+      2. cmake_minimum_required(VERSION 3.10)
+      3. include_directories(./include)
+      4. add_library(mymath SHARED src/mymath.cpp)
+      5. add_executable(main src/main.cpp)
+      6. target_link_libraries(main mymath)
+   2. **library == nonmain.cpp , executable == main.cpp**
