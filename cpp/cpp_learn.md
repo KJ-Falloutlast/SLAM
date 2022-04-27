@@ -1,100 +1,15 @@
-"适合作的开源项目"
+# 1.c++初始
 
-1.https://github.com/amhndu/SimpleNES
-2.https://github.com/Light-City/CPlusPlusThings
-3.https://github.com/TheAlgorithms/C-Plus-Plus
-4.https://github.com/changkun/modern-cpp-tutorial
-5.https://github.com/wuye9036/CppTemplateTutorial
-6.https://github.com/Alinshans/MyTinySTL
-7.https://github.com/taylorconor/tinytetris
-8.https://github.com/microsoft/calculator
-
-
--------------------
-2.vscode下c++配置//参考：https://segmentfault.com/a/1190000020155987
-
- 1.在终端中运行：
-    1.随便找一个文件夹,我们先写一个Main.cpp
-    复制代码
-
-     #include<iostream>
-     
-     int main(void){
-         std::cout<<"Hello Linux!"<<std::endl;
-         return 1;
-     }
-
-    复制代码
-
-    2.在当前文件夹下打开终端,输入> g++ -g -c Main.cpp 后,当前文件空间下会出现 Main.o
-
-    3.在终端中继续输入 g++ -o Main.out Main.o 后,文件空间下将会出现 Main.out(可执行文件)
-
-    4.在终端中输入 ./Main.out 即可执行
-
-    5.上面的命令也可以简化为: g++ -o Main.out Main.cpp ---->然后直接执行./Main.out
-    {
-    -o：指定生成可执行文件的名称。使用方法为：g++ -o afile file.cpp file.h ... （可执行文件不可与待编译或链接文件同名，否则会生成相应可执行文件且覆盖原编译或链接文件），如果不使用-o选项，则会生成默认可执行文件a.out
-    -c：只编译不链接，只生成目标文件。
-    -g：添加gdb调试选项
-    }
-
-    2.在vscode中的配置
-
-    1.launch.json文件：
-    {
-        "version": "0.2.0",
-        "configurations": [
-            {
-                "name": "(gdb) Launch",
-                "type": "cppdbg",
-                "request": "launch",
-                "program": "${workspaceFolder}/${fileBasenameNoExtension}.out",
-                "args": [],
-                "stopAtEntry": false,
-                "cwd": "${workspaceFolder}",
-                "environment": [],
-                "externalConsole": true,
-                "MIMode": "gdb",
-                "preLaunchTask":"build",
-                "setupCommands": [
-                    {
-                        "description": "Enable pretty-printing for gdb",
-                        "text": "-enable-pretty-printing",
-                        "ignoreFailures": true
-                    }
-                ]
-            }
-        ]
-    }
-
-    2.tasks.json文件：
-
-    {
-        "tasks": [
-            {
-                "label": "build",
-                "type": "shell",
-                "command": "g++",
-                "args": ["-g", "${file}", "-std=c++11", "-o", "${fileBasenameNoExtension}.out"]
-            }
-         ]
-    }
-
-    3.f5编译------>4.在终端运行：g++ -o xxx.out xxx.cpp---->./xxx.out  or 在IDE中用ctrl+alt+n来运行自动生成xxxx.out
-
------------------------------
-
-'1.c++初始'
-
-//程序开始执行的地方
+程序开始执行的地方
+```cpp
 #include <iostream>
 using namespace std;//告诉便编译器使用std命名空间
 int main() { //
      cout << "Hello, world!!!!" << endl;
      return 0;
 }
-1.变量
+```
+## 1.变量
 1-1.变量格式:
 
 .数据类型 变量名 = 变量初始值
@@ -111,19 +26,19 @@ int main() { //
     return 0;
 }
 
-2.常量
+## 2.常量
 c++两种常量模式:1.#define 常量名 常量值;2.const 数据类型 常量名 = 常量值
 
-3.关键字:命名变量不能用关键字
+## 3.关键字:命名变量不能用关键字
 
-4.标识符命名规则:
+## 4.标识符命名规则:
 4-1.标识符不能是关键字
 4-2.标识符只能由字母,数字,下划线组成
 4-3.标识符的第一个字符只能为字母或下划线
 4-3.标识符的字母区分大小写
 
 
-4.数据类型:
+## 5.数据类型:
 
 用编程语言进行编程时，需要用到各种变量来存储各种信息。变量保留的是它所存储的值的内存位置。这意味着，当您创建一个变量时，就会在内存中保留一些空间。
 
@@ -160,7 +75,7 @@ typedef short int wchar_t;
 注意：默认情况下，int、short、long都是带符号的，即 signed。
 
 注意：long int 8 个字节，int 都是 4 个字节，早期的 C 编译器定义了 long int 占用 4 个字节，int 占用 2 个字节，新版的 C/C++ 标准兼容了早期的这一设定。
-
+```cpp
 类型  位   范围
 char    1 个字节   -128 到 127 或者 0 到 255
 unsigned char   1 个字节   0 到 255
@@ -178,70 +93,6 @@ float   4 个字节   精度型占4个字节（32位）内存空间，+/- 3.4e +
 double  8 个字节   双精度型占8 个字节（64位）内存空间，+/- 1.7e +/- 308 (~15 个数字)
 long double 16 个字节  长双精度型 16 个字节（128位）内存空间，可提供18-19位有效数字。
 wchar_t 2 或 4 个字节   1 个宽字符
-
-    注意，各种类型的存储大小与系统位数有关，但目前通用的以64位系统为主。
-
-    以下列出了32位系统与64位系统的存储大小的差别（windows 相同）：
-
-从上表可得知，变量的大小会根据编译器和所使用的电脑而有所不同。
-
-下面实例会输出您电脑上各种数据类型的大小。
-实例
-#include<iostream>  
-#include <limits>
- 
-using namespace std;  
-  
-int main()  
-{  
-    cout << "type: \t\t" << "************size**************"<< endl;  
-    cout << "bool: \t\t" << "所占字节数：" << sizeof(bool);  
-    cout << "\t最大值：" << (numeric_limits<bool>::max)();  
-    cout << "\t\t最小值：" << (numeric_limits<bool>::min)() << endl;  
-    cout << "char: \t\t" << "所占字节数：" << sizeof(char);  
-    cout << "\t最大值：" << (numeric_limits<char>::max)();  
-    cout << "\t\t最小值：" << (numeric_limits<char>::min)() << endl;  
-    cout << "signed char: \t" << "所占字节数：" << sizeof(signed char);  
-    cout << "\t最大值：" << (numeric_limits<signed char>::max)();  
-    cout << "\t\t最小值：" << (numeric_limits<signed char>::min)() << endl;  
-    cout << "unsigned char: \t" << "所占字节数：" << sizeof(unsigned char);  
-    cout << "\t最大值：" << (numeric_limits<unsigned char>::max)();  
-    cout << "\t\t最小值：" << (numeric_limits<unsigned char>::min)() << endl;  
-    cout << "wchar_t: \t" << "所占字节数：" << sizeof(wchar_t);  
-    cout << "\t最大值：" << (numeric_limits<wchar_t>::max)();  
-    cout << "\t\t最小值：" << (numeric_limits<wchar_t>::min)() << endl;  
-    cout << "short: \t\t" << "所占字节数：" << sizeof(short);  
-    cout << "\t最大值：" << (numeric_limits<short>::max)();  
-    cout << "\t\t最小值：" << (numeric_limits<short>::min)() << endl;  
-    cout << "int: \t\t" << "所占字节数：" << sizeof(int);  
-    cout << "\t最大值：" << (numeric_limits<int>::max)();  
-    cout << "\t最小值：" << (numeric_limits<int>::min)() << endl;  
-    cout << "unsigned: \t" << "所占字节数：" << sizeof(unsigned);  
-    cout << "\t最大值：" << (numeric_limits<unsigned>::max)();  
-    cout << "\t最小值：" << (numeric_limits<unsigned>::min)() << endl;  
-    cout << "long: \t\t" << "所占字节数：" << sizeof(long);  
-    cout << "\t最大值：" << (numeric_limits<long>::max)();  
-    cout << "\t最小值：" << (numeric_limits<long>::min)() << endl;  
-    cout << "unsigned long: \t" << "所占字节数：" << sizeof(unsigned long);  
-    cout << "\t最大值：" << (numeric_limits<unsigned long>::max)();  
-    cout << "\t最小值：" << (numeric_limits<unsigned long>::min)() << endl;  
-    cout << "double: \t" << "所占字节数：" << sizeof(double);  
-    cout << "\t最大值：" << (numeric_limits<double>::max)();  
-    cout << "\t最小值：" << (numeric_limits<double>::min)() << endl;  
-    cout << "long double: \t" << "所占字节数：" << sizeof(long double);  
-    cout << "\t最大值：" << (numeric_limits<long double>::max)();  
-    cout << "\t最小值：" << (numeric_limits<long double>::min)() << endl;  
-    cout << "float: \t\t" << "所占字节数：" << sizeof(float);  
-    cout << "\t最大值：" << (numeric_limits<float>::max)();  
-    cout << "\t最小值：" << (numeric_limits<float>::min)() << endl;  
-    cout << "size_t: \t" << "所占字节数：" << sizeof(size_t);  
-    cout << "\t最大值：" << (numeric_limits<size_t>::max)();  
-    cout << "\t最小值：" << (numeric_limits<size_t>::min)() << endl;  
-    cout << "string: \t" << "所占字节数：" << sizeof(string) << endl;  
-    // << "\t最大值：" << (numeric_limits<string>::max)() << "\t最小值：" << (numeric_limits<string>::min)() << endl;  
-    cout << "type: \t\t" << "************size**************"<< endl;  
-    return 0;  
-}
 
 本实例使用了 endl，这将在每一行后插入一个换行符，<< 运算符用于向屏幕传多个值，sizeof() 函数用来获取各种数据类型的大小。
 
@@ -264,15 +115,16 @@ float:         所占字节数：4    最大值：3.40282e+38    最小值：1.1
 size_t:     所占字节数：8    最大值：18446744073709551615    最小值：0
 string:     所占字节数：24
 type:         ************size**************
+```
 
-4-1.整型
+### 4-1.整型
 数据类型        占用空间          取值范围
 short(短整型)    2字节           -2^15-2^15-1
 int(整型)    2字节              -2^31-2^31-1
 long(长整型)    linux为4字节     -2^31-2^31-1
 long long(长长整型)    8字节       -2^63-2^63-1
 
-4-2.sizeof关键字
+### 4-2.sizeof关键字
 .作用:统计数据类型的所占内存大小
 .例:
 #include <iostream>
@@ -284,7 +136,7 @@ int main(){
     return 0;
 }
 
-4-3.浮点型:
+### 4-3.浮点型:
 .分类:单精度float;双精度:double
 .区别:{
     数据类型        占用空间        有效数字范围
@@ -293,12 +145,13 @@ int main(){
 
 }
 
-4-4.字符型:
+### 4-4.字符型:
 .作用:字符型变量用于显示单个字符
 .语法: char ch = 'a';------->注意:1.在显示字符型变量时,用单引号,不要用双引号;
  2.单引号内只能有一个字符,不可是字符串
 .空间:c++中字符型变量只占1个字节
 .例子:
+```cpp
 #include <iostream>
 #define day 100
 using namespace std;//告诉便编译器使用std命名空间
@@ -309,10 +162,11 @@ int main() { //
      system("pause");
      return 0;
 }
+```
 
-4-5.转义字符
-.作用:表示一些不能显示出来的ascii字符
-.列表{
+### 4-5.转义字符
+1. 作用:表示一些不能显示出来的ascii字符
+2. 列表{
     转义字符 意义 ASCII码值(十进制) 
     \a 响铃(BEL) 007 //alarm
     \b 退格(BS) 008 //backspace
@@ -343,59 +197,13 @@ int main() { //
 
     6， 转义字符中只能使用小写字母，每个转义字符只能看作一个字符。
 }
-.例子:
-..1.
-IN:
-#include <iostream>
-#define day 100
-using namespace std;//告诉便编译器使用std命名空间
-int main() { //
-     cout << "hello world\n" << endl;
-     cout << "aaa\thello world" << endl;
-     cout << "aaa\vhello world" << endl;
-     cout << "aaa\fhello world" << endl;
-     cout << "aaa\\hello world" << endl;
-     system("pause");
-     return 0;
-}
-OUT:
-hello world
 
-aaa hello world
-aaa
-   hello world
-aaa
-   hello world
-aaa\hello world
-sh: 1: pause: not found
 
-..2.
-IN:
-#include <iostream>
-#define day 100
-using namespace std;//告诉便编译器使用std命名空间
-int main() { //
-     cout << "hello world\n" << endl;
-     cout << "aaa\thello world" << endl;
-     cout << "aaaa\thello world" << endl;
-     cout << "aaaaa\thello world" << endl;
-     cout << "aaaaaa\thello world" << endl;
-     system("pause");
-     return 0;
-}
-OUT:
-hello world
-
-aaa hello world
-aaaa    hello world
-aaaaa   hello world
-aaaaaa  hello world
-sh: 1: pause: not found
-
-4-6.字符串型
-.语法:string 变量名 = "字符串值"
-.注意:1.有头文件:#include <string> 2.等号后面要接双引号,字符型用单引号,字符串型用双引号
-.例:
+### 4-6.字符串型
+1. 语法:string 变量名 = "字符串值"
+2. 注意:1.有头文件:#include <string> 2.等号后面要接双引号,字符型用单引号,字符串型用双引号
+3. 例:
+```cpp
 #include <iostream>
 #include <string>
 using namespace std;//告诉便编译器使用std命名空间
@@ -407,16 +215,17 @@ int main() { //
      system("pause");
      return 0;
 }
+```
+### 4-7.布尔型:
+. 作用:表示真和假的值
+. 大小:bool型占1个字节
 
-4-7.布尔型:
-.作用:表示真和假的值
-.大小:bool型占1个字节
-
-4-8.数据的输入：
-作用：从键盘获取数据
-语法：cin >> 变量
-注意:解决无法输入的问题：设置---> 搜索 runInTerminal，将 Run In Terminal 勾选中--->重启
-例子：
+### 4-8.数据的输入：
+1. 作用：从键盘获取数据
+2. 语法：cin >> 变量
+3. 注意:解决无法输入的问题：设置---> 搜索 runInTerminal，将 Run In Terminal 勾选中--->重启
+4. 例子：
+```cpp
 #include <iostream>
 using namespace std;
 int main()
@@ -439,9 +248,9 @@ int main()
      }
      return 0;
 }
+```
 
-
-5.运算符
+# 5. 运算符
 运算符是一种告诉编译器执行特定的数学或逻辑操作的符号。C++ 内置了丰富的运算符，并提供了以下类型的运算符：
 
     算术运算符：+，-,*,/,%，++,--
@@ -452,34 +261,34 @@ int main()
     杂项运算符:
 
 本章将逐一介绍算术运算符、关系运算符、逻辑运算符、位运算符、赋值运算符和其他运算符。
-5-1.算术运算符
+## 5-1.算术运算符
 
-下表显示了 C++ 支持的算术运算符。
-假设变量 A 的值为 10，变量 B 的值为 20，则：
-运算符 描述  实例
-+   把两个操作数相加    A + B 将得到 30
--   从第一个操作数中减去第二个操作数    A - B 将得到 -10
-*   把两个操作数相乘    A * B 将得到 200
-/   分子除以分母  B / A 将得到 2
-%   取模运算符，整除后的余数    B % A 将得到 0
-++  自增运算符，整数值增加 1   A++ 将得到 11
---  自减运算符，整数值减少 1   A-- 将得到 9
+   下表显示了 C++ 支持的算术运算符。
+   假设变量 A 的值为 10，变量 B 的值为 20，则：
+   运算符 描述  实例
+   +   把两个操作数相加    A + B 将得到 30
+   -   从第一个操作数中减去第二个操作数    A - B 将得到 -10
+   *   把两个操作数相乘    A * B 将得到 200
+   /   分子除以分母  B / A 将得到 2
+   %   取模运算符，整除后的余数    B % A 将得到 0
+   ++  自增运算符，整数值增加 1   A++ 将得到 11
+   --  自减运算符，整数值减少 1   A-- 将得到 9
 
 
-5-2.关系运算符
+## 5-2.关系运算符
+1. 下表显示了 C++ 支持的关系运算符。
 
-.下表显示了 C++ 支持的关系运算符。
+   假设变量 A 的值为 10，变量 B 的值为 20，则：
+   运算符 描述  实例
+   ==  检查两个操作数的值是否相等，如果相等则条件为真。    (A == B) 不为真。
+   !=  检查两个操作数的值是否相等，如果不相等则条件为真。   (A != B) 为真。
+   >   检查左操作数的值是否大于右操作数的值，如果是则条件为真。    (A > B) 不为真。
+   <   检查左操作数的值是否小于右操作数的值，如果是则条件为真。    (A < B) 为真。
+   >=  检查左操作数的值是否大于或等于右操作数的值，如果是则条件为真。 (A >= B) 不为真。
+   <=  检查左操作数的值是否小于或等于右操作数的值，如果是则条件为真。 (A <= B) 为真。
 
-假设变量 A 的值为 10，变量 B 的值为 20，则：
-运算符 描述  实例
-==  检查两个操作数的值是否相等，如果相等则条件为真。    (A == B) 不为真。
-!=  检查两个操作数的值是否相等，如果不相等则条件为真。   (A != B) 为真。
->   检查左操作数的值是否大于右操作数的值，如果是则条件为真。    (A > B) 不为真。
-<   检查左操作数的值是否小于右操作数的值，如果是则条件为真。    (A < B) 为真。
->=  检查左操作数的值是否大于或等于右操作数的值，如果是则条件为真。 (A >= B) 不为真。
-<=  检查左操作数的值是否小于或等于右操作数的值，如果是则条件为真。 (A <= B) 为真。
-
-.实例
+2. 实例
+```cpp
 #include <iostream>
 using namespace std;
  
@@ -499,25 +308,23 @@ int main()
    }
    return 0;
 }
+```
 
-当上面的代码被编译和执行时，它会产生以下结果：
 
-Line 1 - a 不等于 b
-Line 2 - a 不小于 b
-
-5-3.逻辑运算符
+## 5-3.逻辑运算符
 //注意：非0为真，0为假
-.下表显示了 C++ 支持的关系逻辑运算符。
+1. 下表显示了 C++ 支持的关系逻辑运算符。
 
-假设变量 A 的值为 1，变量 B 的值为 0，则：
-运算符 描述  实例
-&&  称为逻辑与运算符。如果两个操作数都 true，则条件为 true。   (A && B) 为 false。
-||  称为逻辑或运算符。如果两个操作数中有任意一个 true，则条件为 true。  (A || B) 为 true。
-!   称为逻辑非运算符。用来逆转操作数的逻辑状态，如果条件为 true 则逻辑非运算符将使其为 false。 !(A && B) 为 true。
+   假设变量 A 的值为 1，变量 B 的值为 0，则：
+   运算符 描述  实例
+   &&  称为逻辑与运算符。如果两个操作数都 true，则条件为 true。   (A && B) 为 false。
+   ||  称为逻辑或运算符。如果两个操作数中有任意一个 true，则条件为 true。  (A || B) 为 true。
+   !   称为逻辑非运算符。用来逆转操作数的逻辑状态，如果条件为 true 则逻辑非运算符将使其为 false。 !(A && B) 为 true。
 
 //注意要与位运算符&,|,^,!区分，逻辑运算符无异或
 
-.实例
+2. 实例
+```cpp
 #include <iostream>
 using namespace std;
  
@@ -552,15 +359,9 @@ int main()
    }
    return 0;
 }
+```
 
-当上面的代码被编译和执行时，它会产生以下结果：
-
-Line 1 - 条件为真
-Line 2 - 条件为真
-Line 4 - 条件不为真
-Line 5 - 条件为真
-
-5-4.位运算符
+## 5-4.位运算符
 
 位运算符作用于位，并逐位执行操作。&、 | 和 ^ 的真值表如下所示：
 p   q   p & q   p | q   p ^ q//&全真则真，一假则假；|一真则真，全假则假；^异真同假
@@ -586,7 +387,7 @@ A^B = 0011 0001
 ~A  = 1100 0011
 
 下表显示了 C++ 支持的位运算符。假设变量 A 的值为 60，变量 B 的值为 13，则：
-----------------------------------------------------------------------------------------------------------
+
 运算符 描述  实例
 (1).&   按位与操作，按二进制位进行"与"运算。运算规则：
 
@@ -630,7 +431,7 @@ A = 0011 1100，B = 0000 1101
 实例
 
 请看下面的实例，了解 C++ 中可用的位运算符。
-
+```cpp
 #include <iostream>
 using namespace std;
  
@@ -660,7 +461,7 @@ int main()
  
    return 0;
 }
-
+```
 当上面的代码被编译和执行时，它会产生以下结果：
 
 Line 1 - c 的值是 12
@@ -670,8 +471,8 @@ Line 4 - c 的值是 -61
 Line 5 - c 的值是 240
 Line 6 - c 的值是 15
 
-5-5.赋值运算符
-
+## 5-5.赋值运算符
+```cpp
 下表列出了 C++ 支持的赋值运算符：
 运算符 描述  实例
 =   简单的赋值运算符，把右边操作数的值赋给左边操作数    C = A + B 将把 A + B 的值赋给 C
@@ -685,7 +486,6 @@ Line 6 - c 的值是 15
 &=  按位与且赋值运算符   C &= 2 等同于 C = C & 2
 ^=  按位异或且赋值运算符  C ^= 2 等同于 C = C ^ 2
 |=  按位或且赋值运算符   C |= 2 等同于 C = C | 2
-实例
 
 请看下面的实例，了解 C++ 中可用的赋值运算符。
 
@@ -749,32 +549,31 @@ Line 8 - >>= 运算符实例，c 的值 = 11
 Line 9 - &= 运算符实例，c 的值 = 2
 Line 10 - ^= 运算符实例，c 的值 = 0
 Line 11 - |= 运算符实例，c 的值 = 2
+```
+2. 注意:unsigned and signed
+   1. unsigned的作用就是将数字类型无符号化， 例如 int 型的范围：-2^31 ~ 2^31 - 1，而unsigned int的范围：0 ~ 2^32。看起来unsigned 是个不错的类型，尤其是用在自增或者没有负数的情况。但是在实际使用中会出现一些意外的情况。
+   2. signed在默认情况下声明的整型变量都是有符号的类型（char有点特别），如果需声明无符号类型的话就需要在类型前加上unsigned。无符号版本和有符号版本的区别就是无符号类型能保存2倍于有符号类型的正整数数据。 
 
-注:unsigned and signed
-    1、unsigned的作用就是将数字类型无符号化， 例如 int 型的范围：-2^31 ~ 2^31 - 1，而unsigned int的范围：0 ~ 2^32。看起来unsigned 是个不错的类型，尤其是用在自增或者没有负数的情况。但是在实际使用中会出现一些意外的情况。
+## 5-6.杂项运算符
 
-    2、signed在默认情况下声明的整型变量都是有符号的类型（char有点特别），如果需声明无符号类型的话就需要在类型前加上unsigned。无符号版本和有符号版本的区别就是无符号类型能保存2倍于有符号类型的正整数数据。 
+1. 下表列出了 C++ 支持的其他一些重要的运算符。
+   运算符 描述
+   sizeof  sizeof 运算符返回变量的大小。例如，sizeof(a) 将返回 4，其中 a 是整数。
+   Condition ? X : Y   条件运算符。如果 Condition 为真 ? 则值为 X : 否则值为 Y。
+   ,   逗号运算符会顺序执行一系列运算。整个逗号表达式的值是以逗号分隔的列表中的最后一个表达式的值。
+   .（点）和 ->（箭头）    成员运算符用于引用类、结构和共用体的成员。
+   Cast    强制转换运算符把一种数据类型转换为另一种数据类型。例如，int(2.2000) 将返回 2。
+   &   指针运算符 & 返回变量的地址。例如 &a; 将给出变量的实际地址。
+   *   指针运算符 * 指向一个变量。例如，*var; 将指向变量 var。
 
-5-6.杂项运算符
-
-下表列出了 C++ 支持的其他一些重要的运算符。
-运算符 描述
-sizeof  sizeof 运算符返回变量的大小。例如，sizeof(a) 将返回 4，其中 a 是整数。
-Condition ? X : Y   条件运算符。如果 Condition 为真 ? 则值为 X : 否则值为 Y。
-,   逗号运算符会顺序执行一系列运算。整个逗号表达式的值是以逗号分隔的列表中的最后一个表达式的值。
-.（点）和 ->（箭头）    成员运算符用于引用类、结构和共用体的成员。
-Cast    强制转换运算符把一种数据类型转换为另一种数据类型。例如，int(2.2000) 将返回 2。
-&   指针运算符 & 返回变量的地址。例如 &a; 将给出变量的实际地址。
-*   指针运算符 * 指向一个变量。例如，*var; 将指向变量 var。
-
-5-7.C++ 中的运算符优先级
+## 5-7.C++ 中的运算符优先级
 
 运算符的优先级确定表达式中项的组合。这会影响到一个表达式如何计算。某些运算符比其他运算符有更高的优先级，例如，乘除运算符具有比加减运算符更高的优先级。
 
 例如 x = 7 + 3 * 2，在这里，x 被赋值为 13，而不是 20，因为运算符 * 具有比 + 更高的优先级，所以首先计算乘法 3*2，然后再加上 7。
 
 下表将按运算符优先级从高到低列出各个运算符，具有较高优先级的运算符出现在表格的上面，具有较低优先级的运算符出现在表格的下面。在表达式中，较高优先级的运算符会优先被计算。
-
+```cpp
 类别      运算符                            结合性 
 后缀  () [] -> . ++ - -       从左到右 
 一元      + - ! ~ ++ - - (type)* & sizeof     从右到左 
@@ -792,12 +591,12 @@ Cast    强制转换运算符把一种数据类型转换为另一种数据类型
 赋值      = += -= *= /= %=>>= <<= &= ^= |=    从右到左 
 逗号      ,   从左到右 
 
-
-6.修饰符
+```
+# 6.修饰符
 
 C++ 允许在 char、int 和 double 数据类型前放置修饰符。修饰符用于改变基本类型的含义，所以它更能满足各种情境的需求。
 
-下面列出了数据类型修饰符：
+1. 下面列出了数据类型修饰符：
 
     signed
     unsigned
@@ -815,6 +614,7 @@ unsigned int y;
 
 为了理解 C++ 解释有符号整数和无符号整数修饰符之间的差别，我们来运行一下下面这个短程序：
 实例
+```cpp
 #include <iostream>
 using namespace std;
  
@@ -833,502 +633,510 @@ int main()
  
    return 0;
 }
-
+```
 当上面的程序运行时，会输出下列结果：
 
 -15536 50000
 
 上述结果中，无符号短整数 50,000 的位模式被解释为有符号短整数 -15,536。
-C++ 中的类型限定符
 
-类型限定符提供了变量的额外信息。
-限定符 含义
-const   const 类型的对象在程序执行期间不能被修改改变。
-volatile    修饰符 volatile 告诉编译器不需要优化volatile声明的变量，让程序可以直接从内存中读取变量。对于一般的变量编译器会对变量进行优化，将内存中的变量值放在寄存器中以加快读写效率。
-restrict    由 restrict 修饰的指针是唯一一种访问它所指向的对象的方式。只有 C99 增加了新的类型限定符 restrict。
+2. C++ 中的类型限定符
+
+   类型限定符提供了变量的额外信息。
+   限定符 含义
+   const   const 类型的对象在程序执行期间不能被修改改变。
+   volatile    修饰符 volatile 告诉编译器不需要优化volatile声明的变量，让程序可以直接从内存中读取变量。对于一般的变量编译器会对变量进行优化，将内存中的变量值放在寄存器中以加快读写效率。
+   restrict    由 restrict 修饰的指针是唯一一种访问它所指向的对象的方式。只有 C99 增加了新的类型限定符 restrict。
 
 
-6.程序流程结构
-'6-1.选择语句'
+# 6.程序流程结构
+## 6-1.选择语句
     6-1.选择语句
-    /1.语法：
-    if(boolean_expression)
+```cpp
+ if(boolean_expression)
+ {
+    // 如果布尔表达式为真将执行的语句
+ }
+
+ 如果布尔表达式为 true，则 if 语句内的代码块将被执行。如果布尔表达式为 false，则 if 语句结束后的第一组代码（闭括号后）将被执行。
+
+ C 语言把任何非零和非空的值假定为 true，把零或 null 假定为 false。
+ /2.实例
+
+ #include <iostream>
+ using namespace std;
+  
+ int main ()
+ {
+    // 局部变量声明
+    int a = 10;
+  
+    // 使用 if 语句检查布尔条件
+    if( a < 20 )
     {
-       // 如果布尔表达式为真将执行的语句
+        // 如果条件为真，则输出下面的语句
+        cout << "a 小于 20" << endl;
     }
+    cout << "a 的值是 " << a << endl;
+  
+    return 0;
+ }
+ ```
+ 它会产生下列结果：
 
-    如果布尔表达式为 true，则 if 语句内的代码块将被执行。如果布尔表达式为 false，则 if 语句结束后的第一组代码（闭括号后）将被执行。
+ a 小于 20
+ a 的值是 10
 
-    C 语言把任何非零和非空的值假定为 true，把零或 null 假定为 false。
-    /2.实例
+## 6-2.if-else语句
+1. 语法
+```cpp
+if(boolean_expression)
+{
+ // 如果布尔表达式为真将执行的语句
+}
+else
+{
+ // 如果布尔表达式为假将执行的语句
+}
 
-    #include <iostream>
-    using namespace std;
-     
-    int main ()
-    {
-       // 局部变量声明
-       int a = 10;
-     
-       // 使用 if 语句检查布尔条件
-       if( a < 20 )
-       {
-           // 如果条件为真，则输出下面的语句
-           cout << "a 小于 20" << endl;
-       }
-       cout << "a 的值是 " << a << endl;
-     
-       return 0;
-    }
-    它会产生下列结果：
+如果布尔表达式为 true，则执行 if 块内的代码。如果布尔表达式为 false，则执行 else 块内的代码。
+```
+2. 实例
+```cpp
+#include <iostream>
+using namespace std;
 
-    a 小于 20
-    a 的值是 10
+int main ()
+{
+ // 局部变量声明
+ int a = 100;
 
-    6-2.if-else语句
-    /1.语法
-    if(boolean_expression)
-    {
-       // 如果布尔表达式为真将执行的语句
-    }
-    else
-    {
-       // 如果布尔表达式为假将执行的语句
-    }
+ // 检查布尔条件
+ if( a < 20 )
+ {
+     // 如果条件为真，则输出下面的语句
+     cout << "a 小于 20" << endl;
+ }
+ else
+ {
+     // 如果条件为假，则输出下面的语句
+     cout << "a 大于 20" << endl;
+ }
+ cout << "a 的值是 " << a << endl;
 
-    如果布尔表达式为 true，则执行 if 块内的代码。如果布尔表达式为 false，则执行 else 块内的代码。
+ return 0;
+}
+```
+3. if...else if...else 语句
+一个 if 语句后可跟一个可选的 else if...else 语句，这可用于测试多种条件。
 
-    /2.实例
+   1. 注意：当使用 if...else if...else 语句时，以下几点需要注意：
 
-    #include <iostream>
-    using namespace std;
-     
-    int main ()
-    {
-       // 局部变量声明
-       int a = 100;
-     
-       // 检查布尔条件
-       if( a < 20 )
-       {
-           // 如果条件为真，则输出下面的语句
-           cout << "a 小于 20" << endl;
-       }
-       else
-       {
-           // 如果条件为假，则输出下面的语句
-           cout << "a 大于 20" << endl;
-       }
-       cout << "a 的值是 " << a << endl;
-     
-       return 0;
-    }
+  一个 if 后可跟零个或一个 else，else 必须在所有 else if 之后。
+  一个 if 后可跟零个或多个 else if，else if 必须在 else 之前。
+  一旦某个 else if 匹配成功，其他的 else if 或 else 将不会被测试。
+   2. 语法
 
-    /3.if...else if...else 语句
+C++ 中的 if...else if...else 语句的语法：
+```cpp
+if(boolean_expression 1)
+{
+ // 当布尔表达式 1 为真时执行
+}
+else if( boolean_expression 2)
+{
+ // 当布尔表达式 2 为真时执行
+}
+else if( boolean_expression 3)
+{
+ // 当布尔表达式 3 为真时执行
+}
+else 
+{
+ // 当上面条件都不为真时执行
+}
 
-    一个 if 语句后可跟一个可选的 else if...else 语句，这可用于测试多种条件。
+实例
 
-    /3-1.注意：当使用 if...else if...else 语句时，以下几点需要注意：
+#include <iostream>
+using namespace std;
 
-        一个 if 后可跟零个或一个 else，else 必须在所有 else if 之后。
-        一个 if 后可跟零个或多个 else if，else if 必须在 else 之前。
-        一旦某个 else if 匹配成功，其他的 else if 或 else 将不会被测试。
+int main ()
+{
+ // 局部变量声明
+ int a = 100;
 
-    /3-2.语法
+ // 检查布尔条件
+ if( a == 10 )
+ {
+     // 如果 if 条件为真，则输出下面的语句
+     cout << "a 的值是 10" << endl;
+ }
+ else if( a == 20 )
+ {
+     // 如果 else if 条件为真，则输出下面的语句
+     cout << "a 的值是 20" << endl;
+ }
+ else if( a == 30 )
+ {
+     // 如果 else if 条件为真，则输出下面的语句
+     cout << "a 的值是 30" << endl;
+ }
+ else
+ {
+     // 如果上面条件都不为真，则输出下面的语句
+     cout << "没有匹配的值" << endl;
+ }
+ cout << "a 的准确值是 " << a << endl;
 
-    C++ 中的 if...else if...else 语句的语法：
+ return 0;
+}
+```
 
-    if(boolean_expression 1)
-    {
-       // 当布尔表达式 1 为真时执行
-    }
-    else if( boolean_expression 2)
-    {
-       // 当布尔表达式 2 为真时执行
-    }
-    else if( boolean_expression 3)
-    {
-       // 当布尔表达式 3 为真时执行
-    }
-    else 
-    {
-       // 当上面条件都不为真时执行
-    }
+## 6-3.嵌套if
+1. 语法
+```cpp
+if( boolean_expression 1)
+{
+ // 当布尔表达式 1 为真时执行
+ if(boolean_expression 2)
+ {
+    // 当布尔表达式 2 为真时执行
+ }
+}
+您可以嵌套 else if...else，方式与嵌套 if 语句相似。
+```
+2. 实例
+```cpp
+#include <iostream>
+using namespace std;
+int main()
+{
+  int a, b, c;//可以用逗号表示连续输入
+  cout << "请输入a =";
+  cin >> a;
+  cout << "请输入b =";
+  cin >> b;
+  cout << "请输入c =";
+  cin >> c;
+  if (a > b){
+      cout << "a>b" << endl; 
+      if (a > c){
+          cout << "a>c" << endl;
+      }
+      else{
+          cout << "a<c" << endl;
+      }
+  }
+  else {
+      cout << "a<b" << endl;
+  return 0;    
+  }
+}
+```
+3. 问题：
+error: expected ‘}’ before ‘else’
+字面上的意思就是“ else”前面缺少了一个“}”
 
-    实例
+## 4. switch语句
+### 1.功能：
+一个 switch 语句允许测试一个变量等于多个值时的情况。每个值称为一个 case，且被测试的变量会对每个 switch case 进行检查。
+### 2.语法
+switch(expression){
+  case constant-expression  :
+     statement(s);
+     break; // 可选的
+  case constant-expression  :
+     statement(s);
+     break; // 可选的
 
-    #include <iostream>
-    using namespace std;
-     
-    int main ()
-    {
-       // 局部变量声明
-       int a = 100;
-     
-       // 检查布尔条件
-       if( a == 10 )
-       {
-           // 如果 if 条件为真，则输出下面的语句
-           cout << "a 的值是 10" << endl;
-       }
-       else if( a == 20 )
-       {
-           // 如果 else if 条件为真，则输出下面的语句
-           cout << "a 的值是 20" << endl;
-       }
-       else if( a == 30 )
-       {
-           // 如果 else if 条件为真，则输出下面的语句
-           cout << "a 的值是 30" << endl;
-       }
-       else
-       {
-           // 如果上面条件都不为真，则输出下面的语句
-           cout << "没有匹配的值" << endl;
-       }
-       cout << "a 的准确值是 " << a << endl;
-     
-       return 0;
-    }
+  // 您可以有任意数量的 case 语句
+  default : // 可选的
+     statement(s);
+}
+### 3.规则：
 
-    当上面的代码被编译和执行时，它会产生下列结果：
+  .switch 语句中的 expression 必须是一个整型或枚举类型，或者是一个 class 类型，其中 class 有一个单一的转换函数将其转换为整型或枚举类型。
+  .在一个 switch 中可以有任意数量的 case 语句。每个 case 后跟一个要比较的值和一个冒号。
+  .case 的 constant-expression 必须与 switch 中的变量具有相同的数据类型，且必须是一个常量或字面量。
+  .当被测试的变量等于 case 中的常量时，case 后跟的语句将被执行，直到遇到 break 语句为止。
+  .当遇到 break 语句时，switch 终止，控制流将跳转到 switch 语句后的下一行。
+  .不是每一个 case 都需要包含 break。如果 case 语句不包含 break，控制流将会 继续 后续的 case，直到遇到 break 为止。
+  .一个 switch 语句可以有一个可选的 default case，出现在 switch 的结尾。
+  default case 可用于在上面所有 case 都不为真时执行一个任务。default case 中的 break 语句不是必需的。
+总结:
+1.switch的参数必须时枚举型;2.case的参数要与swich一致,case可以有多个;
+3.break执行时会跳出switch语句,若case中无break,则继续执行下面的case语句,直到遇到break时跳出switch
+4.default可有可无,当所有case不满足时会执行default
 
-    没有匹配的值
-    a 的准确值是 100
-
-    注意：1.if ()后不要加分号；2.括号格式：if (a = b){}
-
-    6-3.嵌套if
-    .语法
-    if( boolean_expression 1)
-    {
-       // 当布尔表达式 1 为真时执行
-       if(boolean_expression 2)
-       {
-          // 当布尔表达式 2 为真时执行
-       }
-    }
-    您可以嵌套 else if...else，方式与嵌套 if 语句相似。
-    .实例
-    #include <iostream>
-    using namespace std;
-    int main()
-    {
-        int a, b, c;//可以用逗号表示连续输入
-        cout << "请输入a =";
-        cin >> a;
-        cout << "请输入b =";
-        cin >> b;
-        cout << "请输入c =";
-        cin >> c;
-        if (a > b){
-            cout << "a>b" << endl; 
-            if (a > c){
-                cout << "a>c" << endl;
-            }
-            else{
-                cout << "a<c" << endl;
-            }
-        }
-        else {
-            cout << "a<b" << endl;
-        return 0;    
-        }
-    }
-
-    .问题：
-    error: expected ‘}’ before ‘else’
-    字面上的意思就是“ else”前面缺少了一个“}”
-
-    6-4.switch语句
-    /1.功能：
-    一个 switch 语句允许测试一个变量等于多个值时的情况。每个值称为一个 case，且被测试的变量会对每个 switch case 进行检查。
-    /2.语法
-    switch(expression){
-        case constant-expression  :
-           statement(s);
-           break; // 可选的
-        case constant-expression  :
-           statement(s);
-           break; // 可选的
-      
-        // 您可以有任意数量的 case 语句
-        default : // 可选的
-           statement(s);
-    }
-    /3.规则：
-
-        .switch 语句中的 expression 必须是一个整型或枚举类型，或者是一个 class 类型，其中 class 有一个单一的转换函数将其转换为整型或枚举类型。
-        .在一个 switch 中可以有任意数量的 case 语句。每个 case 后跟一个要比较的值和一个冒号。
-        .case 的 constant-expression 必须与 switch 中的变量具有相同的数据类型，且必须是一个常量或字面量。
-        .当被测试的变量等于 case 中的常量时，case 后跟的语句将被执行，直到遇到 break 语句为止。
-        .当遇到 break 语句时，switch 终止，控制流将跳转到 switch 语句后的下一行。
-        .不是每一个 case 都需要包含 break。如果 case 语句不包含 break，控制流将会 继续 后续的 case，直到遇到 break 为止。
-        .一个 switch 语句可以有一个可选的 default case，出现在 switch 的结尾。
-        default case 可用于在上面所有 case 都不为真时执行一个任务。default case 中的 break 语句不是必需的。
-    总结:
-    1.switch的参数必须时枚举型;2.case的参数要与swich一致,case可以有多个;
-    3.break执行时会跳出switch语句,若case中无break,则继续执行下面的case语句,直到遇到break时跳出switch
-    4.default可有可无,当所有case不满足时会执行default
-
-    /4.实例
-    #include <iostream>
-    #include <string>
-    using namespace std;//必须要用namespace才能成功
-    void printcolor(string color, string str){
-        int clr;
-        string head;
-        string tail;
-        string display;
-        if (color == "green") clr =1;
-        if (color == "red") clr = 2;
-        switch(clr){
-            case 1:{
-                head = "a"; 
-                tail = "b";
-                display = head + str + tail;  
-                break;
-            }
-            case 2:{
-                head = "c"; 
-                tail = "d";
-                display = head + str + tail;  
-                break;
-            }
-            default:{
-                display = str;
-                break;
-            }
-        }   
-        cout << display << endl;//只有当有endl的时候,每次调用函数才会换行
-    }
-
-    int main(){
-        printcolor("green", "helloworld");
-        printcolor("red", "helloworld");
-        
-        return 0;
-    }
-
-    6-5.嵌套switch
-    您可以把一个 switch 作为一个外部 switch 的语句序列的一部分，即可以在一个 switch 语句内使用另一个 switch 语句。
-    即使内部和外部 switch 的 case 常量包含共同的值，也没有矛盾。
-
-    /1.语法
-    switch(ch1) {
-       case 'A': 
-          cout << "这个 A 是外部 switch 的一部分";
-          switch(ch2) {
-             case 'A':
-                cout << "这个 A 是内部 switch 的一部分";
-                break;
-             case 'B': // 内部 B case 代码
-          }
+### 4.实例
+```cpp
+#include <iostream>
+#include <string>
+using namespace std;//必须要用namespace才能成功
+void printcolor(string color, string str){
+  int clr;
+  string head;
+  string tail;
+  string display;
+  if (color == "green") clr =1;
+  if (color == "red") clr = 2;
+  switch(clr){
+      case 1:{
+          head = "a"; 
+          tail = "b";
+          display = head + str + tail;  
           break;
-       case 'B': // 外部 B case 代码
-    }
+      }
+      case 2:{
+          head = "c"; 
+          tail = "d";
+          display = head + str + tail;  
+          break;
+      }
+      default:{
+          display = str;
+          break;
+      }
+  }   
+  cout << display << endl;//只有当有endl的时候,每次调用函数才会换行
+}
 
-    /2.实例
-    #include <iostream>
-    using namespace std;
-    int main ()
-    {
-       // 局部变量声明
-       int a = 100;
-       int b = 200;
-       switch(a) {
-          case 100:{
-             cout << "这是外部 switch 的一部分" << endl;
-             switch(b) {
-                case 200:
-                   cout << "这是内部 switch 的一部分" << endl;
-             }
+int main(){
+  printcolor("green", "helloworld");
+  printcolor("red", "helloworld");
+  
+  return 0;
+}
+```
+
+### 6-5.嵌套switch
+
+您可以把一个 switch 作为一个外部 switch 的语句序列的一部分，即可以在一个 switch 语句内使用另一个 switch 语句。
+即使内部和外部 switch 的 case 常量包含共同的值，也没有矛盾。
+
+#### 1.语法
+```cpp
+switch(ch1) {
+ case 'A': 
+    cout << "这个 A 是外部 switch 的一部分";
+    switch(ch2) {
+       case 'A':
+          cout << "这个 A 是内部 switch 的一部分";
+          break;
+       case 'B': // 内部 B case 代码
+    }
+    break;
+ case 'B': // 外部 B case 代码
+}
+```
+#### 2.实例
+```cpp
+#include <iostream>
+using namespace std;
+int main ()
+{
+ // 局部变量声明
+ int a = 100;
+ int b = 200;
+ switch(a) {
+    case 100:{
+       cout << "这是外部 switch 的一部分" << endl;
+       switch(b) {
+          case 200:
+             cout << "这是内部 switch 的一部分" << endl;
        }
-       cout << "a 的准确值是 " << a << endl;
-       cout << "b 的准确值是 " << b << endl;
-       return 0;
-    }
+ }
+ cout << "a 的准确值是 " << a << endl;
+ cout << "b 的准确值是 " << b << endl;
+ return 0;
+}
+```
+结果:
+这是外部 switch 的一部分
+这是内部 switch 的一部分
+a 的准确值是 100
+b 的准确值是 200
 
-    结果:
-    这是外部 switch 的一部分
-    这是内部 switch 的一部分
-    a 的准确值是 100
-    b 的准确值是 200
+#### 6-6.三目运算符
+1. 作用:通过三目运算符实现简单判断
+2. 语法:表达式1 ? 表达式2 : 表达式3 | c = a > b ? a : b;
+3. 解释:若表达式1的值为真,执行表达式2,并返回表达式2的结果
+若表达式1的值为假,执行表达式3,并返回表达式3的结果
+4. 例子
+```cpp
+#include <iostream>
+using namespace std;
+int main(){
+   int a = 1, b = 2, c =3;
+   c = a > b ? a : b;
+   cout << "c = " << c << endl;
+   (a > b ? a : b) = 100
+   cout << "a = " << a << endl;
+}
 
-    6-6.三目运算符
-    /1.作用:通过三目运算符实现简单判断
-    /2.语法:表达式1 ? 表达式2 : 表达式3 | c = a > b ? a : b;
-    /3.解释:若表达式1的值为真,执行表达式2,并返回表达式2的结果
-    若表达式1的值为假,执行表达式3,并返回表达式3的结果
-    /4.例子
-    /4-1.
-        #include <iostream>
-        using namespace std;
-        int main(){
-            int a = 1, b = 2, c =3;
-            c = a > b ? a : b;
-            cout << "c = " << c << endl;
-            (a > b ? a : b) = 100
-            cout << "a = " << a << endl;
-        }
+  int a = 1, b = 2, z, c = 3;
+   
+  z = a > b ? a : (b > c ? b : c);
+   
+  cout << "z:" << z << endl;
 
-    /4-2.
-        int a = 1, b = 2, z, c = 3;
-         
-        z = a > b ? a : (b > c ? b : c);
-         
-        cout << "z:" << z << endl;
+  这样输出的结果是：z:3
+```
+## 6.循环语句
+### 1.while循环
 
-        这样输出的结果是：z:3
+1. 语法：
+ while(condition)
+ {
+    statement(s);
+ }
 
-'6-2.循环语句'
-6-2.while循环
+ 在这里，statement(s) 可以是一个单独的语句，也可以是几个语句组成的代码块。
+ condition 可以是任意的表达式，当为任意非零值时都为真。当条件为真时执行循环。
+ 当条件为假时，程序流将继续执行紧接着循环的下一条语句。
 
-    6-2-1.语法：
-    while(condition)
+ 2. 示例:
+    1. 例子
+```cpp
+ #include <iostream>
+ using namespace std;
+ int main ()
+ {
+    // 局部变量声明
+    int a = 10;
+
+    // while 循环执行
+    while( a < 20 )
     {
-       statement(s);
+        cout << "a 的值：" << a << endl;
+        a++;
     }
+  
+    return 0;
+ }
+```
 
-    在这里，statement(s) 可以是一个单独的语句，也可以是几个语句组成的代码块。
-    condition 可以是任意的表达式，当为任意非零值时都为真。当条件为真时执行循环。
-    当条件为假时，程序流将继续执行紧接着循环的下一条语句。
+ 当 while() 中的条件值为 0 时，循环就结束了。
 
-    6-2-2.示例:
-    /1.例子1
-    #include <iostream>
-    using namespace std;
-    int main ()
+ 开始 y = 10，每循环一次 y 的值就减 1（y-- 会导致 y 减 1），当 y 值一直减到 0 时，
+ 退出 while 循环，但是还要继续做 y --操作，所以 y 最后的值就是 -1。
+
+    2.例子2(死循环)
+```cpp
+ #include <iostream>
+ using namespace std;
+ int main ()
+ {
+    // 局部变量声明
+    int a = 10;
+    // while 无限循环执行
+    while( 1 )
     {
-       // 局部变量声明
-       int a = 10;
-
-       // while 循环执行
-       while( a < 20 )
-       {
-           cout << "a 的值：" << a << endl;
-           a++;
-       }
-     
-       return 0;
+        cout << "a 的值：" << a << endl;
+        a++;
     }
+    return 0;
+ }
+```
+### 2.for循环
 
-    当 while() 中的条件值为 0 时，循环就结束了。
+1. 语法
+ for ( init; condition; increment )//起始表达式；条件表达式；末尾循环体
+ {
+    statement(s);
+ }
 
-    开始 y = 10，每循环一次 y 的值就减 1（y-- 会导致 y 减 1），当 y 值一直减到 0 时，
-    退出 while 循环，但是还要继续做 y --操作，所以 y 最后的值就是 -1。
+2. 控制流:
+     init 会首先被执行，且只会执行一次。这一步允许您声明并初始化任何循环控制变量。
+     您也可以不在这里写任何语句，只要有一个分号出现即可。
+     接下来，会判断 condition。如果为真，则执行循环主体。如果为假，则不执行循环主体，且控制流会跳转到紧接着 for 循环的下一条语句。
+     在执行完 for 循环主体后，控制流会跳回上面的 increment 语句。该语句允许您更新循环控制变量。该语句可以留空，只要在条件后有一个分号出现即可。
+     条件再次被判断。如果为真，则执行循环，这个过程会不断重复（循环主体，然后增加步值，再然后重新判断条件）。在条件变为假时，for 循环终止。
 
-    /2.例子2(死循环)
-    #include <iostream>
-    using namespace std;
-    int main ()
+ 总结：1.先执行起始表达式，2.再判断条件表达式，若为True，则执行for循环内的语句，然后再执行末尾循环体的语句，直到不满足条件后跳出循环体；
+ 若为flase，则执行for循环之下的语句
+ 3. 例子:
+ 例1
+ ```cpp
+ #include <iostream>
+ using namespace std;
+  
+ int main ()
+ {
+    // for 循环执行
+    for( int a = 10; a < 20; a = a + 1 )//起始表达式；条件表达式；末尾循环体
+
     {
-       // 局部变量声明
-       int a = 10;
-       // while 无限循环执行
-       while( 1 )
-       {
-           cout << "a 的值：" << a << endl;
-           a++;
-       }
-       return 0;
+        cout << "a 的值：" << a << endl;//循环语句
     }
+  
+    return 0;
+ }
+```
+4. 注意事项:for 语句中的三个表达式可部分或全部省略，但两个分号不能省略。
 
-6-3.for循环
+ /1.格式:for (表达式1;表达式2;表达式3) {
+     // 循环体语句
+ }
 
-    6-3-1.语法
-    for ( init; condition; increment )//起始表达式；条件表达式；末尾循环体
+ 常见的是：将表达式1放在了 for 语句之前，或表达式3放在了循环体中，在 for 语句中就可相应地省略表达式1或表达式3。
+ 如：
+ for(i=1,s=0; i<=100; i++) {
+     sum += i;
+ }
+
+ 可写成如下形式：
+
+ i=1; 
+ sum=0;
+ for ( ;i<=100; ) {
+     sum+=i;  
+     i++;
+ }      
+ // 等效于while循环
+
+ 表达式2也可省略，写成：
+
+ for (; ;) {…}
+
+ 此时，系统约定表达式2的值为 1，即恒为真，则等同于：
+
+ for (; 1;) {…}
+
+### 3.dowhile循环
+
+1. 功能:不像 for 和 while 循环，它们是在循环头部测试循环条件。
+ do...while 循环是在循环的尾部检查它的条件。
+ do...while 循环与 while 循环类似，但是 do...while 循环会确保至少执行一次循环。
+
+2. 注意：
+ 条件表达式出现在循环的尾部，所以循环中的 statement(s) 会在条件被测试之前至少执行一次。
+ 如果条件为真，控制流会跳转回上面的 do，然后重新执行循环中的 statement(s)。
+ 这个过程会不断重复，直到给定条件变为假为止。
+
+ 总结：先执行do语句，然后执行while语句，当条件不满足时，结束循环，执行下一个语句
+3. 例：
+```cpp
+ #include <iostream>
+ using namespace std;
+ int main ()
+ {
+    // 局部变量声明
+    int a = 10;
+    // do 循环执行
+    do
     {
-       statement(s);
-    }
-
-    6-3-2.控制流:
-        init 会首先被执行，且只会执行一次。这一步允许您声明并初始化任何循环控制变量。
-        您也可以不在这里写任何语句，只要有一个分号出现即可。
-        接下来，会判断 condition。如果为真，则执行循环主体。如果为假，则不执行循环主体，且控制流会跳转到紧接着 for 循环的下一条语句。
-        在执行完 for 循环主体后，控制流会跳回上面的 increment 语句。该语句允许您更新循环控制变量。该语句可以留空，只要在条件后有一个分号出现即可。
-        条件再次被判断。如果为真，则执行循环，这个过程会不断重复（循环主体，然后增加步值，再然后重新判断条件）。在条件变为假时，for 循环终止。
-
-    总结：1.先执行起始表达式，2.再判断条件表达式，若为True，则执行for循环内的语句，然后再执行末尾循环体的语句，直到不满足条件后跳出循环体；
-    若为flase，则执行for循环之下的语句
-    6-3-3.例子:
-    /1.例1
-    #include <iostream>
-    using namespace std;
-     
-    int main ()
-    {
-       // for 循环执行
-       for( int a = 10; a < 20; a = a + 1 )//起始表达式；条件表达式；末尾循环体
-
-       {
-           cout << "a 的值：" << a << endl;//循环语句
-       }
-     
-       return 0;
-    }
-
-    6-3-4.注意事项:for 语句中的三个表达式可部分或全部省略，但两个分号不能省略。
-
-    /1.格式:for (表达式1;表达式2;表达式3) {
-        // 循环体语句
-    }
-
-    常见的是：将表达式1放在了 for 语句之前，或表达式3放在了循环体中，在 for 语句中就可相应地省略表达式1或表达式3。
-    如：
-    for(i=1,s=0; i<=100; i++) {
-        sum += i;
-    }
-
-    可写成如下形式：
-
-    i=1; 
-    sum=0;
-    for ( ;i<=100; ) {
-        sum+=i;  
-        i++;
-    }      
-    // 等效于while循环
-
-    表达式2也可省略，写成：
-
-    for (; ;) {…}
-
-    此时，系统约定表达式2的值为 1，即恒为真，则等同于：
-
-    for (; 1;) {…}
-
-6-4.dowhile循环
-
-    /1.功能:不像 for 和 while 循环，它们是在循环头部测试循环条件。
-    do...while 循环是在循环的尾部检查它的条件。
-    do...while 循环与 while 循环类似，但是 do...while 循环会确保至少执行一次循环。
-
-    /3.注意：
-    条件表达式出现在循环的尾部，所以循环中的 statement(s) 会在条件被测试之前至少执行一次。
-    如果条件为真，控制流会跳转回上面的 do，然后重新执行循环中的 statement(s)。
-    这个过程会不断重复，直到给定条件变为假为止。
-
-    总结：先执行do语句，然后执行while语句，当条件不满足时，结束循环，执行下一个语句
-    /4.例：
-    #include <iostream>
-    using namespace std;
-    int main ()
-    {
-       // 局部变量声明
-       int a = 10;
-       // do 循环执行
-       do
-       {
-           cout << "a 的值：" << a << endl;
-           a = a + 1;
-       }while( a < 20 );
-     
-       return 0;
-    }
-
-6-5.循环嵌套
-/1.C++ 中 嵌套 for 循环 语句的语法：
+        cout << "a 的值：" << a << endl;
+        a = a + 1;
+    }while( a < 20 );
+  
+    return 0;
+ }
+```
+### 4.循环嵌套
+1. C++ 中 嵌套 for 循环 语句的语法：
+```cpp
 for ( init; condition; increment )
 {
    for ( init; condition; increment )
@@ -1337,8 +1145,10 @@ for ( init; condition; increment )
    }
    statement(s); // 可以放置更多的语句
 }
+```
 
-/2.C++ 中 嵌套 while 循环 语句的语法：
+2. C++ 中 嵌套 while 循环 语句的语法：
+```cpp
 while(condition)
 {
    while(condition)
@@ -1347,8 +1157,9 @@ while(condition)
    }
    statement(s); // 可以放置更多的语句
 }
-
-/3.C++ 中 嵌套 do...while 循环 语句的语法：
+```
+3. C++ 中 嵌套 do...while 循环 语句的语法：
+```cpp
 do
 {
    statement(s); // 可以放置更多的语句
@@ -1358,69 +1169,71 @@ do
    }while( condition );
  
 }while( condition );
-
+```
 关于嵌套循环有一点值得注意，您可以在任何类型的循环内嵌套其他任何类型的循环。
 比如，一个 for 循环可以嵌套在一个 while 循环内，反之亦然。
-/4.例子：
+4. 例子：
 下面的程序使用了一个嵌套的 for 循环来查找 2 到 100 中的质数：
+```cpp
 planA    //质数又称为素数，是一个大于1的自然数，除了1和它自身外，不能被其他自然数整除的数叫做质数；否则称为合数。
-    #include<iostream>
-    using namespace std;
-    int main()
-    {
-        int i,j,count=0;    
-        for (i=0;i<100;i++) {
-            for(j=2;j<=i;j++) //从2遍历到i-1，寻找是否有i的因子
-            {
-                if((i%j) == 0)
-                {
-                    break;
-                }
-            }
-            if(j==i)
-            {  //判断是否从第二个for中正常循环出来的i                                          
-                cout << i << endl;     
-                count++;
-            }
-        }
-        cout << "总数为count=" << count << endl;
-        return 0;
-    }
+#include<iostream>
+using namespace std;
+int main()
+{
+  int i,j,count=0;    
+  for (i=0;i<100;i++) {
+      for(j=2;j<=i;j++) //从2遍历到i-1，寻找是否有i的因子
+      {
+          if((i%j) == 0)
+          {
+              break;
+          }
+      }
+      if(j==i)
+      {  //判断是否从第二个for中正常循环出来的i                                          
+          cout << i << endl;     
+          count++;
+      }
+  }
+  cout << "总数为count=" << count << endl;
+  return 0;
+}
 planB:
-    #include <iostream>
-    using namespace std;
-    void Primer_Search(int n);
-    int main(){
-        int n;
-        cout << "请输入一个数字范围n=";
-        cin >> n;
-        Primer_Search(n);
-    }
+#include <iostream>
+using namespace std;
+void Primer_Search(int n);
+int main(){
+  int n;
+  cout << "请输入一个数字范围n=";
+  cin >> n;
+  Primer_Search(n);
+}
 
-    void Primer_Search(int n){
-        int count = 0, i, j;
-        for (i = 0; i <= n; i++){
-            for (j = 2; j <= i; j++){
-                if (i % j == 0){
-                    break;
-                }
-                }
-            if (i == j)//当且仅当只能被自己整除的时候才能输入质数，例如6%2=0，但是此时i=6,j=2,i!=j,所以此时不能当质数输出
-            {
-                cout << "质数i=" << i << endl;
-                count++;
-            }   
-        }
-    }
+void Primer_Search(int n){
+  int count = 0, i, j;
+  for (i = 0; i <= n; i++){
+      for (j = 2; j <= i; j++){
+          if (i % j == 0){
+              break;
+          }
+          }
+      if (i == j)//当且仅当只能被自己整除的时候才能输入质数，例如6%2=0，但是此时i=6,j=2,i!=j,所以此时不能当质数输出
+      {
+          cout << "质数i=" << i << endl;
+          count++;
+      }   
+  }
+}
+```
+## 7.跳转语句"
+### 1.break
+1. 用法
+   1. 当 break 语句出现在一个循环内时，循环会立即终止，且程序流将继续执行紧接着循环的下一条语句。
+   2. 它可用于终止 switch 语句中的一个 case。
+   3. 如果您使用的是嵌套循环（即一个循环内嵌套另一个循环），break 语句会停止执行最内层的循环，然后开始执行该块之后的下一行代码。
 
-"6-3.跳转语句"
-6-3.break
-/1.用法
-    1.当 break 语句出现在一个循环内时，循环会立即终止，且程序流将继续执行紧接着循环的下一条语句。
-    2.它可用于终止 switch 语句中的一个 case。
-    3.如果您使用的是嵌套循环（即一个循环内嵌套另一个循环），break 语句会停止执行最内层的循环，然后开始执行该块之后的下一行代码。
-
-/2.实例
+2. 实例
+```cpp
 #include <iostream>
 using namespace std;
 int main ()
@@ -1442,79 +1255,68 @@ int main ()
  
    return 0;
 }
-6-4.coutinue
-/1.特点:
-    .C++ 中的 continue 语句有点像 break 语句。但它不是强迫终止，continue 会跳过当前循环中的代码，强迫开始下一次循环。
-    .对于 for 循环，continue 语句会导致执行条件测试和循环增量部分。
-    对于 while 和 do...while 循环，continue 语句会导致程序控制回到条件测试上。
-/2.例子
-    /2-1.#include <iostream>
-    using namespace std;
-    int main ()
-    {
-       // 局部变量声明
-       int a = 10;
+```
 
-       // do 循环执行
-       do
-       {
-           if( a == 15)
-           {
-              // 跳过迭代
-              a = a + 1;
-              continue;
-           }
-           cout << "a 的值：" << a << endl;
-           a = a + 1;
-       }while( a < 20 );
-     
-       return 0;
-    }
+### 2.coutinue
+1. 特点:
+   1. C++ 中的 continue 语句有点像 break 语句。但它不是强迫终止，continue 会跳过当前循环中的代码，强迫开始下一次循环。
+   2. 对于 for 循环，continue 语句会导致执行条件测试和循环增量部分。
+   3. 对于 while 和 do...while 循环，continue 语句会导致程序控制回到条件测试上。
+2. 例子
+```cpp
+#include <iostream>
+using namespace std;
+int main ()
+{
+ // 局部变量声明
+ int a = 10;
 
-    当上面的代码被编译和执行时，它会产生下列结果：
+ // do 循环执行
+ do
+ {
+     if( a == 15)
+     {
+        // 跳过迭代
+        a = a + 1;
+        continue;
+     }
+     cout << "a 的值：" << a << endl;
+     a = a + 1;
+ }while( a < 20 );
 
-    a 的值： 10
-    a 的值： 11
-    a 的值： 12
-    a 的值： 13
-    a 的值： 14
-    a 的值： 16
-    a 的值： 17
-    a 的值： 18
-    a 的值： 19
+ return 0;
+}
+/2-2.例2
+只输出奇数不输出偶数
+#include <iostream>
+using namespace std;
+#include <string>
+int main(){
+int i, j;
+cout << "请输入一个数字范围" << endl;
+cin >> j;
+for (i = 0; i <= j; i++){
+  if (i % 2 == 0){
+      continue;
+  }
+  cout << i << endl;
+}
 
-    /2-2.例2
-    只输出奇数不输出偶数
-    #include <iostream>
-    using namespace std;
-    #include <string>
-    int main(){
-    int i, j;
-    cout << "请输入一个数字范围" << endl;
-    cin >> j;
-    for (i = 0; i <= j; i++){
-        if (i % 2 == 0){
-            continue;
-        }
-        cout << i << endl;
-    }
-
-    }
-
-6-5.go-to 
-/1.作用：goto 语句允许把控制无条件转移到同一函数内的被标记的语句。
-
-/2.注意：在任何编程语言中，都不建议使用 goto 语句。因为它使得程序的控制流难以跟踪，使程序难以理解和难以修改。
-        任何使用 goto 语句的程序可以改写成不需要使用 goto 语句的写法。
-/3.语法
+}
+```
+### 3.go-to 
+1. 作用：goto 语句允许把控制无条件转移到同一函数内的被标记的语句。
+2. 注意：在任何编程语言中，都不建议使用 goto 语句。因为它使得程序的控制流难以跟踪，使程序难以理解和难以修改。
+        任何使用 goto 语句的程序可以改写成不需要使用 goto 语句的写法
+3. 语法
 goto label;
 ..
 .
 label: statement;
 
 在这里，label 是识别被标记语句的标识符，可以是任何除 C++ 关键字以外的纯文本。标记语句可以是任何语句，放置在标识符和冒号（:）后边。
-/4.例子
-/4-1.例1.
+4. 例子
+```cpp
 #include <iostream>
 using namespace std;
 int main(){
@@ -1527,1494 +1329,1159 @@ int main(){
     flag:
     cout << "6" << endl;
 }
-输出结果：
-1
-6
+```
+# 7.数组
+## 1. 一维数组
+1. 一维数组的定义方式
+   1. 数据类型 数组名 [数组长度];
+   2. 数据类型 数组名[数组长度] = {value1, value2,...};
+   3. 数据类型 数组名称[] = {value1, value2};
+2. 访问数组：arr[9]
+3. 赋值：arr[3]=100
+4. 例子
+```cpp
+#include <iostream>
+using namespace std;
+int main()
+{
+  //方式1
+  int arr1[5];
+  arr1[0] = 10;
+  arr1[1] = 10;
+  arr1[2] = 10;
+  cout << arr1[0] << endl;//访问数据元素
+  //方式2嵌套输出数组
+  int arr2[5] = {1, 2, 3, 4, 5};
+  for (int i =0; i < 5; i++){
+      cout << arr2[i] << endl;// cout = c + out
+  }
+  ///////方式3,定义数组的时候必须有初始长度
+  int arr3[] = {1, 2, 3, 4};
+  for (int i =0; i < 4; i++){
+      cout << arr3[i] << endl;// cout = c + out
+  }
+}
+/例2.
+#include <iostream>
+using namespace std;
 
+#include <iomanip>
+using std::setw;
 
-7.数组
-    7-1.一维数组
-    7-1-1.一维数组的定义方式
-        /定义数组：/1.数据类型 数组名 [数组长度];
-                /2.数据类型 数组名[数组长度] = {value1, value2,...};
-                /3.数据类型 数组名称[] = {value1, value2};
-        /:访问数组：arr[9]
-        /:赋值：arr[3]=100
-    /例子1.
-    #include <iostream>
-    using namespace std;
-    int main()
-    {
-        //方式1
-        int arr1[5];
-        arr1[0] = 10;
-        arr1[1] = 10;
-        arr1[2] = 10;
-        cout << arr1[0] << endl;//访问数据元素
-        //方式2嵌套输出数组
-        int arr2[5] = {1, 2, 3, 4, 5};
-        for (int i =0; i < 5; i++){
-            cout << arr2[i] << endl;// cout = c + out
-        }
-        ///////方式3,定义数组的时候必须有初始长度
-        int arr3[] = {1, 2, 3, 4};
-        for (int i =0; i < 4; i++){
-            cout << arr3[i] << endl;// cout = c + out
+int main ()
+{
+ int n[ 10 ]; // n 是一个包含 10 个整数的数组
+
+ // 初始化数组元素          
+ for ( int i = 0; i < 10; i++ )
+ {
+    n[ i ] = i + 100; // 设置元素 i 为 i + 100
+ }
+ cout << "Element" << setw( 13 ) << "Value" << endl;
+
+ // 输出数组中每个元素的值                     
+ for ( int j = 0; j < 10; j++ )
+ {
+    cout << setw( 7 )<< j << setw( 13 ) << n[ j ] << endl;
+ }
+
+ return 0;
+ ```
+5. 访问一维数组的方法
+```cpp
+#include <iostream>
+using namespace std;
+int main()
+{
+  //1.通过数组名统计整个数组占用内存大小
+  int arr4[4] = {1, 2, 3, 4};
+  cout << "整个数组占用内存空间为:" << sizeof(arr4) << endl;
+  cout << "每个元素占用内存空间为:" << sizeof(arr4[0]) << endl;
+  cout << "数组中元素个数为:" << sizeof(arr4) / sizeof(arr4[0]) << endl;
+  // 2.可以通过数组名查看数组首地址
+  cout << "数组首地址为:" << (int)arr4 << endl;//int是指将地址切换为10进制
+  cout << "数组第一个元素地址为:" << (int)&arr4[0] << endl;
+  cout << "数组第二个元素地址为:" << (int)&arr4[1] << endl;
+  // cout << "数组中第一个元素地址为:" << (int)&arr4[0] << endl;
+  //&相当于是个取符号
+  return 0;
+}
+```
+6. 案例：
+```cpp
+#include <iostream>
+using namespace std;
+int main()
+{
+  int i, max=0, arr[5]={1, 2, 3, 4, 5};
+  for (i = 0; i < 5; i++){
+      if (arr[i] > max){
+          max = arr[i];
+      }
+  }
+  cout << "max = " << max << endl;
+}
+/2.案例2：冒泡排序
+//程序包含两种冒泡排序算法
+//从小到大的冒泡排序BubbleSort
+//从大到小的冒泡排序InverseBubbleSort
+#include <iostream>
+using namespace std;
+void BubbleSort(int arr[], int n);
+void InverseBubbleSort(int arr[], int n);
+void printArray(int arr[], int n);
+const int n = 8;
+int main(int argc, char **argv) //argc[]
+{
+  int a[n] = {6,5,3,1,8,7,2,4};
+  BubbleSort(a,n);
+  cout << "从小到大的冒泡排序:\n";
+  printArray(a,n);
+  int b[n] = {6,5,3,1,8,7,2,4};
+  InverseBubbleSort(b,n);
+  cout << "从大到小的冒泡排序:\n";
+  printArray(b,n);
+  return 0;
+}
+void BubbleSort(int arr[], int n)
+{
+  for(int i = 0; i < n - 1; i++)
+  {
+      for(int j = 0; j < n - i - 1; j++)
+      {
+          if(arr[j] > arr[j+1])
+              swap(arr[j],arr[j+1]);//swap包含在命名空间std中，swap(a,b)表示对a,b进行交换
+      }
+  }
+}
+void InverseBubbleSort(int arr[], int n)//要声明函数里面的数据类型
+{
+  for(int i = 0; i < n - 1; i++)//有n个数，则要走n-1个循环，第i次循环要进行最多n-i-1次排序
+      //因为第一次循环已经把最大的数放在最后了，所以第二次循环就只进行n-1次排序
+  {
+      for(int j = n - 1; j > 0; j--)
+      {
+          if(arr[j] > arr[j - 1])
+          {
+              swap(arr[j],arr[j-1]);
+          }
+      }
+  }
+}
+void printArray(int arr[], int n)
+{
+  for(int i = 0; i < n; i++)
+  {
+      cout << arr[i] << " ";
+  }
+  cout << endl;
+}
+```
+------------------------
+7. 注：int main(int argc, char **argv)的详解.
+   1. argv:命令行的参数总个数，argv[]是argv个参数，第0个参数是程序的全名，以后的参数命令行后面跟的是用户输入额参数
+所以,argc是参数个数，argv[]是argv个参数，argv[i] = 'output'
+   2. char *argv[]是一个字符串组，其大小为int argc,主要用于命令行参数argv[]参数，数组里的每一个元素代表一个参数；比如输入：test a b c ,argc = r,argv[0] = "test",argv[1] = "a",...,argv[3] = "c",argc记录了用户在运行程序时输入的参数个数，arg指向的数组中至少有一个字符指针，即arg[0],他通常指向程序中的可执行文件的文件名
+   3. 总结：
+int argv:表示在命令行输入参数命令的时候，一共有多少参数，
+比如说，可执行文件为a.cpp,则当:a.cpp a b c 时候，argc = 3,
+char *argv[]:表示用来取得你所输入的参数，当可执行文件为：a.cpp时候：
+当,aa.cpp a b，argc = 3,argv[0]="aa",argv[1]="a",argv[2]="b"
+最后总结:argc是参数的个数，argv[]是参数，argv[0]是文件名，argv[1]是第一个参数...   
+4. 总结
+   1. 关于函数调用的问题：若是先写int main(){}后写void func(){},则需要在最首端申明void func()；，在int main()中调用
+若是先写void func(),则无需申明，只需在int main()中调用就行
+   2. 原则：void里面要指明数据类型；而且int main()中的变量在函数中不能复用，需要额外定义
+## 2. 2维数组
+### 1. 形式：type name[size1][size2]...[sizeN];
+### 2. 语法：int threedim[3][3][3];---->声明一个3x3x3的Matrix
+### 3. 二维数组：
+1. 初始化二维数组：int a[3][4]={{0, 1, 2, 3},//第一行
+                       {4, 5, 6,7},//第二行
+                       {8, 9, 10, 11}};//第三行
+2. 初始化方法2：int a[3][4]={0,......,11};
+   1. 访问2维数组：int val = a[2][3];//访问第3行第4列的元素
+   2. 修改2维数组:val[0][0] = 123
+   3. 例子：
+```cpp
+#include <iostream>
+using namespace std;
+int main(){
+    int a[5][2] = {{0, 0},{1,2}, {2,4}, {3, 6}, {4, 8}}
+    for (int i = 0; i < 5; i++){//输出2维数组中的每个值
+        for (int j = 0; j < 2; j++){
+            cout << "a[" << i << "][" << j << "]";
+            cout << a[i][j] << endl;
         }
     }
-    /例2.
+    return 0;
+}
+.例2：
+#include <iostream>
+using namespace std;
+int main(){
+    int n;
+    cout << "请输入行数n1="
+    cin >> n1;
+    cout << "请输入列数n2="
+    cin >> n2;
+    int a[n1][n2];
+    for (int i = 0; i < n1; i++){
+        for (int j = 0; j < n2; j++){
+            cout >> "a[i][j]=" >> a[i][j];
+            printf("a[%d][%d]=",a[i][j])
+        }
+    }
+    return 0;
+}
+```
+### 3. 2维数组空间：
+
+   内存空间：sizeof(arr)
+   第一行占用的内存：sizeof(arr[0])  行数：sizeof(arr)/sizeof(arr[0])//总内存数/第一行的内存
+   第一行第一列元素占用的内存：sizeof(arr[0][0])   列数：sizeof(arr[0])/sizeof(arr[0][0])//第一行的内存数/第一个元素内存数
+   2维数组的首地址：(int)arr
+   2维数组的第1行的首地址：(int)arr[0]
+   2维数组的第2行的首地址：(int)arr[1]
+   2维数组的第1个元素的首地址：(int)&arr[0][0]
+
+# 8.函数
+函数编写的步骤：申明--->定义--->在main()中调用
+## 1. 定义：
+返回值类型 函数名 (参数列表){//参数列表：数据类型 变量
+  函数体语句
+  return 表达式
+}
+### 1.定义格式:
+return_type function_name( parameter list )
+{
+  body of the function
+}
+
+return_type:为函数的返回的数据类型，有些函数执行所需的操作而不返回值，这种情况下，
+   return_type是void(所以当定义为int,double, char等这些类型的函数时，必须有返回值，而void不能有返回值,所以,为非void型函数时,必须有返回值,为void型函数时,不能有返回值)
+function_name:函数名称
+parameter list:参数列表包括参数的类型，顺序和数量，它可以没有
+body of the function：定义函数任务的语句
+
+### 2.声明：
+return_type function_name( parameter list );
+例子：
+```cpp
+#include <iostream>
+using namespace std;
+#include <string>
+int add(int num1, int num2)
+{//num1和num2为形参
+    int sum = num1 +num2;
+    return sum;
+}
+int max(int a, int b){
+    int c;
+    c = a > b ? a : b;
+    return c;
+}
+
+void Select(int a){
+    cout << "a*2 = " << a*2 << endl;
+}
+
+int main(){
+    int max1, sum, c;//a,b 为形参数
+    sum = add(1, 3);
+    max1 = max(1, 3); 
+    Select(100);//因为void不能有返回值,所以只能用直接调用而不能赋值给别的变量
+    cout << "sum = " << sum << endl;
+    cout << "max = " << max1 << endl;
+    return 0;
+}
+```
+
+### 3.调用：
+1. 功能：使用定义好的函数
+2. 语法：函数名(参数)
+3. 例子：
+```cpp
+#include <iostream>
+using namespace std;
+#include <string>
+int add(int num1, int num2){//num1和num2为形参
+ int sum = num1 +num2;
+ return sum;
+}
+int main(){
+ int a=10, b=10;//a,b 为形参数
+ int sum1 = add(a, b);//add(a,b)=sum
+ cout << "sum = " << sum1 << endl;//这个sum和上面的sum不是一个sum ,他是具有
+}
+```
+### 4.调用的方法
+1. 值传递：//值传递不会影响实参
+函数定义
+```cpp
+void swap(int x, int y)//如果函数不需要返回值，声明的时候可以写void
+{
+int temp;
+
+temp = x; /* 保存 x 的值 */
+x = y;    /* 把 y 赋值给 x */
+y = temp; /* 把 x 赋值给 y */
+
+}
+```cpp
+#include <iostream>
+using namespace std;
+
+// 函数声明
+void swap(int x, int y);
+
+int main ()
+{
+// 局部变量声明
+int a = 100;
+int b = 200;
+swap(a, b);
+
+cout << "交换后，a 的值：" << a << endl;
+cout << "交换后，b 的值：" << b << endl;
+return 0;
+}
+```
+2. 引用传递:
+```cpp
+//引用传递可以改变实参的值
+ #include <iostream>
+ using namespace std;
+ void swap02(int &x, int &y)//
+ {
+    int temp;
+    temp = x;    /* 保存地址 x 的值 */
+    x = y;        /* 把 y 赋值给 x */
+    y = temp;    /* 把 x 赋值给 y */
+ }
+
+ int main ()
+ {
+    int a = 100, b = 200;  
+    swap02(a, b); 
+    cout << "交换后a= " << a << endl;
+    cout << "交换后b= " << b << endl;
+    return 0;
+ }
+ ```
+3. 地址传递：//地址传递可以改变实参的值
+ ```cpp
+ void swap03(int *p1, int *p2){//用指针接受地址
+     int temp = *p1;
+     *p1 = *p2;
+     *p2 = temp;//解引用，实现值的替换
+ }
+ int main(){
+     int a = 10, b = 20;
+     swap03(&a, &b);//传入a, b变量的地址
+ }
+ ```
+4. 总结：
+```cpp
+#include <iostream>
+using namespace std;
+void swap01(int a, int b){
+  int temp = a;
+  a = b;
+  b = temp;
+}
+
+void swap02(int *p1, int *p2){//用指针接受地址,p1=&a,p2= &b
+  int temp = *p1;//p1指针的值赋给temp
+  *p1 = *p2;//p2指针的值和p1指针的值的交换
+  *p2 = temp;//temp的值，也就是*p1,即是p1的值传递给*p2,也就是p2的值
+}
+
+void swap03(int &a, int &b){
+  int temp = a;
+  a = b;
+  b = temp;
+}
+
+int main(){
+  int a = 10, b = 20;
+  swap01(a, b);//值传递不能修改实参的值
+  cout << "a = " << a << endl;
+  cout << "b = " << b << endl;
+  swap02(&a, &b);//传入a, b变量的地址，*p来显示指针值；地址传递可以修改实参的值
+  cout << "a = " << a << endl;
+  cout << "b = " << b << endl;
+  swap03(a, b);//地址传递不可以修改实参的值
+  cout << "a = " << a << endl;
+  cout << "b = " << b << endl;
+}   
+```
+
+### 5. 函数的常见样式：1.无参无返；有参无返；无参有反；有参有返回
+```cpp
+1.无参无返
+void test01(){
+    //void a = 10;无类型不可以创建变量，因为无法分配内存
+    cout << " " << endl;
+    // test01()；函数调用
+}
+2.有参无返：
+void test02(int a){
+    cout << "dsdf" << a << endl;
+}
+3.无参有返：
+int test02(){
+    cout << "dfs" << endl;
+    return 100
+}
+4.有参有返:
+int test04(int a){
+    cout << "dsfsdf" << a endl;
+    return a;
+}
+////////////////函数调用要在之后，先main后定义，要申明函数；先定义后main，不要申明函数
+int main(){
+    test01();
+    test02(100);//调用函数的时候就不需要定义变量类型,例如test01(int 100)是错误的
+    int num1 = test03(); cout << "num1 = " << num1 << endl;//num1 = 100
+    int num2 = test04(100);//
+    cout << "num2=" << num2;
+}
+```
+### 6. 函数的申明：函数申明能有多次，但是定义只能有1次
+
+   int max(int a, int b);
+   int max(int a, int b);
+   int max(int a, int b){
+      return a > b ? a : b;
+   }
+   int main(){
+      max(1,2)
+   }
+### 7. 函数的分文件编写
+1. 作用：让代码更加简洁
+2. 步骤：1.创建后缀名为.h的头文件 2.创建后缀名为.cpp的源文件
+3. 在头文件中写函数声明 4.在源文件中写函数定义 5.调用函数
+4. 例：
+```cpp
+ //swap.h文件
+ #include <iostream>
+ using namespace std;
+ void swap(a, b);
+ //swap.cpp文件;
+ #include <iostream>
+ using namespace std;
+ void swap(int a, int b){
+     int temp = a;
+     a = b;
+     b = temp;
+     cout << "a = " << a << endl;
+     cout << "b = " << b << endl;
+ }
+ //调用文件
+ #include <iostream>
+ using namespace std;
+ #include "swap.h"
+ int main(){
+     swap(1, 3);
+     return 0;
+ }
+```
+### 8.函数参数调用方法：
+1. 传值调用：
+2. 指针调用：
+   1. 把参数的地址复制给形式参数，在函数内，该地址用于访问调用中要用到的实际参数这意味着修改形式参数会影响实际参数，按指针传递，参数指针就像其他值一样传递给函数
+   2. 例子：
+```cpp
+// 函数定义
+void swap(int *x, int *y)
+{
+ int temp;
+ temp = *x;    /* 保存地址 x 的值 */
+ *x = *y;        /* 把 y 赋值给 x */
+ *y = temp;    /* 把 x 赋值给 y */
+}
+include <iostream>
+using namespace std;
+
+// 函数声明
+void swap(int *x, int *y);
+
+int main ()
+{
+ // 局部变量声明
+ int a = 100;
+ int b = 200;
+ cout << "交换前，a 的值：" << a << endl;
+ cout << "交换前，b 的值：" << b << endl;
+
+ /* 调用函数来交换值
+  * &a 表示指向 a 的指针，即变量 a 的地址 
+  * &b 表示指向 b 的指针，即变量 b 的地址 
+  */
+ swap(&a, &b);
+ cout << "交换后，a 的值：" << a << endl;
+ cout << "交换后，b 的值：" << b << endl;
+ return 0;
+}
+```
+
+3. lambda表达式
+   1. 形式：[capture](parameters)->return-type{body}
+   2. 例子：[](int x, int y){return x < y;}
+如果没有返回值可以表示为:[capture](parameters){body},例如：[]{++global_x;}
+
+   /* c++的变量传递俄传引用的区别，可以通过前面的[]来指定：
+   []      // 沒有定义任何变量。使用未定义变量会引发错误。
+   [x, &y] // x以传值方式传入（默认），y以引用方式传入。
+   [&]     // 任何被使用到的外部变量都隐式地以引用方式加以引用。
+   [=]     // 任何被使用到的外部变量都隐式地以传值方式加以引用。
+   [&, x]  // x显式地以传值方式加以引用。其余变量以引用方式加以引用。
+   [=, &z] // z显式地以引用方式加以引用。其余变量以传值方式加以引用。 */
+
+
+# 9.指针//pointer:ptr
+## 1.指针的作用：可以通过指针间接访内存，其值为另一个变量的地址，即是内存的直接地址
+## 2.指针变量的定义和使用
+
+### 1. 语法：数据类型 *变量名;type * var name;
+int    *ip;    /* 一个整型的指针 */
+double *dp;    /* 一个 double 型的指针 */
+float  *fp;    /* 一个浮点型的指针 */
+char   *ch;    /* 一个字符型的指针 */
+### 2. 例子：
+```cpp
+#include <iostream>
+using namespace std;
+int main(){
+    //1.定义指针
+    int * p;
+    int a = 10;
+    p = &a;//让指针记录a的地址.所以指针p就是地址
+    cout << "a的地址为" << &a << endl;
+    cout << "指针p=" << p << endl;
+    //2.使用指针
+    //可以通过解引用的方式找到指针指向的内存
+    //指针前加*表示解引用，找到指针指向的内存中的数据,修改*p,则会修改a的值
+    *p = 234.2;//*p只能为整型
+    cout << "a = " << a << endl;
+    cout << "*p = " << *p << endl;
+    //p = &a,*p = a,指针为变量地址，指针的解引用为变量的内容
+}
+```
+### 3. 指针所占的空间：
+```cpp
+#include <iostream>
+using namespace std;
+int main(){
+   int a = 10;
+   int * p = &a;
+   cout << "sizeof(p)=" << sizeof(int *) << endl;
+   cout << "sizeof(p)=" << sizeof(char *) << endl;
+   cout << "sizeof(p)=" << sizeof(double *) << endl;
+   cout << "sizeof(p)=" << sizeof(bool *) << endl;
+   cout << "sizeof(p)=" << sizeof(long *) << endl;
+   cout << "sizeof(p)=" << sizeof(string *) << endl;
+   return 0;
+}
+```
+### 4. 指针的类型：
+1. 空指针:
+   1. 定义：指针变量指向内存中编号为0的空间
+   2. 注意：空指针指向的内存是不可以访问的
+   3. 例子：
+```cpp
+#include <iostream>
+using namespace std;
+int main(){
+    int a = 10;
+    int * p = NULL;//空指针用于给指针变量初始化
+    *p = 100;//空指针不可访问，因为0-255的内村空间为系统空间，不能直接访问和修改
+    cout << *p << endl;//
+    return 0;
+}
+```
+2. 野指针：
+   1. 定义：指针变量指向非法的内存空间
+   2. 例子：
+```cpp
+int main(){
+  int * p = (int *)0x1100;
+  cout << *p << endl;
+  return 0;
+}
+//由于空指针和野指针不是我们申请的空间，所以不要访问，而且也不能访问
+```
+3. const修饰指针
+   1. const修饰指针---常量指针
+  常量指针的指向可以修改，但是指向的值不可以修改：
+  const int * p = &a;
+   2. const修饰常量---指针常量
+  指针常量的指向不能改，但是值可以改
+  int * const p = &a; 
+   3. const既修饰指针又修饰常量
+  const int * const p = &a;
+  4. 总结：
+ const int * p:常量指针，不能改值;int * const p:指针常量，不能改址
+
+4. 例子：
+```cpp 
+#include <iostream>
+using namespace std;
+int main(){
+   int a = 10, b = 10;
+   /*常量指针*/
+   const int * p1 = &a;
+   int *p2 = &a;
+   cout << *p1 << endl;
+   *p1 = b;//常量指针的值不能修改
+   p1 = &b;
+   cout << *p1 << endl;
+   *p2 = b;//变量指针的值可以修改
+   cout << *p2 << endl;
+   /*指针常量*/
+   int * const p = &a;
+   *p = 20;//指针的值可以改变
+   p = &b;//指针的指向不能变化
+   /*const即修饰指针，又修饰常量*/
+   const int * const p = &a;
+   *p = 20;//错误，此时p的指向和值都不能改变
+   p = &b;//
+   return 0;
+   /*注意:看一个指针是否可变，就是要看const修饰谁，若是const int * p,那么值不能变
+   若是int * const p,那么指向就不能变化 */
+}
+```
+### 4.指针的算术运算：
+.我们喜欢在程序中用指针代替数组，因为变量针可以递增，但是数组不能递增,因为数组是一个常量指针
+```cpp
+#include <iostream>
+using namespace std;
+const int MAX = 3;
+int main(){
+    int var[MAX] = {1, 2, 3};
+    int *ptr;
+    ptr = var;
+    for (int i = 0; i < MAX; i++)
+    {
+        cout << "Address of var[" << i << "] = ";
+        cout << ptr << endl;
+        cout << "Value of var[" << i << "] = ";
+        cout << *ptr << endl;
+        ptr--;//移动到下一位置
+    }
+    return 0;
+}
+例子2.
     #include <iostream>
     using namespace std;
-     
-    #include <iomanip>
-    using std::setw;
-     
-    int main ()
-    {
-       int n[ 10 ]; // n 是一个包含 10 个整数的数组
-     
-       // 初始化数组元素          
-       for ( int i = 0; i < 10; i++ )
-       {
-          n[ i ] = i + 100; // 设置元素 i 为 i + 100
-       }
-       cout << "Element" << setw( 13 ) << "Value" << endl;
-     
-       // 输出数组中每个元素的值                     
-       for ( int j = 0; j < 10; j++ )
-       {
-          cout << setw( 7 )<< j << setw( 13 ) << n[ j ] << endl;
-       }
-     
-       return 0;
-    7-1-2.访问一维数组的方法
-    #include <iostream>
-    using namespace std;
-    int main()
-    {
-        //1.通过数组名统计整个数组占用内存大小
-        int arr4[4] = {1, 2, 3, 4};
-        cout << "整个数组占用内存空间为:" << sizeof(arr4) << endl;
-        cout << "每个元素占用内存空间为:" << sizeof(arr4[0]) << endl;
-        cout << "数组中元素个数为:" << sizeof(arr4) / sizeof(arr4[0]) << endl;
-        // 2.可以通过数组名查看数组首地址
-        cout << "数组首地址为:" << (int)arr4 << endl;//int是指将地址切换为10进制
-        cout << "数组第一个元素地址为:" << (int)&arr4[0] << endl;
-        cout << "数组第二个元素地址为:" << (int)&arr4[1] << endl;
-        // cout << "数组中第一个元素地址为:" << (int)&arr4[0] << endl;
-        //&相当于是个取符号
+    const int MAX = 8;
+    int main(){
+        int i, arr[MAX] = {0, 1, 2, 3, 4, 5, 6, 7};
+        int *prt;
+        prt = arr;//prt为arr的初始地址
+        for (i = 0; i < MAX; i++){
+            cout << "the address of arr[" << i << "] is " << prt << endl;
+            cout << "the value of arr[" << i << "] is " << *prt << endl;
+            prt++;
+        }   
         return 0;
     }
-    /1.案例：
-    #include <iostream>
-    using namespace std;
-    int main()
-    {
-        int i, max=0, arr[5]={1, 2, 3, 4, 5};
-        for (i = 0; i < 5; i++){
-            if (arr[i] > max){
-                max = arr[i];
-            }
-        }
-        cout << "max = " << max << endl;
+
+/*
+int height[10];//int型的数组
+cout << &height << endl;//&height相当于整个height数组取地址
+cout << &height[0] << endl;//&height[0]相当于对height[0]取地址
+height = &height[0]
+*/
+    .注意事项：
+    short int height[10]; //int型的数组（short int 每个数据2字节）
+cout <<  "height       "<< height << endl 
+     <<  "height+1     "<< height + 1 << endl
+     <<  "&height[0]   " <<  &height[0] << endl
+     <<  "&height+1    "<< &height + 1<< endl
+     <<  "height+9     "<< height+9 << endl
+     << "height+10    " << height + 10 << endl
+
+    height       0136F900
+    height+1     0136F902
+    &height[0]   0136F900
+    &height+1    0136F914
+    height+9     0136F912
+    height+10    0136F914
+
+    .结论:
+        1.height  = &height[0] = &height
+        2.height + 1 = height + 2 = height + 1个short int 元素
+        3.height + 9 = height[]的最后一个元素的地址，height + 10 = 该数组结束后的第一个地址
+        4.&height + 1 = height + 10
+        5.*height = height[0] = i //把i值复制给height中的第一个元素
+        6.*(height + 1)//取height内存后面第一个元素，若height中每个元素为4个字节，则height+1就指向&height[0]+4这个地址
+```
+### 5.指针和数组：
+一个指向数组开头的指针可以通过指针的算术运算或数组索引来访问数组
+```cpp
+例1
+#include <iostream>
+using namespace std;
+int main ()
+{
+ int arr[] = {1, 2, 3};
+ int * ptr = arr;//ptr = arr，可以理解为指针就是数组，所以arr[i]= ptr[i]
+ for (int i = 0; i < 3; i++){
+    cout << *ptr << endl;
+    cout << ptr[i] << endl;//*ptr = ptr[i]
+    cout << ptr << endl;
+    ptr++;      
+ }
+}
+例2：
+#include <iostream>
+using namespace std;
+void bubbleSort(int * arr, int len)
+{
+  for (int i = 0; i < len -1; i++)
+  {
+      for (int j = 0; j < len -i -1; j++)
+      {
+          if (arr[j] > arr[j+1]){
+              int temp = arr[i];
+              arr[j] = arr[j+1];
+              arr[j+1] = temp;
+          }
+      }
+  }
+}
+void printArray(int * arr, int len){
+  for (int i = 0; i < len; i++){
+      cout << arr[i] << endl;
+  }
+}
+int main(){
+  int arr[6] = {1, 2, 3, 4, 5, 6};
+  bubbleSort(arr, 6);//arr为数组的首地址，len为数组的长度，将arr的首地址传入
+  printArray(arr, 6);
+  return 0;
+}
+```
+### 6.指针数组：
+1. 申明：int *prt[MAX];把指针prt申明为一个数组,有MAX个整数指针构成，所以prt中的每个元素
+都是一个指向int值的指针,prt[MAX]就是一个有MAX元素的指针数组
+2. 例子：
+```cpp
+#include <iostream>
+using namespace std;
+const int MAX = 3;
+int main ()
+{
+ int  var[MAX] = {10, 100, 200};
+ int *ptr[MAX];
+ for (int i = 0; i < MAX; i++)
+ {
+    cout << "Value of var[" << i << "] = ";
+    ptr[i] = &var[i]; 
+    cout << *ptr[i] << endl;
+ }
+ return 0;
+}
+```
+### 7.指向指针的指针：
+1. 定义：指针的指针就是将指针的地址存放在另一个指针里面
+2. 图像：
+  ptr       ptr      variable
+address---->address--->value 
+3. 申明：int **var;
+4. 例子：
+```cpp
+#include <iostream>
+using namespace std;
+int main ()
+{
+  int  var;
+  int  *ptr;
+  int  **pptr;
+
+  var = 3000;
+
+  // 获取 var 的地址
+  ptr = &var;
+
+  // 使用运算符 & 获取 ptr 的地址
+  pptr = &ptr;
+
+  // 使用 pptr 获取值
+  cout << "var 值为 :" << var << endl;
+  cout << "*ptr 值为:" << *ptr << endl;
+  cout << "**pptr 值为:" << **pptr << endl;
+  cout << "var 地址为：" << &var endl;
+  cout << "ptr = &var 地址为：" << ptr endl;
+  cout << "ptr 地址为：" << &ptr endl;
+  cout << "pptr = ptr = &var 值为var的地址为：" << *pptr endl;
+  cout << "pptr 地址为：" << &pptr << endl;
+  return 0;
+}
+  var 值为 :3000
+  *ptr 值为:3000
+  **pptr 值为:3000
+  var 地址为 :0x7ffeec7a65e8
+  ptr=&var 值为var的地址:0x7ffeec7a65e8
+  ptr地址为:0x7ffeec7a65e0
+  *pptr=ptr=&var  值为var的地址:0x7ffeec7a65e8
+  pptr 地址为:0x7ffeec7a65d8
+
+#include <iostream>
+using namespace std;
+int main()
+{
+  int  var;
+  int* ptr;
+  int** pptr;
+  int*** ppptr;
+  var = 3000;
+  // 获取 var 的地址
+  ptr = &var;
+  // 使用运算符 & 获取 ptr 的地址
+  pptr = &ptr;
+
+  ppptr = &pptr;
+  // 使用 pptr 获取值
+  cout << "var 值为 :" << var << endl;
+  cout << "ptr 值为:" << ptr << endl;
+  cout << "pptr 值为:" << pptr << endl;
+  cout << "pptr 值为:" << ppptr << endl;
+
+  return 0;
+}
+  输出结果为：
+  var 值为 :3000
+  ptr 值为:0x7ffe5deb4e14
+  pptr 值为:0x7ffe5deb4e08
+  pptr 值为:0x7ffe5deb4e00
+
+.结论：
+1.若是pptr = &ptr ; ptr = &var---->var = *ptr(一级指针的值) = **pptr(二级指针的值)  
+2.p,*p,&p的关系：*是寻址符号，&是地址符号，p为变量值，所以*p为p值(地址)的解引用，&p为p的地址,p为值,
+    有多少个*,就解引用多少次,解引用就是对地址进行寻址**
+3.int var, *ptr, **pptr(实际上定义的虽然是**pptr,但是指针变量是*ptr,同理可得ptr)--->  
+4.int **pptr------>*pptr为指针变量地址，**pptr为指针变量值
+     当满足&var = ptr, &ptr = pptr时候：
+        1.var = *ptr = **pptr(取值）,//重点****
+        2.&var = ptr = *pptr(取址)//把*prt想成对prt的值进行解析，即进行指向
+               示意图
+        var       ptr       pptr 
+    d1 3000<---d2 d1 <---d3 d2
+5.分开来看:
+ptr = &var
+*ptr = *(&var) = var //ptr指针的值就是var的地址,*ptr是直接对var地址取值
+pptr = &pt r
+*pptr = *(&ptr) = ptr = &var
+**pptr = *(*pptr) = *(&var) = var    
+注意:每次在p前加入一个*,相当于对p进行  
+6.对于**pptr,当未定义的时候，只能取得,pptr,&pptr,不能取得,*pptr,**pptr
+若var = 30,*pptr = &var,(pptr = &var是错误的),此时*(*pptr) = *(&var) = 30
+所以对于**pptr，*pptr = &var,即是保证2次寻址，pptr = &var就是1次寻址了，因为此时
+*pptr = *(&var) = 30,**pptr就失去了意义    
+7.指针和数组：int arr[]= {.......},int * ptr = arr<------> ptr = arr <---> ptr[i] = arr[i]                                                                       一次取值,
+```
+### 8.指针函数：
+1.指针函数：
+```cpp
+.int *func (int a ,int b)
+    *的优先级低于(),所以func先与()相结合，所以func是一个函数，即int *(func) (int a, int b)
+    这个函数的返回值的类型是int *:指向int类型的指针
+.int (*func) (int a, int b):
+    (*func)表示func是一个指针，然后后面跟着的()说明这个指针指向一个函数，所以为函数指针
+```
+
+
+### 9.变量作用域
+#### 1.定义:
+  局部变量:在函数或一个代码块内部声明的变量，称为局部变量,
+      局部变量只能被函数内部或代码块的语句所用,在函数内部,局部变量的值会覆盖全局变量的值
+  形式参数:在函数参数的定义中声明的变量，称为形式参数。
+  全局变量:在所有函数外部声明的变量，称为全局变量
+      全局变量能在程序的所有位置使用
+#### 2.例子
+```cpp
+  #include <iostream>
+  using namespace std;
+  // 全局变量声明
+  int g = 20;
+   
+  int main ()//int main()是主函数,
+  {
+    // 局部变量声明
+    int g = 10;
+   
+    cout << g;
+   
+    return 0;
+  }
+  //输出的为10
+```
+# 10.结构体：
+## 10-1.结构体的概念：
+### 1.语法：
+   struct type_name {
+   member_type1 member_name1;
+   member_type2 member_name2;
+   member_type3 member_name3;
+   .
+   .
+   } object_names;
+### 2.例如：
+   struct Books
+   {
+      char  title[50];
+      char  author[50];
+      char  subject[100];
+      int   book_id;
+   } book;
+### 3.方式：
+   struct 结构体名称 变量名
+   struct 结构体名称 变量名 = {成员1值，成员2值}
+   定义结构体时顺便创建变量
+### 4.例子：
+```cpp
+#include <iostream>
+using namespace std;
+#include <string>
+struct Student{//struct关键字在创建变量时候可以不写，但是在定义的时候要写
+    string name;
+    int age;
+    int score;
+};s3
+int main(){
+    //定义方式1
+    struct Student s1;//此处的俄struct可以省略
+    s1.name = "张三";
+    s1.age = 19;
+    s1.score = 100;
+    cout << "姓名:" << s1.name << "年龄:" << s1.age << "分数:" << s1.score << endl;
+    //定义方式2
+    struct Student s2 = {"李四", 18, 90};
+    cout << "姓名:" << s2.name << "年龄:" << s2.age << "分数:" << s2.score << endl;
+    //定义方式3,此时不推荐使用
+    s3.name = "张三";//上面已经写了就无需定义
+    s3.age = 19;
+    s3.score = 100;
+}   
+```
+## 10-2.结构体数组：
+### 1.语法：struct 结构体名 数组名[元素个数] = {{}, {},...}
+### 2.例子：
+```cpp
+   struct student{
+       string name;
+       int age;
+       int score;
+   }
+
+   int main(){
+       struct student arr[3]={
+           {"a", 18, 20},{"b", 18, 21}, {"c", 12, 32}}
+
+       arr[0].name = "c";
+       arr[0].age = 12;
+       arr[0].score = 23;
+   }
+   //输出结构体：
+   for (int i = 0; i < 3; i++){
+       cout << "姓名:" << arr[i].name 
+            << "年龄:" << arr[i].age << "分数:" 
+           << arr[i].score << endl;
+   }
+```
+### 10-3.结构体指针：
+1. 作用：利用->可以通过结构体指针来访问结构体属性
+2. 例子：
+```cpp
+#include <iostream>
+using namespace std;
+#include <string>
+struct student{
+    string name;
+    int age;
+    int score;
+};
+
+int main(){
+    //1.创建结构体值：
+    student s={
+        "a", 18, 20};
+    //2.通过指针指向结构体变量
+    student * p = &s;
+    //3.通过指针访问结构体变量中的数据：
+    cout << "姓名： " << p -> name 
+     << "年龄： " << p -> age
+      << "分数：" << p -> score << endl;
+
+}
+
+10-4.结构体嵌套：
+#include <iostream>
+using namespace std;
+#include <string>
+struct student{
+    string name;
+    int age;
+    int score;
+};
+
+struct teacher{
+    string name;
+    int age;
+    struct student stu;//辅导的学生,需要在上面提前定义
+};
+
+int main(){
+    teacher t;
+    t.name = "a";
+    t.age = 18;
+    t.stu.name = "b";
+    t.stu.age = 12;
+    t.stu.score = 12;
+    cout << "老师姓名:" << t.name 
+        << "老师年龄:" << t.age 
+        << "学生姓名:" << t.stu.name 
+        << "学生年龄:" << t.stu.age 
+        << "学生分数:" << t.stu.score << endl;
+}
+```
+### 10-5.结构体做函数参数：//结构体既可以作值传递，也可以地址传递，还可以作引用传递
+```cpp
+#include <iostream>
+using namespace std;
+#include <string>
+struct student{
+   string name;
+   int age;
+   int score;
+};
+//值传递
+void printStudent1(struct student s){
+   cout << "姓名：" << s.name << "年龄" << s.age << endl;
+}
+//地址传递
+void printStudent2(struct student * p){//p = &s
+   cout << "姓名：" << p -> name << "年龄" << p -> age
+   << "分数" << p -> score << endl;//p->name:直接指向name地址的值
+}
+//引用传递
+void printStudent3(struct student & s){
+   cout << "姓名：" << s.name << "年龄" << s.age << endl;
+}
+int main(){
+   student s;
+   s.name = "a";
+   s.age = 20;
+   s.score = 23;
+   printStudent1(s);
+   printStudent2(&s);
+   printStudent3(s);
+}
+```
+### 10-6.const使用场景：
+```cpp
+#include <iostream>
+using namespace std;
+#include <string>
+struct student{
+   string name;
+   int age;
+   int score;
+};
+//将函数的形参改成指针，可以减少内存空间，而且不会复制一个新的副本出来
+void printStudent1(const student *s){//加入const后，一旦修改就会报错，可以防止失误操作
+   s->age = 150; //此操作会将原来的age修改为150
+   cout << "姓名：" << s->name << "年龄：" << s->age << "分数："
+   << s->score << endl;
+}
+int main(){
+   student s = {"张三", 12, 53};
+   printStudent1(&s); 
+   cout << "main中张三年龄为:" << s.age << endl;
+}
+```
+### 10-7.指针函数和函数指针：
+1. 指针函数:
+   1. 定义：指针函数的本质是一个函数，但是它的返回值是一个指针，即是一个地址
+   2. 形式：int *p(int , int);//先()后*为函数指针
+   3. 例子：
+```cpp
+#include <iostream>
+using namespace std;
+int * Pf(int n){//Pf代表指针函数
+    int sum = 0;
+    for (int i = 0; i < n; i++){
+        sum+=i;
     }
-    /2.案例2：冒泡排序
-    //程序包含两种冒泡排序算法
-    //从小到大的冒泡排序BubbleSort
-    //从大到小的冒泡排序InverseBubbleSort
-    #include <iostream>
-    using namespace std;
-    void BubbleSort(int arr[], int n);
-    void InverseBubbleSort(int arr[], int n);
-    void printArray(int arr[], int n);
-    const int n = 8;
-    int main(int argc, char **argv) //argc[]
-    {
-        int a[n] = {6,5,3,1,8,7,2,4};
-        BubbleSort(a,n);
-        cout << "从小到大的冒泡排序:\n";
-        printArray(a,n);
-        int b[n] = {6,5,3,1,8,7,2,4};
-        InverseBubbleSort(b,n);
-        cout << "从大到小的冒泡排序:\n";
-        printArray(b,n);
-        return 0;
-    }
-    void BubbleSort(int arr[], int n)
-    {
-        for(int i = 0; i < n - 1; i++)
-        {
-            for(int j = 0; j < n - i - 1; j++)
-            {
-                if(arr[j] > arr[j+1])
-                    swap(arr[j],arr[j+1]);//swap包含在命名空间std中，swap(a,b)表示对a,b进行交换
-            }
-        }
-    }
-    void InverseBubbleSort(int arr[], int n)//要声明函数里面的数据类型
-    {
-        for(int i = 0; i < n - 1; i++)//有n个数，则要走n-1个循环，第i次循环要进行最多n-i-1次排序
-            //因为第一次循环已经把最大的数放在最后了，所以第二次循环就只进行n-1次排序
-        {
-            for(int j = n - 1; j > 0; j--)
-            {
-                if(arr[j] > arr[j - 1])
-                {
-                    swap(arr[j],arr[j-1]);
-                }
-            }
-        }
-    }
-    void printArray(int arr[], int n)
-    {
-        for(int i = 0; i < n; i++)
-        {
-            cout << arr[i] << " ";
-        }
-        cout << endl;
-    }
-    ------------------------
-    注：int main(int argc, char **argv)的详解：
-    1.argv:命令行的参数总个数，argv[]是argv个参数，第0个参数是程序的全名，以后的参数命令行后面跟的是用户输入额参数
-    所以,argc是参数个数，argv[]是argv个参数，argv[i] = 'output'
-    2.char *argv[]是一个字符串组，其大小为int argc,主要用于命令行参数argv[]参数，数组里的每一个元素代表一个参数；
-    比如输入：test a b c ,argc = r,argv[0] = "test",argv[1] = "a",...,argv[3] = "c",argc记录了用户在运行程序时输入的参数个数，
-    arg指向的数组中至少有一个字符指针，即arg[0],他通常指向程序中的可执行文件的文件名
-    3.总结：
-    int argv:表示在命令行输入参数命令的时候，一共有多少参数，
-    比如说，可执行文件为a.cpp,则当:a.cpp a b c 时候，argc = 3,
-    char *argv[]:表示用来取得你所输入的参数，当可执行文件为：a.cpp时候：
-    当,aa.cpp a b，argc = 3,argv[0]="aa",argv[1]="a",argv[2]="b"
-    最后总结:argc是参数的个数，argv[]是参数，argv[0]是文件名，argv[1]是第一个参数...   
-    4.
-    4-1关于函数调用的问题：若是先写int main(){}后写void func(){},则需要在最首端申明void func()；，在int main()中调用
-    若是先写void func(),则无需申明，只需在int main()中调用就行
-    4-2原则：void里面要指明数据类型；而且int main()中的变量在函数中不能复用，需要额外定义
----------------------------------------------------
-    7-2.2维数组
-    /1.形式：type name[size1][size2]...[sizeN];
-    /2.语法：int threedim[3][3][3];---->声明一个3x3x3的Matrix
-    /3.二维数组：
-        .初始化二维数组：int a[3][4]={{0, 1, 2, 3},//第一行
-                                {4, 5, 6,7},//第二行
-                                {8, 9, 10, 11}};//第三行
-        .初始化方法2：int a[3][4]={0,......,11};
-        .访问2维数组：int val = a[2][3];//访问第3行第4列的元素
-        .修改2维数组:val[0][0] = 123
-        .例子：
-            #include <iostream>
-            using namespace std;
-            int main(){
-                int a[5][2] = {{0, 0},{1,2}, {2,4}, {3, 6}, {4, 8}}
-                for (int i = 0; i < 5; i++){//输出2维数组中的每个值
-                    for (int j = 0; j < 2; j++){
-                        cout << "a[" << i << "][" << j << "]";
-                        cout << a[i][j] << endl;
-                    }
-                }
-                return 0;
-            }
-            .例2：
-            #include <iostream>
-            using namespace std;
-            int main(){
-                int n;
-                cout << "请输入行数n1="
-                cin >> n1;
-                cout << "请输入列数n2="
-                cin >> n2;
-                int a[n1][n2];
-                for (int i = 0; i < n1; i++){
-                    for (int j = 0; j < n2; j++){
-                        cout >> "a[i][j]=" >> a[i][j];
-                        printf("a[%d][%d]=",a[i][j])
-                    }
-                }
-                return 0;
-            }
-        .2维数组空间：
-        内存空间：sizeof(arr)
-        第一行占用的内存：sizeof(arr[0])  行数：sizeof(arr)/sizeof(arr[0])//总内存数/第一行的内存
-        第一行第一列元素占用的内存：sizeof(arr[0][0])   列数：sizeof(arr[0])/sizeof(arr[0][0])//第一行的内存数/第一个元素内存数
-        2维数组的首地址：(int)arr
-        2维数组的第1行的首地址：(int)arr[0]
-        2维数组的第2行的首地址：(int)arr[1]
-        2维数组的第1个元素的首地址：(int)&arr[0][0]
+    int *p = &sum;
+    return p;
+}
 
-8.函数
-    函数编写的步骤：申明--->定义--->在main()中调用
-    8-1.定义：
-    返回值类型 函数名 (参数列表){//参数列表：数据类型 变量
-        函数体语句
-        return 表达式
-    }
-        .定义格式:
-        return_type function_name( parameter list )
-        {
-           body of the function
-        }
+int main(){
+    cout << "请输入一个数:" << endl;
+    int n;
+    cin >> n;
+    int * c = Pf(n);
+    cout << "sum = " << *c << endl;
+    
+}
+```
+2. 函数指针：
+   1. 定义：返回指针的函数，它是一个指针，该指针的地址指向了一个函数，所以它是指向函数的指针；
+   2. 作用：用作调用函数和作函数的参数
+   3. 例子
+```cpp
+int (*p) (int a, int b);//函数指针指能申明，不能定义
+//typedef int(*PF)(int ,int);
+int max(int a, int b){
+  return a > b ? a : b;
+}
+int min(int a, int b) {  
+  return a < b ? a : b;  
+}
+int main(){
+  f = max;
+  f(1, 2);//(*f)(1, 2)和f(1, 2)等效
+  int c = (*f)(1, 2);
+  f = min;
+  c = (*f)(1, 2);
+}
 
-        return_type:为函数的返回的数据类型，有些函数执行所需的操作而不返回值，这种情况下，
-            return_type是void(所以当定义为int,double, char等这些类型的函数时，必须有返回值，而void不能有返回值,所以,为非void型函数时,必须有返回值,为void型函数时,不能有返回值)
-        function_name:函数名称
-        parameter list:参数列表包括参数的类型，顺序和数量，它可以没有
-        body of the function：定义函数任务的语句
+例2：//用作函数的参数
+#include <iostream>
+using namespace std;
+typedef int(*PF)(int, int);
+//int(*func)(int a, int b);
+int bar(int a, int b)
+{
+  return a + b;
+}
 
-        .声明：
-        return_type function_name( parameter list );
-            int max(int num1, int num2);
-            int max(int, int);//函数若有参数，则必须知名类型，但是名字可以不指定
+int foo(int a, int b)
+{
+  return a;
+}
+void func(int a, int b, PF ptr)
+{
+  cout << ptr(a, b) << endl;
+  return;
+}
+int main()
+{
+  PF ptr;
+  ptr = bar;
+  func(12, 34, ptr);
+  system("pause");
+  ptr = foo;
+  func(12, 34, ptr);
+  system("pause");
+  return 0;
+}
+```
 
-        .调用：max(1, 2);//调用无需指明类型
-        .例子：
-            #include <iostream>
-            using namespace std;
-            #include <string>
-            int add(int num1, int num2)
-            {//num1和num2为形参
-                int sum = num1 +num2;
-                return sum;
-            }
-            int max(int a, int b){
-                int c;
-                c = a > b ? a : b;
-                return c;
-            }
-
-            void Select(int a){
-                cout << "a*2 = " << a*2 << endl;
-            }
-
-            int main(){
-                int max1, sum, c;//a,b 为形参数
-                sum = add(1, 3);
-                max1 = max(1, 3); 
-                Select(100);//因为void不能有返回值,所以只能用直接调用而不能赋值给别的变量
-                cout << "sum = " << sum << endl;
-                cout << "max = " << max1 << endl;
-                return 0;
-            }
-
-
-    8-2.调用：
-        1.功能：使用定义好的函数
-        2.语法：函数名(参数)
-        3.例子：
-            #include <iostream>
-            using namespace std;
-            #include <string>
-            int add(int num1, int num2){//num1和num2为形参
-                int sum = num1 +num2;
-                return sum;
-            }
-            int main(){
-                int a=10, b=10;//a,b 为形参数
-                int sum1 = add(a, b);//add(a,b)=sum
-                cout << "sum = " << sum1 << endl;//这个sum和上面的sum不是一个sum ,他是具有
-            }
-        4.调用的方法
-            1.值传递：//值传递不会影响实参
-            // 函数定义
-            void swap(int x, int y)//如果函数不需要返回值，声明的时候可以写void
-            {
-               int temp;
-             
-               temp = x; /* 保存 x 的值 */
-               x = y;    /* 把 y 赋值给 x */
-               y = temp; /* 把 x 赋值给 y */
-              
-            }
-
-            #include <iostream>
-            using namespace std;
-             
-            // 函数声明
-            void swap(int x, int y);
-             
-            int main ()
-            {
-               // 局部变量声明
-               int a = 100;
-               int b = 200;
-               swap(a, b);
-             
-               cout << "交换后，a 的值：" << a << endl;
-               cout << "交换后，b 的值：" << b << endl;
-               return 0;
-            }
-            2.引用传递://引用传递可以改变实参的值
-                #include <iostream>
-                using namespace std;
-                void swap02(int &x, int &y)//
-                {
-                   int temp;
-                   temp = x;    /* 保存地址 x 的值 */
-                   x = y;        /* 把 y 赋值给 x */
-                   y = temp;    /* 把 x 赋值给 y */
-                }
-
-                int main ()
-                {
-                   int a = 100, b = 200;  
-                   swap02(a, b); 
-                   cout << "交换后a= " << a << endl;
-                   cout << "交换后b= " << b << endl;
-                   return 0;
-                }
-            3.地址传递：//地址传递可以改变实参的值
-                void swap03(int *p1, int *p2){//用指针接受地址
-                    int temp = *p1;
-                    *p1 = *p2;
-                    *p2 = temp;//解引用，实现值的替换
-                }
-                int main(){
-                    int a = 10, b = 20;
-                    swap03(&a, &b);//传入a, b变量的地址
-                }
-            4.总结：
-                #include <iostream>
-                using namespace std;
-                void swap01(int a, int b){
-                    int temp = a;
-                    a = b;
-                    b = temp;
-                }
-
-                void swap02(int *p1, int *p2){//用指针接受地址,p1=&a,p2= &b
-                    int temp = *p1;//p1指针的值赋给temp
-                    *p1 = *p2;//p2指针的值和p1指针的值的交换
-                    *p2 = temp;//temp的值，也就是*p1,即是p1的值传递给*p2,也就是p2的值
-                }
-
-                void swap03(int &a, int &b){
-                    int temp = a;
-                    a = b;
-                    b = temp;
-                }
-
-                int main(){
-                    int a = 10, b = 20;
-                    swap01(a, b);//值传递不能修改实参的值
-                    cout << "a = " << a << endl;
-                    cout << "b = " << b << endl;
-                    swap02(&a, &b);//传入a, b变量的地址，*p来显示指针值；地址传递可以修改实参的值
-                    cout << "a = " << a << endl;
-                    cout << "b = " << b << endl;
-                    swap03(a, b);//地址传递不可以修改实参的值
-                    cout << "a = " << a << endl;
-                    cout << "b = " << b << endl;
-                }   
-
-
-        5.函数的常见样式：1.无参无返；有参无返；无参有反；有参有返回
-            1.无参无返
-            void test01(){
-                //void a = 10;无类型不可以创建变量，因为无法分配内存
-                cout << " " << endl;
-                // test01()；函数调用
-            }
-            2.有参无返：
-            void test02(int a){
-                cout << "dsdf" << a << endl;
-            }
-            3.无参有返：
-            int test02(){
-                cout << "dfs" << endl;
-                return 100
-            }
-            4.有参有返:
-            int test04(int a){
-                cout << "dsfsdf" << a endl;
-                return a;
-            }
-        ////////////////函数调用要在之后，先main后定义，要申明函数；先定义后main，不要申明函数
-            int main(){
-                test01();
-                test02(100);//调用函数的时候就不需要定义变量类型,例如test01(int 100)是错误的
-                int num1 = test03(); cout << "num1 = " << num1 << endl;//num1 = 100
-                int num2 = test04(100);//
-                cout << "num2=" << num2;
-            }
-
-        6.函数的申明：函数申明能有多次，但是定义只能有1次
-        例子：
-        int max(int a, int b);
-        int max(int a, int b);
-        int max(int a, int b){
-            return a > b ? a : b;
-        }
-        int main(){
-            max(1,2)
-        }
-        7.函数的分文件编写
-            ..作用：让代码更加简洁
-            ..步骤：1.创建后缀名为.h的头文件 2.创建后缀名为.cpp的源文件
-            3.在头文件中写函数声明 4.在源文件中写函数定义 5.调用函数
-            ..例：
-                //swap.h文件
-                #include <iostream>
-                using namespace std;
-                void swap(a, b);
-                //swap.cpp文件;
-                #include <iostream>
-                using namespace std;
-                void swap(int a, int b){
-                    int temp = a;
-                    a = b;
-                    b = temp;
-                    cout << "a = " << a << endl;
-                    cout << "b = " << b << endl;
-                }
-                //调用文件
-                #include <iostream>
-                using namespace std;
-                #include "swap.h"
-                int main(){
-                    swap(1, 3);
-                    return 0;
-                }
-        8.函数参数调用方法：
-            1.传值调用：
-            2.指针调用：
-                .把参数的地址复制给形式参数，在函数内，该地址用于访问调用中要用到的实际参数
-                这意味着修改形式参数会影响实际参数，按指针传递，参数指针就像其他值一样传递给函数
-                .例子：
-                // 函数定义
-                void swap(int *x, int *y)
-                {
-                   int temp;
-                   temp = *x;    /* 保存地址 x 的值 */
-                   *x = *y;        /* 把 y 赋值给 x */
-                   *y = temp;    /* 把 x 赋值给 y */
-                }
-                include <iostream>
-                using namespace std;
-
-                // 函数声明
-                void swap(int *x, int *y);
-
-                int main ()
-                {
-                   // 局部变量声明
-                   int a = 100;
-                   int b = 200;
-                   cout << "交换前，a 的值：" << a << endl;
-                   cout << "交换前，b 的值：" << b << endl;
-
-                   /* 调用函数来交换值
-                    * &a 表示指向 a 的指针，即变量 a 的地址 
-                    * &b 表示指向 b 的指针，即变量 b 的地址 
-                    */
-                   swap(&a, &b);
-                   cout << "交换后，a 的值：" << a << endl;
-                   cout << "交换后，b 的值：" << b << endl;
-                   return 0;
-                }
-
-
-    8-3.lambda表达式
-        .形式：[capture](parameters)->return-type{body}
-        .例子：[](int x, int y){return x < y;}
-        如果没有返回值可以表示为:[capture](parameters){body},例如：[]{++global_x;}
-        /* c++的变量传递俄传引用的区别，可以通过前面的[]来指定：
-        []      // 沒有定义任何变量。使用未定义变量会引发错误。
-        [x, &y] // x以传值方式传入（默认），y以引用方式传入。
-        [&]     // 任何被使用到的外部变量都隐式地以引用方式加以引用。
-        [=]     // 任何被使用到的外部变量都隐式地以传值方式加以引用。
-        [&, x]  // x显式地以传值方式加以引用。其余变量以引用方式加以引用。
-        [=, &z] // z显式地以引用方式加以引用。其余变量以传值方式加以引用。 */
-
-
-9.指针//pointer:ptr
-    9-1.指针的作用：可以通过指针间接访内存，其值为另一个变量的地址，即是内存的直接地址
-    9-2.指针变量的定义和使用
-        语法：数据类型 *变量名;type * var name;
-            int    *ip;    /* 一个整型的指针 */
-            double *dp;    /* 一个 double 型的指针 */
-            float  *fp;    /* 一个浮点型的指针 */
-            char   *ch;    /* 一个字符型的指针 */
-        例子：
-            #include <iostream>
-            using namespace std;
-            int main(){
-                //1.定义指针
-                int * p;
-                int a = 10;
-                p = &a;//让指针记录a的地址.所以指针p就是地址
-                cout << "a的地址为" << &a << endl;
-                cout << "指针p=" << p << endl;
-                //2.使用指针
-                //可以通过解引用的方式找到指针指向的内存
-                //指针前加*表示解引用，找到指针指向的内存中的数据,修改*p,则会修改a的值
-                *p = 234.2;//*p只能为整型
-                cout << "a = " << a << endl;
-                cout << "*p = " << *p << endl;
-                //p = &a,*p = a,指针为变量地址，指针的解引用为变量的内容
-            }
-    9-3.指针所占的空间：
-        #include <iostream>
-        using namespace std;
-        int main(){
-            int a = 10;
-            int * p = &a;
-            cout << "sizeof(p)=" << sizeof(int *) << endl;
-            cout << "sizeof(p)=" << sizeof(char *) << endl;
-            cout << "sizeof(p)=" << sizeof(double *) << endl;
-            cout << "sizeof(p)=" << sizeof(bool *) << endl;
-            cout << "sizeof(p)=" << sizeof(long *) << endl;
-            cout << "sizeof(p)=" << sizeof(string *) << endl;
-            return 0;
-        }
-    9-4.指针的类型：
-        1.空指针:
-            .定义：指针变量指向内存中编号为0的空间
-            .注意：空指针指向的内存是不可以访问的
-            .例子：
-            #include <iostream>
-            using namespace std;
-            int main(){
-                int a = 10;
-                int * p = NULL;//空指针用于给指针变量初始化
-                *p = 100;//空指针不可访问，因为0-255的内村空间为系统空间，不能直接访问和修改
-                cout << *p << endl;//
-                return 0;
-            }
-        2.野指针：
-            .定义：指针变量指向非法的内存空间
-            .例子：
-                int main(){
-                    int * p = (int *)0x1100;
-                    cout << *p << endl;
-                    return 0;
-                }
-             //由于空指针和野指针不是我们申请的空间，所以不要访问，而且也不能访问
-        3.const修饰指针
-            .三种情况：
-                1.const修饰指针---常量指针
-                    常量指针的指向可以修改，但是指向的值不可以修改：
-                    const int * p = &a;
-                2.const修饰常量---指针常量
-                    指针常量的指向不能改，但是值可以改
-                    int * const p = &a; 
-                3.const既修饰指针又修饰常量
-                    const int * const p = &a;
-                .总结：
-                const int * p:常量指针，不能改值;int * const p:指针常量，不能改址
-
-                4.例子：
-                    #include <iostream>
-                    using namespace std;
-                    int main(){
-                        int a = 10, b = 10;
-                        /*常量指针*/
-                        const int * p1 = &a;
-                        int *p2 = &a;
-                        cout << *p1 << endl;
-                        *p1 = b;//常量指针的值不能修改
-                        p1 = &b;
-                        cout << *p1 << endl;
-                        *p2 = b;//变量指针的值可以修改
-                        cout << *p2 << endl;
-                        /*指针常量*/
-                        int * const p = &a;
-                        *p = 20;//指针的值可以改变
-                        p = &b;//指针的指向不能变化
-                        /*const即修饰指针，又修饰常量*/
-                        const int * const p = &a;
-                        *p = 20;//错误，此时p的指向和值都不能改变
-                        p = &b;//
-                        return 0;
-                        /*注意:看一个指针是否可变，就是要看const修饰谁，若是const int * p,那么值不能变
-                        若是int * const p,那么指向就不能变化 */
-                    }
-
-        4.指针的算术运算：
-            .我们喜欢在程序中用指针代替数组，因为变量针可以递增，但是数组不能递增,因为数组是一个常量指针
-            .例子1：
-            #include <iostream>
-            using namespace std;
-            const int MAX = 3;
-            int main(){
-                int var[MAX] = {1, 2, 3};
-                int *ptr;
-                ptr = var;
-                for (int i = 0; i < MAX; i++)
-                {
-                    cout << "Address of var[" << i << "] = ";
-                    cout << ptr << endl;
-                    cout << "Value of var[" << i << "] = ";
-                    cout << *ptr << endl;
-                    ptr--;//移动到下一位置
-                }
-                return 0;
-            }
-            例子2.
-                #include <iostream>
-                using namespace std;
-                const int MAX = 8;
-                int main(){
-                    int i, arr[MAX] = {0, 1, 2, 3, 4, 5, 6, 7};
-                    int *prt;
-                    prt = arr;//prt为arr的初始地址
-                    for (i = 0; i < MAX; i++){
-                        cout << "the address of arr[" << i << "] is " << prt << endl;
-                        cout << "the value of arr[" << i << "] is " << *prt << endl;
-                        prt++;
-                    }   
-                    return 0;
-                }
-
-            /*
-            int height[10];//int型的数组
-            cout << &height << endl;//&height相当于整个height数组取地址
-            cout << &height[0] << endl;//&height[0]相当于对height[0]取地址
-            height = &height[0]
-            */
-                .注意事项：
-                short int height[10]; //int型的数组（short int 每个数据2字节）
-            cout <<  "height       "<< height << endl 
-                 <<  "height+1     "<< height + 1 << endl
-                 <<  "&height[0]   " <<  &height[0] << endl
-                 <<  "&height+1    "<< &height + 1<< endl
-                 <<  "height+9     "<< height+9 << endl
-                 << "height+10    " << height + 10 << endl
-
-                height       0136F900
-                height+1     0136F902
-                &height[0]   0136F900
-                &height+1    0136F914
-                height+9     0136F912
-                height+10    0136F914
-
-                .结论:
-                    1.height  = &height[0] = &height
-                    2.height + 1 = height + 2 = height + 1个short int 元素
-                    3.height + 9 = height[]的最后一个元素的地址，height + 10 = 该数组结束后的第一个地址
-                    4.&height + 1 = height + 10
-                    5.*height = height[0] = i //把i值复制给height中的第一个元素
-                    6.*(height + 1)//取height内存后面第一个元素，若height中每个元素为4个字节，则height+1就指向&height[0]+4这个地址
-        5.指针和数组：
-            .一个指向数组开头的指针可以通过指针的算术运算或数组索引来访问数组
-            .例1：
-                #include <iostream>
-                using namespace std;
-                int main ()
-                {
-                   int arr[] = {1, 2, 3};
-                   int * ptr = arr;//ptr = arr，可以理解为指针就是数组，所以arr[i]= ptr[i]
-                   for (int i = 0; i < 3; i++){
-                      cout << *ptr << endl;
-                      cout << ptr[i] << endl;//*ptr = ptr[i]
-                      cout << ptr << endl;
-                      ptr++;      
-                   }
-                }
-            .例2：
-                #include <iostream>
-                using namespace std;
-                void bubbleSort(int * arr, int len)
-                {
-                    for (int i = 0; i < len -1; i++)
-                    {
-                        for (int j = 0; j < len -i -1; j++)
-                        {
-                            if (arr[j] > arr[j+1]){
-                                int temp = arr[i];
-                                arr[j] = arr[j+1];
-                                arr[j+1] = temp;
-                            }
-                        }
-                    }
-                }
-                void printArray(int * arr, int len){
-                    for (int i = 0; i < len; i++){
-                        cout << arr[i] << endl;
-                    }
-                }
-                int main(){
-                    int arr[6] = {1, 2, 3, 4, 5, 6};
-                    bubbleSort(arr, 6);//arr为数组的首地址，len为数组的长度，将arr的首地址传入
-                    printArray(arr, 6);
-                    return 0;
-                }
-        6.指针数组：
-            .申明：int *prt[MAX];把指针prt申明为一个数组,有MAX个整数指针构成，所以prt中的每个元素
-            都是一个指向int值的指针,prt[MAX]就是一个有MAX元素的指针数组
-            .例子：
-                #include <iostream>
-                using namespace std;
-                const int MAX = 3;
-                int main ()
-                {
-                   int  var[MAX] = {10, 100, 200};
-                   int *ptr[MAX];
-                   for (int i = 0; i < MAX; i++)
-                   {
-                      cout << "Value of var[" << i << "] = ";
-                      ptr[i] = &var[i]; 
-                      cout << *ptr[i] << endl;
-                   }
-                   return 0;
-                }
-
-    9-5.指向指针的指针：
-        1.定义：指针的指针就是将指针的地址存放在另一个指针里面
-        2.图像：
-              ptr       ptr      variable
-            address---->address--->value 
-        3.申明：int **var;
-        4.例子：
-                #include <iostream>
-                using namespace std;
-                int main ()
-                {
-                    int  var;
-                    int  *ptr;
-                    int  **pptr;
-                 
-                    var = 3000;
-                 
-                    // 获取 var 的地址
-                    ptr = &var;
-                 
-                    // 使用运算符 & 获取 ptr 的地址
-                    pptr = &ptr;
-                 
-                    // 使用 pptr 获取值
-                    cout << "var 值为 :" << var << endl;
-                    cout << "*ptr 值为:" << *ptr << endl;
-                    cout << "**pptr 值为:" << **pptr << endl;
-                    cout << "var 地址为：" << &var endl;
-                    cout << "ptr = &var 地址为：" << ptr endl;
-                    cout << "ptr 地址为：" << &ptr endl;
-                    cout << "pptr = ptr = &var 值为var的地址为：" << *pptr endl;
-                    cout << "pptr 地址为：" << &pptr << endl;
-                    return 0;
-                }
-                    var 值为 :3000
-                    *ptr 值为:3000
-                    **pptr 值为:3000
-                    var 地址为 :0x7ffeec7a65e8
-                    ptr=&var 值为var的地址:0x7ffeec7a65e8
-                    ptr地址为:0x7ffeec7a65e0
-                    *pptr=ptr=&var  值为var的地址:0x7ffeec7a65e8
-                    pptr 地址为:0x7ffeec7a65d8
-           ------------------------------------------------------
-                #include <iostream>
-                using namespace std;
-                int main()
-                {
-                    int  var;
-                    int* ptr;
-                    int** pptr;
-                    int*** ppptr;
-                    var = 3000;
-                    // 获取 var 的地址
-                    ptr = &var;
-                    // 使用运算符 & 获取 ptr 的地址
-                    pptr = &ptr;
-
-                    ppptr = &pptr;
-                    // 使用 pptr 获取值
-                    cout << "var 值为 :" << var << endl;
-                    cout << "ptr 值为:" << ptr << endl;
-                    cout << "pptr 值为:" << pptr << endl;
-                    cout << "pptr 值为:" << ppptr << endl;
-
-                    return 0;
-                }
-                    输出结果为：
-                    var 值为 :3000
-                    ptr 值为:0x7ffe5deb4e14
-                    pptr 值为:0x7ffe5deb4e08
-                    pptr 值为:0x7ffe5deb4e00
-            .结论：
-            1.若是pptr = &ptr ; ptr = &var---->var = *ptr(一级指针的值) = **pptr(二级指针的值)  
-            2.p,*p,&p的关系：*是寻址符号，&是地址符号，p为变量值，所以*p为p值(地址)的解引用，&p为p的地址,p为值,
-                有多少个*,就解引用多少次,解引用就是对地址进行寻址**
-            3.int var, *ptr, **pptr(实际上定义的虽然是**pptr,但是指针变量是*ptr,同理可得ptr)--->  
-            4.int **pptr------>*pptr为指针变量地址，**pptr为指针变量值
-                 当满足&var = ptr, &ptr = pptr时候：
-                    1.var = *ptr = **pptr(取值）,//重点****
-                    2.&var = ptr = *pptr(取址)//把*prt想成对prt的值进行解析，即进行指向
-                           示意图
-                    var       ptr       pptr 
-                d1 3000<---d2 d1 <---d3 d2
-            5.分开来看:
-            ptr = &var
-            *ptr = *(&var) = var //ptr指针的值就是var的地址,*ptr是直接对var地址取值
-            pptr = &pt r
-            *pptr = *(&ptr) = ptr = &var
-            **pptr = *(*pptr) = *(&var) = var    
-            注意:每次在p前加入一个*,相当于对p进行  
-            6.对于**pptr,当未定义的时候，只能取得,pptr,&pptr,不能取得,*pptr,**pptr
-            若var = 30,*pptr = &var,(pptr = &var是错误的),此时*(*pptr) = *(&var) = 30
-            所以对于**pptr，*pptr = &var,即是保证2次寻址，pptr = &var就是1次寻址了，因为此时
-            *pptr = *(&var) = 30,**pptr就失去了意义    
-            7.指针和数组：int arr[]= {.......},int * ptr = arr<------> ptr = arr <---> ptr[i] = arr[i]                                                                       一次取值,
-
-    9-6.指针函数：
-        1.指针函数：
-            .int *func (int a ,int b)
-                *的优先级低于(),所以func先与()相结合，所以func是一个函数，即int *(func) (int a, int b)
-                这个函数的返回值的类型是int *:指向int类型的指针
-            .int (*func) (int a, int b):
-                (*func)表示func是一个指针，然后后面跟着的()说明这个指针指向一个函数，所以为函数指针
-
-
-
-10.变量作用域
-    10-1.定义:
-        局部变量:在函数或一个代码块内部声明的变量，称为局部变量,
-            局部变量只能被函数内部或代码块的语句所用,在函数内部,局部变量的值会覆盖全局变量的值
-        形式参数:在函数参数的定义中声明的变量，称为形式参数。
-        全局变量:在所有函数外部声明的变量，称为全局变量
-            全局变量能在程序的所有位置使用
-    10-2.例子
-        #include <iostream>
-        using namespace std;
-        // 全局变量声明
-        int g = 20;
-         
-        int main ()//int main()是主函数,
-        {
-          // 局部变量声明
-          int g = 10;
-         
-          cout << g;
-         
-          return 0;
-        }
-        //输出的为10
-
-10.结构体：
-    10-1.结构体的概念：
-        1.语法：
-            struct type_name {
-            member_type1 member_name1;
-            member_type2 member_name2;
-            member_type3 member_name3;
-            .
-            .
-            } object_names;
-        2.例如：
-            struct Books
-            {
-               char  title[50];
-               char  author[50];
-               char  subject[100];
-               int   book_id;
-            } book;
-        3.方式：
-            struct 结构体名称 变量名
-            struct 结构体名称 变量名 = {成员1值，成员2值}
-            定义结构体时顺便创建变量
-        4.例子：
-            #include <iostream>
-            using namespace std;
-            #include <string>
-            struct Student{//struct关键字在创建变量时候可以不写，但是在定义的时候要写
-                string name;
-                int age;
-                int score;
-            };s3
-            int main(){
-                //定义方式1
-                struct Student s1;//此处的俄struct可以省略
-                s1.name = "张三";
-                s1.age = 19;
-                s1.score = 100;
-                cout << "姓名:" << s1.name << "年龄:" << s1.age << "分数:" << s1.score << endl;
-                //定义方式2
-                struct Student s2 = {"李四", 18, 90};
-                cout << "姓名:" << s2.name << "年龄:" << s2.age << "分数:" << s2.score << endl;
-                //定义方式3,此时不推荐使用
-                s3.name = "张三";//上面已经写了就无需定义
-                s3.age = 19;
-                s3.score = 100;
-            }   
-    10-2.结构体数组：
-        .语法：struct 结构体名 数组名[元素个数] = {{}, {},...}
-        .例子：
-            struct student{
-                string name;
-                int age;
-                int score;
-            }
-
-            int main(){
-                struct student arr[3]={
-                    {"a", 18, 20},{"b", 18, 21}, {"c", 12, 32}}
-
-                arr[0].name = "c";
-                arr[0].age = 12;
-                arr[0].score = 23;
-            }
-            //输出结构体：
-            for (int i = 0; i < 3; i++){
-                cout << "姓名:" << arr[i].name 
-                     << "年龄:" << arr[i].age << "分数:" 
-                    << arr[i].score << endl;
-            }
-
-    10-3.结构体指针：
-        1.作用：利用->可以通过结构体指针来访问结构体属性
-        2.例子：
-            #include <iostream>
-            using namespace std;
-            #include <string>
-            struct student{
-                string name;
-                int age;
-                int score;
-            };
-
-            int main(){
-                //1.创建结构体值：
-                student s={
-                    "a", 18, 20};
-                //2.通过指针指向结构体变量
-                student * p = &s;
-                //3.通过指针访问结构体变量中的数据：
-                cout << "姓名： " << p -> name 
-                 << "年龄： " << p -> age
-                  << "分数：" << p -> score << endl;
-
-            }
-
-    10-4.结构体嵌套：
-            #include <iostream>
-            using namespace std;
-            #include <string>
-            struct student{
-                string name;
-                int age;
-                int score;
-            };
-
-            struct teacher{
-                string name;
-                int age;
-                struct student stu;//辅导的学生,需要在上面提前定义
-            };
-
-            int main(){
-                teacher t;
-                t.name = "a";
-                t.age = 18;
-                t.stu.name = "b";
-                t.stu.age = 12;
-                t.stu.score = 12;
-                cout << "老师姓名:" << t.name 
-                    << "老师年龄:" << t.age 
-                    << "学生姓名:" << t.stu.name 
-                    << "学生年龄:" << t.stu.age 
-                    << "学生分数:" << t.stu.score << endl;
-            }
-
-    10-5.结构体做函数参数：//结构体既可以作值传递，也可以地址传递，还可以作引用传递
-        #include <iostream>
-        using namespace std;
-        #include <string>
-        struct student{
-            string name;
-            int age;
-            int score;
-        };
-        //值传递
-        void printStudent1(struct student s){
-            cout << "姓名：" << s.name << "年龄" << s.age << endl;
-        }
-        //地址传递
-        void printStudent2(struct student * p){//p = &s
-            cout << "姓名：" << p -> name << "年龄" << p -> age
-            << "分数" << p -> score << endl;//p->name:直接指向name地址的值
-        }
-        //引用传递
-        void printStudent3(struct student & s){
-            cout << "姓名：" << s.name << "年龄" << s.age << endl;
-        }
-        int main(){
-            student s;
-            s.name = "a";
-            s.age = 20;
-            s.score = 23;
-            printStudent1(s);
-            printStudent2(&s);
-            printStudent3(s);
-        }
-
-    10-6.const使用场景：
-        #include <iostream>
-        using namespace std;
-        #include <string>
-        struct student{
-            string name;
-            int age;
-            int score;
-        };
-        //将函数的形参改成指针，可以减少内存空间，而且不会复制一个新的副本出来
-        void printStudent1(const student *s){//加入const后，一旦修改就会报错，可以防止失误操作
-            s->age = 150; //此操作会将原来的age修改为150
-            cout << "姓名：" << s->name << "年龄：" << s->age << "分数："
-            << s->score << endl;
-        }
-        int main(){
-            student s = {"张三", 12, 53};
-            printStudent1(&s); 
-            cout << "main中张三年龄为:" << s.age << endl;
-        }
-
-    10-7.指针函数和函数指针：
-        1.指针函数:
-            .定义：指针函数的本质是一个函数，但是它的返回值是一个指针，即是一个地址
-            .形式：int *p(int , int);//先()后*为函数指针
-            .例子：
-            #include <iostream>
-            using namespace std;
-            int * Pf(int n){//Pf代表指针函数
-                int sum = 0;
-                for (int i = 0; i < n; i++){
-                    sum+=i;
-                }
-                int *p = &sum;
-                return p;
-            }
-
-            int main(){
-                cout << "请输入一个数:" << endl;
-                int n;
-                cin >> n;
-                int * c = Pf(n);
-                cout << "sum = " << *c << endl;
-                
-            }
-
-        2.函数指针：
-            .定义：返回指针的函数，它是一个指针，该指针的地址指向了一个函数，所以它是指向函数的指针；
-            .作用：用作调用函数和作函数的参数
-            .例子
-                例1.//用作调用函数
-                int (*p) (int a, int b);//函数指针指能申明，不能定义
-                //typedef int(*PF)(int ,int);
-                int max(int a, int b){
-                    return a > b ? a : b;
-                }
-                int min(int a, int b) {  
-                    return a < b ? a : b;  
-                }
-                int main(){
-                    f = max;
-                    f(1, 2);//(*f)(1, 2)和f(1, 2)等效
-                    int c = (*f)(1, 2);
-                    f = min;
-                    c = (*f)(1, 2);
-                }
-
-                例2：//用作函数的参数
-                #include <iostream>
-                using namespace std;
-                typedef int(*PF)(int, int);
-                //int(*func)(int a, int b);
-                int bar(int a, int b)
-                {
-                    return a + b;
-                }
-                 
-                int foo(int a, int b)
-                {
-                    return a;
-                }
-                void func(int a, int b, PF ptr)
-                {
-                    cout << ptr(a, b) << endl;
-                    return;
-                }
-                int main()
-                {
-                    PF ptr;
-                    ptr = bar;
-                    func(12, 34, ptr);
-                    system("pause");
-                    ptr = foo;
-                    func(12, 34, ptr);
-                    system("pause");
-                    return 0;
-                }
-
-
-
-11.类
-    11-1.类的定义：
-        1.语法：
-        class classname{
-            Access specifiers://访问修饰符：private/public/protected
-                Date members/variables;//变量，类里面即可以定义变量，也可以定义方法，还可以声明方法
-                Member functions(){}//方法
-        };//以分号结束一个类
-        2.例子
-        class Box{
-            public:
-                double length; 
-                double breadth; 
-                double height; 
-        };
-        3.申明类：Box Box1;   Box Box2;//分别申明Box1和Box2，类型为Box
-        4.访问数据成员：利用.来访问公共数据成员
-        5.例：
-        #include <iostream>
-        using namespace std;
-        //定义一个类
-        class Box
-        {
-           public:
-              double length;   // 长度
-              double breadth;  // 宽度
-              double height;   // 高度
-              // 成员函数声明
-              double get(void);
-              void set( double len, double bre, double hei );
-        };
-        // 成员函数定义
-        double Box::get(void)//::用来指代是在Box类中的函数get(void)
-        {
-            return length * breadth * height;//类中定义的变量就无需定义
-        }
-         
-        void Box::set( double len, double bre, double hei)
-        {
-            length = len;
-            breadth = bre;
-            height = hei;//void无return 
-        }
-        int main( )
-        {
-           Box Box1;        // 声明 Box1，类型为 Box
-           Box Box2;        // 声明 Box2，类型为 Box
-           Box Box3;        // 声明 Box3，类型为 Box
-           double volume = 0.0;     // 用于存储体积
-         
-           // box 1 详述
-           Box1.height = 5.0; 
-           Box1.length = 6.0; 
-           Box1.breadth = 7.0;
-         
-           // box 2 详述
-           Box2.height = 10.0;
-           Box2.length = 12.0;
-           Box2.breadth = 13.0;
-         
-           // box 1 的体积
-           volume = Box1.height * Box1.length * Box1.breadth;
-           cout << "Box1 的体积：" << volume <<endl;
-         
-           // box 2 的体积
-           volume = Box2.height * Box2.length * Box2.breadth;
-           cout << "Box2 的体积：" << volume <<endl;
-         
-         
-           // box 3 详述
-           Box3.set(16.0, 8.0, 12.0); 
-           volume = Box3.get(); 
-           cout << "Box3 的体积：" << volume <<endl;
-           return 0;
-        }
-    10-2.类的成员函数:
-      
-        定义方法:
-        方法1://在类内部定义
-            class Box
-            {
-               public:
-                  double length;      // 长度
-                  double breadth;     // 宽度
-                  double height;      // 高度
-               
-                  double getVolume(void)/getVolume(void)=getVolume()
-                  {
-                     return length * breadth * height;
-                  }
-            };
-        方法2://在类外部定义
-            double Box::getVolume(void)
-            {
-                return length * breadth * height;
-            }
-        注意:
-            Box myBox;          // 创建一个类对象
-            myBox.getVolume();  // 调用该对象的成员函数
-    10-3.类的访问修饰符
-        public、private、protected 称为访问修饰符,成员和类的默认修饰符是private
-        1.public(共有成员):公有成员是外部可以访问的,我们可以不使用任何成员函数来设置和获取公有变量的值:
-            #include <iostream>
-            using namespace std;
-            class Line
-            {
-               public:
-                  double length;
-                  void setLength( double len );
-                  double getLength( void );
-            };
-            // 成员函数定义
-            double Line::getLength(void)
-            {
-                return length ;
-            }
-             
-            void Line::setLength( double len )
-            {
-                length = len;
-            }
-            // 程序的主函数
-            int main( )
-            {
-               Line line;
-               // 设置长度
-               line.setLength(6.0); 
-               cout << "Length of line : " << line.getLength() <<endl;
-             
-               // 不使用成员函数设置长度
-               line.length = 10.0; // OK: 因为 length 是公有的
-               cout << "Length of line : " << line.length <<endl;
-               return 0;
-            }
-        2.private(私有成员)
-        私有成员变量在函数或在类的外部是不可访问的,甚至是不可查看的,只有类和友元函数可以访问私有成员
-        如果您没有使用任何访问修饰符，类的成员将被假定为私有成员：
-            #include <iostream>
-            using namespace std;
-            class Box
-            {
-               double width;//此时width默认为私有成员
-               public:
-                  double length;
-                  void setWidth( double wid );
-                  double getWidth( void );
-             
-               private:
-                  double width;
-            };
-            // 成员函数定义
-            double Box::getWidth(void)
-            {
-                return width ;
-            }
-             
-            void Box::setWidth( double wid )
-            {
-                width = wid;
-            }
-            // 程序的主函数
-            int main( )
-            {
-               Box box;
-               // 不使用成员函数设置长度
-               box.length = 10.0; // OK: 因为 length 是公有的
-               cout << "Length of box : " << box.length <<endl;
-               // 不使用成员函数设置宽度
-               // box.width = 10.0; // Error: 因为 width 是私有的
-               box.setWidth(10.0);  // 使用成员函数设置宽度
-               cout << "Width of box : " << box.getWidth() <<endl;
-               return 0;
-            }
-
-        3.protected(受保护对象)
-            .受保护成员变量与私有成员十分相似,但是protected成员在派生类中是可以访问的
-            下面的例子中,我们从父类Box中派生了一个子类smallBox,这里的width成员可被派生类smallBox
-            的任何成员函数访问
-            例子:
-            #include <iostream>
-            using namespace std;
-            class Box
-            {
-               protected:
-                  double width;
-            };
-             
-            class SmallBox:Box // SmallBox 是派生类,是Box的派生
-            {
-               public:
-                  void setSmallWidth( double wid );
-                  double getSmallWidth( void );
-            };
-            // 子类的成员函数
-            double SmallBox::getSmallWidth(void)
-            {
-                return width ;
-            }
-             
-            void SmallBox::setSmallWidth( double wid )
-            {
-                width = wid;
-            }
-            // 程序的主函数
-            int main( )
-            {
-               SmallBox box;//叫做box的SmallBox类
-             
-               // 使用成员函数设置宽度
-               box.setSmallWidth(5.0);
-               cout << "Width of box : "<< box.getSmallWidth() << endl;
-             
-               return 0;
-            }
-
-    10-4.继承中的特点:
-        1.public 继承：基类 public 成员，protected 成员，private 成员的访问属性在派生类中分别变成：public, protected, private
-        2.protected 继承：基类 public 成员，protected 成员，private 成员的访问属性在派生类中分别变成：protected, protected, private
-        3.private 继承：基类 public 成员，protected 成员，private 成员的访问属性在派生类中分别变成：private, private, private
-            但无论哪种继承方式，上面两点都没有改变：
-        1.private 成员只能被本类成员（类内）和友元访问，不能被派生类访问；
-        2.protected 成员可以被派生类访问。
-        -------------------------
-        1.public继承:
-            #include<iostream>
-            #include<assert.h>
-            using namespace std;
-            class A{
-                public:
-                  int a;
-                  A(){
-                    a1 = 1;
-                    a2 = 2;
-                    a3 = 3;
-                    a = 4;
-                  }
-                  void fun(){
-                    cout << a << endl;    //正确
-                    cout << a1 << endl;   //正确
-                    cout << a2 << endl;   //正确
-                    cout << a3 << endl;   //正确
-              }
-                public:
-                  int a1;
-                protected:
-                  int a2;
-                private:
-                  int a3;
-            };
-            class B : public A{
-                public:
-                    int a;
-                    B(int i){
-                        A();
-                        a = i;
-                  }
-                    void fun(){
-                        cout << a << endl;       //正确，public成员
-                        cout << a1 << endl;       //正确，基类的public成员，在派生类中仍是public成员。
-                        cout << a2 << endl;       //正确，基类的protected成员，在派生类中仍是protected可以被派生类访问。
-                        cout << a3 << endl;       //错误，基类的private成员不能被派生类访问。
-                    }
-            };
-            int main(){
-                B b(10);
-                cout << b.a << endl;
-                cout << b.a1 << endl;   //正确
-                cout << b.a2 << endl;   //错误，类外不能访问protected成员
-                cout << b.a3 << endl;   //错误，类外不能访问private成员
-                system("pause");
-                return 0;
-            }
-        2.protected继承:
-            #include<iostream>
-            #include<assert.h>
-            using namespace std;
-            class A{
-                public:
-                  int a;
-                  A(){
-                    a1 = 1;
-                    a2 = 2;
-                    a3 = 3;
-                    a = 4;
-                  }
-                  void fun(){
-
-                    cout << a << endl;    //正确
-                    cout << a1 << endl;   //正确
-                    cout << a2 << endl;   //正确
-                    cout << a3 << endl;   //正确
-                  }
-                public:
-                  int a1;
-                protected:
-                  int a2;
-                private:
-                  int a3;
-            };
-            class B : protected A{
-                public:
-                  int a;
-                  B(int i){
-                    A();
-                    a = i;
-                  }
-                  void fun(){
-                    cout << a << endl;       //正确，public成员。
-                    cout << a1 << endl;       //正确，基类的public成员，在派生类中变成了protected，可以被派生类访问。
-                    cout << a2 << endl;       //正确，基类的protected成员，在派生类中还是protected，可以被派生类访问。
-                    cout << a3 << endl;       //错误，基类的private成员不能被派生类访问。
-                  }
-            };
-            int main(){
-              B b(10);
-              cout << b.a << endl;       //正确。public成员
-              cout << b.a1 << endl;      //错误，protected成员不能在类外访问。
-              cout << b.a2 << endl;      //错误，protected成员不能在类外访问。
-              cout << b.a3 << endl;      //错误，private成员不能在类外访问。
-              system("pause");
-              return 0;
-            }
-        3.private继承:
-            #include<iostream>
-            #include<assert.h>
-            using namespace std;
-            class A{
-                public:
-                  int a;
-                  A(){
-                    a1 = 1;
-                    a2 = 2;
-                    a3 = 3;
-                    a = 4;
-                  }
-                  void fun(){
-                    cout << a << endl;    //正确
-                    cout << a1 << endl;   //正确
-                    cout << a2 << endl;   //正确
-                    cout << a3 << endl;   //正确
-                  }
-                public:
-                  int a1;
-                protected:
-                  int a2;
-                private:
-                  int a3;
-            };
-            class B : private A{
-                public:
-                  int a;
-                  B(int i){
-                    A();
-                    a = i;
-                  }
-                  void fun(){
-                    cout << a << endl;       //正确，public成员。
-                    cout << a1 << endl;       //正确，基类public成员,在派生类中变成了private,可以被派生类访问。
-                    cout << a2 << endl;       //正确，基类的protected成员，在派生类中变成了private,可以被派生类访问。
-                    cout << a3 << endl;       //错误，基类的private成员不能被派生类访问。
-                  }
-            };
-            int main(){
-              B b(10);
-              cout << b.a << endl;       //正确。public成员
-              cout << b.a1 << endl;      //错误，private成员不能在类外访问。
-              cout << b.a2 << endl;      //错误, private成员不能在类外访问。
-              cout << b.a3 << endl;      //错误，private成员不能在类外访问。
-              system("pause");
-              return 0;
-            }
 # 11. 核心编程
 ## 1. 内存分区模型：内存方向可以分为4个区域
    * 代码区：存放函数体的二进制代码，由操作系统进行管理，**代码区 = 局部变量(局部变量=普通变量+指针)+const修饰的局部变量**
@@ -3402,7 +2869,7 @@ int main(){
 
 
 ## 3. 函数提高 
-3-1.函数的默认参数
+### 3-1.函数的默认参数
 * >语法 :返回值类型 函数名 (参数 = 默认值)
   ```cpp
   #include <iostream>
@@ -3437,7 +2904,7 @@ int main(){
   int main(){
       func(10, 3);
   ```
-3-3.函数重载
+### 3-3.函数重载
 * 作用:函数名可以相同, 提高复用性
 * 条件:
   * 同一个作用域
@@ -3504,6 +2971,342 @@ int main(){
       return 0;
   }
   ```
+### 3-4.const和static的区别
+#### 1.引论
+1. const是只读的意思，只在声明中使用，意指其所修饰的对象为常量(immutable),它不能被修改，并存放在常量区
+2. static一般有2个作用
+   1. 修饰局部变量，规定作用域和储存方式，对于局部变量，static规定为静态存储，每次调用的初始值为上一次调用后的值，调用结束后储存空间不释放；
+   2. 修饰全局变量，如果以文件划分作用域的话，此变量只在当前文件可见，对于static函数也是如此，static修饰的变量若为初始化，为0
+#### 2.细节
+1. 修饰局部变量
+   1. >const int a = 1;const修饰的全局变量为只读，其值不可修改，如果企图对const修饰的变量进行修改，那么程序会出错
+   2. static int a = 1;static修饰局部变量改变了变量的生命周期，让静态局部变出了作用域后仍然存在，到程序结束，生命周期才结束
+2. 修饰全局变量
+   1. **应尽可能少用全局变量，可以适当多用const,如果修饰的全局变量只在一个文件中使用，那么const的作用和前面所说的函数局部变量没有区别
+   2. 一个全局变量被static所修饰，使得这个全局变量只能在本源文件内使用，不能在其他源文件使用
+   3. const和static修饰的全局变量如果要在多个文件之间共享，则可以在其他文件需要时使用extern关键字,声明外部变量，使用时一定包含所定义变量所在的文件:
+```cpp
+//file.h
+const int a = 1;
+static int b = 2;
+//file.2
+#include "file.h"
+extern const int a;
+extern int b;
+```
+无论对于const修饰的变量a还是变量b,这样做的结果是整个工程的程序链接完成后，所有需要使用该变量的程序共享同一个这个变量的储存区域
+3. 修饰类成员变量
+   1. const修饰类成员变量与修饰局部或全局变量类似，在是用时不能修改，所以必须在对象实例化时初始化
+   2. static修饰的成员为静态成员变量，静态成员变量必须在类内定义，类外初始化，初始化无须加static
+   3. 题目:实现一个类，计算程序中创建了多少类对象
+```cpp
+class A
+{
+public:
+	A()
+	{
+		++_scount;
+	}
+	A(const A& t)
+	{
+		++_scount;
+	}
+	static int GetACount()
+	{
+		return _scount;
+	}
+private:
+	static int _scount;
+};
+
+int A::_scount = 0;
+
+void TestA()
+{
+	cout<<A::GetACount()<<endl;
+	A a1, a2;
+	A a3(a1);
+	cout<<A::GetACount()<<endl;
+}
+```
+**本质上说，const修饰的类变量并不储存在具体的对象中，所以在计算大小时不记入；其储存在静态储存区中，不因某一对象生命周期的结束而结束，且可以被任意对象随意更改其值
+
+4. 修饰类成员函数
+   1. 将const修饰的类成员函数称之为const成员函数，const修饰类成员函数，实际修饰该成员函数隐含的this指针，表明在该成员函数中不能对类的任何成员进行修改。但也可在某些变量前加上mutable关键字，其在对对象进行操作的过程中可以被修改。
+   2. 用static修饰的成员函数，称为静态成员函数，特性时：
+      1. 静态成员为所有类对象共享，不属于某个具体的实例
+      2. 静态变量为必须类外定义，定义时不加static
+      3. 类静态成员可用(类名::静态成员) OR (对象.静态成员)来访问
+      4. 静态成员函数无隐藏的this指针，不能访问任何非静态成员
+      5. 静态成员和类的普通成员一样，也有public、protected、private3种访问级别，也可以具有返回值
+   3. 总结：静态成员函数内部不能调用非静态成员函数（没有隐含的this指针）；但非静态成员函数可以调用类的静态成员函数。
+5. 修饰类对象
+   1. const修饰类对象，对象中的变量均不可修改，其只能调用const成员函数，非const对象既可以调用普通成员函数也可以调用const成员函数，
+   2. static不能修饰一个类，但是可以修饰内部类；被修饰的内部类可以被当成一个普通类在使用
+6. 总结：
+   1. static
+      1. static局部变量 将一个变量声明为函数的局部变量，那么这个局部变量在函数执行完成之后不会被释放，而是继续保留在内存中
+      2. static 全局变量 表示一个变量在当前文件的全局内可访问
+      3. static 函数 表示一个函数只能在当前文件中被访问
+      4. static 类成员变量 表示这个成员为全类所共有
+      5. static 类成员函数 表示这个函数为全类所共有，而且只能访问静态成员变量
+   2. const
+      1. const 常量：定义时就初始化，以后不能更改。
+      2. const 形参：func(const int a){};该形参在函数里不能改变
+      3. const修饰类成员函数：该函数对成员变量只能进行只读操作
+      4. const 类对象
+   3. static关键字的作用：
+      1. 函数体内static变量的作用范围为该函数体，该变量的内存只被分配一次，因此其值在下次调用时仍维持上次的值；
+      2. 在模块内的static全局变量和函数可以被模块内的函数访问，但不能被模块外其它函数访问；
+      3. 在类中的static成员变量属于整个类所拥有，对类的所有对象只有一份拷贝；
+      4. 在类中的static成员函数属于整个类所拥有，这个函数不接收this指针，因而只能访问类的static成员变量。
+
+   4. const关键字的作用：
+      1. 阻止一个变量被改变
+      2. 声明常量指针和指针常量
+      3. const修饰形参，表明它是一个输入参数，在函数内部不能改变其值；
+      4. 对于类的成员函数，若指定其为const类型，则表明其是一个常函数，不能修改类的成员变量；
+      5. 对于类的成员函数，有时候必须指定其返回值为const类型，以使得其返回值不为”左值”。
+##### 7. static的详解
+1. static局部变量
+   1. 静态局部变量在函数内定义它的生存周期为**整个程序生命周期**，但作用域和自动变量相同，只能在定义该变的函数内使用该变量，退出该函数后，尽管该变量还继续存在，但是不能使用它
+   2. 对基本类型的静态局部变量若在声明时未赋以初值，则系统自动赋予0值。而对自动变量不赋初值，则其值是不定的。
+   3. 例子
+```cpp
+void test_static() 
+{
+ static int Temp = 1; 
+ Temp++; 
+ printf("Temp is :%d/n",Temp); 
+}
+
+int main(int argc,char *argv[]) 
+{ 
+ int i=0; 
+ for(i=0;i<=4;i++) 
+ { 
+     test_static(); 
+ }
+
+ system("pause"); 
+}
+/*1.const int temp =1,这个不可修改，
+2. static int temp = 1,这个只有一份,所以temp = 1,2,3, 4, 5
+3. int temp = 1,局部变量，每次执行函数都是2
+```
+2. static全局变量
+   1. 非静态全局变量的作用域是整个源程序，也即在各个源文件中都是有效的。**static int a = 1, int a = 1;**
+   2. 而静态全局变量则只在定义该变量的源文件内有效，在同一源程序的其它源文件中不能使用它。
+   3. 所以使用静态全局变量时，可以避免在其他源文件中引起错误
+
+3. static全局函数
+   1. 定义：static int func(int a);
+   2. 作用：static的含义是对函数的作用域仅仅局限于本文件，好处是：不同的人编写不同的函数时，不用担心自己定义的函数，是否会与其它文件中的函数同名，因为同名也没有关系.
+4. static成员属性
+   1. 特点：
+      1. 无论这个类的对象被定义了多少次，静态成员属性在程序中只有一个拷贝
+      2. 静态数据成员存储在全局数据区。静态数据成员定义时才分配空间，所以不能在类声明中定义。
+      3. 静态数据成员和普通数据成员一样遵从public, protected, private 访问规则；除了定义，定义不要管访问规则。
+      4. 静态数据成员主要用在各个对象都有相同的某项属性的时候。比如对于一个存款类，每个实例的利息都是相同的。所以，应该把利息设为存款类的静态数据成员。这有两个好处，第一，不管定义多少个存款类对象，利息数据成员都共享分配在全局数据区的内存，所以节省存储空间。第二，一旦利息需要改变时，只要改变一次，则所有存款类对象的利息全改变过来了；
+      5. 对比全局变量，使用静态数据成员的好处
+         1. 静态数据成员没有进入程序的全局名字空间，所以不存在与程序中其他全局名字冲突的可能性
+         2. 可是实现信息隐藏，静态数据成员可以是private成员，而全局变量不能；
+   2. 例子
+```cpp
+#include <iostream>
+using namespace std;
+class Myclass
+{
+public:
+Myclass(int a,int b,int c);
+void GetSum();
+
+private:
+int a,b,c;
+static int Sum; //声明静态数据成员
+};
+
+int Myclass::Sum=0; //定义并初始化静态数据成员
+//static int Myclass::Sum = 0; //注意加static， 是错误的
+
+Myclass::Myclass(int a,int b,int c)
+{
+this->a=a;
+this->b=b;
+this->c=c;
+Sum+=a+b+c;
+}
+
+void Myclass::GetSum()
+{
+cout<<"Sum="<<Sum<<endl;
+}
+
+int main()
+{
+Myclass M(1,2,3);
+M.GetSum(); // cout 6
+
+Myclass N(1, 1, 1);
+N.GetSum(); // cout 21
+M.GetSum(); // cout 21
+}
+```
+5. static成员函数
+   1. 性质:static成员函数为类的全部对象服务而不是为一个类的具体对象服务;普通的成员函一般都隐含了一个this指针,但由于静态成员函数不是与任何对象相联系,所以不具有**this指针,从这个以意义上说,它无法访问属于类对象那个的no-static的成员属性和成员函数,所以只能调用其余的静态成员函数,但是可以修改mutable修饰的变量**,
+    2. 例子
+```cpp
+#include <iostream>
+using namespace std;
+class Myclass
+{
+public:
+Myclass(int a,int b,int c);
+static void GetSum(); //声明静态成员函数
+
+private:
+int a,b,c;
+static int Sum; //声明静态数据成员
+};
+
+int Myclass::Sum = 0;//定义并初始化静态数据成员
+
+Myclass::Myclass(int a,int b,int c)
+{
+this->a=a;
+this->b=b;
+this->c=c;
+Sum+=a+b+c; //非静态成员函数可以访问静态数据成员
+}
+
+//static void Myclass::GetSum(){...} //加上static是错误的
+void Myclass::GetSum() //静态成员函数的实现
+{
+//  cout<<a<<endl; //错误代码，a是非静态数据成员
+cout<<"Sum="<<Sum<<endl; //静态函数只能能访问静态数据成员
+}
+int main()
+{
+Myclass M(1,2,3);
+M.GetSum();
+
+Myclass N(4,5,6);
+N.GetSum();
+
+Myclass::GetSum();
+}
+```
+6. 总结:
+   1. 类为定义静态函数不能加static
+   2. static之间可以相互访问
+   3. 非静态成员函数可以任意地访问静态成员函数和成员属性;静态成员函数不能访问非静态成员函数和非静态数据成员，只能访问静态的；
+
+
+##### 8. const的详解
+1. 作用
+   1. const类型定义: 指明变量或对象的值是不能被更新,引入目的是为了取代预编译指令
+   2. 可以保护被修饰的东西,防止意外的修改,增强程序的健壮性
+   3. 编译器通常不为普通const常量分配存储空间,而是将它们保存在符号表中,这使得它成为一个编译期间的常量,没有了存储与读内存的操作,使得它的效率也很高
+   4. 可以节省空间,避免不必要的内存分配
+2. 初始化和const
+   1. const修饰的全局变量是储存在全局区,修饰局部变量时储存在栈区,，**const修饰的对象一旦创建后其值便不能再改变** ，类的数据成员只是声明，如果const修饰类的数据成员，那么必须要有构造函数来初始化这个const对象，其他情况必须在声明的地方就初始化。
+3. const和引用
+```cpp
+const int ci = 1024;//ci是一个int型的常量
+const int &r1 = ci;//正确，r1是一个常量引用，并且r1本身也是一个常量
+r1 = 42;//错误，引用被const限制了，不能修改所引用对象的值了
+int &r2 = ci;//错误，试图让一个非常量引用指向一个常量对象
+```
+常量引用不能直接修改所引用的对象,**引用的类型与其所引用的对象类型一致,但有2个意外**
+```cpp
+//意外1:初始化常量引用时允许用任意表达式作为初始值，只要该表达式的结果能转换成引用的类型即可
+int i = 42;
+const int &r1 = i;     //允许讲const int&绑定到一个普通int对象上
+const int &r2 = 42;    //正确，r2是一个常量引用
+const int &r3 = r1 * 2;//正确，r3是一个常量引用
+int &r4 = r1 * 2;      //错误，右边是常量而左边并不是常量
+
+//意外2:常量引用所引用的对象可能是一个非常量
+#include <iostream>
+using namespace std;
+int main()
+{
+	int i = 42;
+	int &r1 = i;
+	const int &r2 = i;
+	r1 = 0;//r1,r2都是i的引用,所以修改了r1,r2,i中的任何一个值都会修改其余的值,但由于r2是常量引用,所以不可修改其值
+	cout << "i " << i << endl;//0
+	cout << "r1 " << r1 << endl;//0
+	cout << "r2 " << r2 << endl;//0
+    r2 = 10 //错误，不能通过r2来修改i的值，因为有了const的限定
+}
+```
+4. const和指针
+   1. 指向常量的指针不能用于改变其所指对象的值，只能使用常量指针（即对指针加const修饰）,常量指针都不可以去修改所指向的对象，常量引用也是不能修改所引用的对象，不管对象是不是常量都不能修改
+```cpp
+const double pi = 3.1415;  //pi是一个常量，它的值不能改变
+double *ptr = &pi; //错误：指向常量的指针必须是常量指针
+const double *cptr = &pi; //正确
+*cptr = 42; //错误：常量指针不能修改对应的值
+```
+   2. const指针即指针存放的地址就不能再改变，我们称为指针常量，*在前
+```cpp
+
+int errNumb = 0;
+int *const curErr = &errNumb;// curErr将一直指向errNumb这块内存
+const double pi = 3.14;
+const double *const pip = &pi; //从右向左依次解修饰符，首先pip是一个常量，然后是*说明pip是一个常量指针，
+//再然后是double说明是指向double的指针，最后是const说明这个double不能变，即指向的对象是一个常量的double
+```
+   3. 和引用一样，常量指针指向的对象并不一定是一个常量，虽然不能通过该指针修改，但是可以通过其他指针修改。顶层const指的是指针本身是不是常量，底层const指的是指针指向的对象是不是常量
+```cpp
+int i = 0;
+int *const p1 = &i;//p1是一个顶层const，可以修改*p1，但是不可以修改p1
+int ci = 42;//ci是一个const变量，本身值不允许发生变化都可以称为顶层const
+const int *p2 = &ci;//是一个底层const，不允许修改*p2，但可以修改p2
+const int *const p3 = p2;//既是底层const也是顶层const，*p3和p3都不可以修改
+const int &r = ci;//r是一个常量引用
+*p2 = 3; //错误，表达式左边必须是可修改的值
+p1 = &i;//错误，表达式左边必须是可修改的值
+```
+5. const形参和实参
+```cpp
+//注意1. 当用实参初始化形参时会忽略掉形参的顶层const，即实参值本身是const或者不是无所谓
+
+void func(const int i);//传入的i可以是const，也可以是非const，但是func不能修改i
+void func(int i);//错误，重复定义
+
+//注意2.但如果形参不是顶层const，那么实参也不能是顶层const，也就是说如果形参是可变的，传进来的值必须可变才行
+
+#include <iostream>
+using namespace std;
+void reset(int* ptr){//传入的&a,必须是非const地址,&(const int c a =1)
+	cout << "int*调用" << endl;
+}
+void reset(int& ptr){//传入的a,必须是非const值,const int a =1 和 reset(1)都不行
+	cout << "int&调用" << endl;
+}
+
+int main()
+{
+
+int i = 0;
+const int ci = i;//一个顶层const
+reset(&i);//调用传入指针的函数
+reset(&ci);//错误，实参是一个常量，是指向const int的指针，那么&ci是const int*，不能传递给int*
+reset(i);//调用传入引用的reset函数
+reset(ci);//错误，形参变量，实参也必须是变量，ci是常量
+reset(42);//错误，字面值是一个常量，形参可变，不能传入常量
+}
+//注意3:如果将注意2改成,那么上述5个reset都可以调用
+void reset(const int* ptr){
+	cout << "int*调用" << endl;
+}
+void reset(const int& ptr){
+	cout << "int&调用" << endl;
+}
+
+```
 ## 4. 类
 ### 4-1.封装
 * 意义:
@@ -3818,7 +3621,7 @@ class Person{
             cout << "这是析构函数" << endl;
         }
     private:
-        int age;
+        int age;的
 };
 void test01(){
     Person p1;
@@ -4340,11 +4143,10 @@ int main(){
 #### 4-3-3. const修饰成员函数
 1. 常函数
    1. 成员函数加const后称这个函数为常函数
-   2. 常函数内不可以修改成员属性，但成员属性声明时候加关键字mutabel后,在常函数中可以修改
+   2. 常函数内不可以修改成员属性，但成员属性声明时候加关键字mutabel后,在常函数中可以修改,**mutable = 可变的**
 2. 常对象
    1. 声明对象前加const称该对象为常对象
    2. 常对象只能调用常函数，且不能修改非mutabel属性值
-   3. 常对象可以调用
 3. 总结:
    1. this指针的本质是**指针常量**,所以指针的指向是不能修改的,其本质即为:**Person *const this = this**,所以指向不能改,如果是**const Person *const this = this**,则它的值不能修改
    2. 在成员函数后面加const,修饰的是this指向,让指针指向的值也不可以更改,此时的函数称为常函数,此时即为**const Person *const this = this**

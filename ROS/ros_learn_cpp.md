@@ -1359,7 +1359,99 @@ myfunc.test()
 ```
 2. 关于头文件路径：
 **如果文件地址已经被包括进cpp_properties中了，就直接写文件名就行，否则写相对绝对路径**
+
 ### 2.自定义源文件调用
+1. plumbing_head/
+   1. include
+      1. inlclude/plumbing_head
+         1. mymath.h
+    2. src
+        1. main.cpp
+        2. mymath.cpp
+    3. CMakeLists.txt 
+2. 文件：
+**inlclude/plumbing_head/mymath.h**
+```cpp
+#ifndef MYMATH_H
+#define MYMATH_H
+class Circle{
+    public:
+        Circle(int r);
+        int showArea();
+        int r;
+};
+#endif 
+```
+
+**src/mymath.cpp**
+```cpp
+#include "../include/plumbing_head/mymath.h"
+Circle::Circle(int r){
+    this->r = r;
+}
+int Circle::showArea(){
+    return 3.14*r*r; 
+}
+```
+**src/main.cpp**
+```cpp
+#include "../include/plumbing_head/mymath.h"//相对路径导入
+#include "ros/ros.h"
+#include <iostream>
+using namespace std;
+int main(int argc, char **argv){
+    ros::init(argc, argv, "head");
+    Circle c(199);
+    ROS_INFO("the area is %d", c.showArea());
+}
+```
+**CMakeLists.txt**
+1. 头文件和源文件相关配置
+```cmake
+#将include文件点加进来
+include_directories(
+include
+  ${catkin_INCLUDE_DIRS}
+)
+#${catkin_INCLUDE_DIRS}是include下的文件路径
+
+## 声明C++库，将mymath.h和mymath.cpp链接到库上
+add_library(mymath
+  include/plumbing_head/mymath.h
+  src/mymath.cpp
+)
+
+add_dependencies(mymath ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+target_link_libraries(mymath
+  ${catkin_LIBRARIES}
+)#生成mymath的库
+
+2. 可执行文件
+```cmake
+add_executable(main src/main.cpp)
+
+add_dependencies(main ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+#此处需要添加之前设置的 mymath 库
+target_link_libraries(main
+  mymath
+  ${catkin_LIBRARIES}
+)
+#将main链接到mymath库上
+```
+3. 总结：
+   1. 4 + 3 = 7
+      1. 4表示头文件和源文件的配置，包括:
+         1. include_direcotories
+         2. add_library(mymath include/plumbing_head/mymath.h src/mymath.cpp)
+         3. add_denpendencies(mymath xxxxx) 
+         4. target_link_libraries(mymath xxxx)
+      2. 3表示可执行文件配置，包括：
+         1. add_exexcutable(main src/main.cpp)
+         2. add_dependencies(main ${xxx})  
+         3. target_link_libraries(main mymath xxxxx)
+   2. 都具备的是： add_denpendencies + target_link_libraries(),区别是前者多了include_directories()，后者多了add_executable()
 
 # 3.ROS运行管理
 
@@ -1518,6 +1610,7 @@ roslaunch 命令不能保证按照 node 的声明顺序来启动节点(节点的
 ### 2-6.rosparam
 步骤
 1. launch文件
+```xml
 <launch>
   <node pkg = "turtlesim" type = "turtle_teleop_key" name = "my_key" output = "screen"/>
   <node pkg = "turtlesim" type = "turtlesim_node" name = "my_node" output = "screen">
@@ -1530,7 +1623,7 @@ roslaunch 命令不能保证按照 node 的声明顺序来启动节点(节点的
   </node>
 </launch>
 ```
-2. 配置yaml文件   /3.roslaunch该文件,直接会导出节点
+1. 配置yaml文件   /3.roslaunch该文件,直接会导出节点
   bg_R: 100
   bg_G: 100
   bg_B: 100
@@ -1648,7 +1741,34 @@ rosnode list : /t1 ; /t2
 
 5. 脚本的方式实现命名空间和重映射：
 ```cpp
-std::map<std::string, std::string> map;
-map["__ns"] = "xxxx";
-ros::init(map,"wangqiang");
+#include "ros/ros.h"
+#include "std_msgs/String.h"
+int main(int argc, char* argv[]){
+    ros::init(argc, argv, "hello");
+    ros::NodeHandle nh;
+    // //核心：设置不同的类型的话题
+    //1. 全局----话题名称要以/开头(也可以设置自己的命名空间），这种情况下和节点(命名空间以及名称)没有关系
+    ros::Publisher pub1 = nh.advertise<std_msgs::String>("/x1/chatter", 1000);
+    //2. 相对----话题名称要以非/开头
+    ros::Publisher pub2 = nh.advertise<std_msgs::String>("x2/chatter", 1000);
+    ros::Publisher pub3 = nh.advertise<std_msgs::String>("chatter", 1000);
+    //3. 私有-----需要创建特定NodeHandle
+    ros::NodeHandle nh2("abc");//a作为顶层话题名称
+    ros::Publisher pub4 = nh2.advertise<std_msgs::String>("x3/chatter", 1000);//x3,x4以abc作为顶层话题
+    ros::Publisher pub5 = nh2.advertise<std_msgs::String>("x4/chatter", 1000);
+    ros::Publisher pub6 = nh2.advertise<std_msgs::String>("/x5/chatter", 1000);//采用全局话题名称的形式
+    while (ros::ok()){
+
+    }
+    return 0;
+//注意：必须要在程序执行的时候才能看到node和topic
+}
+/*最终结果
+/abc/x3/chatter
+/abc/x4/chatter
+/chatter
+/x1/chatter
+/x2/chatter
+/x5/chatter
+*/
 ```
