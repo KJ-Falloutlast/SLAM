@@ -2,8 +2,8 @@
 
 !!注意:要保证caktin_make 和rosrun 在终端中跑，不要在vscode的终端中跑
 
-1. 编译过程要注意：catkin_make -DPYTHON_EXECUTABLE=/usr/bin/python3
-2. cd和roscd的区别：
+## 1. 编译过程要注意：catkin_make -DPYTHON_EXECUTABLE=/usr/bin/python3
+## 2. cd和roscd的区别：
    1. cd命令和roscd命令都是切换到指定目录的命令。不同的是，cd是Linux系统的命令，在使用时必须指定目标目录的完整路径；而roscd是ros系统中的命令，它可以直接切换到指定目录（ros系统中的软件包），而不需要输入冗长的完整路径。
    2. 例如，要切换到roscpp这个软件包，两个命令的格式分别为：
       1. cd /opt/ros/kinetic/share/roscpp
@@ -15,15 +15,17 @@
 添加环境变量之后，roscd即可正常使用。
 注意，如果新打开了一个终端，在使用某一工作空间之前，都需要执行上述命令切换到该工作空间的目录下将工作空间的路径添加到环境变量中。
 
-3. rosrun kitti.py
+## 3. rosrun kitti.py
 
-4. py脚本要加可执行权限
+## 4. py脚本要加可执行权限
 chmod +x test.py
 如何寻找文件：whereis xxx
 
-5. rosrun的python接口：pip install rospkg，pip install catkin-tools
+## 5. rosrun的python接口
+pip install rospkg，pip install catkin-tools
 
-6. 关于Usage: rosrun [--prefix cmd] [--debug] PACKAGE EXECUTABLE [ARGS]
+## 6. 关于Usage
+rosrun [--prefix cmd] [--debug] PACKAGE EXECUTABLE [ARGS]
   rosrun will locate PACKAGE and try to find
   an executable named EXECUTABLE in the PACKAGE tree.
   If it finds it, it will run it with ARGS.
@@ -33,10 +35,10 @@ chmod +x test.py
 以运行在功能包my_ros_helloworld功能包下的talker.py程序为例。
 rosrun my_ros_helloworld talker.py
 
-7. 关于anoncoda和ros兼容的问题：conda create -n ROS python=3.8
+## 7. 关于anoncoda和ros兼容的问题：conda create -n ROS python=3.8
 
 
-8. ROS依赖包安装问题
+## 8. ROS依赖包安装问题
    1. 问题描述
 在ROS编译过程中经常会遇到找不到ROS包的情况，如下所示
 >
@@ -72,7 +74,7 @@ sudo apt-get install ros-kinetic-slam-gmapping
   例如，针对问题中的依赖包，使用如下命令
   sudo apt-get install ros-kinetic-gazebo-ros-control
 
-9. 关于python执行路径和环境的问题：
+## 9. 关于python执行路径和环境的问题：
 
     运行环境位于运行页面左下角，点击一下就可以改变运行环境了。按照网上大部分教程，安装tensorflow时一般都会新建一个环境，而vscode默认很有可能是在根环境下运行的，所以这里要改一下运行环境到安装tensorflow的环境下。
     第二步 检查运行环境下是否安装tensorflow
@@ -115,13 +117,13 @@ import sys cpp
 
    5. 环境问题:一个环境对应一个工程,要确保你运行的包在你用的这个环境中,否则运行会出错
 
-10. 命名规则：
+## 10. 命名规则：
 
 问题：**WARNING: Package name "Sever" does not follow the naming conventions. 
 It should start with a lower case letter and only**
 解决方案：在rospackage 中不能有大写，所以必须只能用小写
 
-12. cmake问题：
+## 12. cmake问题：
     1. 问题
 CMake Error at /opt/ros/noetic/share/catkin/cmake/catkin_install_python.cmake:86 (message):
   catkin_install_python() called with non-existing file
@@ -140,7 +142,7 @@ xml:<name>model02</name>
 cmakelists:project(model02)
 ```
 
-13. launch文件的使用
+## 13. launch文件的使用
     1. launch文件不能加","；子标签以/结尾；尾标签以/开头；
     2. 每次启动launch文件都不需要catkin_make，直接source后运行就行
 
@@ -149,7 +151,7 @@ cmakelists:project(model02)
 
 
 
-1. sublime的python编译环境：
+## 1. sublime的python编译环境：
    1. 快捷键：在Perferences -> Key Binding，打开配置文件，添加如下几行：
 ```cpp
 { "keys": ["ctrl+l"], "command": "move", "args": {"by": "characters", "forward": true} },
@@ -162,11 +164,12 @@ cmakelists:project(model02)
 
 
 
-2. 利用clash代理问题：https://www.jianshu.com/p/260fbac1d4a2
+## 2. 利用clash代理问题：
+https://www.jianshu.com/p/260fbac1d4a2
 启动：clash;proxy_on,proxy_off分别代表开关代理
 
 
-3. 结束进程的方法：
+## 3. 结束进程的方法：
 
    1. 常规篇：
 　首先，用ps查看进程，方法如下：
@@ -206,12 +209,12 @@ $ pgrep firefox
 
 $kill -s 9 1827
 
-9. 将anoconda设为默认python解释器的方法
+## 3. 将anoconda设为默认python解释器的方法
   
   在终端输入$sudo gedit /etc/profile，打开profile文件。
   在文件末尾添加一行：export PATH=/home/kim/anaconda3/bin:$PATH，其中，将“/home/grant/anaconda2/bin”替换为你实际的安装路径。保存。
 
-10.改变默认终端的问题：
+## 4.改变默认终端的问题：
    1. 安装terminator:sudo apt install terminator2
    2. 安装oh-my-zsh
 
@@ -280,7 +283,7 @@ linux中的执行文件.bashrc 变更为 .zshrc
     执行 source ~/.zshrc
     将所有的操作转成zshrc
 
-11. 使用typora
+## 5. 使用typora
 
 官网下载链接：Typora-linux-x64.tar.gz
 进入下载文件夹，解压Typora-linux-x64.tar.gz
@@ -308,7 +311,7 @@ sudo cp typora.desktop /usr/share/applications/#此文件夹是专门放快捷�
 
 至此就可以搜索到Typora并将其添加进收藏夹啦
 
-12. jupyter notebook的相关问题
+## 6. jupyter notebook的相关问题
 ```py
 Opencv无法显示图像，报错QObject::moveToThread: Current thread is not the object's thread . Cannot move to target thread
 
@@ -316,7 +319,7 @@ Opencv无法显示图像，报错QObject::moveToThread: Current thread is not th
 
 PS：因为这个报错信息比较模糊不够具体，所以无法定位问题的根源在哪。在网上寻找了各种解决方法，基本上都是如下的方法，但是我是在实验室的服务器上，没有sudo权限，没法apt-get，因此下面这种方案并没有亲自尝试，这里贴出来作为参考吧。
 ```
-13. 软件源的问题
+## 7. 软件源的问题
 1. 方法一：!!!一定不能随便修改软件源，否则程序安装会出错
 如果不慎修改了source.list内容，导致一系列错误，建议恢复默认源文件。
 
@@ -399,7 +402,7 @@ W: 目标 DEP-11-icons-hidpi (multiverse/dep11/icons-64x64@2.tar) 在
     首先看一下update-alternatives的帮助信息：
 
     $ update-alternatives --help
-15. 用法：update-alternatives [<选项> ...] <命令>
+## 8. 用法：update-alternatives [<选项> ...] <命令>
 ```cpp
     命令：
       --install <链接> <名称> <路径> <优先级>
@@ -468,32 +471,32 @@ $ sudo update-alternatives --config python
     要维持当前值[*]请按回车键，或者键入选择的编号：
     原来是因为默认选中了自动模式，而Python2的优先级高于Python3，这时候只要键入2，就可以使用Python3了。
 ```
-15. 修改为只读状态：
+## 9. 修改为只读状态：
 sudo chmod 444 /etc/environment
 
-16. tar and rar
+## 10. tar and rar
 sudo apt-get install rar
 sudo apt-get install unrar 
 执行unrar xxxxx.rar可以解压文件
 
-17. 简体和繁体转换：ctrl+shift+f
+## 11. 简体和繁体转换：ctrl+shift+f
 
-18. 错误：
+## 12. 错误：
 ERROR: Could not open requirements file: [Errno 2] 没有那个文件或目录: 'requrements.txt'
 解决方案：
     sudo pip freeze > requirements.txt
     sudo pip install -r requirements.txt
 
 
-19.利用管道筛选
+## 13.利用管道筛选
 ls -l | grep python
 
-20. 查看电脑配置
+## 14. 查看电脑配置
   * free -g 
   cat /etc/issue
   lscpu
   ifconfig
-21. 内存条问题：
+## 15. 内存条问题：
   *  sudo dmidecode -t memory**查看内存条和内存槽**
   * sudo dmidecode -t memory | grep Size**查看每个内存多大**
   * sudo dmidecode | grep "System Information" -A9 | egrep "Manufacturer|Product|Serial"
@@ -540,14 +543,14 @@ int main(int argc, char *argv[]){
 ```
 
 # 4.其余学习问题
-1. 进制输入 
+## 1. 进制输入 
     a，默认为10进制 ，10 ，20。
     b，以0开头为8进制，045，021。
     c，以0b开头为2进制，0b11101101。
     d，以0x开头为16进制，0x21458adf。   
 
-2. 欧拉角度
-3. 终端的控制命令
+## 2. 欧拉角度
+## 3. 终端的控制命令
 ctrl+shift+o/p：水平/垂直分割
 tab:自动补全
 win+方向箭头:移动终端的位置
@@ -555,17 +558,60 @@ alt+方向键：移动到某个终端
 ctrl+shift+w:关闭终端
 ctrl+alt+t:重新打开某个终端
 
-4. 代理的使用
-   1. 下载
+## 4. 代理的使用
+
+   1. clash for windows
+```cpp
+步骤：
+1. cd download
+解压包并放入opt文件夹
+
+sudo tar -zxf Clash.for.Windows-0.17.1-x64-linux.tar.gz -C /opt
+打开 opt文件夹
+cd /opt
+
+重命名文件夹
+sudo mv 'Clash for Windows-0.17.1-x64-linux' clash
+
+打开程序文件夹
+cd clash 
+
+运行clash
+./cfw 
+
+2. 配置clash
+将首页设置为以下样式：allow lan打开
+将订阅链接导入,点击 Download
+
+3. 修改配置文件
+将文件改为可读可写状态
+sudo chmod 666 /etc/environment
+
+4. 编辑文件
+vi /etc/environment
+填入以下内容且保存
+http_proxy=http://127.0.0.1:7890/
+https_proxy=http://127.0.0.1:7890/
+ftp_proxy=http://127.0.0.1:7890/
+HTTP_PROXY=http://127.0.0.1:7890/
+HTTPS_PROXY=http://127.0.0.1:7890/
+FTP_PROXY=http://127.0.0.1:7890/
+改为原来的只读状态
+sudo chmod 444 /etc/environment
+最后重启即可
+```
+   2. clash-linux-amd64-v1.9.0.gz
+      1. 下载
 
 下载对应的Linux-amd64版本，也可以直接在线下载
 wget https://github.com/Dreamacro/clash/releases/download/v1.8.0/clash-linux-amd64-v1.8.0.gz
-   2. 安装
+      2. 安装
 
 进入安装包存放目录，解压安装
-gunzip clash-linux-amd64-v1.8.0.gz
-sudo mv clash-linux-amd64-v1.8.0 /usr/local/bin/clash
+gunzip clash-linux-amd64-v1.9.0.gz
+sudo mv clash-linux-amd64-v1.9.0 /usr/local/bin/clash
 sudo chmod +x /usr/local/bin/clash
+cd /usr/local/bin/
 ./clash
 
 clash启动后会在~/.config/clash 目录生成配置文件
@@ -578,8 +624,8 @@ sudo cat tools/FY-21329.yaml > ~/.config/clash/config.yaml
 配置开机启动
 
 在配置开机启动之前，将配置文件移动到 /etc 目录：
-sudo mv ~/.config/clash /etc#在重新移动的过程中，要将原来的在/etc的clash文件删除然后才能执行此步骤,或者直接替换调/etc下的clash.ymal文件
-
+sudo mv ~/.config/clash /etc
+**此处要注意：1.在重新移动的过程中，要将原来的在/etc的clash文件删除然后才能执行此步骤,或者直接替换调/etc下的clash.ymal文件 2.在没有在配置开机启动前，linux会执行在.config下的yaml文件，所以配置好开机启动后，就要直接修改在/etc下的yaml文件 3.cfw 和 clash不要同时启动**
 以后修改配置都记住修改 /etc/clash 目录下的这个配置文件。
 然后使用 vim 增加 systemd 配置 ,：
 sudo vim /etc/systemd/system/clash.service
@@ -624,9 +670,20 @@ $source .bashrc  #使配置生效
 proxy_on
 proxy_off
 
-!注意：当网络不能用的时候，要用cd /opt/clash---->./cfw---->profile节点------>导出yaml文件---->用yaml替换/etc/clash/.cofig.yml文件
+   3. 注意：当网络不能用的时候，要用cd /opt/clash---->./cfw---->profile节点------>导出yaml文件---->用yaml替换/etc/clash/.cofig.yml文件
+   4. 当重新迁移系统之后，如何恢复和以前一样的配置
+      1. 将原来在**usr/local/bin/clash + .config/clash + etc/clash**这三个文件全部删除(sudo rm -r /etc/clash)
+      2. 将原来在/usr/local/bin/clash 复制到新的系统的/usr/local/bin这个路经
+      3. 将原来在.config/clash 复制新的系统的.config/clash文件  (sudo cp -r olddir newdir)
+      4. 将原来在/etc/clash 复制新的系统的/etc/clash文件   
+   5. 常用节点
+https://suo.yt/151bpdM(失效了)
+https://suo.yt/1LxmMPA
+https://raw.githubusercontent.com/ssrsub/ssr/master/V2Ray
+https://suo.yt/ZKjZa7R
+https://suo.yt/uXoibye
 
-5. wine的相关问题：
+## 5. wine的相关问题：
    1. 未安装windows应用
     $ sudo apt-get update
     $ sudo apt-get install wine
@@ -644,11 +701,24 @@ proxy_off
 
     . 解决方案：winetricks riched20
 
-5. 删除在linux的垃圾图标
+## 6. 删除在linux的垃圾图标
 看/usr/share/applications下是否有xxx.desktop，若有就直接删除
 可以到～/.local/share/applications下看是否有xxx.desktop,若有就直接
 
 
 
 
-6. github令牌：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
+## 7. github的问题：
+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
+
+## 8. 关于网络重启问题
+   1. 关闭：systemctl stop systemd-resolved---重启：sudo systemctl enable systemd-resolved.service(**这样开机就可以自动重启**)
+   2. 切记千万不能乱操作这些在根目录下的配置文件;
+
+## 9. 关于linux源的问题
+1. 问题：不要随意修改源，要将原来的源及时备份，以防丢失
+2. 问题：**ubuntu安装nodejs，执行sudo apt-get update报错的解决办法。错误信息: 仓库 “http://ppa.launchpad.net/chris-lea/node.js/ubuntu focal Release” 没有 Release 文件**
+   1. step1:sudo add-apt-repository --remove ppa:/chris-lea/node.js(按照出错的文件名来写)
+   2. step2:sudo apt update
+3. 若迁移系统后，源发生问题，则直接复制原来/etc/apt文件到新的系统中，sudo apt update若有错误，则按照2的方法改进
+

@@ -1,12 +1,12 @@
 常用命令：
 !在退出终端的时候要用命令ctrl+c
 
-一、系统信息
+ # 一、系统信息
 
     显示机器的处理器架构
 
 arch
-# 或
+ 或
 uname -m
 显示正在使用的内核版本
 uname -r
@@ -45,14 +45,14 @@ clock -w
 
     几种查看CentOS系统版本和位数的方法
 
-二、关机(系统的关机、重启以及登出)
+## 二、关机(系统的关机、重启以及登出)
 
     关闭系统
 
 shutdown -h now
-# 或
+ 或
 init 0
-# 或
+ 或
 telinit 0
 按预定时间关闭系统
 shutdown -h <hours>:<minutes> &
@@ -60,12 +60,12 @@ shutdown -h <hours>:<minutes> &
 shutdown -c
 重启
 reboot
-# 或
+ 或
 shutdown -r now
 注销
 logout
 
-三、文件和目录
+## 三、文件和目录
 
     进入 '/ home' 目录'
 
@@ -133,7 +133,7 @@ iconv -f <from-encoding> -t <to-encoding> <input-file> > <output-file>
 图片批量减小图片大小，将结果输入到另一个文件夹(依赖Imagemagick)
 find ./ -maxdepth 1 -name -jpg -print -exec convert "{}” -resize 80×60 "thumbs/{}” ;
 
-四、文件搜索
+## 四、文件搜索
 
     从 '/' 开始进入根文件系统搜索文件和目录
 
@@ -157,7 +157,7 @@ whereis halt
 显示一个二进制文件或可执行文件的完整路径
 which halt 
 
-五、挂载一个文件系统
+## 五、挂载一个文件系统
 
     挂载一个叫做hda2的盘 – 确定目录 '/ mnt/hda2′ 已经存在
 
@@ -185,7 +185,7 @@ mount /dev/sda1 /mnt/usbdisk
 挂载一个windows网络共享
 mount -t smbfs -o username=user,password=pass //WinClient/share /mnt/share 
 
-六、磁盘空间
+## 六、磁盘空间
 
     显示已经挂载的分区列表
 
@@ -201,7 +201,7 @@ rpm -q -a –qf '%10{SIZE}t%{NAME}n' | sort -k1,1n
 以大小为依据显示已安装的deb包所使用的空间 (ubuntu, debian类系统)
 dpkg-query -W -f='${Installed-Size;10}t${Package}n' | sort -k1,1n
 
-七、用户和群组
+## 七、用户和群组
 
     创建一个新用户组
 
@@ -231,7 +231,7 @@ grpck
 登陆进一个新的群组以改变新创建文件的预设群组
 newgrp group_name
 
-八、文件的权限
+## 八、文件的权限
 
     显示权限
 
@@ -281,7 +281,7 @@ chattr +u <file-name>
 显示特殊的属性
 lsattr
 
-九、打包和压缩文件
+## 九、打包和压缩文件
 
     解压一个叫做 '<file-name>.bz2′的文件
 
@@ -327,7 +327,7 @@ zip -r <file-name>.zip <file-name> file2 dir1
 解压一个zip格式压缩包
 unzip <file-name>.zip
 
-十、包管理器
+## 十、包管理器
 RPM 包 – （Fedora, Redhat及类似系统）
 
     安装一个rpm包
@@ -448,7 +448,7 @@ apt-get clean
 返回包含所要搜索字符串的软件包名称
 apt-cache search searched-package
 
-十一、文本
+## 十一、文本
 查看文件内容
 
     从第一个字节开始正向查看文件的内容
@@ -496,7 +496,7 @@ sed 's/stringa1/stringa2/g' example.txt
 从example.txt文件中删除所有空白行
 sed '/^$/d' example.txt
 从example.txt文件中删除所有注释和空白行
-sed '/ *#/d; /^$/d' example.txt
+sed '/ */d; /^$/d' example.txt
 合并上下单元格内容
 echo 'esempio' | tr '[:lower:]' '[:upper:]'
 从文件example.txt 中排除第一行
@@ -552,7 +552,7 @@ recode ..HTML < page.txt > page.html
 显示所有允许的转换格式
 recode -l | more
 
-十二、文件系统分析
+## 十二、文件系统分析
 
     检查磁盘hda1上的坏磁块
 
@@ -664,7 +664,7 @@ cdrecord –scanbus
 校验一个设备的md5sum编码
 dd if=/dev/hdc | md5sum
 
-十三、端口占用
+## 十三、端口占用
 
     使用lsof
 
@@ -681,7 +681,7 @@ netstat -tunlp | grep <port>
         -l：仅列出在Listen(监听)的服务状态
         -p：显示建立相关链接的程序名
 
-十四、其他
+## 十四、其他
 
     一块网卡添加多个IP
 
@@ -689,15 +689,15 @@ ip addr add <new-ip> dev <device-name>
 
 
 
-开始学习：
-'day01:'用户及文件权限管理
+# 2.开始学习：
+## 1. 用户及文件权限管理
 1.查看用户：
 
 打开终端，输入命令：
 
 who am i
 
-# 或者
+ 或者
 
 who mom likes
 
@@ -718,7 +718,7 @@ who 命令其它常用参数
 -u  打印当前登录用户登录信息
 -r  打印运行等级
 
-2.创建用户：
+## 2.创建用户：
 su，su- 与 sudo
 
 需要注意 Linux 环境下输入密码是不会显示的。
@@ -749,10 +749,11 @@ pwd
 
 退出当前用户跟退出终端一样，可以使用 exit 命令或者使用快捷键 Ctrl+D。
 
-3.用户组：
+##  3.用户组：
 在 Linux 里面每个用户都有一个归属（用户组），用户组简单地理解就是一组用户的集合，它们共享一些资源和权限，同时拥有私有资源，就跟家的形式差不多，你的兄弟姐妹（不同的用户）属于同一个家（用户组），你们可以共同拥有这个家（共享资源），爸妈对待你们都一样（共享权限），你偶尔写写日记，其他人未经允许不能查看（私有资源和权限）。当然一个用户是可以属于多个用户组的，正如你既属于家庭，又属于学校或公司。
 
 在 Linux 里面如何知道自己属于哪些用户组呢？
+
 方法一：使用 groups 命令
 
 groups shiyanlou
@@ -789,7 +790,7 @@ cat /etc/group | grep -E "shiyanlou"
 
 默认情况下新创建的用户是不具有 root 权限的，也不在 sudo 用户组，可以让其加入 sudo 用户组从而获取 root 权限：
 
-# 注意 Linux 上输入密码是不会显示的
+ 注意 Linux 上输入密码是不会显示的
 su -l lilei
 sudo ls
 
@@ -814,10 +815,9 @@ groups lilei
 
 然后你再切换回 lilei 用户，现在就可以使用 sudo 获取 root 权限了。
 
-4.删除用户：sudo deluser lilei --remove-home
+## 4.删除用户：sudo deluser lilei --remove-home
 
-'day01:'
-linux下的文件目录：
+# 3.linux下的文件目录：
     /bin：
     bin 是 Binaries (二进制文件) 的缩写, 这个目录存放着最经常使用的命令。
 
@@ -908,9 +908,9 @@ linux下的文件目录：
 /var： 这是一个非常重要的目录，系统上跑了很多程序，那么每个程序都会有相应的日志产生，而这些日志就被记录到这个目录下，具体在 /var/log 目录下，另外 mail 的预设放置也是在这里。
 
 
-'day02'linux文件的基本属性
+# 2.linux文件的基本属性
 
-1.Linux 文件基本属性
+## 1.Linux 文件基本属性
 
 Linux 系统是一种典型的多用户系统，不同的用户处于不同的地位，拥有不同的权限。
 为了保护系统的安全性，Linux 系统对不同的用户访问同一文件（包括目录文件）的权限做了不同的规定。
@@ -921,7 +921,7 @@ Linux 系统是一种典型的多用户系统，不同的用户处于不同的�
 
 在 Linux 中我们可以使用 ll 或者 ls –l 命令来显示一个文件的属性以及文件所属的用户和组，如：
 
-[root@www /]# ls -l
+[root@www /] ls -l
 total 64
 dr-xr-xr-x   2 root root 4096 Dec 14  2012 bin
 dr-xr-xr-x   4 root root 4096 Apr 19  2012 boot
@@ -965,9 +965,9 @@ d|r-x|r-x|r-x  2 |root |root |4096| Dec 14  2012| bin
 如果用 x 字符表示，则有执行权限，如果用 - 字符表示，则没有执行权限。 
 
 
-2.Linux文件属主和属组
+## 2.Linux文件属主和属组
 
-[root@www /]# ls -l
+[root@www /] ls -l
 total 64
 drwxr-xr-x 2 root  root  4096 Feb 15 14:46 cron
 drwxr-xr-x 3 mysql mysql 4096 Apr 21  2014 mysql
@@ -984,7 +984,7 @@ drwxr-xr-x 3 mysql mysql 4096 Apr 21  2014 mysql
 
 对于 root 用户来说，一般情况下，文件的权限对其不起作用。
 
-3.更改文件属性
+## 3.更改文件属性
 
 1、chgrp：更改文件属组
 
@@ -1006,14 +1006,14 @@ chown [-R] 属主名：属组名 文件名
 进入 /root 目录（~）将install.log的拥有者改为bin这个账号：
 
 [root@www ~] cd ~
-[root@www ~]# chown bin install.log
-[root@www ~]# ls -l
+[root@www ~] chown bin install.log
+[root@www ~] ls -l
 -rw-r--r--  1 bin  users 68495 Jun 25 08:53 install.log
 
 将install.log的拥有者与群组改回为root：
 
-[root@www ~]# chown root:root install.log
-[root@www ~]# ls -l
+[root@www ~] chown root:root install.log
+[root@www ~] ls -l
 -rw-r--r--  1 root root 68495 Jun 25 08:53 install.log
 
 3、chmod：更改文件9个属性
@@ -1045,10 +1045,10 @@ Linux 文件的基本权限就有九个，分别是 owner/group/others(拥有者
 
 举例来说，如果要将 .bashrc 这个文件所有的权限都设定启用，那么命令如下：
 
-[root@www ~]# ls -al .bashrc
+[root@www ~] ls -al .bashrc
 -rw-r--r--  1 root root 395 Jul  4 11:45 .bashrc
-[root@www ~]# chmod 777 .bashrc
-[root@www ~]# ls -al .bashrc(a:所有文件，l:查看可执行权限)
+[root@www ~] chmod 777 .bashrc
+[root@www ~] ls -al .bashrc(a:所有文件，l:查看可执行权限)
 -rwxrwxrwx  1 root root 395 Jul  4 11:45 .bashrc
 
 那如果要将权限变成 -rwxr-xr-- 呢？那么权限的分数就成为 [4+2+1][4+0+1][4+0+0]=754。
@@ -1075,22 +1075,22 @@ x   文件或目录
 
 如果我们需要将文件权限设置为 -rwxr-xr-- ，可以使用 chmod u=rwx,g=rx,o=r 文件名 来设定:
 
-#  touch test1    // 创建 test1 文件
-# ls -al test1    // 查看 test1 默认权限
+  touch test1    // 创建 test1 文件
+ ls -al test1    // 查看 test1 默认权限
 -rw-r--r-- 1 root root 0 Nov 15 10:32 test1
-# chmod u=rwx,g=rx,o=r  test1    // 修改 test1 权限
-# ls -al test1
+ chmod u=rwx,g=rx,o=r  test1    // 修改 test1 权限
+ ls -al test1
 -rwxr-xr-- 1 root root 0 Nov 15 10:32 test1
 
 而如果是要将权限去掉而不改变其他已存在的权限呢？例如要拿掉全部人的可执行权限，则：
 
-#  chmod  a-x test1
-# ls -al test1
+  chmod  a-x test1
+ ls -al test1
 -rw-r--r-- 1 root root 0 Nov 15 10:32 test1
 
 
 
-'day03'Linux 文件与目录管理
+# 4.Linux 文件与目录管理
 
 
 我们知道Linux的目录结构为树状结构，最顶级的目录为根目录 /。
@@ -1105,7 +1105,7 @@ x   文件或目录
     相对路径：
     路径的写法，不是由 / 写起，例如由 /usr/share/doc 要到 /usr/share/man 底下时，可以写成： cd ../man 这就是相对路径的写法。
 
-1.处理目录的常用命令
+## 1.处理目录的常用命令
 
 接下来我们就来看几个常见的处理目录的命令吧：
 
@@ -1122,19 +1122,19 @@ x   文件或目录
 
 
 
-.touch(创建文件)
+1. touch(创建文件)
 touch a.py aa.xml aaa.cpp
 
 
-.ls (列出目录)
+2. ls (列出目录)
 
 在Linux系统当中， ls 命令可能是最常被运行的。
 
 语法：
 
-[root@www ~]# ls [-aAdfFhilnrRSt] 目录名称
-[root@www ~]# ls [--color={never,auto,always}] 目录名称
-[root@www ~]# ls [--full-time] 目录名称
+[root@www ~] ls [-aAdfFhilnrRSt] 目录名称
+[root@www ~] ls [--color={never,auto,always}] 目录名称
+[root@www ~] ls [--full-time] 目录名称
 
 选项与参数：
 
@@ -1144,9 +1144,9 @@ touch a.py aa.xml aaa.cpp
 
 将家目录下的所有文件列出来(含属性与隐藏档)
 
-[root@www ~]# ls -al ~
+[root@www ~] ls -al ~
 
-.cd (切换目录)
+3. cd (切换目录)
 
 cd是Change Directory的缩写，这是用来变换工作目录的命令。
 
@@ -1154,28 +1154,28 @@ cd是Change Directory的缩写，这是用来变换工作目录的命令。
 
  cd [相对路径或绝对路径]
 
-#使用 mkdir 命令创建 runoob 目录
-[root@www ~]# mkdir runoob
+使用 mkdir 命令创建 runoob 目录
+[root@www ~] mkdir runoob
 
-#使用绝对路径切换到 runoob 目录
-[root@www ~]# cd /root/runoob/
+使用绝对路径切换到 runoob 目录
+[root@www ~] cd /root/runoob/
 
-#使用相对路径切换到 runoob 目录
-[root@www ~]# cd ./runoob/
+使用相对路径切换到 runoob 目录
+[root@www ~] cd ./runoob/
 
-# 表示回到自己的家目录，亦即是 /root 这个目录
-[root@www runoob]# cd ~
+ 表示回到自己的家目录，亦即是 /root 这个目录
+[root@www runoob] cd ~
 
-# 表示去到目前的上一级目录，亦即是 /root 的上一级目录的意思；
-[root@www ~]# cd ..
+ 表示去到目前的上一级目录，亦即是 /root 的上一级目录的意思；
+[root@www ~] cd ..
 
 接下来大家多操作几次应该就可以很好的理解 cd 命令的。
 
-.pwd (显示目前所在的目录)
+4. pwd (显示目前所在的目录)
 
 pwd 是 Print Working Directory 的缩写，也就是显示目前所在目录的命令。
 
-[root@www ~]# pwd [-P]
+[root@www ~] pwd [-P]
 
 选项与参数：
 
@@ -1183,22 +1183,22 @@ pwd 是 Print Working Directory 的缩写，也就是显示目前所在目录的
 
 实例：单纯显示出目前的工作目录：
 
-[root@www ~]# pwd
+[root@www ~] pwd
 /root   <== 显示出目录啦～
 
 实例显示出实际的工作目录，而非连结档本身的目录名而已。
 
-[root@www ~]# cd /var/mail   <==注意，/var/mail是一个连结档
-[root@www mail]# pwd
+[root@www ~] cd /var/mail   <==注意，/var/mail是一个连结档
+[root@www mail] pwd
 /var/mail         <==列出目前的工作目录
-[root@www mail]# pwd -P
+[root@www mail] pwd -P
 /var/spool/mail   <==怎么回事？有没有加 -P 差很多～
-[root@www mail]# ls -ld /var/mail
+[root@www mail] ls -ld /var/mail
 lrwxrwxrwx 1 root root 10 Sep  4 17:54 /var/mail -> spool/mail
-# 看到这里应该知道为啥了吧？因为 /var/mail 是连结档，连结到 /var/spool/mail 
-# 所以，加上 pwd -P 的选项后，会不以连结档的数据显示，而是显示正确的完整路径啊！
+ 看到这里应该知道为啥了吧？因为 /var/mail 是连结档，连结到 /var/spool/mail 
+ 所以，加上 pwd -P 的选项后，会不以连结档的数据显示，而是显示正确的完整路径啊！
 
-.mkdir (创建新目录)
+5. mkdir (创建新目录)
 
 如果想要创建新的目录的话，那么就使用mkdir (make directory)吧。
 
@@ -1213,19 +1213,19 @@ mkdir [-mp] 目录名称
 
 实例：请到/tmp底下尝试创建数个新目录看看：
 
-[root@www ~]# cd /tmp
-[root@www tmp]# mkdir test    <==创建一名为 test 的新目录
-[root@www tmp]# mkdir test1/test2/test3/test4
+[root@www ~] cd /tmp
+[root@www tmp] mkdir test    <==创建一名为 test 的新目录
+[root@www tmp] mkdir test1/test2/test3/test4
 mkdir: cannot create directory `test1/test2/test3/test4': 
 No such file or directory       <== 没办法直接创建此目录啊！
-[root@www tmp]# mkdir -p test1/test2/test3/test4
+[root@www tmp] mkdir -p test1/test2/test3/test4
 
 加了这个 -p 的选项，可以自行帮你创建多层目录！
 
 实例：创建权限为 rwx--x--x 的目录。
 
-[root@www tmp]# mkdir -m 711 test2
-[root@www tmp]# ls -l
+[root@www tmp] mkdir -m 711 test2
+[root@www tmp] ls -l
 drwxr-xr-x  3 root  root 4096 Jul 18 12:50 test
 drwxr-xr-x  3 root  root 4096 Jul 18 12:53 test1
 drwx--x--x  2 root  root 4096 Jul 18 12:54 test2
@@ -1234,7 +1234,7 @@ drwx--x--x  2 root  root 4096 Jul 18 12:54 test2
 
 如果我们使用 -m ，如上例我们给予 -m 711 来给予新的目录 drwx--x--x 的权限。
 
-.rmdir (删除空的目录)
+6. rmdir (删除空的目录)
 
 语法：
 
@@ -1246,32 +1246,32 @@ drwx--x--x  2 root  root 4096 Jul 18 12:54 test2
 
 删除 runoob 目录
 
-[root@www tmp]# rmdir runoob/
+[root@www tmp] rmdir runoob/
 
 将 mkdir 实例中创建的目录(/tmp 底下)删除掉！
 
-[root@www tmp]# ls -l   <==看看有多少目录存在？
+[root@www tmp] ls -l   <==看看有多少目录存在？
 drwxr-xr-x  3 root  root 4096 Jul 18 12:50 test
 drwxr-xr-x  3 root  root 4096 Jul 18 12:53 test1
 drwx--x--x  2 root  root 4096 Jul 18 12:54 test2
-[root@www tmp]# rmdir test   <==可直接删除掉，没问题
-[root@www tmp]# rmdir test1  <==因为尚有内容，所以无法删除！
+[root@www tmp] rmdir test   <==可直接删除掉，没问题
+[root@www tmp] rmdir test1  <==因为尚有内容，所以无法删除！
 rmdir: `test1': Directory not empty
-[root@www tmp]# rmdir -p test1/test2/test3/test4
-[root@www tmp]# ls -l        <==您看看，底下的输出中test与test1不见了！
+[root@www tmp] rmdir -p test1/test2/test3/test4
+[root@www tmp] ls -l        <==您看看，底下的输出中test与test1不见了！
 drwx--x--x  2 root  root 4096 Jul 18 12:54 test2
 
 利用 -p 这个选项，立刻就可以将 test1/test2/test3/test4 一次删除。
 
 不过要注意的是，这个 rmdir 仅能删除空的目录，你可以使用 rm 命令来删除非空目录。
-rm -r a#可直接递归删除
+rm -r a可直接递归删除
 
-.cp (复制文件或目录)
+7. cp (复制文件或目录)
 
 语法:
 
-[root@www ~]# cp [-adfilprsu] 来源档(source) 目标档(destination)
-[root@www ~]# cp [options] source1 source2 source3 .... directory
+[root@www ~] cp [-adfilprsu] 来源档(source) 目标档(destination)
+[root@www ~] cp [options] source1 source2 source3 .... directory
 
 选项与参数：
 
@@ -1295,11 +1295,11 @@ rm -r a#可直接递归删除
 
 用 root 身份，将 root 目录下的 .bashrc 复制到 /tmp 下，并命名为 bashrc
 
-[root@www ~]# cp ~/.bashrc /tmp/bashrc
-[root@www ~]# cp -i ~/.bashrc /tmp/bashrc
+[root@www ~] cp ~/.bashrc /tmp/bashrc
+[root@www ~] cp -i ~/.bashrc /tmp/bashrc
 cp: overwrite `/tmp/bashrc'? n  <==n不覆盖，y为覆盖
 
-.rm (移除文件或目录)
+8. rm (移除文件或目录)
 
 语法：
 
@@ -1313,7 +1313,7 @@ cp: overwrite `/tmp/bashrc'? n  <==n不覆盖，y为覆盖
 
 将刚刚在 cp 的实例中创建的 bashrc 删除掉！
 
-[root@www tmp]# rm -i bashrc
+[root@www tmp] rm -i bashrc
 rm: remove regular file `bashrc'? y
 
 如果加上 -i 的选项就会主动询问喔，避免你删除到错误的档名！
@@ -1323,8 +1323,8 @@ rm: remove regular file `bashrc'? y
 
 语法：
 
-[root@www ~]# mv [-fiu] source destination
-[root@www ~]# mv [options] source1 source2 source3 .... directory
+[root@www ~] mv [-fiu] source destination
+[root@www ~] mv [options] source1 source2 source3 .... directory
 
 选项与参数：
 
@@ -1334,19 +1334,19 @@ rm: remove regular file `bashrc'? y
 
 复制一文件，创建一目录，将文件移动到目录中
 
-[root@www ~]# cd /tmp
-[root@www tmp]# cp ~/.bashrc bashrc
-[root@www tmp]# mkdir mvtest
-[root@www tmp]# mv bashrc mvtest
+[root@www ~] cd /tmp
+[root@www tmp] cp ~/.bashrc bashrc
+[root@www tmp] mkdir mvtest
+[root@www tmp] mv bashrc mvtest
 
 将某个文件移动到某个目录去，就是这样做！
 
 将刚刚的目录名称更名为 mvtest2
 
-[root@www tmp]# mv mvtest mvtest2(文件名的修改)
+[root@www tmp] mv mvtest mvtest2(文件名的修改)
 
 
-2.Linux 文件内容查看
+## 2.Linux 文件内容查看
 
 Linux系统中使用以下命令来查看文件的内容：
 
@@ -1360,7 +1360,7 @@ Linux系统中使用以下命令来查看文件的内容：
 
 你可以使用 man [命令]来查看各个命令的使用文档，如 ：man cp。
 
-.cat
+1. cat
 
 由第一行开始显示文件内容
 
@@ -1379,21 +1379,21 @@ cat [-AbEnTv]
 
 检看 /etc/issue 这个文件的内容：
 
-[root@www ~]# cat /etc/issue
+[root@www ~] cat /etc/issue
 CentOS release 6.4 (Final)
 Kernel \r on an \m
 
-.tac
+2. tac
 
 tac与cat命令刚好相反，文件内容从最后一行开始显示，可以看出 tac 是 cat 的倒着写！如：
 
 
-[root@www ~]# tac /etc/issue
+[root@www ~] tac /etc/issue
 
 Kernel \r on an \m
 CentOS release 6.4 (Final)
 
-.nl
+3. nl
 
 显示行号
 
@@ -1414,20 +1414,20 @@ nl [-bnw] 文件
 
 实例一：用 nl 列出 /etc/issue 的内容
 
-[root@www ~]# nl /etc/issue
+[root@www ~] nl /etc/issue
      1  CentOS release 6.4 (Final)
      2  Kernel \r on an \m
 
-more
+4. more
 
 一页一页翻动
 
-[root@www ~]# more /etc/man_db.config 
-#
-# Generated automatically from man.conf.in by the
-# configure script.
-#
-# man.conf from man-1.6d
+[root@www ~] more /etc/man_db.config 
+
+ Generated automatically from man.conf.in by the
+ configure script.
+
+ man.conf from man-1.6d
 ....(中间省略)....
 --More--(28%)  <== 重点在这一行喔！你的光标也会在这里等待你的命令
 
@@ -1440,16 +1440,16 @@ more
     q             ：代表立刻离开 more ，不再显示该文件内容。
     b 或 [ctrl]-b ：代表往回翻页，不过这动作只对文件有用，对管线无用。
 
-less
+5. less
 
 一页一页翻动，以下实例输出/etc/man.config文件的内容：
 
-[root@www ~]# less /etc/man.config
-#
-# Generated automatically from man.conf.in by the
-# configure script.
-#
-# man.conf from man-1.6d
+[root@www ~] less /etc/man.config
+
+ Generated automatically from man.conf.in by the
+ configure script.
+
+ man.conf from man-1.6d
 ....(中间省略)....
 :   <== 这里可以等待你输入命令！
 
@@ -1464,7 +1464,7 @@ less运行时可以输入的命令有：
     N         ：反向的重复前一个搜寻 (与 / 或 ? 有关！)
     q         ：离开 less 这个程序；
 
-head
+6. head
 
 取出文件前面几行
 
@@ -1476,13 +1476,13 @@ head [-n number] 文件
 
     -n ：后面接数字，代表显示几行的意思 
 
-[root@www ~]# head /etc/man.config
+[root@www ~] head /etc/man.config
 
 默认的情况中，显示前面 10 行！若要显示前 20 行，就得要这样：
 
-[root@www ~]# head -n 20 /etc/man.config
+[root@www ~] head -n 20 /etc/man.config
 
-tail
+7. tail
 
 取出文件后面几行
 
@@ -1495,13 +1495,13 @@ tail [-n number] 文件
     -n ：后面接数字，代表显示几行的意思
     -f ：表示持续侦测后面所接的档名，要等到按下[ctrl]-c才会结束tail的侦测 
 
-[root@www ~]# tail /etc/man.config
-# 默认的情况中，显示最后的十行！若要显示最后的 20 行，就得要这样：
-[root@www ~]# tail -n 20 /etc/man.config
+[root@www ~] tail /etc/man.config
+ 默认的情况中，显示最后的十行！若要显示最后的 20 行，就得要这样：
+[root@www ~] tail -n 20 /etc/man.config
 
 
 
-'day04'Linux 磁盘管理
+# 5. Linux 磁盘管理
 
 Linux 磁盘管理好坏直接关系到整个系统的性能问题。
 
@@ -1511,7 +1511,7 @@ Linux 磁盘管理常用三个命令为 df、du 和 fdisk。
     du（英文全称：disk used）：检查磁盘空间使用量
     fdisk：用于磁盘分区
 
-1.df
+1. df
 
 df命令参数功能：检查文件系统的磁盘空间占用情况。可以利用该命令来获取硬盘被占用了多少空间，目前还剩下多少空间等信息。
 
@@ -1533,7 +1533,7 @@ df [-ahikHTm] [目录或文件名]
 
 将系统内所有的文件系统列出来！
 
-[root@www ~]# df
+[root@www ~] df
 Filesystem      1K-blocks      Used Available Use% Mounted on
 /dev/hdc2         9920624   3823112   5585444  41% /
 /dev/hdc3         4956316    141376   4559108   4% /home
@@ -1545,7 +1545,7 @@ tmpfs              371332         0    371332   0% /dev/shm
 
 将容量结果以易读的容量格式显示出来
 
-[root@www ~]# df -h
+[root@www ~] df -h
 Filesystem            Size  Used Avail Use% Mounted on
 /dev/hdc2             9.5G  3.7G  5.4G  41% /
 /dev/hdc3             4.8G  139M  4.4G   4% /home
@@ -1556,7 +1556,7 @@ tmpfs                 363M     0  363M   0% /dev/shm
 
 将系统内的所有特殊文件格式及名称都列出来
 
-[root@www ~]# df -aT
+[root@www ~] df -aT
 Filesystem    Type 1K-blocks    Used Available Use% Mounted on
 /dev/hdc2     ext3   9920624 3823112   5585444  41% /
 proc          proc         0       0         0   -  /proc
@@ -1572,11 +1572,11 @@ sunrpc  rpc_pipefs         0       0         0   -  /var/lib/nfs/rpc_pipefs
 
 将 /etc 底下的可用的磁盘容量以易读的容量格式显示
 
-[root@www ~]# df -h /etc
+[root@www ~] df -h /etc
 Filesystem            Size  Used Avail Use% Mounted on
 /dev/hdc2             9.5G  3.7G  5.4G  41% /
 
-2.du
+2. du
 
 Linux du 命令也是查看使用空间的，但是与 df 命令不同的是 Linux du 命令是对文件和目录磁盘使用的空间的查看，还是和df命令有一些区别的，这里介绍 Linux du 命令。
 
@@ -1597,7 +1597,7 @@ du [-ahskm] 文件或目录名称
 
 只列出当前目录下的所有文件夹容量（包括隐藏文件夹）:
 
-[root@www ~]# du
+[root@www ~] du
 8       ./test4     <==每个目录都会列出来
 8       ./test2
 ....中间省略....
@@ -1609,7 +1609,7 @@ du [-ahskm] 文件或目录名称
 
 将文件的容量也列出来
 
-[root@www ~]# du -a
+[root@www ~] du -a
 12      ./install.log.syslog   <==有文件的列表了
 8       ./.bash_logout
 8       ./test4
@@ -1622,7 +1622,7 @@ du [-ahskm] 文件或目录名称
 
 检查根目录底下每个目录所占用的容量
 
-[root@www ~]# du -sm /*
+[root@www ~] du -sm /*
 7       /bin
 6       /boot
 .....中间省略....
@@ -1638,9 +1638,9 @@ du [-ahskm] 文件或目录名称
 fdisk
 
 
-'day05'环境变量与文件查找：
+# 6.环境变量与文件查找：
 
-1.变量
+## 1.变量
 
 要解释环境变量，得先明白变量是什么，准确的说应该是 Shell 变量，所谓变量就是计算机中用于记录一个值（不一定是数值，也可以是字符或字符串）的符号，而这些符号将用于不同的运算处理中。通常变量与值是一对一的关系，可以通过表达式读取它的值并赋值给其它变量，也可以直接指定数值赋值给任意变量。为了便于运算和处理，大部分的编程语言会区分变量的类型，用于分别记录数值、字符或者字符串等等数据类型。Shell 中的变量也基本如此，有不同类型（但不用专门指定类型名），可以参与运算，有作用域限定。
 
@@ -1656,10 +1656,10 @@ declare tmp
 
 使用 = 号赋值运算符，将变量 tmp 赋值为 shiyanlou。注意，与其他语言不同的是， Shell 中的赋值操作，= 两边不可以输入空格，否则会报错。
 
-# 正确的赋值
+ 正确的赋值
 tmp=shiyanlou
 
-# 错误的赋值
+ 错误的赋值
 tmp = shiyanlou
 
 读取变量的值，使用 echo 命令和 $ 符号（$ 符号用于表示引用一个变量的值，初学者经常忘记输入）：
@@ -1670,7 +1670,7 @@ echo $tmp
 
 注意：并不是任何形式的变量名都是可用的，变量名只能是英文字母、数字或者下划线，且不能以数字作为开头。
 
-2.环境变量
+## 2. 环境变量
 
 环境变量的作用域比自定义变量的要大，如 Shell 的环境变量作用于自身和它的子进程。
 在所有的 UNIX 和类 UNIX 系统中，每个进程都有其各自的环境变量设置，且默认情况下，当一个进程被创建时，除了创建过程中明确指定的话，它将继承其父进程的绝大部分环境设置。
@@ -1720,7 +1720,7 @@ vimdiff env.txt export.txt set.txt
 
 这里介绍两个重要文件 /etc/bashrc（有的 Linux 没有这个文件） 和 /etc/profile ，它们分别存放的是 shell 变量和环境变量。还有要注意区别的是每个用户目录下的一个隐藏文件：
 
-# .profile 可以用 ls -a 查看
+ .profile 可以用 ls -a 查看
 cd /home/shiyanlou
 ls -a
 
@@ -1728,7 +1728,7 @@ ls -a
 所以如果想要添加一个永久生效的环境变量，只需要打开 /etc/profile，在最后加上你想添加的环境变量就好啦。
 
 
-3.命令的查找路径与顺序 
+## 3. 命令的查找路径与顺序 
 
 
 你可能很早之前就有疑问，我们在 Shell 中输入一个命令，Shell 是怎么知道去哪找到这个命令然后执行的呢？这是通过环境变量 PATH 来进行搜索的，熟悉 Windows 的用户可能知道 Windows 中的也是有这么一个 PATH 环境变量。这个 PATH 里面就保存了 Shell 中执行的命令的搜索路径。
@@ -1759,7 +1759,7 @@ gedit hello_shell.sh
 
 注意不要省掉第一行，这不是注释，有用户反映有语法错误，就是因为没有了第一行。
 
-#!/bin/bash
+!/bin/bash
 
 for ((i=0; i<10; i++));do
     echo "hello shell"
@@ -1783,7 +1783,7 @@ gedit hello_world.c
 
 输入如下内容，同样不能省略第一行。
 
-#include <stdio.h>
+include <stdio.h>
 
 int main(void)
 {
@@ -1832,14 +1832,14 @@ echo "PATH=$PATH:/home/shiyanlou/mybin" >> .zshrc
 
 上述命令中 >> 表示将标准输出以追加的方式重定向到一个文件中，注意前面用到的 > 是以覆盖的方式重定向到一个文件中，使用的时候一定要注意分辨。在指定文件不存在的情况下都会创建新的文件。
 
-4.修改和删除已有变量
+## 4. 修改和删除已有变量
 
-.变量修改
+1. 变量修改
 
 变量的修改有以下几种方式：
 变量设置方式  说明
-${变量名#匹配字串}     从头向后开始匹配，删除符合匹配字串的最短数据
-${变量名##匹配字串}    从头向后开始匹配，删除符合匹配字串的最长数据
+${变量名匹配字串}     从头向后开始匹配，删除符合匹配字串的最短数据
+${变量名匹配字串}    从头向后开始匹配，删除符合匹配字串的最长数据
 ${变量名%匹配字串}     从尾向前开始匹配，删除符合匹配字串的最短数据
 ${变量名%%匹配字串}    从尾向前开始匹配，删除符合匹配字串的最长数据
 ${变量名/旧的字串/新的字串}    将符合旧字串的第一个字串替换为新的字串
@@ -1850,19 +1850,19 @@ ${变量名//旧的字串/新的字串}   将符合旧字串的全部字串替�
 mypath=$PATH
 echo $mypath
 mypath=${mypath%/home/shiyanlou/mybin}
-# 或使用通配符 * 表示任意多个任意字符
+ 或使用通配符 * 表示任意多个任意字符
 mypath=${mypath%*/mybin}
 
 可以看到路径已经不存在了。
 
 
-.变量删除
+2. 变量删除
 
 可以使用 unset 命令删除一个环境变量：
 
 unset mypath
 
- 5. 如何让环境变量立即生效
+   1. 如何让环境变量立即生效
 
 前面我们在 Shell 中修改了一个配置脚本文件之后（比如 zsh 的配置文件 home 目录下的 .zshrc），每次都要退出终端重新打开甚至重启主机之后其才能生效，很是麻烦，我们可以使用 source 命令来让其立即生效，如：
 
@@ -1883,12 +1883,12 @@ source 命令还有一个别名就是 .，上面的命令如果替换成 . 的�
 总结：
 mkdir a---cd a---touch a.py---gedit a.py---PATH=$PATH:/home/kim/a(把PATH这个环境变量添加到PATH中---
 echo 'PATH=$PATH:/home/kim/a' >> .bashrc---source .bashrc
----./a.py---unset PATH#删除path环境变量
+---./a.py---unset PATH删除path环境变量
 (环境变量生效后就能在任意位置执行a.py)
-#千万不要随便修改环境变量
+千万不要随便修改环境变量
 
 
-6.常用的搜索命令：
+## 6.常用的搜索命令：
 与搜索相关的命令常用的有 whereis，which，find 和 locate。
 whereis 简单快速
 whereis who
@@ -1918,9 +1918,9 @@ locate /etc/sh
 locate /usr/share/*.jpg
 
 
-'day06文件的打包和解压缩'
+# 7. 文件的打包和解压缩
 
-'1.用zip压缩解压'
+## 1. 用zip压缩解压
 在讲 Linux 上的压缩工具之前，有必要先了解一下常见常用的压缩包文件格式。在 Windows 上最常见的不外乎这两种 *.zip，*.7z 后缀的压缩文件。而在 Linux 上面常见的格式除了以上两种外，还有 .rar，*.gz，*.xz，*.bz2，*.tar，*.tar.gz，*.tar.xz，*.tar.bz2，简单介绍如下：
 文件后缀名   说明
 *.zip   zip 程序打包压缩的文件
@@ -1937,14 +1937,14 @@ locate /usr/share/*.jpg
 
 讲了这么多种压缩文件，这么多个命令，不过我们一般只需要掌握几个命令即可，包括 zip，tar。下面会依次介绍这几个命令及对应的解压命令。
 
-1.zip压缩打包程序
+1. zip压缩打包程序
 
     使用 zip 打包文件夹，注意输入完整的参数和路径：
 
 cd /home/shiyanlou
-zip -r -q -o shiyanlou.zip /home/shiyanlou/Desktop#一般用-r，第一个是压缩后的文件，第二个是将要被的压缩文件
+zip -r -q -o shiyanlou.zip /home/shiyanlou/Desktop一般用-r，第一个是压缩后的文件，第二个是将要被的压缩文件
 du -h shiyanlou.zip
-file shiyanlou.zip#将shiyanlou.zip解压
+file shiyanlou.zip将shiyanlou.zip解压
 
 上面命令将目录 /home/shiyanlou/Desktop 打包成一个文件，并查看了打包后文件的大小和类型。
 第一行命令中，-r 参数表示递归打包包含子目录的全部内容，
@@ -1968,7 +1968,6 @@ du -h -d 0 *.zip ~ | sort
     -h， --human-readable（顾名思义，你可以试试不加的情况）
     -d， --max-depth（所查看文件的深度）
 
-图片描述
 
 这样一目了然，理论上来说默认压缩级别应该是最高的，但是由于文件不大，这里的差异不明显（几乎看不出差别），不过你在环境中操作之后看到的压缩文件大小可能跟图上的有些不同，因为系统在使用过程中，会随时生成一些缓存文件在当前用户的家目录中，这对于我们学习命令使用来说，是无关紧要的，可以忽略这些不同。
 
@@ -1984,14 +1983,14 @@ zip -r -l -o shiyanlou.zip /home/shiyanlou/Desktop
 
 需要加上 -l 参数将 LF 转换为 CR+LF 来达到以上目的。
 
-2.unzip解压
+2. unzip解压
 将 shiyanlou.zip 解压到当前目录：
 
 unzip shiyanlou.zip
 
 使用安静模式，将文件解压到指定目录：
 
-unzip -q shiyanlou.zip -d ziptest#-d代表解压地点destination
+unzip -q shiyanlou.zip -d ziptest-d代表解压地点destination
 
 上述指定目录不存在，将会自动创建。如果你不想解压只想查看压缩包的内容你可以使用 -l 参数：
 
@@ -2005,7 +2004,7 @@ unzip -l shiyanlou.zip
 unzip -O GBK 中文压缩文件.zip
 
 
-'2.用tar压缩解压'
+## 2. 用tar压缩解压
 
 
 在 Linux 上面更常用的是 tar 工具，tar 原本只是一个打包工具，只是同时还是实现了对 7z、gzip、xz、bzip2 等工具的支持，这些压缩工具本身只能实现对文件或目录（单独压缩目录中的文件）的压缩，没有实现对文件的打包压缩，所以我们也无需再单独去学习其他几个工具，tar 的解压和压缩都是同一个命令，只需参数不同，使用比较方便。
@@ -2017,7 +2016,7 @@ unzip -O GBK 中文压缩文件.zip
 cd /home/shiyanlou
 tar -P -cf shiyanlou.tar /home/shiyanlou/Desktop
 
-上面命令中，-P 保留绝对路径符，-c 表示创建一个 tar 包文件'create'，-f 用于指定创建的文件名#file，
+上面命令中，-P 保留绝对路径符，-c 表示创建一个 tar 包文件'create'，-f 用于指定创建的文件名file，
 注意文件名必须紧跟在 -f 参数之后，比如不能写成 tar -fc shiyanlou.tar，可以写成 tar -f shiyanlou.tar -c ~。你还可以加上 -v 参数以可视的的方式输出打包的文件。
 
     解包一个文件（-x 参数）到指定路径的已存在目录（-C 参数）：
@@ -2064,12 +2063,12 @@ tar：
 指定路径：-C 参数
 (任何时候都要加f,zip的路径-d,tar路径为-C)
 
-'day07磁盘操作'
+# 8.磁盘操作
 
 
-2.1 查看磁盘和目录的容量
+## 8-1. 查看磁盘和目录的容量
 
-    使用 df 命令查看磁盘的容量
+    1. 使用 df 命令查看磁盘的容量
 
 
 物理主机上的 /dev/sda2 是对应着主机硬盘的分区，后面的数字表示分区号，数字前面的字母 a 表示第几块硬盘（也可能是可移动磁盘），你如果主机上有多块硬盘则可能还会出现 /dev/sdb，/dev/sdc 这些磁盘设备都会在 /dev 目录下以文件的存在形式。
@@ -2081,34 +2080,34 @@ df -h
 
 现在你就可以使用命令查看你主机磁盘的使用情况了。至于挂载点如果你还记得前面第 4 节介绍 Linux 目录树结构的内容，那么你就应该能很好的理解挂载的概念，这里就不再赘述。
 
-    使用 du 命令查看目录的容量
+    2. 使用 du 命令查看目录的容量
 
 这个命令前面其实已经用了很多次了：
 
-# 默认同样以块的大小展示
+ 默认同样以块的大小展示
 du
-# 加上 `-h` 参数，以更易读的方式展示
+ 加上 `-h` 参数，以更易读的方式展示
 du -h
 
 -d 参数指定查看目录的深度
 
-# 只查看 1 级目录的信息
+ 只查看 1 级目录的信息
 du -h -d 0 ~
-# 查看 2 级
+ 查看 2 级
 du -h -d 1 ~
 
 常用参数
 
-du -h # 同 --human-readable 以 K，M，G 为单位，提高信息的可读性。
-du -a # 同 --all 显示目录中所有文件的大小。
-du -s # 同 --summarize 仅显示总计，只列出最后加总的值。
+du -h  同 --human-readable 以 K，M，G 为单位，提高信息的可读性。
+du -a  同 --all 显示目录中所有文件的大小。
+du -s  同 --summarize 仅显示总计，只列出最后加总的值。
 
 注意：
 du（estimate file space usage）命令与 df（report file system disk space usage）命令只有一字之差，希望大家注意不要弄混淆了，你可以像我这样从 man 手册中获取命令的完整描述，记全称就不会搞混了。
 du是记录文件空间使用的，df是记录磁盘空间使用的
 
 
-'day08Linux 下的帮助命令 '
+# 9. Linux 下的帮助命令 
 
 
     内建命令实际上是 shell 程序的一部分，其中包含的是一些比较简单的 Linux 系统命令，这些命令是写在 bash 源码的 builtins 里面的，由 shell 程序识别并在 shell 程序内部完成运行，通常在 Linux 系统加载运行时 shell 就被加载并驻留在系统内存中。而且解析内部命令 shell 不需要创建子进程，因此其执行速度比外部命令快。比如：history、cd、exit 等等。
@@ -2125,14 +2124,14 @@ type vim
 
 
 
-# 得到这样的结果说明是内建命令，正如上文所说内建命令都是在 bash 源码中的 builtins 的.def中
+ 得到这样的结果说明是内建命令，正如上文所说内建命令都是在 bash 源码中的 builtins 的.def中
 xxx is a shell builtin
-# 得到这样的结果说明是外部命令，正如上文所说，外部命令在/usr/bin or /usr/sbin等等中
+ 得到这样的结果说明是外部命令，正如上文所说，外部命令在/usr/bin or /usr/sbin等等中
 xxx is /usr/bin/xxx
-# 若是得到alias的结果，说明该指令为命令别名所设定的名称；
+ 若是得到alias的结果，说明该指令为命令别名所设定的名称；
 xxx is an alias for xx --xxx
 
-'1.help'
+## 1. help
 
 本实验环境是 zsh，而 zsh 中内置并没有 help 命令，我们可以进入 bash 中，在 bash 中内置有该命令
 
@@ -2141,7 +2140,7 @@ bash
 
 做好了以上的准备，我们就可以愉快的使用 help 命令了，我们可以尝试下这个命令:
 
-help ls#help ls表示显示内建的信息
+help lshelp ls表示显示内建的信息
 
 得到的结果如图所示，为什么是这样的结果？
 
@@ -2150,9 +2149,9 @@ help ls#help ls表示显示内建的信息
 
 那如果是外部命令怎么办，不能就这么抛弃它呀。其实外部命令基本上都有一个参数 --help，这样就可以得到相应的帮助，看到你想要的东西了。试试下面这个命令是不是能看到你想要的东西了。
 
-ls --help#ls --help表示显示外部的信息
+ls --helpls --help表示显示外部的信息
 
-'2.man'
+## 2. man
 
 得到的内容比用 help 更多更详细，而且 man 没有内建与外部命令的区分，因为 man 工具是显示系统手册页中的内容，也就是一本电子版的字典，这些内容大多数都是对命令的解释信息，还有一些相关的描述。
 通过查看系统文档中的 man 也可以得到程序的更多相关信息和 Linux 的更多特性。
@@ -2163,8 +2162,8 @@ ls --help#ls --help表示显示外部的信息
 
 
 
-'3. Linux 任务计划 crontab '
-1.简介:
+## 3. Linux 任务计划 crontab 
+1. 简介:
 我们时常会有一些定期定时的任务，如周期性的清理一下 /tmp，周期性的去备份一次数据库，周期性的分析日志等等。
 而且有时候因为某些因素的限制，执行该任务的时间会很尴尬。本课程将带你很好的利用 Linux 系统的计划工具。
 
@@ -2173,16 +2172,16 @@ crontab 命令从输入设备读取指令，并将其存放于 crontab 文件中
 通过 crontab 命令，我们可以在固定的间隔时间执行指定的系统指令或 shell 脚本。时间间隔的单位可以是分钟、小时、日、月、周的任意组合。
 
 这里我们看一看 crontab 的格式：
-# Example of job definition:
-# .---------------- minute (0 - 59)
-# |  .------------- hour (0 - 23)
-# |  |  .---------- day of month (1 - 31)
-# |  |  |  .------- month (1 - 12) OR jan,feb,mar,apr ...
-# |  |  |  |  .---- day of week (0 - 6) (Sunday=0 or 7) OR sun,mon,tue,wed,thu,fri,sat
-# |  |  |  |  |
-# *  *  *  *  * user-name command to be executed
+ Example of job definition:
+ .---------------- minute (0 - 59)
+ |  .------------- hour (0 - 23)
+ |  |  .---------- day of month (1 - 31)
+ |  |  |  .------- month (1 - 12) OR jan,feb,mar,apr ...
+ |  |  |  |  .---- day of week (0 - 6) (Sunday=0 or 7) OR sun,mon,tue,wed,thu,fri,sat
+ |  |  |  |  |
+ *  *  *  *  * user-name command to be executed
 
-2.准备：
+2. 准备：
 crontab 在本实验环境中需要做一些特殊的准备，首先我们会启动 rsyslog，以便我们可以通过日志中的信息来了解我们的任务是否真正的被执行了（在本实验环境中需要手动启动，而在自己本地中 Ubuntu 会默认自行启动不需要手动启动）。
 
 sudo apt-get install -y rsyslog
@@ -2190,28 +2189,28 @@ sudo service rsyslog start
 
 
 
-'day09.命令执行顺序控制与管道' 
+# 9. 命令执行顺序控制与管道
 顺序执行、选择执行、管道、cut 命令、grep 命令、wc 命令、sort 命令等，高效率使用 Linux 的技巧。
 
-1.选择性执行
- 2.1 顺序执行多条命令
+## 1.选择性执行
+1. 顺序执行多条命令
 
 当我们需要使用 apt-get 安装一个软件，然后安装完成后立即运行安装的软件或命令工具，又恰巧你的主机才更换的软件源还没有更新软件列表（比如之前我们的环境中，每次重新开始实验就得 sudo apt-get update，否则可能会报错提示 404），那么你可能会有如下一系列操作：
 
 sudo apt-get update
-# 等待执行完毕，然后输入下面的命令
-sudo apt-get install some-tool # 这里 some-tool 需要替换成具体的软件包
-# 等待安装完毕，然后输入软件包名称执行
+ 等待执行完毕，然后输入下面的命令
+sudo apt-get install some-tool  这里 some-tool 需要替换成具体的软件包
+ 等待安装完毕，然后输入软件包名称执行
 some-tool
 
 这时你可能就会想：要是我可以一次性输入完，让它自己去依次执行各命令就好了，这就是我们这一小节要解决的问题。
 
 简单的顺序执行你可以使用 ; 来完成，比如上述操作你可以：
 
-sudo apt-get update;sudo apt-get install some-tool;some-tool # 让它自己运行
+sudo apt-get update;sudo apt-get install some-tool;some-tool  让它自己运行
 
 
- 2.2 有选择的执行命令
+2. 有选择的执行命令
 
 关于上面的操作，不知你有没有思考过一个问题，如果我们在让它自动顺序执行命令时，前面的命令执行不成功，而后面的命令又依赖于上一条命令的结果，那么就会造成花了时间，最终却得到一个错误的结果，而且有时候直观的看你还无法判断结果是否正确。
 那么我们需要能够有选择性的来执行命令，比如上一条命令执行成功才继续下一条，或者不成功又该做出其它什么处理，比如我们使用 which 来查找是否安装某个命令，如果找到就执行该命令，否则什么也不做，虽然这个操作没有什么实际意义，但可帮你更好的理解一些概念：
@@ -2223,7 +2222,7 @@ which cowsay>/dev/null && cowsay -f head-in ohch~
 上面的 && 就是用来实现选择性执行的，它表示如果前面的命令执行结果（不是表示终端输出的内容，而是表示命令执行状态的结果）返回 0 则执行后面的，否则不执行，你可以从 $? 环境变量获取上一次命令的返回结果：
 
 
-2.管道：
+## 2. 管道：
 
 
 管道是一种通信机制，通常用于进程间的通信（也可通过 socket 进行网络通信），它表现出来的形式就是将前面每一个进程的输出（stdout）直接作为下一个进程的输入（stdin）。
@@ -2241,7 +2240,7 @@ ls -al /etc | less
 通过管道将前一个命令(ls)的输出作为下一个命令(less)的输入，然后就可以一行一行地看。
 
 
-3.cut 命令，打印每一行的某一字段
+## 3.cut 命令，打印每一行的某一字段
 
 打印 /etc/passwd 文件中以 : 为分隔符的第 1 个字段和第 6 个字段分别表示用户名和其家目录：
 
@@ -2250,17 +2249,17 @@ cut /etc/passwd -d ':' -f 1,6
 
 打印 /etc/passwd 文件中每一行的前 N 个字符：
 
-# 前五个（包含第五个）
+ 前五个（包含第五个）
 cut /etc/passwd -c -5
-# 前五个之后的（包含第五个）
+ 前五个之后的（包含第五个）
 cut /etc/passwd -c 5-
-# 第五个
+ 第五个
 cut /etc/passwd -c 5
-# 2 到 5 之间的（包含第五个）
+ 2 到 5 之间的（包含第五个）
 cut /etc/passwd -c 2-5
 
 
-4.rep 命令，在文本中或 stdin 中查找匹配字符串
+## 4. rep 命令，在文本中或 stdin 中查找匹配字符串
 
 grep 命令是很强大的，也是相当常用的一个命令，它结合正则表达式可以实现很复杂却很高效的匹配和查找，不过在学习正则表达式之前，这里介绍它简单的使用，而关于正则表达式后面将会有单独一小节介绍到时会再继续学习 grep 命令和其他一些命令。
 
@@ -2279,7 +2278,7 @@ grep -rnI "shiyanlou" ~
 
 当然也可以在匹配字段中使用正则表达式，下面简单的演示：
 
-# 查看环境变量中以 "yanlou" 结尾的字符串
+ 查看环境变量中以 "yanlou" 结尾的字符串
 export | grep ".*yanlou$"
 
 
@@ -2300,7 +2299,7 @@ export [-fnp][变量名称]=[变量设置值]
     -p 　列出所有的shell赋予程序的环境变量。
 
 
-4.wc 命令，简单小巧的计数工具
+## 5.wc 命令，简单小巧的计数工具
 
 wc 命令用于统计并输出一个文件中行、单词和字节的数目，比如输出 /etc/passwd 文件的统计信息：
 
@@ -2308,15 +2307,15 @@ wc /etc/passwd
 
 分别只输出行数、单词数、字节数、字符数和输入文本中最长一行的字节数：
 
-# 行数
+ 行数
 wc -l /etc/passwd
-# 单词数
+ 单词数
 wc -w /etc/passwd
-# 字节数
+ 字节数
 wc -c /etc/passwd
-# 字符数
+ 字符数
 wc -m /etc/passwd
-# 最长行字节数
+ 最长行字节数
 wc -L /etc/passwd
 
 
@@ -2328,14 +2327,14 @@ wc -L /etc/passwd
 
 ls -dl /etc/*/ | wc -l
 
-5.sort 排序命令
+## 6.sort 排序命令
 
 这个命令前面我们也是用过多次，功能很简单就是将输入按照一定方式排序，
 然后再输出，它支持的排序有按字典排序，数字排序，按月份排序，随机排序，反转排序，指定特定字段进行排序等等。
 
 默认为字典排序：
 
-cat /etc/passwd | sort#按照首字母行排序
+cat /etc/passwd | sort按照首字母行排序
 
 反转排序：
 
@@ -2349,7 +2348,7 @@ cat /etc/passwd | sort -t':' -k 3
 
 上面的-t参数用于指定字段的分隔符，这里是以":"作为分隔符；-k 字段号用于指定对哪一个字段进行排序。这里/etc/passwd文件的第三个字段为数字，默认情况下是以字典序排序的，如果要按照数字排序就要加上-n参数：
 
-6.uniq 去重命令
+## 7.uniq 去重命令
 
 uniq 命令可以用于过滤或者输出重复行。
 
@@ -2362,16 +2361,16 @@ history | cut -c 8- | cut -d ' ' -f 1 | uniq
 然后经过层层过滤，你会发现确是只输出了执行的命令那一列，不过去重效果好像不明显，仔细看你会发现它确实去重了，只是不那么明显，之所以不明显是因为 uniq 命令只能去连续重复的行，不是全文去重，所以要达到预期效果，我们先排序：
 
 history | cut -c 8- | cut -d ' ' -f 1 | sort | uniq
-# 或者
+ 或者
 history | cut -c 8- | cut -d ' ' -f 1 | sort -u
 
 这就是 Linux/UNIX 哲学吸引人的地方，大繁至简，一个命令只干一件事却能干到最好。
 
     输出重复行
 
-# 输出重复过的行（重复的只输出一个）及重复次数
+ 输出重复过的行（重复的只输出一个）及重复次数
 history | cut -c 8- | cut -d ' ' -f 1 | sort | uniq -dc
-# 输出所有重复的行
+ 输出所有重复的行
 history | cut -c 8- | cut -d ' ' -f 1 | sort | uniq -D
 
 文本处理命令还有很多，下一节将继续介绍一些常用的文本处理的命令。
@@ -2380,9 +2379,9 @@ history | cut -c 8- | cut -d ' ' -f 1 | sort | uniq -D
 使用以前介绍过的方法，安装aview和imagemagick，然后用asciiview命令显示图片，使用方法可以用 man 命令查看。
 
 
-'day10简单的文本处理'
+# 10.简单的文本处理
 
-.tr
+1. tr
 
 tr 命令可以用来删除一段文本信息中的某些文字。或者将其进行转换。
 使用方式
@@ -2393,31 +2392,31 @@ tr 指令从标准输入设备读取数据，经过字符串转译后，将结�
 语法
 
 tr [-cdst][--help][--version][第一字符集][第二字符集]  
-tr [OPTION]…SET1[SET2] #!/usr/bin/env python
+tr [OPTION]…SET1[SET2] !/usr/bin/env python
 常用的选项有
 选项  说明
 -d  删除和 set1 匹配的字符，注意不是全词匹配也不是按字符顺序匹配
 -s  去除 set1 指定的在输入文本中连续并重复的字符
 操作举例
 
-# 删除 "hello shiyanlou" 中所有的'o'，'l'，'h'
+ 删除 "hello shiyanlou" 中所有的'o'，'l'，'h'
 $ echo 'hello shiyanlou' | tr -d 'olh'
-# 将"hello" 中的ll，去重为一个l
+ 将"hello" 中的ll，去重为一个l
 $ echo 'hello' | tr -s 'l'
-# 将输入文本，全部转换为大写或小写输出
+ 将输入文本，全部转换为大写或小写输出
 $ echo 'input some text here' | tr '[:lower:]' '[:upper:]'
-# 上面的'[:lower:]' '[:upper:]'你也可以简单的写作'[a-z]' '[A-Z]'，当然反过来将大写变小写也是可以的
+ 上面的'[:lower:]' '[:upper:]'你也可以简单的写作'[a-z]' '[A-Z]'，当然反过来将大写变小写也是可以的
 
 
 将文件testfile中的小写字母全部转换成大写字母，此时，可使用如下命令：
 
-cat testfile |tr a-z A-Z #转换
+cat testfile |tr a-z A-Z 转换
 
-cat testfile | tr -d asd #删除调testfile中的asd
+cat testfile | tr -d asd 删除调testfile中的asd
 
 更多 tr 的使用，你可以使用--help或者man tr获得。
 
-.col
+2. col
 
 col 命令可以将Tab换成对等数量的空格键，或反转这个操作。
 使用方式
@@ -2430,13 +2429,13 @@ col [option]
 -h  将空格转换为Tab（默认选项）
 操作举例
 
-# 查看 /etc/protocols 中的不可见字符，可以看到很多 ^I ，这其实就是 Tab 转义成可见字符的符号
+ 查看 /etc/protocols 中的不可见字符，可以看到很多 ^I ，这其实就是 Tab 转义成可见字符的符号
 cat -A /etc/protocols
-# 使用 col -x 将 /etc/protocols 中的 Tab 转换为空格，然后再使用 cat 查看，你发现 ^I 不见了
+ 使用 col -x 将 /etc/protocols 中的 Tab 转换为空格，然后再使用 cat 查看，你发现 ^I 不见了
 cat /etc/protocols | col -x | cat -A
 
 
-.join
+3. join
 
 学过数据库的用户对这个应该不会陌生，这个命令就是用于将两个文件中包含相同内容的那一行合并在一起。
 使用方式
@@ -2452,17 +2451,17 @@ join [option]... file1 file2
 操作举例
 
 cd /home/shiyanlou
-# 创建两个文件
-echo '1 hello' > file1#将'1 hello'追加在file1中，若无file1则自动创建
+ 创建两个文件
+echo '1 hello' > file1将'1 hello'追加在file1中，若无file1则自动创建
 echo '1 shiyanlou' > file2
 join file1 file2
-# 将 /etc/passwd 与 /etc/shadow 两个文件合并，指定以':'作为分隔符
+ 将 /etc/passwd 与 /etc/shadow 两个文件合并，指定以':'作为分隔符
 sudo join -t':' /etc/passwd /etc/shadow
-# 将 /etc/passwd 与 /etc/group 两个文件合并，指定以':'作为分隔符，分别比对第4和第3个字段
+ 将 /etc/passwd 与 /etc/group 两个文件合并，指定以':'作为分隔符，分别比对第4和第3个字段
 sudo join -t':' -1 4 /etc/passwd -2 3 /etc/group
 
 
-.paste
+4. paste
 
 paste这个命令与join 命令类似，它是在不对比数据的情况下，简单地将多个文件合并一起，以Tab隔开。
 使用方式
@@ -2482,7 +2481,7 @@ paste -d ':' file1 file2 file3
 paste -s file1 file2 file3
 
 
-'day11数据流重定向'
+# 11. 数据流重定向'
 
 下面我们简单的回顾一下我们前面经常用到的两个重定向操作：
 
@@ -2493,7 +2492,7 @@ cat redirect
     当然前面没有用到的 < 和 << 操作也是没有问题的，如你理解的一样，它们的区别在于重定向的方向不一致而已，
     > 表示是从左到右，< 右到左。
 
-1.简单重定向
+## 1.简单重定向
 
 
 在更多了解 Linux 的重定向之前，我们需要先知道一些基本的东西，前面我们已经提到过 Linux 默认提供了三个特殊设备，用于终端的显示和输出，分别为 stdin（标准输入，对应于你在终端的输入），stdout（标准输出，对应于终端的输出），stderr（标准错误输出，对应于终端的输出）。
@@ -2506,13 +2505,13 @@ cat redirect
 
 我们可以这样使用这些文件描述符。例如默认使用终端的标准输入作为命令的输入和标准输出作为命令的输出：
 
-cat # 按 Ctrl+C 退出
+cat  按 Ctrl+C 退出
 
 将 cat 的连续输出（heredoc 方式）重定向到一个文件：
 
 mkdir Documents
 cat > Documents/test.c <<EOF
-#include <stdio.h>
+include <stdio.h>
 
 int main()
 {
@@ -2539,15 +2538,15 @@ cat redirect
 初学者这里要注意不要将管道和重定向混淆，管道默认是连接前一个命令的输出到下一个命令的输入，
 而重定向通常是需要一个文件来建立两个命令的连接，你可以仔细体会一下上述第三个操作和最后两个操作的异同点。
 
-2.标准错误重定向
+## 2. 标准错误重定向
 
 重定向标准输出到文件，这是一个很实用的操作，另一个很实用的操作是将标准错误重定向，标准输出和标准错误都被指向伪终端的屏幕显示，
 所以我们经常看到的一个命令的输出通常是同时包含了标准输出和标准错误的结果的。比如下面的操作：
 
-# 使用cat 命令同时读取两个文件，其中一个存在，另一个不存在
+ 使用cat 命令同时读取两个文件，其中一个存在，另一个不存在
 cat Documents/test.c hello.c
-# 你可以看到除了正确输出了前一个文件的内容，还在末尾出现了一条错误信息
-# 下面我们将输出重定向到一个文件
+ 你可以看到除了正确输出了前一个文件的内容，还在末尾出现了一条错误信息
+ 下面我们将输出重定向到一个文件
 cat Documents/test.c hello.c > somefile
 
 
@@ -2555,36 +2554,36 @@ cat Documents/test.c hello.c > somefile
 遗憾的是，这里依然出现了那条错误信息，这正是因为如我上面说的那样，标准输出和标准错误虽然都指向终端屏幕，实际它们并不一样。
 那有的时候我们就是要隐藏某些错误或者警告，那又该怎么做呢。这就需要用到我们前面讲的文件描述符了：
 
-# 将标准错误重定向到标准输出，再将标准输出重定向到文件，注意要将重定向到文件写到前面
+ 将标准错误重定向到标准输出，再将标准输出重定向到文件，注意要将重定向到文件写到前面
 cat Documents/test.c hello.c >somefile  2>&1
-# 或者只用bash提供的特殊的重定向符号"&"将标准错误和标准输出同时重定向到文件
-cat Documents/test.c hello.c &>somefile#直接将cat显示出来的值重定向到somefile,若是没有hello.c文件，则将错误信息追加到somefile
+ 或者只用bash提供的特殊的重定向符号"&"将标准错误和标准输出同时重定向到文件
+cat Documents/test.c hello.c &>somefile直接将cat显示出来的值重定向到somefile,若是没有hello.c文件，则将错误信息追加到somefile
 
 注意你应该在输出重定向文件描述符前加上&，否则 shell 会当做重定向到一个文件名为 1 的文件中
 
 !!!echo 和 cat 重定向的区别
-echo 'adfsd' > a.py#将'adfsd'重定向到a.py
-cat a.py b.py > c.py#将a.py ，b.py直接追加到c.py内，但若是无a.py或者b.py会出错
+echo 'adfsd' > a.py将'adfsd'重定向到a.py
+cat a.py b.py > c.py将a.py ，b.py直接追加到c.py内，但若是无a.py或者b.py会出错
 
-cat a.py b.py &> c.py#若无b.py,则将错误信息追加到c.py
+cat a.py b.py &> c.py若无b.py,则将错误信息追加到c.py
 
-3.永久重定向
+## 3. 永久重定向
 
 你应该可以看出我们前面的重定向操作都只是临时性的，即只对当前命令有效，那如何做到永久有效呢，比如在一个脚本中，你需要某一部分的命令的输出全部进行重定向，难道要让你在每个命令上面加上临时重定向的操作嘛？
 
 当然不需要，我们可以使用 exec 命令实现永久重定向。exec 命令的作用是使用指定的命令替换当前的 Shell，即使用一个进程替换当前进程，或者指定新的重定向：
 
-# 先开启一个子 Shell
+ 先开启一个子 Shell
 zsh
-# 使用exec替换当前进程的重定向，将标准输出重定向到一个文件
+ 使用exec替换当前进程的重定向，将标准输出重定向到一个文件
 exec 1>somefile
-# 后面你执行的命令的输出都将被重定向到文件中，直到你退出当前子shell，或取消exec的重定向（后面将告诉你怎么做）
+ 后面你执行的命令的输出都将被重定向到文件中，直到你退出当前子shell，或取消exec的重定向（后面将告诉你怎么做）
 ls
 exit
 cat somefile
 
 
-'day12正则表达式'
+# 12. 正则表达式
 
 一个正则表达式通常被称为一个模式（pattern），为用来描述或者匹配一系列符合某个句法规则的字符串。
 选择
@@ -2636,7 +2635,7 @@ x ｜ y   匹配 x 或 y。例如，“z ｜ food”能匹配 z 或 food。“(z
 ^，$，\ 任何元字符     定位点和序列
 ｜   选择
 
-1.基本操作：
+## 1.基本操作：
 
 grep 命令用于打印输出文本中匹配的模式串，它使用正则表达式作为模式匹配的条件。grep 支持三种正则表达式引擎，分别用三个参数指定：
 参数  说明
@@ -2662,7 +2661,7 @@ grep 命令用于打印输出文本中匹配的模式串，它使用正则表达
     注：在大多数发行版中是默认设置了 grep 的颜色的，你可以通过参数指定或修改GREP_COLOR环境变量。
 
 
-2 使用正则表达式
+## 2. 使用正则表达式
 使用基本正则表达式，BRE
 
     位置
@@ -2676,11 +2675,11 @@ grep '^shiyanlou' /etc/group
 
     数量
 
-# 将匹配以'z'开头以'o'结尾的所有字符串
+ 将匹配以'z'开头以'o'结尾的所有字符串
 echo 'zero\nzo\nzoo' | grep 'z.*o'
-# 将匹配以'z'开头以'o'结尾，中间包含一个任意字符的字符串
+ 将匹配以'z'开头以'o'结尾，中间包含一个任意字符的字符串
 echo 'zero\nzo\nzoo' | grep 'z.o'
-# 将匹配以'z'开头，以任意多个'o'结尾的字符串
+ 将匹配以'z'开头，以任意多个'o'结尾的字符串
 echo 'zero\nzo\nzoo' | grep 'zo*'
 
 注意：其中 \n 为换行符
@@ -2689,19 +2688,19 @@ echo 'zero\nzo\nzoo' | grep 'zo*'
 
     选择
 
-# grep默认是区分大小写的，这里将匹配所有的小写字母
+ grep默认是区分大小写的，这里将匹配所有的小写字母
 echo '1234\nabcd' | grep '[a-z]'
-# 将匹配所有的数字
+ 将匹配所有的数字
 echo '1234\nabcd' | grep '[0-9]'
-# 将匹配所有的数字
+ 将匹配所有的数字
 echo '1234\nabcd' | grep '[[:digit:]]'
-# 将匹配所有的小写字母
+ 将匹配所有的小写字母
 echo '1234\nabcd' | grep '[[:lower:]]'
-# 将匹配所有的大写字母
+ 将匹配所有的大写字母
 echo '1234\nabcd' | grep '[[:upper:]]'
-# 将匹配所有的字母和数字，包括0-9，a-z，A-Z
+ 将匹配所有的字母和数字，包括0-9，a-z，A-Z
 echo '1234\nabcd' | grep '[[:alnum:]]'
-# 将匹配所有的字母
+ 将匹配所有的字母
 echo '1234\nabcd' | grep '[[:alpha:]]'
 
 
@@ -2716,14 +2715,14 @@ echo '1234\nabcd' | grep '[[:alpha:]]'
 [:graph:]   除了空白字节（空白键与 [Tab] 按键）外的其他所有按键
 [:lower:]   代表小写字母，亦即 a-z
 [:print:]   代表任何可以被列印出来的字符
-[:punct:]   代表标点符号（punctuation symbol），即："，'，?，!，;，:，#，$...
+[:punct:]   代表标点符号（punctuation symbol），即："，'，?，!，;，:，，$...
 [:upper:]   代表大写字母，亦即 A-Z
 [:space:]   任何会产生空白的字符，包括空格键，[Tab]，CR 等等
 [:xdigit:]  代表 16 进位的数字类型，因此包括： 0-9，A-F，a-f 的数字与字节
 
     注意：之所以要使用特殊符号，是因为上面的 [a-z] 不是在所有情况下都管用，这还与主机当前的语系有关，即设置在 LANG 环境变量的值，zh_CN.UTF-8 的话 [a-z]，即为所有小写字母，其它语系可能是大小写交替的如，"a A b B...z Z"，[a-z] 中就可能包含大写字母。所以在使用 [a-z] 时请确保当前语系的影响，使用 [:lower:] 则不会有这个问题。
 
-# 排除字符
+ 排除字符
 echo 'geek\ngood' | grep '[^o]'
 
     当 ^ 放到中括号内为排除字符，否则表示行首。
@@ -2734,33 +2733,33 @@ echo 'geek\ngood' | grep '[^o]'
 
     数量
 
-# 只匹配"zo"
+ 只匹配"zo"
 echo 'zero\nzo\nzoo' | grep -E 'zo{1}'
-# 匹配以"zo"开头的所有单词
+ 匹配以"zo"开头的所有单词
 echo 'zero\nzo\nzoo' | grep -E 'zo{1,}'
 
     推荐掌握 {n,m} 即可 +，?，* 这几个不太直观，且容易弄混淆。
 
     选择
 
-# 匹配"www.shiyanlou.com"和"www.google.com"
+ 匹配"www.shiyanlou.com"和"www.google.com"
 echo 'www.shiyanlou.com\nwww.baidu.com\nwww.google.com' | grep -E 'www\.(shiyanlou|google)\.com'
-# 或者匹配不包含"baidu"的内容
+ 或者匹配不包含"baidu"的内容
 echo 'www.shiyanlou.com\nwww.baidu.com\nwww.google.com' | grep -Ev 'www\.baidu\.com'
 
     因为 . 号有特殊含义，所以需要转义。
 
-2.sed编辑器
+## 2. sed编辑器
 
 sed 工具在 man 手册里面的全名为"sed - stream editor for filtering and transforming text "，意即，用于过滤和转换文本的流编辑器。
 
 在 Linux/UNIX 的世界里敢称为编辑器的工具，大都非等闲之辈，比如前面的 vi/vim（编辑器之神），emacs（神的编辑器），gedit 这些编辑器。sed 与上述的最大不同之处在于它是一个非交互式的编辑器，下面我们就开始介绍 sed 这个编辑器。
 
-sed 命令基本格式：
+1. sed 命令基本格式：
 
 sed [参数]... [执行命令] [输入文件]...
-# 形如：
-$ sed -i 's/sad/happy/' test # 表示将test文件中的"sad"替换为"happy"
+ 形如：
+$ sed -i 's/sad/happy/' test  表示将test文件中的"sad"替换为"happy"
 
 参数  说明
 -n  安静模式，只打印受影响的行，默认打印输入数据的全部内容
@@ -2770,15 +2769,15 @@ $ sed -i 's/sad/happy/' test # 表示将test文件中的"sad"替换为"happy"
 -i  将直接修改输入文件内容，而不是打印到标准输出设备
 
 
-.sed 执行命令格式：
+2. sed 执行命令格式：
 
 [n1][,n2]command
 [n1][~step]command
 
 其中一些命令可以在后面加上作用范围，形如：
 
-sed -i 's/sad/happy/g' test # g 表示全局范围
-sed -i 's/sad/happy/4' test # 4 表示指定行中的第四个匹配字符串
+sed -i 's/sad/happy/g' test  g 表示全局范围
+sed -i 's/sad/happy/4' test  4 表示指定行中的第四个匹配字符串
 
 其中 n1,n2 表示输入内容的行号，它们之间为 , 逗号则表示从 n1 到 n2 行，如果为 ~ 波浪号则表示从 n1 开始以 step 为步进的所有行；command 为执行动作，下面为一些常用动作指令：
 命令  说明
@@ -2789,10 +2788,10 @@ i   插入到指定行的前面
 p   打印指定行，通常与 -n 参数配合使用
 d   删除指定行
 
-# day13软件学习
-1.apt-get
+# 13.软件学习
+## 1. apt-get
 
-.软件安装：
+1. 软件安装：
 apt-get 是用于处理 apt包的公用程序集，我们可以用它来在线安装、卸载和升级软件包等，下面列出一些 apt-get 包含的常用的一些工具：
 工具  说明
 install     其后加上软件包名，用于安装一个软件包
@@ -2809,40 +2808,40 @@ autoclean   移除已安装的软件的旧版本软件包
 参数  说明
 -y  自动回应是否安装软件包的选项，在一些自动化安装脚本中使用这个参数将十分有用
 -s  模拟安装
--q  静默安装方式，指定多个 q 或者 -q=#，# 表示数字，用于设定静默级别，这在你不想要在安装软件包时屏幕输出过多时很有用
--f  修复损坏的依赖关系#这一步很重要，否则无法安装成功
+-q  静默安装方式，指定多个 q 或者 -q=， 表示数字，用于设定静默级别，这在你不想要在安装软件包时屏幕输出过多时很有用
+-f  修复损坏的依赖关系这一步很重要，否则无法安装成功
 -d  只下载不安装
 --reinstall     重新安装已经安装但可能存在问题的软件包
 --install-suggests  同时安装 APT 给出的建议安装的软件包
 
-#重新安装
+重新安装
 sudo apt-get --reinstall install <packagename>
-# 更新软件源
+ 更新软件源
 sudo apt-get update
 
-# 升级没有依赖问题的软件包
+ 升级没有依赖问题的软件包
 sudo apt-get upgrade
 
-# 升级并解决依赖关系
+ 升级并解决依赖关系
 sudo apt-get dist-upgrade
 
 
-.软件卸载
+2. 软件卸载
 
 
 sudo apt-get remove w3m
 或者，你可以执行
 
-# 不保留配置文件的移除
+ 不保留配置文件的移除
 sudo apt-get purge w3m
-# 或者
+ 或者
 sudo apt-get --purge remove w3m
-# 移除不再需要的被依赖的软件包
+ 移除不再需要的被依赖的软件包
 sudo apt-get autoremove
 
 !!新版中-get都可以删除
 
-.软件搜索
+3. 软件搜索
 
 当自己刚知道了一个软件，想下载使用，需要确认软件仓库里面有没有，就需要用到搜索功能了，命令如下：
 
@@ -2858,7 +2857,7 @@ apt-cache 命令则是针对本地数据进行相关操作的工具，search 顾
 
 本节讲解如何使用 dpkg 从本地磁盘安装 deb 软件包。
 
-2.dpkg 介绍(debian package)
+## 2.dpkg 介绍(debian package)
 
     dpkg 是 Debian 软件包管理器的基础，它被伊恩·默多克创建于 1993 年。dpkg 与 RPM 十分相似，同样被用于安装、卸载和供给和 .deb 软件包相关的信息。
 
@@ -2888,12 +2887,12 @@ sudo apt-get -d install -y emacs
 然后我们将第一个deb拷贝到 /home/shiyanlou 目录下，并使用dpkg安装
 
 cp /var/cache/apt/archives/emacs24_24.5+1-6ubuntu1.1_amd64.deb ~
-# 安装之前参看deb包的信息
+ 安装之前参看deb包的信息
 sudo dpkg -I emacs24_24.5+1-6ubuntu1.1_amd64.deb
 
 如你所见，这个包还额外依赖了一些软件包，这意味着，如果主机目前没有这些被依赖的软件包，直接使用 dpkg 安装可能会存在一些问题，因为dpkg并不能为你解决依赖关系。
 
-# 使用dpkg安装
+ 使用dpkg安装
 sudo dpkg -i emacs24_24.5+1-6ubuntu1.1_amd64.deb
 
 跟前面预料的一样，这里你可能出现了一些错误：
@@ -2907,7 +2906,7 @@ sudo apt-get -f install -y
 
 没有任何错误，这样我们就安装成功了，然后你可以运行 emacs 程序
 
-3.查看已安装软件包的安装目录
+## 3.查看已安装软件包的安装目录
 
 如果你依然在纠结到底 linux 将软件安装到了什么地方，那么很幸运你将可以通过dpkg找到答案
 
@@ -2916,12 +2915,12 @@ sudo apt-get -f install -y
 sudo dpkg -L emacs24
 
 
-4.从二进制包安装
+## 4.从二进制包安装
 
 二进制包的安装比较简单，我们需要做的只是将从网络上下载的二进制包解压后放到合适的目录，然后将包含可执行的主程序文件的目录添加进PATH环境变量即可，如果你不知道该放到什么位置，请重新复习第四节关于 Linux 目录结构的内容。
 
-5.垃圾清理
-    1.sudo apt-get clean
+## 5.垃圾清理
+    1. sudo apt-get clean
 
     　　在网络连接正常的情况下，我们执行软件安装命令，软件安装结束后，以 .deb 为后缀的软件包就不再需要了。
     这种情况和 Windows 平台、手机的安卓平台上的情况是类似的。我们可以定期对这些不再需要的软件安装包进行清理。 
@@ -2929,25 +2928,25 @@ sudo dpkg -L emacs24
     　　Ctrl + Alt + t 组合键调出终端，键入以下命令并执行：
     　　如图所示，它实际上删除了 /var/cache/apt/archives 目录下所有以 .deb 结尾的文件。
     利用命令清理Linux系统垃圾文件优化技巧
-    2.autoclean 命令删除不再可用的软件安装包。
+    2. autoclean 命令删除不再可用的软件安装包。
     　该命令与 clean 类似，只不过它有选择地删除软件包：
     那些不再可用的安装包(比如，你再也不能够从软件仓库中下载到该软件包的当前版本、或更新版本)。
     　　在终端内执行：
     　　sudo apt-get autoclean
     　　即可删除不再可用的软件安装包。
-    3.remove 命令删除特定软件。
+    3. remove 命令删除特定软件。
     类似于 Windows 控制面板中的“程序卸载命令”，
     remove 命令可以删除软件。sudo apt-get remove 软件名
 
-    4.用purge 命令删除软件“残余”。
+    4. 用purge 命令删除软件“残余”。
     purge 命令是 remove 命令的另一个版本，它可以在删除软件本身的同时，删除软件包的残余设置。类似于 Windows 环境下删除软件后的“软件残余”清理。
     sudo apt-get purge 软件名
     将删除相关软件，同时删除该软件的配置文件。
-    5.autoremove 命令删除不再需要的依赖软件包。
+    5. autoremove 命令删除不再需要的依赖软件包。
     比如，我们安装软件 A，但是 A 依赖软件包 B，当 A 被安装的过程中，B 也必须被安装。
     有一天，我们不再需要软件 A 并删除了它，我们就可以用 autoremove 命令，删除当初为了满足 A 的依赖关系而安装的软件 B。
     sudo apt-get autoremove
-6.查找软件名
+## 6.查找软件名
     1.rpm包安装的，可以用rpm -qa看到，如果要查找某软件包是否安装，用 rpm -qa | grep “软件或者包的名字”。
     [root@hexuweb102 ~] rpm -qa | grep ruby
 
@@ -2958,9 +2957,9 @@ sudo dpkg -L emacs24
     [root@hexuweb102 ~] yum list installed | grep ruby
 
 
-'day14进程'
+# 14. 进程
 
-1.进程的分类
+## 1.进程的分类
 
 首先程序与进程是什么？程序与进程又有什么区别？
 
@@ -2968,7 +2967,7 @@ sudo dpkg -L emacs24
 
     进程（process）：进程是程序在一个数据集合上的一次执行过程，在早期的 UNIX、Linux 2.4 及更早的版本中，它是系统进行资源分配和调度的独立基本单位。同上一个例子，就如我们去了餐馆，给服务员说我要牛肉盖浇饭，她执行了做牛肉盖浇饭这么一个程序，而里面做饭的是一个进程，做牛肉汤汁的是一个进程，把牛肉汤汁与饭混合在一起的是一个进程，把饭端上桌的是一个进程。它就像是我们在看武功秘籍这么一个过程，然后一个篇章一个篇章地去练。
 
-#程序是一系列有逻辑的指令，进程是程序中的一次执行过程
+程序是一系列有逻辑的指令，进程是程序中的一次执行过程
 简单来说，程序是为了完成某种任务而设计的软件，比如 vim 是程序。什么是进程呢？进程就是运行中的程序。
 
 程序只是一些列指令的集合，是一个静止的实体，而进程不同，进程有以下的特性：
@@ -2983,15 +2982,6 @@ sudo dpkg -L emacs24
 
     并行：在每一个瞬间，都有多个程序都在同时执行，这个必须有多个 CPU 才行
 
-引入进程是因为传统意义上的程序已经不足以描述 OS 中各种活动之间的动态性、并发性、独立性还有相互制约性。程序就像一个公司，只是一些证书，文件的堆积（静态实体）。而当公司运作起来就有各个部门的区分，财务部，技术部，销售部等等，就像各个进程，各个部门之间可以独立运作，也可以有交互（独立性、并发性）。
-
-而随着程序的发展越做越大，又会继续细分，从而引入了线程的概念，当代多数操作系统、Linux 2.6 及更新的版本中，进程本身不是基本运行单位，而是线程的容器。就像上述所说的，每个部门又会细分为各个工作小组（线程），而工作小组需要的资源需要向上级（进程）申请。
-
-    线程（thread）是操作系统能够进行运算调度的最小单位。它被包含在进程之中，是进程中的实际运作单位。一条线程指的是进程中一个单一顺序的控制流，一个进程中可以并发多个线程，每条线程并行执行不同的任务。因为线程中几乎不包含系统资源，所以执行更快、更有效率。
-
-简而言之，一个程序至少有一个进程，一个进程至少有一个线程。线程的划分尺度小于进程，使得多线程程序的并发性高。另外，进程在执行过程中拥有独立的内存单元，而多个线程共享内存，从而极大地提高了程序的运行效率。就如下图所示：
-
----------------------------------------------------------------------------
 大概明白进程是个什么样的存在后，我们需要进一步了解的就是进程分类。可以从两个角度来分：
 
     以进程的功能与服务的对象来分；
@@ -3008,7 +2998,7 @@ sudo dpkg -L emacs24
     批处理进程：该进程是一个进程集合，负责按顺序启动其他的进程。
     守护进程：守护进程是一直运行的一种进程，在 Linux 系统启动时启动，在系统关闭时终止。它们独立于控制终端并且周期性的执行某种任务或等待处理某些发生的事件。例如 httpd 进程，一直处于运行状态，等待用户的访问。还有经常用的 cron（在 centOS 系列为 crond）进程，这个进程为 crontab 的守护进程，可以周期性的执行用户设定的某些任务。
 
-2.进程的衍生
+##2. 进程的衍生
 
 进程有这么多的种类，那么进程之间定是有相关性的，而这些有关联性的进程又是如何产生的，如何衍生的？
 
@@ -3075,7 +3065,7 @@ ps －fxo user,ppid,pid,pgid,command
 就像一个树状图，而 init 进程就是这棵树的根，其他进程由根不断的发散，开枝散叶
 
 
-3.进程组和session
+##3. 进程组和session
 
 每一个进程都会是一个进程组的成员，而且这个进程组是唯一存在的，他们是依靠 PGID（process group ID）来区别的，而每当一个进程被创建的时候，它便会成为其父进程所在组中的一员。
 
@@ -3089,8 +3079,7 @@ Session 主要是针对一个 tty 建立，Session 中的每个进程都称为�
 
     后台（background）就是在终端中运行，但是你并不能与其任何的交互，也不会显示其执行的过程
 
------------
-4.工作管理：
+##4. 工作管理：
 bash(Bourne-Again shell)支持工作控制（job control），而 sh（Bourne shell）并不支持。
 
 并且每个终端或者说 bash 只能管理当前终端中的 job，不能管理其他终端中的 job。比如我当前存在两个 bash 分别为 bash1、bash2，bash1 只能管理其自己里面的 job 并不能管理 bash2 里面的 job
@@ -3104,8 +3093,8 @@ ls &我们可以通过
 用jobs来查看后台的命令
 
 
-# 'day15'
-
+ 
+# 15. wine
 
 wine ——简介
 
@@ -3136,7 +3125,7 @@ wine——命令
     wine  regedit      （注册表）
     wine  notepad    （记事本）
     wineboot            （ 重启wine）
-##wine安装的文件夹在home/kim的隐藏文件中
+wine安装的文件夹在home/kim的隐藏文件中
  
 微信安装
 
@@ -3161,9 +3150,11 @@ wine PCQQ2021.exe
 
 3、接下来按照提示步骤操作即可成功安装QQ；
 
-# 其余问题
-1. 关于内存的使用情况和电脑的CPU的查看
+# 15. 杂项问题
+## 1. 关于内存的使用情况和电脑的CPU的查看
    * df -h:查看磁盘使用状况
    * top:看cpu使用情况
    * free -g:看内存使用情况 
-   * 
+
+## 2.关于查找的命令
+1. 

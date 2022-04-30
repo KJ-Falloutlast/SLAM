@@ -3307,6 +3307,72 @@ void reset(const int& ptr){
 }
 
 ```
+6. const返回值
+若返回值为const值,cosnt指针,cosnt引用，要如何考虑：
+   1.若函数返回值采用“值传递”，由于函数会把返回值复制到为临时储存单元，加const修饰没有任何价值，那个临时储存单元却是个const int 
+```cpp
+const int func1(int a);
+int func1(int a);
+```
+   2. 如果给以"指针传递"方式的函数返回值加const修饰，那么返回值可以是指针常量，也可以是常量指针
+```cpp
+/*指针常量，cosnt无意义*/
+int* const func1(int a);//返回一个指针常量，虽然想返回一个顶层const的值，但是由于外部的临时储存单元中，这个const无意义，虽然临时储存单元的指向确实无法修改
+int* b = func1(2);//可以用int* 接受返回值，b指向的值可以修改，b的指向可以修改
+/* int* const c = func1(2); int* b = c;*/
+const int* b = func1(2);//也可以用const int*接收返回值
+//此时的b是一个底层const,也就是说int* const转换成了const int*
+/*常量指针*/
+const int* func1(int a);
+int* b = func1(2);//错误，因为const int*不能转int*
+const int* b = func1(2);//正确，因为b指向的值不能改变
+/*第三种返回常量指针*/
+int const* func1(int a);//和第二种完全一样
+//const在*前是指针常量，否则是常量指针
+```
+   3. const修饰函数的引用返回值
+const修饰函数的引用返回值，这种场合主要在类的**赋值函数**和**拷贝构造函数**中，赋值函数和一些操作符函数是为了实现链式表达，拷贝构造函数传引用是为了避免逻辑错误，因为函数返回时如果是返回值的话，会再次调用拷贝构造函数，这样需要返回引用，**返回的引用不能是函数内临时变量的引用**
+```cpp
+class B{
+    public:
+        int val = 0;
+        B(int val):val(val){};
+        B& operator= (const B &other){
+            val = other.val;
+            return *this;
+        }
+};
+B tmp = (b = c);//左边的等号是拷贝的意思不是操作符=，tmp的值和c的值是相等的
+a = tmp;//此时a和b的值都被赋成了c
+//考虑下面的代码块
+B b1(3), b2(4),b3(5);
+cout << "b1: " << b1.val << endl;
+cout << "b2: " << b2.val << endl;
+cout << "b3: " << b3.val << endl;
+cout << "b1=b2=b3" << endl;
+b1 = b2 = b3;
+cout << "b1: " << b1.val << endl;
+cout << "b2: " << b2.val << endl;
+cout << "b3: " << b3.val << endl;
+/*
+输出：
+b1: 3
+b2: 4
+b3: 5
+b1=b2=b3
+b1: 5
+b2: 5
+b3: 5
+*/
+
+1. const修饰类的成员变量
+```cpp
+class T{
+    public:
+        void getValue() const {}
+        void func(){}
+        int m_
+}
 ## 4. 类
 ### 4-1.封装
 * 意义:
@@ -6437,6 +6503,5 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 ```
-网页
+
 ```cpp
-https://blog.csdn.net/Bruski/article/details/115840667?spm=1001.2101.3001.6650.5&utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7ERate-5.pc_relevant_antiscanv2&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7ERate-5.pc_relevant_antiscanv2&utm_relevant_index=7```
