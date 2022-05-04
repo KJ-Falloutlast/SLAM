@@ -1772,3 +1772,160 @@ int main(int argc, char* argv[]){
 /x5/chatter
 */
 ```
+# 4.ROS常用组件
+## 4-1.TF坐标变换
+### 1. 坐标msg消息
+1. geometry_msgs/TransformStamped
+输入:rosmsg info geometry_msgs/TransfromStamped
+
+std_msgs/Header header                     #头信息
+  uint32 seq                                #|-- 序列号
+  time stamp                                #|-- 时间戳
+  string frame_id                            #|-- 坐标 ID
+string child_frame_id                    #子坐标系的 id
+geometry_msgs/Transform transform        #坐标信息
+  geometry_msgs/Vector3 translation        #偏移量
+    float64 x                                #|-- X 方向的偏移量
+    float64 y                                #|-- Y 方向的偏移量
+    float64 z                                #|-- Z 方向上的偏移量
+  geometry_msgs/Quaternion rotation        #四元数
+    float64 x                                
+    float64 y                                
+    float64 z                                
+    float64 w
+
+2. geometry_msgs/PointStamped
+   输入：rosmsg info geometry_msgs/PointStamped
+
+std_msgs/Header header                    #头
+  uint32 seq                                #|-- 序号
+  time stamp                                #|-- 时间戳
+  string frame_id                            #|-- 所属坐标系的 id
+geometry_msgs/Point point                #点坐标
+  float64 x                                    #|-- x y z 坐标
+  float64 y
+  float64 z
+### 2. 静态坐标变换
+**静态坐标变换是指2个坐标系的相对位置是固定的**
+实现：
+1. 创建功能包：tf2, tf2_ros, tf2_geometry_msgs, roscpp, std_msgs, geometry_msgs
+2. 发布方：
+```cpp
+/* 
+    静态坐标变换发布方:
+        发布关于 laser 坐标系的位置信息 
+
+    实现流程:
+        1.包含头文件
+        2.初始化 ROS 节点
+        3.创建静态坐标转换广播器
+        4.创建坐标系信息
+        5.广播器发布坐标系信息
+        6.spin()
+*/
+
+
+// 1.包含头文件
+#include "ros/ros.h"
+#include "tf2_ros/static_transform_broadcaster.h"
+#include "geometry_msgs/TransformStamped.h"
+#include "tf2/LinearMath/Quaternion.h"
+
+int main(int argc, char *argv[])
+{
+    setlocale(LC_ALL,"");
+    // 2.初始化 ROS 节点
+    ros::init(argc,argv,"static_brocast");
+    // 3.创建静态坐标转换广播器
+    tf2_ros::StaticTransformBroadcaster broadcaster;
+    // 4.创建坐标系信息
+    geometry_msgs::TransformStamped ts;
+    //----设置头信息
+    ts.header.seq = 100;
+    ts.header.stamp = ros::Time::now();
+    ts.header.frame_id = "base_link";
+    //----设置子级坐标系
+    ts.child_frame_id = "laser";
+    //----设置子级相对于父级的偏移量
+    ts.transform.translation.x = 0.2;
+    ts.transform.translation.y = 0.0;
+    ts.transform.translation.z = 0.5;
+    //----设置四元数:将 欧拉角数据转换成四元数
+    tf2::Quaternion qtn;
+    qtn.setRPY(0,0,0);
+    ts.transform.rotation.x = qtn.getX();
+    ts.transform.rotation.y = qtn.getY();
+    ts.transform.rotation.z = qtn.getZ();
+    ts.transform.rotation.w = qtn.getW();
+    // 5.广播器发布坐标系信息
+    broadcaster.sendTransform(ts);
+    ros::spin();
+    return 0;
+}
+```
+3. 订阅方
+```cpp
+/*  
+    订阅坐标系信息，生成一个相对于 子级坐标系的坐标点数据，转换成父级坐标系中的坐标点
+
+    实现流程:
+        1.包含头文件
+        2.初始化 ROS 节点
+        3.创建 TF 订阅节点
+        4.生成一个坐标点(相对于子级坐标系)
+        5.转换坐标点(相对于父级坐标系)
+        6.spin()
+*/
+//1.包含头文件
+#include "ros/ros.h"
+#include "tf2_ros/transform_listener.h"
+#include "tf2_ros/buffer.h"
+#include "geometry_msgs/PointStamped.h"
+#include "tf2_geometry_msgs/tf2_geometry_msgs.h" //注意: 调用 transform 必须包含该头文件
+
+int main(int argc, char *argv[])
+{
+    setlocale(LC_ALL,"");
+    // 2.初始化 ROS 节点
+    ros::init(argc,argv,"tf_sub");
+    ros::NodeHandle nh;
+    // 3.创建 TF 订阅节点
+    tf2_ros::Buffer buffer;
+    tf2_ros::TransformListener listener(buffer);
+
+    ros::Rate r(1);
+    while (ros::ok())
+    {
+    // 4.生成一个坐标点(相对于子级坐标系)
+        geometry_msgs::PointStamped point_laser;
+        point_laser.header.frame_id = "laser";
+        point_laser.header.stamp = ros::Time::now();
+        point_laser.point.x = 1;
+        point_laser.point.y = 2;
+        point_laser.point.z = 7.3;
+    // 5.转换坐标点(相对于父级坐标系)
+        //新建一个坐标点，用于接收转换结果  
+        //--------------使用 try 语句或休眠，否则可能由于缓存接收延迟而导致坐标转换失败------------------------
+        try
+        {
+            geometry_msgs::PointStamped point_base;
+            point_base = buffer.transform(point_laser,"base_link");
+            ROS_INFO("转换后的数据:(%.2f,%.2f,%.2f),参考的坐标系是:",point_base.point.x,point_base.point.y,point_base.point.z,point_base.header.frame_id.c_str());
+
+        }
+        catch(const std::exception& e)
+        {
+            // std::cerr << e.what() << '\n';
+            ROS_INFO("程序异常.....");
+        }
+
+
+        r.sleep();  
+        ros::spinOnce();
+    }
+
+
+    return 0;
+}
+```
+4. 执行：可以使用launch文件的方式启动发布节点和订阅节点

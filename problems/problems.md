@@ -146,7 +146,13 @@ cmakelists:project(model02)
     1. launch文件不能加","；子标签以/结尾；尾标签以/开头；
     2. 每次启动launch文件都不需要catkin_make，直接source后运行就行
 
+## 14. catkin_make问题
+1. CMake Error: The source directory "/home/kim/ROS_Space/catkin_ws_cpp/src" does not exist.
+   1. 解决方案：删除build和devep后重新catkin_make
+2. fatal error: pub_sub/Person.h: 没有那个文件或目录
+   1. 解决方案：重新catkin_make
 
+ 
 # 2.linux学习问题
 
 
@@ -684,6 +690,7 @@ https://suo.yt/ZKjZa7R
 https://suo.yt/uXoibye
 
 ## 5. wine的相关问题：
+[wine的网址](https://www.cnblogs.com/a5idc/p/13515946.html)
    1. 未安装windows应用
     $ sudo apt-get update
     $ sudo apt-get install wine

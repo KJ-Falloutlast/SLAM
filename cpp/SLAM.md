@@ -1,6 +1,6 @@
 # 1.第一讲
-## 1-1.基本命令
-### 1.运行c++文件
+### 1-1.基本命令
+#### 1.运行c++文件
 1. 过程
    1. 各个文件包的功能
       1. include: 放头文件 xxx.h
@@ -248,7 +248,7 @@ Map类：在已经存在的矩阵或向量中，不必拷贝对象，而是直�
 [Eigen](https://blog.csdn.net/m0_46577050/article/details/121657750)
 
 
-## 1.矩阵的定义：
+### 1.矩阵的定义：
 ```cpp
 #include <Eigen/Dense>
 
@@ -267,7 +267,7 @@ C.cols()          // size(C,2)        // number of columns
 x(i)              // x(i+1)           // Matlab is 1-based
 C(i,j)            // C(i+1,j+1)       //
 ```
-## 2.基础使用
+### 2.基础使用
 ```cpp
 // Basic usage
 // Eigen        // Matlab           // comments
@@ -289,7 +289,7 @@ B << A, A, A;     // B is three horizontally stacked A's.
 A.fill(10);       // Fill A with all 10's.
 ```
 
-## 3.Eigen特殊矩阵生成
+###  3.Eigen特殊矩阵生成
 ```cpp
 // Eigen                            // Matlab
 MatrixXd::Identity(rows,cols)       // eye(rows,cols)
@@ -304,7 +304,7 @@ VectorXd::LinSpaced(size,low,high)  // linspace(low,high,size)'
 v.setLinSpaced(size,low,high)       // v = linspace(low,high,size)'
 ```
 
-## 4.矩阵分块
+### 4.矩阵分块
 ```cpp
 // Matrix slicing and blocks. All expressions listed here are read/write.
 // Templated size versions are faster. Note that Matlab is 1-based (a size N
@@ -342,7 +342,7 @@ P.bottomLeftCorner<rows,cols>()    // P(end-rows+1:end, 1:cols)
 P.bottomRightCorner<rows,cols>()   // P(end-rows+1:end, end-cols+1:end)
 
 ```
-## 5.Eigen矩阵元素交换
+### 5.Eigen矩阵元素交换
 ```cpp
 // Of particular note is Eigen's swap function which is highly optimized.
 // Eigen                           // Matlab
@@ -350,7 +350,7 @@ R.row(i) = P.col(j);               // R(i, :) = P(:, i)
 R.col(j1).swap(mat1.col(j2));      // R(:, [j1 j2]) = R(:, [j2, j1])
 ```
 
-## 6.矩阵转置
+### 6.矩阵转置
 ```cpp
 // Views, transpose, etc; all read-write except for .adjoint().
 // Eigen                           // Matlab
@@ -361,7 +361,7 @@ x.asDiagonal()                     // diag(x)
 R.transpose().colwise().reverse(); // rot90(R)
 R.conjugate()                      // conj(R)
 ```
-## 7.矩阵乘积
+### 7.矩阵乘积
 ```cpp
 // All the same as Matlab, but matlab doesn't have *= style operators.
 // Matrix-vector.  Matrix-matrix.   Matrix-scalar.
@@ -372,7 +372,7 @@ a *= M;            R  = P + Q;      R  = P/s;
                    R += Q;          R *= s;
                    R -= Q;          R /= s;
 ```
-## 8.矩阵单个元素操作
+### 8.矩阵单个元素操作
 
 ```cpp
 // Vectorized operations on each element independently
@@ -409,7 +409,7 @@ R.array().abs2()          // abs(P.^2)
 (R.array() < s).select(P,Q);  // (R < s ? P : Q)
 ```
 
-## 9.矩阵化简
+### 9.矩阵化简
 ```cpp
 // Reductions.
 int r, c;
@@ -432,7 +432,7 @@ R.any()                   // any(R(:))
 R.colwise().any()         // any(R)
 R.rowwise().any()         // any(R, 2)
 ```
-## 10.矩阵点乘
+### 10.矩阵点乘
 ```cpp
 // Dot products, norms, etc.
 // Eigen                  // Matlab
@@ -441,7 +441,7 @@ x.squaredNorm()           // dot(x, x)   Note the equivalence is not true for co
 x.dot(y)                  // dot(x, y)
 x.cross(y)                // cross(x, y) Requires #include <Eigen/Geometry>
 ```
-## 11.矩阵类型转换
+### 11.矩阵类型转换
 ```cpp
  Type conversion
 // Eigen                           // Matlab
@@ -452,7 +452,7 @@ A.real();                          // real(A)
 A.imag();                          // imag(A)
 // if the original type equals destination type, no work is done
 ```
-## 12.求解线性方程组
+### 12.求解线性方程组
 ```cpp
 // Solve Ax = b. Result stored in x. Matlab: x = A \ b.
 x = A.ldlt().solve(b));  // A sym. p.s.d.    #include <Eigen/Cholesky>
@@ -466,7 +466,7 @@ x = A.svd() .solve(b));  // Stable, slowest. #include <Eigen/SVD>
 // .qr()   -> .matrixQ() and .matrixR()
 // .svd()  -> .matrixU(), .singularValues(), and .matrixV()
 ```
-## 13.矩阵特征值
+### 13.矩阵特征值
 ```cpp
 // Eigenvalue problems
 // Eigen                          // Matlab
@@ -476,3 +476,5 @@ eig.eigenvalues();                // diag(val)
 eig.eigenvectors();               // vec
 // For self-adjoint matrices use SelfAdjointEigenSolver<>
 ```
+## 2.eigen的使用总结：
+1. 矩阵

@@ -3364,15 +3364,78 @@ b1: 5
 b2: 5
 b3: 5
 */
-
-1. const修饰类的成员变量
+```
+7. const函数
+**const限定函数只允许发生在类的成员函数中，表明该函数不会修改类的成员变量，const放在成员函数的末尾，声明和定义都要加**
 ```cpp
-class T{
+class Stack{
     public:
-        void getValue() const {}
-        void func(){}
-        int m_
+        void Push(int elem);
+        int Pop();
+        int GetCount() const;
+    private:
+        int m_num;
+        int m_data[100];
+};
+int Stack::GetCount() const{
+    ++m_num;//错误，const成员函数只能访问const成员属性和成员函数，不能访访问非const属性和方法
+    Pop();
+    return m_num;
 }
+
+例子:
+```cpp
+#include <iostream>
+using namespace std;
+class Person{
+    public:
+        const int m_A = 2;
+        int m_B = 1;
+        static int m_C;
+        void test1() const;
+        void test2();
+        void test3() const;
+        static void test4();
+        static void test5();
+
+};
+//静态属性和方法在类外定义时不需要加static,但是const函数在类外实现的时候要加const
+int Person::m_C = 3;
+void Person::test4(){
+    cout << "static func" << endl;
+}
+
+void Person::test5(){
+    //只能访问静态成员属性, 调用静态成语函数
+    test4();
+    // test3();错误,非静态方法
+    // test2();错误,非静态方法
+    ++m_C;
+    // ++m_A;错误
+    // ++m_B;错误
+    cout << "m_C = " << m_C << endl;
+}
+void Person::test2(){
+    cout << "non const func" << endl;
+}
+void Person::test1() const{
+    //const成员函数只能访问和修改const成员函数,访问const成员函数
+    // ++m_B;错误,常量成员函数只能访问刹那管
+    cout << "b = " << m_A << endl;
+    cout << "a = " << m_B << endl;
+    // test2();错误
+    test3();
+}
+
+void Person::test3() const{
+    cout << "const func" << endl;
+}
+
+int main(){
+    Person p;
+    p.test1();
+}
+```
 ## 4. 类
 ### 4-1.封装
 * 意义:
@@ -6166,7 +6229,7 @@ class Dog: public Animal{
 也就是地址晚绑定
 2.动态多态的满足条件：
 (1).有继承关系
-(2). 子类重写父类的虚函数，函数重写！=函数重载，函数重写是2个函数在函数名，函数体，形参，返回值完全相同。
+(2). 子类重写父类的虚函数，函数重写！=函数重载，函数重写是2个函数在函数名,形参，返回值完全相同,但是函数体不必相同
 所以子类继承父类中的虚寒数时virtual可加可不加，但是父类虚函数必须要加
 3. 动态多态的使用：父类的指针或者引用 指向子类对象
 */
@@ -6190,8 +6253,234 @@ int main(){
       2. 子类重写父类的虚函数。**函数重写！=函数重载，函数重写是2个函数在函数名，形参，返回值完全相同。**，所以子类继承父类中的虚函数时virtual可加可不加，但是父类虚函数必须要加
       3. 动态多态的使用：父类的指针或者引用 指向子类对象，**Animal &animal = cat** 
 #### 2.多态的原理
-1. 案例
+#### 3.多态的案例
 ```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+class Calulator{
+    public:
+        int m_A;
+        int m_B;
+        virtual int getResult(){
+            return 0;
+        }
+};
+class AddCal: public Calulator{
+    public:
+        int getResult(){
+            return m_A + m_B;
+        }
+};
+class MultipulCal: public Calulator{
+    public:
+        int getResult(){
+            return m_A * m_B;
+        }
+};
+
+void test(){
+    Calulator *cal = new Calulator;//创建父类对象
+    // Calculator *cal1 = new MultipulCal;//创建子类对象,等同于cal = new MultipulCal;
+    cal = new AddCal;//让父类对象的引用或者指针指向子类对象
+    cal->m_A = 1;
+    cal->m_B = 2;
+    cout << "m_A + m_B = " << cal->getResult() << endl; 
+    delete cal;
+
+    cal = new MultipulCal;    
+    cal->m_A = 3;
+    cal->m_B = 4;
+    cout << "m_A + m_B = " << cal->getResult() << endl; 
+    delete cal;
+
+}
+
+int main(){
+    test();
+}
+```
+#### 4.纯虚函数和抽象类
+在多态中,通常父类中虚函数的实现是毫无意义的,主要都是调用子类重写的内容
+因此可以将虚函数改为纯虚函数
+1. 语法
+**virtual 返回值 函数名 (参数列表) = 0;**
+当类中有了纯虚函数,这个类为抽象类
+
+2. 特点
+   1. 无法实例化对象
+   2. 子类必须重写父类的(抽象类)纯虚函数,否则也属于抽象类
+
+3. 例如
+```cpp
+#include <iostream>
+using namespace std;
+class AbstractDrinking{
+    public:
+        virtual void boiling() = 0;
+        virtual void brew() = 0;
+        virtual void pourInCup() = 0;
+        virtual void addSomething() = 0;
+        void makeDrink(){
+            boiling();
+            brew();
+            pourInCup();
+            addSomething();
+        }
+};
+class Coffee: public AbstractDrinking{
+    public:
+        void boiling(){
+            cout << "煮水" << endl; 
+        }
+        void brew(){
+            cout << "冲泡" << endl; 
+        }        
+        void pourInCup(){
+            cout << "加牛奶" << endl; 
+        }        
+        void addSomething(){
+            cout << "加咖啡" << endl; 
+        }
+};
+
+void doWork(AbstractDrinking *ptr){
+    ptr->makeDrink();
+    
+}
+void test(){
+    /*方法1
+    Coffee coffee;
+    AbstractDrinking *ptr = &coffee;
+    方法2：
+    AbstractDrinking *ptr = new Coffee;
+    方法3：(不行，因为AbstractDrinking不能实例化)
+    AbstractDrinking *ptr = new AbstractDrinking;//不能实例化
+    AbstractDrinking drinking;//不能实例化
+    ptr = new Coffee;
+    */
+
+    // ptr = new Coffee;
+    // Coffee coffee;
+    // AbstractDrinking *ptr = &coffee;
+    // doWork(ptr);
+}
+int main(){
+    test();
+}
+```
+**利用指针指向的3种方法
+```cpp
+方法1
+    Coffee coffee;
+    AbstractDrinking *ptr = &coffee;
+方法2：
+    AbstractDrinking *ptr = new Coffee;
+方法3：(不行，因为AbstractDrinking不能实例化)
+    AbstractDrinking *ptr = new AbstractDrinking;//不能实例化
+    AbstractDrinking drinking;//不能实例化
+    ptr = new Coffee;
+```
+
+#### 4.虚析构和纯虚析构
+
+1. 问题：多态使用时，如果子类有属性开辟到堆区，那么父类指针在释放时无法调用到子类的析构代码；解决方式：将父类中的析构函数改为虚析构和纯虚析构
+2. 虚析构和纯虚析构共性：
+   1. 可以解决父类指针释放子类对象
+   2. 都需要有具体的函数实现
+3. 虚析构和纯虚析构区别：
+   1. 如果是纯虚析构，该类属于抽象类，无法实例化对象
+4. 语法
+虚析构语法：
+
+`virtual ~类名(){}`
+
+纯虚析构语法：
+
+` virtual ~类名() = 0;`
+
+`类名::~类名(){}`
+5. 例子
+
+
+```C++
+class Animal {
+public:
+
+	Animal()
+	{
+		cout << "Animal 构造函数调用！" << endl;
+	}
+	virtual void Speak() = 0;
+
+	//析构函数加上virtual关键字，变成虚析构函数
+	//virtual ~Animal()
+	//{
+	//	cout << "Animal虚析构函数调用！" << endl;
+	//}
+
+
+	virtual ~Animal() = 0;
+};
+
+Animal::~Animal()
+{
+	cout << "Animal 纯虚析构函数调用！" << endl;
+}
+
+//和包含普通纯虚函数的类一样，包含了纯虚析构函数的类也是一个抽象类。不能够被实例化。
+
+class Cat : public Animal {
+public:
+	Cat(string name)
+	{
+		cout << "Cat构造函数调用！" << endl;
+		m_Name = new string(name);
+	}
+	virtual void Speak()
+	{
+		cout << *m_Name <<  "小猫在说话!" << endl;
+	}
+	~Cat()
+	{
+		cout << "Cat析构函数调用!" << endl;
+		if (this->m_Name != NULL) {
+			delete m_Name;
+			m_Name = NULL;
+		}
+	}
+
+public:
+	string *m_Name;
+};
+
+void test01()
+{
+	Animal *animal = new Cat("Tom");
+	animal->Speak();
+
+	//通过父类指针去释放，会导致子类对象可能清理不干净，造成内存泄漏
+	//怎么解决？给基类增加一个虚析构函数
+	//虚析构函数就是用来解决通过父类指针释放子类对象
+	delete animal;
+}
+
+int main() {
+	test01();
+}
+```
+总结：
+​	1. 虚析构或纯虚析构就是用来解决通过父类指针释放子类对象
+
+​	2. 如果子类中没有堆区数据，可以不写为虚析构或纯虚析构
+
+​	3. 拥有纯虚析构函数的类也属于抽象类
+
+
+
+
+
+
 
 # 12.模板：
 template <typename type> ret-type func-name(parameter list)
@@ -6208,7 +6497,7 @@ template <typename type> ret-type func-name(parameter list)
   - 例子：
   ```cpp
   #include <iostream>
-  using namespace std;阀的
+  using namespace std;
   //函数模板：
   template<typename T>//申明一个模板，T是一个通用类型
 

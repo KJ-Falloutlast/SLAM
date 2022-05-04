@@ -3157,4 +3157,6 @@ wine PCQQ2021.exe
    * free -g:看内存使用情况 
 
 ## 2.关于查找的命令
-1. 
+1. 查找软件包:dpkg -l | grep -i python
+2. 查找目录和文件:find /home | grep -i python(**其中-i是忽略大小写) 
+3. 
