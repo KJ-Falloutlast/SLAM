@@ -1,33 +1,26 @@
 #include <iostream>
 using namespace std;
-#include <string>
-class Animal{
-    public:
-        //出虚函数
-        virtual void speak() = 0;
-        
 
-};
-class Cat: public Animal{
-    public:
-        Cat(string name){
-            m_Name = new string(name);
-            //把string传进来，并让指针m_Name维护堆区的数据
-        }
-    //如果不对子类虚函数重写，那么子类也变为抽象类
-        virtual void speak(){
-            cout << *m_Name << " cat is speaking" << endl;
-        }
-        
-        string *m_Name;
-
-};
-void test01(){
-    Animal *animal = new Cat("tom");
-    animal->speak();
-    delete animal;//创建在堆区的数据要释放
-
+int DevFun(int a, int b)
+{
+	if ( 0 == b)  //除数为 0 ， 打印异常提示，并返回 0
+	{
+		throw b; //抛出异常
+	}
+	return a / b;
 }
-int main(){
-    test01();
+
+int main()
+{
+	try
+	{
+		cout << DevFun(6, 2) << endl;
+		cout << DevFun(6, 0) << endl;  //除数为 0
+	}
+	catch (int)  //捕获到异常（捕获到int类型），打印输出, catch (...) 表示任意类型
+	{
+		cout << "除数不能为 0 !"<< endl;
+	}
+
+    return 0;
 }

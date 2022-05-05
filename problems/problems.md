@@ -152,7 +152,35 @@ cmakelists:project(model02)
 2. fatal error: pub_sub/Person.h: 没有那个文件或目录
    1. 解决方案：重新catkin_make
 
- 
+## 15. 自动补全的问题
+**直接使用这个配置就可以自动补全**
+```json
+{
+  "configurations": [
+      {
+          "name": "Linux",
+          "includePath": [
+              "/opt/ros/noetic/include",
+              "/usr/include",
+              "${workspaceFolder}/**",
+              "${workspaceFolder}/devel/include",
+              "/usr/include/pcl-1.8",
+              "/usr/include/eigen3",
+              "/usr/include/x86_64-linux-gnu/qt5/QtWidgets",
+              "/usr/include/x86_64-linux-gnu/qt5",
+              "/usr/include/x86_64-linux-gnu/qt5/QtCore"
+          ],
+          "defines": [],
+          "compilerPath": "/usr/bin/gcc",
+          "cStandard": "c11",
+          "cppStandard": "c++17",
+          "intelliSenseMode": "clang-x64"
+      }
+  ],
+  "version": 4
+}
+```
+
 # 2.linux学习问题
 
 

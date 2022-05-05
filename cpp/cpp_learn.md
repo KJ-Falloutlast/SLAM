@@ -6401,84 +6401,299 @@ int main(){
 
 `类名::~类名(){}`
 5. 例子
+```cpp
+#include <iostream>
+#include <string>
+using namespace std;
+//先调用父类构造函数，再调用子类构造函数
+class Animal{
+	public:
+		virtual void speak() = 0;//纯虚函数只需要声明无须实现
+		Animal(){
+			cout << "Animal构造函数调用" << endl;
+		}
+		//方法1：利用虚析构解决父类指针无法执行子类析构函数问题
+		// virtual ~Animal(){
+		// 	cout << "Animal析构函数调用" << endl;
+		// }
+		//方法2：利用纯虚析构(纯虚析构和虚析构都需要代码实现)
+		virtual ~Animal() = 0;
 
-
-```C++
-class Animal {
-public:
-
-	Animal()
-	{
-		cout << "Animal 构造函数调用！" << endl;
-	}
-	virtual void Speak() = 0;
-
-	//析构函数加上virtual关键字，变成虚析构函数
-	//virtual ~Animal()
-	//{
-	//	cout << "Animal虚析构函数调用！" << endl;
-	//}
-
-
-	virtual ~Animal() = 0;
 };
-
-Animal::~Animal()
-{
-	cout << "Animal 纯虚析构函数调用！" << endl;
+Animal::~Animal(){//纯虚析外部实现无须加virtual
+	cout << "Animal构造函数调用" << endl;	
 }
 
-//和包含普通纯虚函数的类一样，包含了纯虚析构函数的类也是一个抽象类。不能够被实例化。
+class Cat : public Animal{
+	public://不重写的话，子类也是抽象类，无法实例化
 
-class Cat : public Animal {
+		Cat(string name){
+			m_Name = new string(name);
+	
+			cout << "Cat构造函数调用" << endl;
+		}
+		~Cat(){//本来应该先执行子类的析构函数，但是没有执行子类的析构函数，说明此时堆区的m_Name没有释放干净
+			if(m_Name != NULL){
+				cout << "Cat析构函数调用" << endl;
+				delete m_Name;//通过析构释放堆区数据
+				m_Name = NULL;
+			}
+		}
+		string *m_Name;
+};
+void test01(){
+	Animal *animal = new Cat("tom");
+	//父类的指针在析构时候，不会调用子类的析构函数，但是可以调用父类和子类的构造函数以及父类的析构函数
+	/**各种选项**/
+	//1. Animal animal;//因为Animal为抽象类，所以不能实例化，所以他们的所有无参和有参构造都会失败，Animal animal;Animal animal("cat")
+	
+	// 2.Cat cat;//子类中有有参构造函数了就必须要自定义无参构造函数
+
+	//3.Cat cat("tom");//直接创建子类对象时会调用父类和子类的所有构造和析构函数
+
+	delete animal;//如果不delete animal就不会执行父类和子类的的析构函数
+}
+int main(){
+	test01();
+}
+/*总结
+1.用m_Name指针维护堆区的name，在cat的析构函数中把堆区的数据m_Name释放
+3.本来应该先执行子类的析构函数，但是没有执行子类的析构函数，说明此时堆区的m_Name没有释放干净，导致了内存泄漏
+4.产生的原因:父类的指针在析构时候，不会调用子类的析构函数，导致子类如果有堆区属性，出现内存泄漏
+
+5.解决办法：将父类的析构变为虚析构，就可以执行子类的析构函数。
+
+6.纯虚析构，虚析构，虚函数需要代码声明和实现,纯虚函数只需要声明无须实现，
+
+7.有了纯虚析构或者纯虚函数后，这个类就是抽象类；若子类不重写父类的纯虚函数，
+那么子类也变成了抽象类，因为此时子类的纯虚函数没有变成虚函数
+
+8.各种构造方法:
+	1.Animal animal;
+	因为Animal为抽象类，所以不能实例化，所以他们的所有无参和有参构造都会失败，Animal animal;Animal animal("cat")
+	
+	2.Cat cat;
+	子类中有有参构造函数了就必须要自定义无参构造函数
+
+	s3.Cat cat("tom");
+	直接创建子类对象时会调用父类和子类的所有构造和析构函数
+*/
+```
+升级版
+```cpp
+#include <iostream>
+#include <string>
+using namespace std;
+class Animal{
+    public:
+        string *m_Name;//由于m_Name = new string(name),name为string，所以,*m_Name必须为string对象
+        Animal(){
+            cout << "animal构造函数调用" << endl;
+        }
+        //方法1：
+        // virtual ~Animal(){
+        //     cout << "animal虚构函数调用" << endl;
+        // }
+        //方法2：
+        virtual ~Animal() = 0;
+};
+Animal::~Animal(){
+    cout << "animal虚构函数调用" << endl;
+}
+class Cat : public Animal{
+    public:
+        Cat(string name){
+            m_Name = new string(name);
+            cout << "Cat构造函数调用" << endl;
+            cout << *m_Name << " cat is speaking" << endl;
+        }
+        ~Cat(){
+            if (m_Name != NULL){
+                cout << "Cat析构函数调用" << endl; 
+                delete m_Name;
+                m_Name = NULL;
+            } 
+        }
+};
+void test(){
+    Animal *animal = new Cat("tom");
+    delete animal;
+
+}
+int main(){
+    test();
+}
+```
+6. 应用
+```cpp
+#include<iostream>
+using namespace std;
+
+//抽象CPU类
+class CPU
+{
 public:
-	Cat(string name)
+	//抽象的计算函数
+	virtual void calculate() = 0;
+};
+
+//抽象显卡类
+class VideoCard
+{
+public:
+	//抽象的显示函数
+	virtual void display() = 0;
+};
+
+//抽象内存条类
+class Memory
+{
+public:
+	//抽象的存储函数
+	virtual void storage() = 0;
+};
+
+//电脑类
+class Computer
+{
+public:
+	Computer(CPU * cpu, VideoCard * vc, Memory * mem)
 	{
-		cout << "Cat构造函数调用！" << endl;
-		m_Name = new string(name);
+		m_cpu = cpu;
+		m_vc = vc;
+		m_mem = mem;
 	}
-	virtual void Speak()
+
+	//提供工作的函数
+	void work()
 	{
-		cout << *m_Name <<  "小猫在说话!" << endl;
+		//让零件工作起来，调用接口
+		m_cpu->calculate();
+
+		m_vc->display();
+
+		m_mem->storage();
 	}
-	~Cat()
+
+	//提供析构函数 释放3个电脑零件
+	~Computer()
 	{
-		cout << "Cat析构函数调用!" << endl;
-		if (this->m_Name != NULL) {
-			delete m_Name;
-			m_Name = NULL;
+
+		//释放CPU零件
+		if (m_cpu != NULL)
+		{
+			delete m_cpu;
+			m_cpu = NULL;
+		}
+
+		//释放显卡零件
+		if (m_vc != NULL)
+		{
+			delete m_vc;
+			m_vc = NULL;
+		}
+
+		//释放内存条零件
+		if (m_mem != NULL)
+		{
+			delete m_mem;
+			m_mem = NULL;
 		}
 	}
 
-public:
-	string *m_Name;
+private:
+
+	CPU * m_cpu; //CPU的零件指针
+	VideoCard * m_vc; //显卡零件指针
+	Memory * m_mem; //内存条零件指针
 };
+
+//具体厂商
+//Intel厂商
+class IntelCPU :public CPU
+{
+public:
+	virtual void calculate()
+	{
+		cout << "Intel的CPU开始计算了！" << endl;
+	}
+};
+
+class IntelVideoCard :public VideoCard
+{
+public:
+	virtual void display()
+	{
+		cout << "Intel的显卡开始显示了！" << endl;
+	}
+};
+
+class IntelMemory :public Memory
+{
+public:
+	virtual void storage()
+	{
+		cout << "Intel的内存条开始存储了！" << endl;
+	}
+};
+
+//Lenovo厂商
+class LenovoCPU :public CPU
+{
+public:
+	virtual void calculate()
+	{
+		cout << "Lenovo的CPU开始计算了！" << endl;
+	}
+};
+
+class LenovoVideoCard :public VideoCard
+{
+public:
+	virtual void display()
+	{
+		cout << "Lenovo的显卡开始显示了！" << endl;
+	}
+};
+
+class LenovoMemory :public Memory
+{
+public:
+	virtual void storage()
+	{
+		cout << "Lenovo的内存条开始存储了！" << endl;
+	}
+};
+
 
 void test01()
 {
-	Animal *animal = new Cat("Tom");
-	animal->Speak();
+	//第一台电脑零件
+	CPU * intelCpu = new IntelCPU;
+	VideoCard * intelCard = new IntelVideoCard;
+	Memory * intelMem = new IntelMemory;
 
-	//通过父类指针去释放，会导致子类对象可能清理不干净，造成内存泄漏
-	//怎么解决？给基类增加一个虚析构函数
-	//虚析构函数就是用来解决通过父类指针释放子类对象
-	delete animal;
-}
+	cout << "第一台电脑开始工作：" << endl;
+	//创建第一台电脑
+	Computer * computer1 = new Computer(intelCpu, intelCard, intelMem);
+	computer1->work();
+	delete computer1;
 
-int main() {
-	test01();
-}
+	cout << "-----------------------" << endl;
+	cout << "第二台电脑开始工作：" << endl;
+	//第二台电脑组装
+	Computer * computer2 = new Computer(new LenovoCPU, new LenovoVideoCard, new LenovoMemory);;
+	computer2->work();
+	delete computer2;
+
+	cout << "-----------------------" << endl;
+	cout << "第三台电脑开始工作：" << endl;
+	//第三台电脑组装
+	Computer * computer3 = new Computer(new LenovoCPU, new IntelVideoCard, new LenovoMemory);;
+	computer3->work();
+	delete computer3;
+
 ```
-总结：
-​	1. 虚析构或纯虚析构就是用来解决通过父类指针释放子类对象
-
-​	2. 如果子类中没有堆区数据，可以不写为虚析构或纯虚析构
-
-​	3. 拥有纯虚析构函数的类也属于抽象类
-
-
-
-
 
 
 
@@ -6793,4 +7008,58 @@ int main(int argc, char *argv[]) {
 }
 ```
 
+## 2. try-catch语句
+1. 异常的抛出:
+   1. 格式：throw 表达式
+   2. 表达式：表示抛出的异常类型，并且在存在异常的情况下进行捕获
+2. 异常的捕获
+   1. 格式:try{...}表示开始检查被调用的函数，catch(type){...}用于捕获throw抛出的异常，并根据抛出类型匹配需要进行的异常处理，
+**type可以用...来表示任意类型**
 ```cpp
+try
+{
+	//被调用的函数（功能模块）
+}
+catch (异常类型1)
+{
+	//进行异常处理1
+}
+catch (异常类型2)
+{
+	//进行异常处理2
+}
+...
+catch (异常类型n)
+{
+	//进行异常处理n
+}
+
+例子
+#include <iostream>
+using namespace std;
+int main()
+{
+    double m ,n;
+    cin >> m >> n;
+    try {
+        cout << "before dividing." << endl;
+        if( n == 0)
+            throw -1; //抛出int类型异常
+        else
+            cout << m / n << endl;
+        cout << "after dividing." << endl;
+    }
+    catch(double d) {
+        cout << "catch(double) " << d <<  endl;
+    }
+    catch(int e) {
+        cout << "catch(int) " << e << endl;
+    }
+    cout << "finished" << endl;
+    return 0;
+}
+/*过程
+1.当n != 0时，try不会抛出异常，所以try执行完后越过所有的catch,继续执行
+2. 当n = 0时，try会抛出一个整形异常，抛出异常后，try立即停止执行，该整型异常会被类型匹配的第一个catch块捕获，即进入catch(int e)块执行，该catch块执行完毕后程序继续往后执行，直到正常结束
+
+```
