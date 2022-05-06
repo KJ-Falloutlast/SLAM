@@ -477,4 +477,79 @@ eig.eigenvectors();               // vec
 // For self-adjoint matrices use SelfAdjointEigenSolver<>
 ```
 ## 2.eigen的使用总结：
-1. 矩阵
+```cpp
+#include <iostream>
+#include <Eigen/Core>
+#include <Eigen/Dense>
+using namespace std;
+int main(){
+    //**1.创建和初始化矩阵**//
+    //1-1. 普通矩阵生成
+    Eigen::Matrix4d m1;//在定义时不能后接endl
+    m1 << 1, 0, 0, 0,
+          0, 2, 0, 0,
+          0, 0, 3, 0,
+          0, 0, 0, 4;
+    cout << m1 << endl;
+    //1-2. 向量生成
+    Eigen::Vector3d vec1(1, 2, 3), vec2(2, 3, 4);
+    cout << vec1 << endl << vec2 << endl;
+    //1-3.Array生成
+    Eigen::ArrayXd array1(3), array2(3);
+    array1 << 1, 2, 3;
+    array2 << 1, 2, 3;
+    cout << array1 << endl << array2 << endl;
+    //1-2. 特殊矩阵生成
+    Eigen::MatrixXd m3(3, 3);//若为动态矩阵，则需括号，若为静态矩阵，则无须括号
+    Eigen::MatrixXd m4(3, 3);
+    Eigen::MatrixXd m5(3, 3);
+    Eigen::MatrixXd m6(3, 3);
+    m3 = Eigen::Matrix3d::Random();//随机矩阵
+    m4 = Eigen::Matrix3d::Zero();
+    m5 = Eigen::Matrix3d::Identity();//单位矩阵
+    m6 = Eigen::Matrix3d::Ones();//全1矩阵
+    cout << m3 << endl << endl;
+    cout << m4 << endl << endl;
+    cout << m5 << endl << endl;
+    cout << m6 << endl << endl;
+    //**2. 矩阵运算**//
+    //2-1. 基本运算
+    cout << " vec1.vec2 =\n " << vec1.dot(vec2) << endl; //点积 
+    cout << "vec1 x vec2 =\n " << vec1.cross(vec2) << endl;    //叉积
+    cout << "m1.sum() =\n " << m1.sum() <<  endl << endl;            // 各元素和
+    cout << "m1.trace() =\n " << m1.trace() <<  endl << endl;          // 迹
+    cout <<"m1.determinant() =\n " <<  m1.determinant() <<  endl << endl;    // 行列式
+    cout << "m1.transpose() =\n " << m1.transpose() <<  endl << endl;      // 转置
+    cout <<"m1.inverse() =\n " <<  m1.inverse() <<  endl << endl;        // 逆
+    cout << "m1.adjoint() =\n " << m1.adjoint() <<  endl << endl;        // 伴随
+    cout <<"m1.conjugate() =\n " <<  m1.conjugate() <<  endl << endl;      // 共轭
+    //2-2. 块的操作
+    //2-2-1. vector块操作
+    cout << vec1.tail(2) << endl << endl;
+    cout << vec1.head(2) << endl << endl;
+    cout << vec1.segment(1, 2) << endl;//segment的索引是从0开始往后面推，所以(1, 2) = (2, 3)
+    //2-2-2. matrix块操作
+    cout << m1.block(1, 1, 2, 2) << endl;
+    cout << m1.block<2, 2>(1, 1) << endl;
+    //2-3. 类型的转换
+    cout << m1.cast<int>() << endl << endl;    
+    cout << m1.cast<float>() << endl << endl;    
+    cout << m1.cast<double>() << endl << endl;    
+    //**3. 矩阵的特征值 // 
+    Eigen::SelfAdjointEigenSolver<Eigen::Matrix4d> eigenSolver(m1.transpose()*m1);//实对称矩阵可以相似对角化
+    if(eigenSolver.info() == Eigen::Success){
+        cout << "eigenvalues = \n" << eigenSolver.eigenvalues() << endl;
+        cout << "eigenvectors = \n" << eigenSolver.eigenvectors() << endl << endl;
+    }
+    //**4. 解方程** //
+    Eigen::Matrix3d m2;
+    Eigen::Vector3d vec3d(1, 2, 3);
+    m2 << 1, 0, 0;
+          0, 2, 0,
+          0, 0, 3;
+    m2.inverse();
+    cout << "the result = " << m2*vec3d << endl;
+    
+}
+
+```

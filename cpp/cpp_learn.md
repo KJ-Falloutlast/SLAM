@@ -6456,7 +6456,8 @@ void test01(){
 int main(){
 	test01();
 }
-/*总结
+
+总结
 1.用m_Name指针维护堆区的name，在cat的析构函数中把堆区的数据m_Name释放
 3.本来应该先执行子类的析构函数，但是没有执行子类的析构函数，说明此时堆区的m_Name没有释放干净，导致了内存泄漏
 4.产生的原因:父类的指针在析构时候，不会调用子类的析构函数，导致子类如果有堆区属性，出现内存泄漏
@@ -6468,16 +6469,17 @@ int main(){
 7.有了纯虚析构或者纯虚函数后，这个类就是抽象类；若子类不重写父类的纯虚函数，
 那么子类也变成了抽象类，因为此时子类的纯虚函数没有变成虚函数
 
-8.各种构造方法:
+8.如果不delete animal就不会执行父类和子类的的析构函数，因为析构函数在类被删除时才会执行
+
+9.各种构造方法:
 	1.Animal animal;
 	因为Animal为抽象类，所以不能实例化，所以他们的所有无参和有参构造都会失败，Animal animal;Animal animal("cat")
 	
 	2.Cat cat;
 	子类中有有参构造函数了就必须要自定义无参构造函数
 
-	s3.Cat cat("tom");
+	3.Cat cat("tom");
 	直接创建子类对象时会调用父类和子类的所有构造和析构函数
-*/
 ```
 升级版
 ```cpp
@@ -6525,185 +6527,340 @@ int main(){
 }
 ```
 6. 应用
+核心思路：
+抽象类->具体类
+零件->电脑
 ```cpp
-#include<iostream>
+#include <iostream>
+#include <string>
 using namespace std;
-
-//抽象CPU类
-class CPU
-{
-public:
-	//抽象的计算函数
-	virtual void calculate() = 0;
+class CPU{
+	public:
+		virtual void calculate() = 0;
+};
+class VideoCard{
+	public:
+		virtual void display() = 0;
+};
+class Memory{
+	public:
+		virtual void storage() = 0;
 };
 
-//抽象显卡类
-class VideoCard
-{
-public:
-	//抽象的显示函数
-	virtual void display() = 0;
-};
-
-//抽象内存条类
-class Memory
-{
-public:
-	//抽象的存储函数
-	virtual void storage() = 0;
-};
-
-//电脑类
-class Computer
-{
-public:
-	Computer(CPU * cpu, VideoCard * vc, Memory * mem)
-	{
-		m_cpu = cpu;
-		m_vc = vc;
-		m_mem = mem;
-	}
-
-	//提供工作的函数
-	void work()
-	{
-		//让零件工作起来，调用接口
-		m_cpu->calculate();
-
-		m_vc->display();
-
-		m_mem->storage();
-	}
-
-	//提供析构函数 释放3个电脑零件
-	~Computer()
-	{
-
-		//释放CPU零件
-		if (m_cpu != NULL)
-		{
-			delete m_cpu;
-			m_cpu = NULL;
+//1.Intel厂
+class IntelCPU: public CPU{
+	public:
+		virtual void calculate(){
+			cout << "IntelCPU is working"<< endl;
 		}
-
-		//释放显卡零件
-		if (m_vc != NULL)
-		{
-			delete m_vc;
-			m_vc = NULL;
+};
+class IntelVideoCard : public VideoCard{
+	public:
+		virtual void display(){
+			cout << "IntelVideoCard is working"<< endl;
 		}
-
-		//释放内存条零件
-		if (m_mem != NULL)
-		{
-			delete m_mem;
-			m_mem = NULL;
+};
+class IntelMemory : public Memory{
+	public:
+		virtual void storage(){
+			cout <<"Intelstorage is working" << endl;
 		}
-	}
-
-private:
-
-	CPU * m_cpu; //CPU的零件指针
-	VideoCard * m_vc; //显卡零件指针
-	Memory * m_mem; //内存条零件指针
 };
 
-//具体厂商
-//Intel厂商
-class IntelCPU :public CPU
-{
-public:
-	virtual void calculate()
-	{
-		cout << "Intel的CPU开始计算了！" << endl;
-	}
+//2. lenovo厂
+class LenovoCPU : public CPU{
+	public:
+		virtual void calculate(){
+			cout << "LenovoCPU is working"<< endl;
+		}
+};
+class LenovoVideoCard : public VideoCard{
+	public:
+		virtual void display(){
+			cout << "LenovoVideoCard is working"<< endl;
+		}
+};
+class LenovoMemory : public Memory{
+	public:
+		virtual void storage(){
+			cout <<"Lenovostorage is working" << endl;
+		}
+};
+// 3.电脑类
+class Computer{
+	public:
+		Computer(CPU *cpu, VideoCard *vc, Memory *mem){
+			m_Cpu = cpu;
+			m_Vc = vc;
+			m_Mem = mem;
+		}
+		void work(){
+			m_Cpu->calculate();
+			m_Vc->display();
+			m_Mem->storage();
+		}
+		~Computer(){
+			if (m_Cpu != NULL){
+				delete m_Cpu;//接收到m_Cpu = cpu = new IntelCPU 之后就要销毁
+				m_Cpu = NULL;
+			}
+			if (m_Vc != NULL){
+				delete m_Vc;
+				m_Vc = NULL;
+			}
+			if (m_Mem != NULL){
+				delete m_Mem;
+				m_Mem = NULL;
+			}
+		}
+	private:
+		CPU *m_Cpu;
+		VideoCard *m_Vc;
+		Memory *m_Mem;
+			
 };
 
-class IntelVideoCard :public VideoCard
-{
-public:
-	virtual void display()
-	{
-		cout << "Intel的显卡开始显示了！" << endl;
-	}
-};
+//4.组装电脑
+void test(){
+	CPU *intelCpu = new IntelCPU;//用父类的指针指向子类对象
+	VideoCard *intelVideoCard = new IntelVideoCard;
+	Memory *intelMem = new IntelMemory;
+	//第一台电脑(方法1)
+	cout << "-----the first computer starts-------" << endl;
+	Computer *computer1 = new Computer(intelCpu, intelVideoCard, intelMem);
+	computer1->work();
+	delete computer1;
+	//第二台电脑(方法2)
+	cout << "-----the second computer starts------" << endl;
+	Computer *computer2 = new Computer(new IntelCPU, new LenovoVideoCard, new IntelMemory);
+	computer2->work();
+	delete computer2;
+}
 
-class IntelMemory :public Memory
-{
-public:
-	virtual void storage()
-	{
-		cout << "Intel的内存条开始存储了！" << endl;
-	}
-};
+int main(){
+	test();
+}
+```
+## 5.文本文件
+### 5-1.文本文件
+#### 1.读文件
+1. 写文件步骤如下：
+   1. 包含头文件   
+     \#include <fstream\>
+   2. 创建流对象  
+   ofstream ofs;
+   3. 打开文件
+   ofs.open("文件路径",打开方式);
+   4. 写数据
+   ofs << "写入的数据";
+   5. 关闭文件
+   ofs.close();
 
-//Lenovo厂商
-class LenovoCPU :public CPU
-{
-public:
-	virtual void calculate()
-	{
-		cout << "Lenovo的CPU开始计算了！" << endl;
-	}
-};
+   ​
+2. 文件打开方式：
 
-class LenovoVideoCard :public VideoCard
-{
-public:
-	virtual void display()
-	{
-		cout << "Lenovo的显卡开始显示了！" << endl;
-	}
-};
+| 打开方式    | 解释                       |
+| ----------- | -------------------------- |
+| ios::in     | 为读文件而打开文件         |
+| ios::out    | 为写文件而打开文件         |
+| ios::ate    | 初始位置：文件尾           |
+| ios::app    | 追加方式写文件             |
+| ios::trunc  | 如果文件存在先删除，再创建 |
+| ios::binary | 二进制方式                 |
 
-class LenovoMemory :public Memory
-{
-public:
-	virtual void storage()
-	{
-		cout << "Lenovo的内存条开始存储了！" << endl;
-	}
-};
+3. **注意：** 文件打开方式可以配合使用，利用|操作符
 
+4. **例如：**用二进制方式写文件 `ios::binary |  ios:: out`
+
+5. **示例：**
+
+```C++
+#include <fstream>
 
 void test01()
 {
-	//第一台电脑零件
-	CPU * intelCpu = new IntelCPU;
-	VideoCard * intelCard = new IntelVideoCard;
-	Memory * intelMem = new IntelMemory;
+	ofstream ofs;
+	ofs.open("test.txt", ios::out);
 
-	cout << "第一台电脑开始工作：" << endl;
-	//创建第一台电脑
-	Computer * computer1 = new Computer(intelCpu, intelCard, intelMem);
-	computer1->work();
-	delete computer1;
+	ofs << "姓名：张三" << endl;
+	ofs << "性别：男" << endl;
+	ofs << "年龄：18" << endl;
 
-	cout << "-----------------------" << endl;
-	cout << "第二台电脑开始工作：" << endl;
-	//第二台电脑组装
-	Computer * computer2 = new Computer(new LenovoCPU, new LenovoVideoCard, new LenovoMemory);;
-	computer2->work();
-	delete computer2;
+	ofs.close();
+}
 
-	cout << "-----------------------" << endl;
-	cout << "第三台电脑开始工作：" << endl;
-	//第三台电脑组装
-	Computer * computer3 = new Computer(new LenovoCPU, new IntelVideoCard, new LenovoMemory);;
-	computer3->work();
-	delete computer3;
+int main() {
 
+	test01();
+
+	system("pause");
+
+	return 0;
+}
+```
+
+6. 总结：
+
+* 文件操作必须包含头文件 fstream
+* 读文件可以利用 ofstream  ，或者fstream类
+* 打开文件时候需要指定操作文件的路径，以及打开方式
+* 利用<<可以向文件中写数据
+* 操作完毕，要关闭文件
+
+#### 2.读文件
+1. 读文件步骤如下：
+   1. 包含头文件   
+        \#include <fstream\>
+   2. 创建流对象  
+      ifstream ifs;
+   3. 打开文件并判断文件是否打开成功
+      ifs.open("文件路径",打开方式);
+   4. 读数据
+      四种方式读取
+   5. 关闭文件
+      ifs.close();
+2. 读取文件
+
+3. **示例：**
+
+```C++
+#include <iostream>
+#include <fstream>
+#include <string>
+using namespace std;
+void test01(){
+    //1.包含头文件
+    //2.创建流对象
+    ifstream ifs;//i:input,f:file,输入文件流
+    //3.打开文件并且判断是否打开成功
+    ifs.open("test.txt",ios::in);
+    if (!ifs.is_open()){
+        cout << "文件打开失败" << endl;
+        return;
+    }
+    //4.读数据
+    //第一种：
+    // char buf[1024] = {0};
+    // while (ifs >> buf){
+    //     cout << buf << endl;
+    // }
+    //第二种
+    // char buf[1024] = {0};//定义一个1024字节的char数组,并将所有元素赋值为0
+    // while (ifs.getline(buf, sizeof(buf))){//数组名指向第一个元素的地址
+    //     //ifs.getline(buf, sizeof(buf)):第一个元素是对象，第二个元素是数组大小
+    //     cout << buf << endl;
+    // }
+    //第三种
+    // string buf;
+    // while (getline(ifs, buf)){
+    //     //getline第一个参数：ifs输入文件流对象，第二个参数：输出对象buf
+    //     cout << buf << endl;
+    // }
+    //第四种
+    char c;
+    while ((c = ifs.get()) != EOF){
+        //EOF = end of file:意思是只要没有读到文件尾，就一直读
+        cout << c;
+    }
+    //5.关闭文件
+    ifs.close();
+    /*get和getline的区别：
+    首先这两个函数都读取下一行输入，直到到达换行符；
+    但是getline()函数会丢弃换行符，而get(）将换行符保留在输入序列中
+    */
+}
+int main(){
+    test01();
+}
+```
+
+4. 总结：
+- 读文件可以利用 ifstream  ，或者fstream类
+- 利用is_open函数可以判断文件是否打开成功
+- close 关闭文件 
+
+
+### 5-2.二进制文件
+以二进制的方式对文件进行读写操作
+#### 1.写文件
+二进制方式写文件主要利用流对象调用成员函数write
+函数原型：ostream& write(const char *buffer, int len);
+函数解释：字符指针buffer指向内存中的一段存储空间，len是读写的字节数
+
+1. 实例：
+```cpp
+#include <iostream>
+#include <fstream>//file stream
+using namespace std;
+class Person{
+    public:
+        char m_Name[64];//姓名
+        int m_Age;//年龄
+
+};
+void test01(){
+    //1.包含头文件
+    //2.创建流对象
+    ofstream ofs("person.txt", ios::out | ios::binary);//也可用构造函数
+    //3.打开文件
+    // ofs.open("person.txt", ios::out | ios::binary);//利用普通方式写文件还是2进制关系写文件
+    //4.写文件
+    Person p ={"tom", 19};//lf
+    ofs.write((const char *)&p, sizeof(Person));
+    /*
+    1.(const char *)&p：将p指针强转成const char*
+    2.write的第一个参数是对象，第二个参数是大小 
+    */
+    //5.关闭文件
+    ofs.close();
+}
+int main(){
+    test01();
+}
+```
+#### 2.读文件
+```cpp
+class Person{
+    public:
+        string m_Name;
+        int m_Age;
+};
+void test01(){
+    //1.包含头文件
+    //2.创建流对象
+    ifstream ifs("person.txt", ios::in | ios::binary);//也可用构造函数创建，这样就不用直接创建了
+    //3.打开文件,判断文件是否打开成功
+    // ofs.open("person.txt", ios::out | ios::binary);//利用普通方式写文件还是2进制关系写文件
+    if (!ifs.is_open()){//如果is_open返回为false，则打开失败
+        cout << "文件打开失败" << endl;
+        return;
+    }
+    //4.读文件
+    Person p;
+    ifs.read((char*)&p, sizeof(Person));
+    cout << "name = " << p.m_Name << "  age = " << p.m_Age << endl;
+    //5.关闭文件
+    ifs.close();
+}
+int main(){
+    test01();
+}
 ```
 
 
 
+
 # 12.模板：
+## 12-1.函数模板
+### 1. 定义：
+```cpp
 template <typename type> ret-type func-name(parameter list)
 {
  // 函数的主体
 }
-* 12-2.分类：
-* 1.函数模板：
+```
+### 2. 分类：
+   1. 函数模板：
   - 作用：建立一个通用函数，其函数的返回值类型和形参类型可以不具体指定，用一个虚拟的类型来代表
   - 语法：template<typename T>//T为通用的数据类型，可以用class来代替，通常为大写字母
         函数申明或者定义
@@ -6782,7 +6939,7 @@ int main(){
     test02();
 }
 ```
-  - 实例：
+### 3.实例：
   ```cpp
   #include <iostream>
   using namespace std;
@@ -6838,7 +6995,17 @@ int main(){
       test02();
   }
   ```
+### 4.普通函数和函数模板的区别
+1. 区别：
+   1. 普通函数调用时可以发生自动类型转换(隐式转换)
+   2. 函数模板调用时，如果利用自动类型推导，不会发生隐式类型转换
+   3. 如果利用显示指定类型的方式，可以发生隐式类型转换
+2. 例子
+```cpp
+
+## 12-2.类模板
 1. 类模板：
+```cpp
 #include <iostream>
 using namespace std;
 template <typename T>//T为通用的数据类型，可以用class来代替，通常为大写字母
@@ -6856,6 +7023,8 @@ int main()
   cout << "5 * 5 = " << opInt.peocess(5) <<endl;
   cout << "0.5 * 0.5 = " << opDouble.peocess(0.5) <<endl;
 }
+```
+
 # 13.c++高级教程
 ## 1. 命名空间
 1. 提出：当一个班上有2个同名学生时，不得不用其他的信息，比如说，年龄等等来区分他们；在c++中，你可能会有xyz()的函数，在另一个库中也有xyz()的函数，所以需要加命名空间加以区分
@@ -7063,3 +7232,25 @@ int main()
 2. 当n = 0时，try会抛出一个整形异常，抛出异常后，try立即停止执行，该整型异常会被类型匹配的第一个catch块捕获，即进入catch(int e)块执行，该catch块执行完毕后程序继续往后执行，直到正常结束
 
 ```
+# 3.cout. precision
+```cpp
+#include <iostream>
+using namespace std;
+int main()
+{
+	double value =0.0012345;
+	cout.precision(1);
+	cout<<value<<endl;
+	cout.precision(2);
+	cout<<value<<endl;
+	cout.precision(3);
+	cout<<value<<endl;
+	return 0;
+}
+
+输出结果：
+0.001
+0.0012
+0.00123
+```
+cout.precision(n)是指保留n位有效数字，即从左往右数，除了0之外有多少个数字

@@ -535,8 +535,41 @@ ls -l | grep python
   * sudo dmidecode -t memory | grep Size**查看每个内存多大**
   * sudo dmidecode | grep "System Information" -A9 | egrep "Manufacturer|Product|Serial"
 
-  
+## 16.卸载问题
+1. 任何时候都不要用sudo apt autoremove xxx
+2. 卸载时候用:sudo apt remove xxx | sudo apt purge xxx
+## 17.vscode的配置问题
+1. 打开c_cpp_properties的方法：
 
+   Ctrl+Shift+P
+   Edit configuration
+   c_cpp_properties.json
+```json
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "/opt/ros/noetic/include",
+                "/usr/include",
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/devel/include",
+                "/usr/include/pcl-1.8",
+                "/usr/include/eigen3",
+                "/usr/include/x86_64-linux-gnu/qt5/QtWidgets",
+                "/usr/include/x86_64-linux-gnu/qt5",
+                "/usr/include/x86_64-linux-gnu/qt5/QtCore"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "clang-x64"
+        }
+    ],
+    "version": 4
+  }
+```
 # 3.c++学习问题
 
 1. endl的问题:
