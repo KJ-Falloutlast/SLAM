@@ -3436,6 +3436,21 @@ int main(){
     p.test1();
 }
 ```
+### 3-5.何时用引用传参
+1. 使用引用传递的原因：
+   1.  能修改调用函数中的数据对象
+   2.  通过传递引用而非整个数据对象，可以提高程序的运行速度
+2. 使用场合
+   1. 使用值传递而不做修改的函数
+      1. 数据对象较小，如内置数据类型，则按值传递
+      2. 数据对象为数组，则使用const指针
+      3. 数据对象为类对象，使用const常引用
+   2. 对于修改调用函数中的数据的函数
+      1. 数据对象为数组，则只能使用指针
+      2. 数据对象为结构，则使用引用或指针
+      3. 数据对象为类对象，则使用引用
+
+
 ## 4. 类
 ### 4-1.封装
 * 意义:
@@ -4994,13 +5009,14 @@ void test01(){
    Person p4 = p3 + 1;//对应重载函数运算符重载
    p4.showMsg(p4);
 
-   Person *p5 = new Person(1, 3);//利用指针运算符重载,对应全局函数运算符重载和成员函数运算符重载，2个都可以调用
+   Person *p5 = new Person;//利用指针运算符重载,对应全局函数运算符重载和成员函数运算符重载，2个都可以调用
    *p5 = p1 + p2;
    p5->showMsg(p5);
 }
 int main(){
    test01();
 }
+/*注意：此处所有类的传递必须要用引用传递
 ```
    3. 例子3
 ```cpp
@@ -5195,45 +5211,42 @@ int main(){
 ```cpp
 #include <iostream>
 using namespace std;
- 
-class Distance
-{
-   private:
-      int feet;             // 0 到无穷
-      int inches;           // 0 到 12
-   public:
-      // 所需的构造函数
-      Distance(){
-      }
-      Distance(int f, int i){
-         feet = f;
-         inches = i;
-      }
-      friend ostream& operator<< ( ostream &output, 
-                                       const Distance &D )
-      { 
-         output << "F : " << D.feet << " I : " << D.inches;
-         return output;            
-      }
- 
-      friend istream& operator>> ( istream  &input, Distance &D )
-      { 
-         input >> D.feet >> D.inches;
-         return input;            
-      }
+class Distance{
+    private:
+        int feet;
+        int inches;
+    public:
+        Distance(int f, int i){
+            feet = f;
+            inches = i;
+        }
+        friend ostream& operator<<(ostream &output, Distance &D);        
+        friend istream& operator>>(istream &input, Distance &D);        
 };
-int main()
-{
-   Distance D1(11, 10), D2(5, 11), D3;
- 
-   cout << "Enter the value of object : " << endl;
-   cin >> D3;//调用的是istream
-   cout << "First Distance : " << D1 << endl;//cout << "First Distance : 返回的是cout,所以可以重复输出
-   cout << "Second Distance :" << D2 << endl;//
-   cout << "Third Distance :" << D3 << endl;
- 
- 
-   return 0;
+
+ostream& operator<< (ostream &output, Distance &D){
+    output << "feet = " << D.feet << " inches = " << D.inches << endl;
+    return output;
+    /*
+    1.ostream函数返回ostream对象，所以此时可以为:return output, return this,
+    但是友元函数无this指针和继承，所以无法返回this
+    2.int fun(){}返回一个int对象，Distance->D
+    */
+}
+
+istream& operator>> (istream &input, Distance &D){
+    input >> D.feet >> D.inches;
+    return input;
+}
+
+void test(){
+    Distance D1(2, 3), D2(2, 5);
+    cin >> D1 >> D2;
+    cout << "the distance is  " << D1 << endl;  
+    cout << "the distance is  " << D2 << endl;  
+}
+int main(){
+    test();
 }
 ```
 #### 7.赋值运算符重载
@@ -6998,9 +7011,281 @@ int main(){
 ### 4.普通函数和函数模板的区别
 1. 区别：
    1. 普通函数调用时可以发生自动类型转换(隐式转换)
-   2. 函数模板调用时，如果利用自动类型推导，不会发生隐式类型转换
-   3. 如果利用显示指定类型的方式，可以发生隐式类型转换
+   2. 函数模板调用时，如果利用**自动类型推导**，不会发生隐式类型转换，如果利用**显示指定类型**的方式，可以发生隐式类型转换，**尽量使用显示指定类型方式**
 2. 例子
+```cpp
+#include <iostream>
+using namespace std;
+/*
+1.普通函数调用可以发生隐式类型转换
+2.函数模板用自动类型推导，不可以发生隐式类型转换
+3.函数模板用指定类型，可以发生隐式类型转换
+*/
+
+//普通函数
+int myAdd01(int a, int b){
+    return a + b;
+}
+//函数模板
+template<class T>//声明一个叫T的模板
+T myAdd02(T a, T b){
+    return a + b;
+}
+
+void test01(){
+    int a = 10;
+    int b = 20;
+    char c = 'c';//a-97, c-99
+    cout << myAdd01(a, c) << endl;
+    //自动类型推导:不会发生自动类型转换
+    // cout << myAdd02(a, c) << endl;
+    //由于a,c的类型不一致，所以编译器无法明白究竟T = int还是T = char
+
+    //显示指定类型：会发生自动类型转换
+    cout << myAdd02<int>(a, c) <<endl;
+    //显示指定类型的可以发生自动类型推导，若a,c类型不是int,则转成int 
+
+}
+int main(){
+    test01();
+}
+```
+### 5.普通函数和函数模板的调用规则
+1. 规则如下：
+   1. 如果函数模板和普通函数都可以实现，优先调用普通函数
+   2. 可以通过空模板参数列表来强制调用函数模板
+   3. 函数模板也可以发生重载
+   4. 如果函数模板可以产生更好的匹配，优先调用函数模板
+2. 例子
+```cpp
+#include <iostream>
+using namespace std;
+//普通函数与函数模板
+//优先调用普通函数，若普通函数只有声明，不会重载，只会报错
+void myPrint(int a, int b){
+    cout << "调用的普通函数" << endl;
+}
+template<class T>//每定义一个函数就要声明一次模板
+void myPrint(T a, T b){
+    cout << "调用的模板" << endl;
+}
+
+template<class T>
+void myPrint(T a, T b, T c){
+    cout << "调用的重载模板" << endl;
+}
+void test01(){
+    int a = 1;
+    int b = 2;
+    int c = 3;
+    myPrint(a, b);//调用的普通函数
+    myPrint<>(a, b);//调用的函数模板
+    myPrint<>(a, b, c);//调用的重载模板
+
+    //如果函数模板产生更好的匹配，优先调用函数模板
+    char c1 = 'a';
+    char c2 = 'b';
+    myPrint(c1, c2);
+    /*若不用发生隐式类型转换，就直接调用函数模板，
+    因为如果调用myPrint(int a, in b),则会将c1, c2转为a, b,这样太麻烦了
+    所以就直接调用myPrint(T a, T b)会发生自动类型推导，不会发生隐式类型转换
+    */
+}
+int main(){
+    test01();
+}
+----------------------------
+升级版
+#include <iostream>
+#include <string>
+using namespace std;
+
+template<class T>
+void myPrint(T a, T b){
+	cout << "函数模板调用" << endl;
+}
+
+template<class T>
+void myPrint(T a, T b, T c){
+	cout << "函数模板重载" << endl;
+}
+
+void myPrint(int a, int b){
+	cout << "普通函数调用" << endl;
+}
+
+void test(){
+	int a = 1, b = 2, c = 3;
+	myPrint(a, b);//普通函数调用
+	myPrint<>(a, b);//函数模板调用
+	myPrint(a, b, c);//函数模板重载
+	myPrint<>(a, b, c);//函数模板重载
+	myPrint(a, 'c');//普通函数调用;发生隐式转化
+	myPrint('a', 'c');//函数模板调用;发生自动类型推导，因为隐式转化太麻烦，所以选择该方法
+
+}
+int main(){
+	test();
+}
+```
+### 6.模板的局限性
+1. 局限性：模板不是万能的，有些特定数据类型，需要用具体化方式作特殊实现
+```cpp
+#include<iostream>
+using namespace std;
+#include <string>
+
+class Person
+{
+public:
+	Person(string name, int age)
+	{
+		this->m_Name = name;
+		this->m_Age = age;
+	}
+	string m_Name;
+	int m_Age;
+};
+
+//普通函数模板
+template<class T>
+bool myCompare(T& a, T& b)
+{
+	if (a == b)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+
+//具体化，显示具体化的原型和定意思以template<>开头，并通过名称来指出类型
+//具体化优先于常规模板
+template<> bool myCompare(Person &p1, Person &p2)
+{
+	if ( p1.m_Name  == p2.m_Name && p1.m_Age == p2.m_Age)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+void test01()
+{
+	int a = 10;
+	int b = 20;
+	//内置数据类型可以直接使用通用的函数模板
+	bool ret = myCompare(a, b);
+	if (ret)
+	{
+		cout << "a == b " << endl;
+	}
+	else
+	{
+		cout << "a != b " << endl;
+	}
+}
+
+void test02()
+{
+	Person p1("Tom", 10);
+	Person p2("Tom", 10);
+	//自定义数据类型，不会调用普通的函数模板
+	//可以创建具体化的Person数据类型的模板，用于特殊处理这个类型
+	bool ret = myCompare(p1, p2);
+	if (ret){
+		cout << "p1 == p2 " << endl;
+	}
+	else{
+		cout << "p1 != p2 " << endl;
+	}
+}
+
+int main() {
+	test01();
+	test02();
+	return 0;
+}
+```
+2. 总结
+   1. 利用具体化的模板，可以解决自定义类型的通用化
+   2. 学习模板不是为了写模板，而是为了在STL能构运用系统提供的模板 
+### 7.模板特化
+[template](https://blog.csdn.net/greywolf0824/article/details/106856397?utm_medium=distribute.pc_relevant.none-task-blog-2~default~baidujs_baidulandingword~default-0-106856397-blog-121504506.pc_relevant_paycolumn_v3&spm=1001.2101.3001.4242.1&utm_relevant_index=3)
+1. 特化目的：模板本来是一组通用逻辑的实现，但是可能存在特定参数类型下，通用的逻辑无法满足要求，这就需要针对这些特殊模型，实现一个特例模板---->模板特化
+2. 注意：   
+   1. 类模板和函数模板都可以被全特化
+   2. 类模板能偏特化，不能重载
+   3. 函数模板能重载，不能被偏特化
+   4. 类模板调用优先级：**全特化类>偏特化类>主版本模板类**
+   5. 模板类/模板函数的声明和定义要放在头文件中，否则在链接时会出错
+   6. 函数模板同时存在：具体化模板，函数模板重载，常规函数重载，调用优先级：**常规函数 > 具体化模板函数 > 常规模板函数** (具体化模板函数：template<> )
+      1. 注意：重载决议时，优先决议是不是符合常规函数，不存在符合的普通函数，才会决议出符合的函数主模板，对于**函数模板重载决议，会无视特化存在**，决议出函数主模板后，如果函数主模板存在符合的具体化函数模板，才会调用具体化函数模板
+   7. 不能将函数模板特化和重载混为一谈
+      1. 函数特化都没有引入一个全新的模板或者模板实例，他们只是对原来的主（或者非特化）模板中已经隐式声明的的实例提供另一种定义，这也是特化区别于重载模板的关键
+
+3. 函数模板间的重载决议
+   1. 当代码存在如下顺序的声明时：
+```cpp
+template<typename T, typename N> void Compare(T first, N second) //函数主模板a
+
+{.....}
+
+template<> void Compare(const char* first, const char* second) // 函数主模板a的全特化模板 b
+
+{.....}
+
+template<typename T, typename N> void Compare(T* first, N* second) // 函数主模板c，是函数主模板a的重载
+
+{.....}
+Compare("1", "2");//这里实际调用了函数主模板c
+```
+这里实际调用了函数主模板c,因为在调用Compare("1", "2");时，会**发生重载决议，会无视特化的存在**(标准规定：重载决议无视模板特化，重载决议发生在主模板间，那么会决议出函数主模板c)
+   2. 当代码中存在如下的声明时：
+```cpp
+template<typename T, typename N> void Compare(T first, N second) //函数主模板a
+
+{.....}
+
+template<typename T, typename N> void Compare(T* first, N* second) // 函数主模板b，是函数主模板a的重载
+
+{.....}
+
+template<> void Compare(const char* first, const char* second) // 此时是函数主模板b的全特化模板(具体化) ,为全特化函数模板c
+//全特化就是把T换成了具体的对象，然后在函数类型前加template<>
+{.....}
+Compare("1", "2");//这里实际上调用了全特化函数模板c
+```
+这里实际调用了函数主模板c,因为在调用Compare("1", "2");时，会发生重载决议，会无视特化的存在(标准规定：重载决议无视模板特化，重载决议发生在主模板间，那么会决议出函数主模板b,在判断函数主模板存在符合类型条件的全特化模板c)
+
+   3. 常规函数和函数模板的重载决议
+```cpp
+当代码中存在如下顺序的申明时，
+template<typename T, typename N> void Compare(T first, N second) //函数主模板a
+
+{.....}
+
+template<> void Compare(const char* first, const char* second) // 函数主模板a的全特化模板 b
+
+{.....}
+
+template<typename T, typename N> void Compare(T* first, N* second) // 函数主模板c，是函数主模板a的重载
+
+{.....}
+void Compare(const char* first, const char* second) // 常规函数
+
+{.....}
+
+Compare("1", "2");
+```
+这里实际调用了常规函数，因为在调用Compare("1","2")时，会先进行重载决议，重载决议会优先决议是否存在符合条件的常规函数
+4. 全部代码
 ```cpp
 
 ## 12-2.类模板

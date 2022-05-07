@@ -1,1 +1,0 @@
-/usr/bin/c++     CMakeFiles/demo.dir/main.cpp.o  -o demo  math/libmyfuntions.a 

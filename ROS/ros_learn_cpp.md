@@ -1829,7 +1829,7 @@ int main(int argc, char **argv){
     /*
     4-1.创建消息对象-变换戳
     4-2.创建header:3+3
-    4-3.创建qtn:4
+    4-3.创建qtn:2+4(qtn,setRPY,x, y, z, w)
     */
     geometry_msgs::TransformStamped tfs;//变换戳
     tfs.header.stamp = ros::Time::now();
@@ -1873,10 +1873,9 @@ int main(int argc,char **argv){
     tf2_ros::Buffer buffer;
     //3-2.创建订阅对象
     tf2_ros::TransformListener listener(buffer);
-    //4. 组织一个坐标点数据(组织订阅数据)
+    //4. 生成坐标点数据(组织订阅数据)
     //4-1.创建消息类型ps
-    //4-2.创建header
-    //4-3.创建point.x
+    //4-2.创建header(2+3)
     geometry_msgs::PointStamped ps;
     ps.header.stamp = ros::Time::now();//时间戳
     ps.header.frame_id = "laser";//以laser作为坐标点,而非base_link
@@ -1886,7 +1885,7 @@ int main(int argc,char **argv){
     // //添加休眠
     // ros::Duration(2).sleep();//在转换之前先休眠2s，以留出时间订阅到数据
     //5.转换坐标点
-    //5-1.创建转换坐标点ps_outwhile循环及其频率
+    //5-1.创建转换坐标点ps_out while循环及其频率
     //5-2.转换坐标:ps_out = buffer.transform(ps, "base_link")
     //5-3.输出转换后坐标点:ROS_INFO(ps_out.point.x,....)
     ros::Rate r(10);
@@ -1926,3 +1925,136 @@ int main(int argc,char **argv){
 方案1：ros::Duration(2).sleep();
 方案2：使用try语句
    4. ps_out 随着RPY和ps的不同而不同 
+
+### 3. 动态坐标变换
+1. 发布方
+```cpp
+#include "ros/ros.h"
+#include "turtlesim/Pose.h"//turtlesim头文件
+#include "tf2_ros/transform_broadcaster.h"//动态坐标变换头文件(tf2_ros::TransformBroadcaster pub),如果是小写，那么2单词间有下划线，如果是首字母大写，那么2单词间无下滑线
+#include "geometry_msgs/TransformStamped.h"//发布的数据头文件(geometry_msgs::TransformStamped tfs)
+#include "tf2/LinearMath/Quaternion.h"//四元数头文件(tf2::Quaternion qtn)
+void doPose(const turtlesim::Pose::ConstPtr &pose){
+    //4-1.创建发布对象
+    static tf2_ros::TransformBroadcaster pub;
+    /*1.动态是transform_broadcaster;静态是static_transform_broadcaster
+      2. pub对象必须是静态对象，否则订阅到的坐标不会变化
+    */
+
+    //4-2.组织被发布的消息
+    /*
+    4-2-1.创建消息类型tfs
+    4-2-2.创建header:3+3
+    4-2-2.创建qtn:2+4(RPY + (x, y, z, w))
+    */
+    geometry_msgs::TransformStamped tfs;
+    tfs.header.frame_id = "world";//世界坐标系
+    tfs.child_frame_id = "turtle1";//乌龟坐标系
+    tfs.header.stamp = ros::Time::now();
+    //坐标系偏移量设计
+    tfs.transform.translation.x = pose->x;//turtle1相对于world的坐标
+    tfs.transform.translation.y = pose->y;
+    tfs.transform.translation.z = 0;
+    //坐标系四元数设计
+    /*
+        位姿信息中无四元数，但是有个偏航角，又已知乌龟是2D，无roll和pitch,所以可以得出乌龟的欧辣角是
+        0,0, theta
+    */
+    tf2::Quaternion qtn;
+    qtn.setRPY(0, 0, pose->theta);
+    tfs.transform.rotation.x = qtn.getX(); 
+    tfs.transform.rotation.y = qtn.getY();
+    tfs.transform.rotation.z = qtn.getZ();
+    tfs.transform.rotation.w = qtn.getW();
+    //4-3.发布
+    pub.sendTransform(tfs);
+
+}
+int main(int argc, char **argv){
+    //1.创建头文件
+    setlocale(LC_ALL, "");
+    //2.初始化节点和创建节点句柄
+    ros::init(argc, argv, "dynamic_pub");
+    ros::NodeHandle nh;
+    //3.创建订阅者对象
+    ros::Subscriber sub = nh.subscribe<turtlesim::Pose>("/turtle1/pose", 100, doPose);//接受来自与turtlesimnode的数据
+    //3-1.此处不能少<turtlesim::Pose>； 3-2.此处必须为/turtle1/pose,否则当启动乌龟节点后无法订阅到乌龟的位姿
+    //4.回调函数处理
+    //5.spin()
+    ros::spin();
+    return 0;
+
+}
+```
+2. 订阅方
+```cpp
+#include "ros/ros.h"
+#include "tf2_ros/transform_listener.h"//发布者头文件
+#include "tf2_ros/buffer.h"//(创建缓存对象)
+#include "geometry_msgs/PointStamped.h"//点戳头文件(创建坐标点对象)
+#include "tf2_geometry_msgs/tf2_geometry_msgs.h"//ps->ps_out需要用到的消息对象
+//1.创建头文件
+int main(int argc,char **argv){
+    setlocale(LC_ALL, "");
+    //2.初始化节点和创建节点句柄
+    ros::init(argc, argv, "dynamic_sub");
+    ros::NodeHandle nh;
+    //3.创建订阅对象
+    //3-1.创建一个buffer缓存(订阅对象可以将订阅的数据存入buffer)
+    tf2_ros::Buffer buffer;
+    //3-2.创建订阅对象
+    tf2_ros::TransformListener listener(buffer);
+    //4. 组织一个坐标点数据
+    geometry_msgs::PointStamped ps;
+    ps.header.frame_id = "turtle1";//以laser作为坐标点
+    ps.header.stamp = ros::Time();//时间戳,设置为0
+    ps.point.x = 1;
+    ps.point.y = 1;
+    ps.point.z = 0;//这里不能有Z
+    // //添加休眠
+    // ros::Duration(2).sleep();//在转换之前先休眠2s，以留出时间订阅到数据
+    //5. 转换算法，需要调用TF内置实现
+    ros::Rate r(1);
+    while (ros::ok()){
+        try{
+            //核心代码----将ps转换为相对于base_link的坐标点
+            geometry_msgs::PointStamped ps_out;
+            ps_out = buffer.transform(ps, "world");
+            ROS_INFO("坐标点相对于world的坐标为:(%.2f, %.2f, %.2f),参考的坐标系：%s",
+                                ps_out.point.x,
+                                ps_out.point.y,
+                                ps_out.point.z,
+                                ps_out.header.frame_id.c_str());
+        
+        }
+        catch(const std::exception &e){
+            ROS_INFO("程序异常");
+        }
+        //6. 输出
+        r.sleep();
+        ros::spinOnce();
+    }
+}
+
+/*
+动态坐标变换sub相对于静态坐标变换sub修改的地方
+1.参考坐标系
+2.世界坐标系
+3.时间戳：ros::Time(0)
+*/
+```
+3. 总结
+   1. tf2_ros
+      1. transform_broadcaster.h
+      2. static_transform_broadcaster
+      3. buffer
+   2. geometry_msgs
+      1. TransformStamped
+      2. PointStamped
+   3. tf2_geometry_msgs/tf2_geometry_msgs
+   4. 依赖的功能包：tf2、tf2_ros、tf2_geometry_msgs、roscpp std_msgs geometry_msgs、turtlesim
+   5. 注意
+      1. 发布方消息类型必须为:/turtle1/pose,
+      2. 发布方必须是static tf2_ros::TransformBroadcaster pub
+      3. 订阅方的时间戳为tf2_ros::TransformStamped tfs, tfs.header.stamp = ros::Time()
+

@@ -1,4 +1,0 @@
-/home/kim/git/test/mytest3/build/CMakeFiles/rebuild_cache.dir
-/home/kim/git/test/mytest3/build/CMakeFiles/edit_cache.dir
-/home/kim/git/test/mytest3/build/CMakeFiles/sayHello.dir
-/home/kim/git/test/mytest3/build/CMakeFiles/hello.dir

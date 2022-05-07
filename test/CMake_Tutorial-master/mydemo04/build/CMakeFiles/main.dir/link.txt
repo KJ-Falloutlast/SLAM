@@ -1,1 +1,0 @@
-/usr/bin/c++     CMakeFiles/main.dir/src/main.cpp.o  -o main  -Wl,-rpath,/home/kim/CMake_Tutorial-master/mydemo04/build libmymath.so 

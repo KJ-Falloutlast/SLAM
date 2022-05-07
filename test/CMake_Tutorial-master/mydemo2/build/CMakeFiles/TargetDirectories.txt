@@ -1,8 +1,0 @@
-/home/kim/CMake_Tutorial-master/mydemo2/build/CMakeFiles/rebuild_cache.dir
-/home/kim/CMake_Tutorial-master/mydemo2/build/CMakeFiles/edit_cache.dir
-/home/kim/CMake_Tutorial-master/mydemo2/build/include/CMakeFiles/rebuild_cache.dir
-/home/kim/CMake_Tutorial-master/mydemo2/build/include/CMakeFiles/edit_cache.dir
-/home/kim/CMake_Tutorial-master/mydemo2/build/include/CMakeFiles/Mylib.dir
-/home/kim/CMake_Tutorial-master/mydemo2/build/src/CMakeFiles/rebuild_cache.dir
-/home/kim/CMake_Tutorial-master/mydemo2/build/src/CMakeFiles/edit_cache.dir
-/home/kim/CMake_Tutorial-master/mydemo2/build/src/CMakeFiles/mydemo2.dir

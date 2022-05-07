@@ -1,24 +1,34 @@
 #include <iostream>
 using namespace std;
-int main()
-{
-    double m ,n;
-	cout << "请输入2个数字" << endl;
-    cin >> m >> n;
-    try {
-        cout << "before dividing." << endl;
-        if( n == 0)
-            throw -1; //抛出int类型异常
-        else
-            cout << m / n << endl;
-        cout << "after dividing." << endl;
-    }
-    catch(double d) {
-        cout << "catch(double) " << d <<  endl;
-    }
-    catch(int e) {
-        cout << "catch(int) " << e << endl;
-    }
-    cout << "finished" << endl;
-    return 0;
+class Distance{
+    private:
+        int feet;
+        int inches;
+    public:
+        Distance(int f, int i){
+            feet = f;
+            inches = i;
+        }
+        friend ostream& operator<<(ostream &output, Distance &D);        
+        friend istream& operator>>(istream &input, Distance &D);        
+};
+
+ostream& operator<< (ostream &output, Distance &D){
+    output << "feet = " << D.feet << " inches = " << D.inches << endl;
+    return output;
+}
+
+istream& operator>> (istream &input, Distance &D){
+    input >> D.feet >> D.inches;
+    return input;
+}
+
+void test(){
+    Distance D1(2, 3), D2(2, 5);
+    cin >> D1 >> D2;
+    cout << "the distance is  " << D1 << endl;  
+    cout << "the distance is  " << D2 << endl;  
+}
+int main(){
+    test();
 }

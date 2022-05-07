@@ -1,6 +1,0 @@
-cmake_minimum_required(VERSION 3.10)
-project(mydemo4)
-include_directories(./include)
-add_library(mymath SHARED src/mymath.cpp)
-add_executable(main src/main.cpp)
-target_link_libraries(main mymath)
