@@ -751,7 +751,6 @@ https://suo.yt/ZKjZa7R
 https://suo.yt/uXoibye
 
 ## 5. wine的相关问题：
-[wine的网址](https://www.cnblogs.com/a5idc/p/13515946.html)
    1. 未安装windows应用
     $ sudo apt-get update
     $ sudo apt-get install wine
@@ -766,9 +765,15 @@ https://suo.yt/uXoibye
    3. 问题:
     . 描述：You are using a 64-bit WINEPREFIX. Note that many verbs only install 32-bit versions of packages. 
     If you encounter problems, please retest in a clean 32-bit WINEPREFIX before reporting a bug.
-
     . 解决方案：winetricks riched20
+   4. 新的方案：
 
+    1. 首次使用需要添加仓库： wget -O- https://deepin-wine.i-m.dev/setup.sh | sh
+    2. 而后使用： apt install ... 安装对应软件包
+    3. 应用图标需要注销重登录后才会出现
+    4. 网址：<https://deepin-wine.i-m.dev/>
+
+  
 ## 6. 删除在linux的垃圾图标
 看/usr/share/applications下是否有xxx.desktop，若有就直接删除
 可以到～/.local/share/applications下看是否有xxx.desktop,若有就直接

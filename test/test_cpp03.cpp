@@ -1,34 +1,73 @@
 #include <iostream>
+#include <string>
 using namespace std;
-class Distance{
-    private:
-        int feet;
-        int inches;
-    public:
-        Distance(int f, int i){
-            feet = f;
-            inches = i;
-        }
-        friend ostream& operator<<(ostream &output, Distance &D);        
-        friend istream& operator>>(istream &input, Distance &D);        
+//类模板
+template<class NameType, class AgeType = int> 
+class Person
+{
+public:
+	Person(NameType name, AgeType age)
+	{
+		this->mName = name;
+		this->mAge = age;
+	}
+	void showPerson()
+	{
+		cout << "name: " << this->mName << " age: " << this->mAge << endl;
+	}
+public:
+	NameType mName;
+	AgeType mAge;
 };
 
-ostream& operator<< (ostream &output, Distance &D){
-    output << "feet = " << D.feet << " inches = " << D.inches << endl;
-    return output;
+//1、指定传入的类型
+void printPerson1(Person<string, int> &p)//Person<string, int> = p
+{
+	p.showPerson();
+}
+void test01()
+{
+	Person <string, int > p("孙悟空", 100);
+	printPerson1(p);
 }
 
-istream& operator>> (istream &input, Distance &D){
-    input >> D.feet >> D.inches;
-    return input;
+//2、参数模板化
+template <class T1, class T2>
+void printPerson2(Person<T1, T2> &p)
+/*
+1.Person的<>中可以是具体类型，int, char, class，也可以是template
+2.Person<T1, T2> = p
+*/
+{
+	p.showPerson();
+	cout << "T1的类型为： " << typeid(T1).name() << endl;
+	cout << "T2的类型为： " << typeid(T2).name() << endl;
+}
+void test02()
+{
+	Person<string, int > p("猪八戒", 90);
+	printPerson2(p);
 }
 
-void test(){
-    Distance D1(2, 3), D2(2, 5);
-    cin >> D1 >> D2;
-    cout << "the distance is  " << D1 << endl;  
-    cout << "the distance is  " << D2 << endl;  
+//3、整个类模板化
+template<class T>
+void printPerson3(T &p)//T = Person
+{
+	cout << "T的类型为： " << typeid(T).name() << endl;
+	p.showPerson();
+
 }
-int main(){
-    test();
+void test03()
+{
+	Person<string, int> p("唐僧", 30);
+	printPerson3(p);
 }
+
+int main() {
+	test01();
+	test02();
+	test03();
+	return 0;
+}
+
+

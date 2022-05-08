@@ -1925,6 +1925,8 @@ int main(int argc,char **argv){
 方案1：ros::Duration(2).sleep();
 方案2：使用try语句
    4. ps_out 随着RPY和ps的不同而不同 
+   5. 补充：rosrun tf2_ros static_transform_publisher x偏移量 y偏移量 z偏移量 z偏航角度 y俯仰角度 x翻滚角度 父级坐标系 子级坐标系
+   6. RPY对应ZYX轴的旋转，setRPY(x, y, z)这三个角度依次左乘，为绕x, y, z轴的转角，但最终结果是Z*Y*X， ；在**static_transform_publisher**中，前三个角度分别是绕ZYX的转角，要区分
 
 ### 3. 动态坐标变换
 1. 发布方
@@ -1961,7 +1963,7 @@ void doPose(const turtlesim::Pose::ConstPtr &pose){
         0,0, theta
     */
     tf2::Quaternion qtn;
-    qtn.setRPY(0, 0, pose->theta);
+    qtn.setRPY(0, 0, pose->theta);//x, y, z
     tfs.transform.rotation.x = qtn.getX(); 
     tfs.transform.rotation.y = qtn.getY();
     tfs.transform.rotation.z = qtn.getZ();
@@ -2058,3 +2060,93 @@ int main(int argc,char **argv){
       2. 发布方必须是static tf2_ros::TransformBroadcaster pub
       3. 订阅方的时间戳为tf2_ros::TransformStamped tfs, tfs.header.stamp = ros::Time()
 
+### 4. 多坐标变换
+1. 创建功能包： tf2、tf2_ros、tf2_geometry_msgs、roscpp std_msgs geometry_msgs、turtlesim
+2. 发布方
+```launch
+<launch>
+    <node pkg="tf2_ros" type="static_transform_publisher" name="son1" args="0.2 0.8 0.3 0 0 0 /world /son1" output="screen" />
+    <node pkg="tf2_ros" type="static_transform_publisher" name="son2" args="0.5 0 0 0 0 0 /world /son2" output="screen" />
+</launch>
+```
+3. 订阅方
+```cpp
+/*
+
+需求:
+    现有坐标系统，父级坐标系统 world,下有两子级系统 son1，son2，
+    son1 相对于 world，以及 son2 相对于 world 的关系是已知的，
+    求 son1 与 son2中的坐标关系，又已知在 son1中一点的坐标，要求求出该点在 son2 中的坐标
+实现流程:
+    1.包含头文件
+    2.初始化 ros 节点
+    3.创建 ros 句柄
+    4.创建 TF 订阅对象
+    5.解析订阅信息中获取 son1 坐标系原点在 son2 中的坐标
+      解析 son1 中的点相对于 son2 的坐标
+    6.spin
+
+*/
+//1.包含头文件
+#include "ros/ros.h"
+#include "tf2_ros/transform_listener.h"
+#include "tf2/LinearMath/Quaternion.h"
+#include "tf2_geometry_msgs/tf2_geometry_msgs.h"
+#include "geometry_msgs/TransformStamped.h"
+#include "geometry_msgs/PointStamped.h"
+
+int main(int argc, char *argv[])
+{   setlocale(LC_ALL,"");
+    // 2.初始化 ros 节点
+    ros::init(argc,argv,"sub_frames");
+    // 3.创建 ros 句柄
+    ros::NodeHandle nh;
+    // 4.创建 TF 订阅对象
+    tf2_ros::Buffer buffer; 
+    tf2_ros::TransformListener listener(buffer);
+    // 5.解析订阅信息中获取 son1 坐标系原点在 son2 中的坐标
+    ros::Rate r(1);
+    while (ros::ok())
+    {
+        try
+        {
+        //   解析 son1 中的点相对于 son2 的坐标
+            geometry_msgs::TransformStamped tfs = buffer.lookupTransform("son2","son1",ros::Time(0));
+            ROS_INFO("Son1 相对于 Son2 的坐标关系:父坐标系ID=%s",tfs.header.frame_id.c_str());
+            ROS_INFO("Son1 相对于 Son2 的坐标关系:子坐标系ID=%s",tfs.child_frame_id.c_str());
+            ROS_INFO("Son1 相对于 Son2 的坐标关系:x=%.2f,y=%.2f,z=%.2f",
+                    tfs.transform.translation.x,
+                    tfs.transform.translation.y,
+                    tfs.transform.translation.z
+                    );
+
+            // 坐标点解析
+            geometry_msgs::PointStamped ps;
+            ps.header.frame_id = "son1";
+            ps.header.stamp = ros::Time::now();
+            ps.point.x = 1.0;
+            ps.point.y = 2.0;
+            ps.point.z = 3.0;//ps是相对于son1的坐标
+
+            geometry_msgs::PointStamped psAtSon2;
+            psAtSon2 = buffer.transform(ps,"son2");
+            ROS_INFO("在 Son2 中的坐标:x=%.2f,y=%.2f,z=%.2f",
+                    psAtSon2.point.x,
+                    psAtSon2.point.y,
+                    psAtSon2.point.z
+                    );
+        }
+        catch(const std::exception& e)
+        {
+            // std::cerr << e.what() << '\n';
+            ROS_INFO("异常信息:%s",e.what());
+        }
+
+
+        r.sleep();
+        // 6.spin
+        ros::spinOnce();
+    }
+    return 0;
+}
+```

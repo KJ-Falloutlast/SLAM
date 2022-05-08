@@ -7217,79 +7217,115 @@ int main() {
    1. 利用具体化的模板，可以解决自定义类型的通用化
    2. 学习模板不是为了写模板，而是为了在STL能构运用系统提供的模板 
 ### 7.模板特化
+#### 1.函数模板特化
 [template](https://blog.csdn.net/greywolf0824/article/details/106856397?utm_medium=distribute.pc_relevant.none-task-blog-2~default~baidujs_baidulandingword~default-0-106856397-blog-121504506.pc_relevant_paycolumn_v3&spm=1001.2101.3001.4242.1&utm_relevant_index=3)
 1. 特化目的：模板本来是一组通用逻辑的实现，但是可能存在特定参数类型下，通用的逻辑无法满足要求，这就需要针对这些特殊模型，实现一个特例模板---->模板特化
 2. 注意：   
    1. 类模板和函数模板都可以被全特化
    2. 类模板能偏特化，不能重载
    3. 函数模板能重载，不能被偏特化
-   4. 类模板调用优先级：**全特化类>偏特化类>主版本模板类**
+   4. 类模板调用优先级：**全特化类>偏特化类>主模板类（优先级由高到低）**
    5. 模板类/模板函数的声明和定义要放在头文件中，否则在链接时会出错
-   6. 函数模板同时存在：具体化模板，函数模板重载，常规函数重载，调用优先级：**常规函数 > 具体化模板函数 > 常规模板函数** (具体化模板函数：template<> )
-      1. 注意：重载决议时，优先决议是不是符合常规函数，不存在符合的普通函数，才会决议出符合的函数主模板，对于**函数模板重载决议，会无视特化存在**，决议出函数主模板后，如果函数主模板存在符合的具体化函数模板，才会调用具体化函数模板
-   7. 不能将函数模板特化和重载混为一谈
-      1. 函数特化都没有引入一个全新的模板或者模板实例，他们只是对原来的主（或者非特化）模板中已经隐式声明的的实例提供另一种定义，这也是特化区别于重载模板的关键
-
-3. 函数模板间的重载决议
-   1. 当代码存在如下顺序的声明时：
+   6. 函数模板同时存在：具体化模板，函数模板重载，常规函数重载，调用优先级：**普通函数 > 全特化模板函数 > 主模板函数重载 > 主模板函数** (具体化模板函数：template<> )
 ```cpp
-template<typename T, typename N> void Compare(T first, N second) //函数主模板a
-
-{.....}
-
-template<> void Compare(const char* first, const char* second) // 函数主模板a的全特化模板 b
-
-{.....}
-
-template<typename T, typename N> void Compare(T* first, N* second) // 函数主模板c，是函数主模板a的重载
-
-{.....}
-Compare("1", "2");//这里实际调用了函数主模板c
+#include <iostream>
+using namespace std;
+//模板函数
+template<typename T1, typename T2>
+void fun(T1 a , T2 b)
+{
+	cout<<"模板函数"<<endl;
+}
+//模板函数重载
+template<typename T1>
+void fun(int a, T1 b)
+{
+	cout<<"模板函数重载"<<endl;
+}
+//全特化
+template<>
+void fun(int a, char b)
+{
+	cout<<"全特化"<<endl;
+}
+//普通函数
+void fun(int a, char b){
+	cout << "普通函数"<< endl;
+}
+//函数不存在偏特化：下面的代码是错误的
+/*
+template<typename T2>
+void fun<char,T2>(char a, T2 b)
+{
+	cout<<"偏特化"<<endl;
+}
+*/
+int main(){
+	fun(1, 2);//因为此时参数列表中都是int,所以只能优先执行模板函数
+	fun(2, 'd');
+	/*
+	1. 类型都符合的时候，执行顺序：主模板函数重载->主模板函数->全特化模板函数->普通函数
+	2. 注释掉普通函数后，优先执行全特化；注释掉全特化后，优先执行模板函数重载
+	*/
+}
 ```
-这里实际调用了函数主模板c,因为在调用Compare("1", "2");时，会**发生重载决议，会无视特化的存在**(标准规定：重载决议无视模板特化，重载决议发生在主模板间，那么会决议出函数主模板c)
-   2. 当代码中存在如下的声明时：
+#### 2.类模板特化
 ```cpp
-template<typename T, typename N> void Compare(T first, N second) //函数主模板a
+#include <iostream>
+using namespace std;
+template<typename T1, typename T2>//主模板
+class Test
+{
+public:
+	Test(T1 i,T2 j):a(i),b(j){cout<<"主模板"<<endl;}
+private:
+	T1 a;
+	T2 b;
+};
+ 
+template<>//全特化模板
+class Test<int , char>
+{
+public:
+	Test(int i, char j):a(i),b(j){cout<<"全特化"<<endl;}
+private:
+	int a;
+	char b;
+};
+ 
+template <typename T2>//偏特化模板
+class Test<int, T2>//char和T2对应着形参列表的1和2
+{
+public:
+	Test(int i, T2 j):a(i),b(j){cout<<"偏特化"<<endl;}
+private:
+	char a;
+	T2 b;
+};
 
-{.....}
+int main(){
+	Test<double , double> t1(0.1,0.2);//主模板，其余的模板都不符合
+	Test<int , char> t2(1,'A');//全特化模板，其余的模板都不符合
+	Test<char, bool> t3('A',true);//主模板，其余的模板都不符合
+	Test<int, char> t4(1, 's');//全特化模板，偏特化模板，主模板都符合，优先执行：全->偏->主
+}
+/*
+1. 全特化是限定死模板的所有部分
+2. 偏特化是限定模板的其中一部分
+3. 主模板不限定模板的任何部分
+4.
+类模板和函数模板都可以被全特化；
+类模板能偏特化，不能被重载；
+函数模板全特化，不能被偏特化。
 
-template<typename T, typename N> void Compare(T* first, N* second) // 函数主模板b，是函数主模板a的重载
-
-{.....}
-
-template<> void Compare(const char* first, const char* second) // 此时是函数主模板b的全特化模板(具体化) ,为全特化函数模板c
-//全特化就是把T换成了具体的对象，然后在函数类型前加template<>
-{.....}
-Compare("1", "2");//这里实际上调用了全特化函数模板c
+5. 类模板的调用顺序：
+全特化类>偏特化类>主版本模板类
+*/
 ```
-这里实际调用了函数主模板c,因为在调用Compare("1", "2");时，会发生重载决议，会无视特化的存在(标准规定：重载决议无视模板特化，重载决议发生在主模板间，那么会决议出函数主模板b,在判断函数主模板存在符合类型条件的全特化模板c)
-
-   3. 常规函数和函数模板的重载决议
-```cpp
-当代码中存在如下顺序的申明时，
-template<typename T, typename N> void Compare(T first, N second) //函数主模板a
-
-{.....}
-
-template<> void Compare(const char* first, const char* second) // 函数主模板a的全特化模板 b
-
-{.....}
-
-template<typename T, typename N> void Compare(T* first, N* second) // 函数主模板c，是函数主模板a的重载
-
-{.....}
-void Compare(const char* first, const char* second) // 常规函数
-
-{.....}
-
-Compare("1", "2");
-```
-这里实际调用了常规函数，因为在调用Compare("1","2")时，会先进行重载决议，重载决议会优先决议是否存在符合条件的常规函数
-4. 全部代码
-```cpp
-
 ## 12-2.类模板
 1. 类模板：
+   1. 定义：参考上文类模板的特化
+
 ```cpp
 #include <iostream>
 using namespace std;
@@ -7309,7 +7345,211 @@ int main()
   cout << "0.5 * 0.5 = " << opDouble.peocess(0.5) <<endl;
 }
 ```
+## 12-2.类模板和函数模板的区别
+1. 区别:
+   1. 类模板没有自动类型推导的使用方式
+   2. 类模板在模板参数列表中可以有默认参数
+2. 例子
+```cpp
+#include <iostream>
+#include <string>
+using namespace std;
+//类模板
+template<class NameType, class AgeType = int> 
+class Person
+{
+public:
+	Person(NameType name, AgeType age)
+	{
+		this->mName = name;
+		this->mAge = age;
+	}
+	void showPerson()
+	{
+		cout << "name: " << this->mName << " age: " << this->mAge << endl;
+	}
+public:
+	NameType mName;
+	AgeType mAge;
+};
 
+//1、类模板没有自动类型推导的使用方式
+void test01()
+{
+	// Person p("孙悟空", 1000); // 错误 类模板使用时候，不可以用自动类型推导
+	Person <string ,int> p("孙悟空", 1000); //必须使用显示指定类型的方式，使用类模板
+	p.showPerson();
+}
+//2、类模板在模板参数列表中可以有默认参数
+void test02()
+{
+	Person <string> p("猪八戒", 999); //类模板中的模板参数列表 可以指定默认参数
+	p.showPerson();
+}
+int main() {
+	test01();
+	test02();
+	return 0;
+}
+```
+## 12-3.类模板中的成员函数创建时机
+1. 类模板中的成员函数和普通类中的成员函数创建时机的区别
+   1. 普通类中的成员函数一开始就可以创建
+   2. 类模板中的成员函数在调用时才创建
+2. 例子
+```cpp
+#include <iostream>
+#include <string>
+using namespace std;
+class Person1{
+    public:
+        void showPerson1(){
+            cout << "person 1" << endl;
+        }
+
+};
+class Person2{
+    public:
+        void showPerson2(){
+            cout << "person 2" << endl;
+        }
+
+};
+template<class T>
+class MyClass{
+    public:
+        T obj;
+        /*类模板中的成员函数,此时是可以编译成功的，因为类模板中的成员函数
+        只有在调用时才会创建
+        */
+        void func1(){
+            obj.showPerson1();
+        }
+        void func2(){
+            obj.showPerson2();
+        }
+
+};
+void test(){
+    MyClass<Person1> m;
+    m.func1();//因为m是person1的对象，所以可以调用func1但不能调用func2
+    // m.func2();//
+}
+int main(){
+    test();
+}
+```
+## 12-4.类模板对象做函数参数
+1. 方式：
+   1. 指定传入的类型： 直接显示对象的数据类型
+   2. 参数模板化： 将类型中的参数变为模板进行传递
+   3. 整个类模板化: 将这个对象类型模板化进行传递
+**一般都使用第一种传参，后2种属于类模板和函数模板配合，较为麻烦**
+2. 案例
+```cpp
+#include <iostream>
+#include <string>
+using namespace std;
+template<class T1, class T2>
+class Person{
+	public:
+		T1 m_Name;
+		T2 m_Age;
+	    Person(T1 i, T2 j):m_Name(i), m_Age(j){
+		}
+		void showPerson(){
+			cout << "name = " << this->m_Name << "   age = " << this->m_Age << endl;
+
+		}
+};
+//1.指定传入类型
+void printPerson1(Person<string, int> &p){//p直接传入
+	p.showPerson();
+}
+void test01(){
+	Person<string, int> p("tom", 1);
+	printPerson1(p);
+}
+//2.参数模板化
+template<class T1, class T2>///p直接传入会出错，必须声明这个T1，T2这2个模板
+void printPerson2(Person<T1, T2> &p){
+	p.showPerson();
+	cout << "T1的类型为：" << typeid(T1).name() << endl;
+	cout << "T2的类型为：" << typeid(T2).name() << endl;
+}
+void test02(){
+	Person<string, int> p("jack", 1);
+	printPerson2(p);
+}
+//3.整个类模板化
+template<class T>///p直接传入会出错，必须声明这个T
+void printPerson3(T &p){
+	p.showPerson();
+	cout << "T的类型为：" << typeid(T).name() << endl;
+}
+void test03(){
+	Person<string, int> p("Synic", 3);
+	printPerson3(p);
+}
+int main(){
+	test01();
+	test02();
+	test03();
+}
+```
+## 12-5.类模板和继承
+1. 注意：
+   1. 当子类继承的父类是一个类模板时，子类在声明的时候，要指定父类中的T的类型
+   2. 如果不指定，编译器无法给子类分配内存
+   3. 如果想灵活指出父类中T的类型，子类也需变为类模板
+2. 例子
+```cpp
+#include <iostream>
+using namespace std;
+template<class T>
+class Base
+{
+	T m;
+};
+
+//class Son:public Base  //错误，c++编译需要给子类分配内存，必须知道父类中T的类型才可以向下继承
+class Son :public Base<int> //继承类模板时必须指定父类类型
+{
+};
+
+void test01()
+{
+	Son c;//子类为普通类而非类模板
+}
+
+//如果想灵活指定父类中T类型，子类也需要变类模板
+template<class T1, class T2>//T1, T2表示子类有2个模板参数，在定义子类的时候用<int, char>
+class Son2 :public Base<T2>//指定出的父类的类型为T2
+{
+public:
+	T1 obj
+	Son2()//构造函数
+	{
+		cout << typeid(T1).name() << endl;
+		cout << typeid(T2).name() << endl;
+	}
+};
+
+void test02()
+{
+	Son2<int, char> s2;//类模板中的对象必须要显示指定类型
+/*
+1.Son2<int, char>表示，T1 = int , T2 = char, 
+Base<T2>表示 T2 = char，在父类Base中，T = T2 = char
+实现了模板传递
+*/
+}
+int main() {
+	test01();
+	test02();
+	return 0;
+}
+```
 # 13.c++高级教程
 ## 1. 命名空间
 1. 提出：当一个班上有2个同名学生时，不得不用其他的信息，比如说，年龄等等来区分他们；在c++中，你可能会有xyz()的函数，在另一个库中也有xyz()的函数，所以需要加命名空间加以区分
