@@ -764,7 +764,8 @@ https://suo.yt/uXoibye
 
    3. 问题:
     . 描述：You are using a 64-bit WINEPREFIX. Note that many verbs only install 32-bit versions of packages. 
-    If you encounter problems, please retest in a clean 32-bit WINEPREFIX before reporting a bug.
+    If you encounter problems, please retest in a clean 32-bit WINEPREFIX
+     before reporting a bug.
     . 解决方案：winetricks riched20
    4. 新的方案：
 

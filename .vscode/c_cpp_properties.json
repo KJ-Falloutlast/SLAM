@@ -3,14 +3,24 @@
         {
             "name": "Linux",
             "includePath": [
-                "${workspaceFolder}/**"
+                "/opt/ros/noetic/include",
+                "/usr/include",
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/devel/include",
+                "/usr/include/pcl-1.8",
+                "/usr/include/eigen3",
+                "/usr/include/x86_64-linux-gnu/qt5/QtWidgets",
+                "/usr/include/x86_64-linux-gnu/qt5",
+                "/usr/include/x86_64-linux-gnu/qt5/QtCore"
             ],
             "defines": [],
-            "compilerPath": "/usr/bin/cpp",
-            "cStandard": "gnu17",
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c11",
             "cppStandard": "c++17",
-            "intelliSenseMode": "linux-gcc-x64"
+            "intelliSenseMode": "clang-x64"
         }
     ],
     "version": 4
-}
+  }
+  
+  

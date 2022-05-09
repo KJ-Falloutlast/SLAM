@@ -243,239 +243,8 @@ int main(int argc, char* argv[])
 
 Map类：在已经存在的矩阵或向量中，不必拷贝对象，而是直接在该对象的内存上进行运算操作。
 ```
-1. 常用命令
-```cpp
-[Eigen](https://blog.csdn.net/m0_46577050/article/details/121657750)
 
 
-### 1.矩阵的定义：
-```cpp
-#include <Eigen/Dense>
-
-Matrix<double, 3, 3> A;               // Fixed rows and cols. Same as Matrix3d.
-Matrix<double, 3, Dynamic> B;         // Fixed rows, dynamic cols.
-Matrix<double, Dynamic, Dynamic> C;   // Full dynamic. Same as MatrixXd.
-Matrix<double, 3, 3, RowMajor> E;     // Row major; default is column-major.
-Matrix3f P, Q, R;                     // 3x3 float matrix.
-Vector3f x, y, z;                     // 3x1 float matrix.
-RowVector3f a, b, c;                  // 1x3 float matrix.
-VectorXd v;                           // Dynamic column vector of doubles
-// Eigen          // Matlab           // comments
-x.size()          // length(x)        // vector size
-C.rows()          // size(C,1)        // number of rows
-C.cols()          // size(C,2)        // number of columns
-x(i)              // x(i+1)           // Matlab is 1-based
-C(i,j)            // C(i+1,j+1)       //
-```
-### 2.基础使用
-```cpp
-// Basic usage
-// Eigen        // Matlab           // comments
-x.size()        // length(x)        // vector size
-C.rows()        // size(C,1)        // number of rows
-C.cols()        // size(C,2)        // number of columns
-x(i)            // x(i+1)           // Matlab is 1-based
-C(i, j)         // C(i+1,j+1)       //
-
-A.resize(4, 4);   // Runtime error if assertions are on.
-B.resize(4, 9);   // Runtime error if assertions are on.
-A.resize(3, 3);   // Ok; size didn't change.
-B.resize(3, 9);   // Ok; only dynamic cols changed.
-                  
-A << 1, 2, 3,     // Initialize A. The elements can also be
-     4, 5, 6,     // matrices, which are stacked along cols
-     7, 8, 9;     // and then the rows are stacked.
-B << A, A, A;     // B is three horizontally stacked A's.
-A.fill(10);       // Fill A with all 10's.
-```
-
-###  3.Eigen特殊矩阵生成
-```cpp
-// Eigen                            // Matlab
-MatrixXd::Identity(rows,cols)       // eye(rows,cols)
-C.setIdentity(rows,cols)            // C = eye(rows,cols)
-MatrixXd::Zero(rows,cols)           // zeros(rows,cols)
-C.setZero(rows,cols)                // C = zeros(rows,cols)
-MatrixXd::Ones(rows,cols)           // ones(rows,cols)
-C.setOnes(rows,cols)                // C = ones(rows,cols)
-MatrixXd::Random(rows,cols)         // rand(rows,cols)*2-1        // MatrixXd::Random returns uniform random numbers in (-1, 1).
-C.setRandom(rows,cols)              // C = rand(rows,cols)*2-1
-VectorXd::LinSpaced(size,low,high)  // linspace(low,high,size)'
-v.setLinSpaced(size,low,high)       // v = linspace(low,high,size)'
-```
-
-### 4.矩阵分块
-```cpp
-// Matrix slicing and blocks. All expressions listed here are read/write.
-// Templated size versions are faster. Note that Matlab is 1-based (a size N
-// vector is x(1)...x(N)).
-// Eigen                           // Matlab
-x.head(n)                          // x(1:n)
-x.head<n>()                        // x(1:n)
-x.tail(n)                          // x(end - n + 1: end)
-x.tail<n>()                        // x(end - n + 1: end)
-x.segment(i, n)                    // x(i+1 : i+n)
-x.segment<n>(i)                    // x(i+1 : i+n)
-P.block(i, j, rows, cols)          // P(i+1 : i+rows, j+1 : j+cols)
-P.block<rows, cols>(i, j)          // P(i+1 : i+rows, j+1 : j+cols)
-P.row(i)                           // P(i+1, :)
-P.col(j)                           // P(:, j+1)
-P.leftCols<cols>()                 // P(:, 1:cols)
-P.leftCols(cols)                   // P(:, 1:cols)
-P.middleCols<cols>(j)              // P(:, j+1:j+cols)
-P.middleCols(j, cols)              // P(:, j+1:j+cols)
-P.rightCols<cols>()                // P(:, end-cols+1:end)
-P.rightCols(cols)                  // P(:, end-cols+1:end)
-P.topRows<rows>()                  // P(1:rows, :)
-P.topRows(rows)                    // P(1:rows, :)
-P.middleRows<rows>(i)              // P(i+1:i+rows, :)
-P.middleRows(i, rows)              // P(i+1:i+rows, :)
-P.bottomRows<rows>()               // P(end-rows+1:end, :)
-P.bottomRows(rows)                 // P(end-rows+1:end, :)
-P.topLeftCorner(rows, cols)        // P(1:rows, 1:cols)
-P.topRightCorner(rows, cols)       // P(1:rows, end-cols+1:end)
-P.bottomLeftCorner(rows, cols)     // P(end-rows+1:end, 1:cols)
-P.bottomRightCorner(rows, cols)    // P(end-rows+1:end, end-cols+1:end)
-P.topLeftCorner<rows,cols>()       // P(1:rows, 1:cols)
-P.topRightCorner<rows,cols>()      // P(1:rows, end-cols+1:end)
-P.bottomLeftCorner<rows,cols>()    // P(end-rows+1:end, 1:cols)
-P.bottomRightCorner<rows,cols>()   // P(end-rows+1:end, end-cols+1:end)
-
-```
-### 5.Eigen矩阵元素交换
-```cpp
-// Of particular note is Eigen's swap function which is highly optimized.
-// Eigen                           // Matlab
-R.row(i) = P.col(j);               // R(i, :) = P(:, i)
-R.col(j1).swap(mat1.col(j2));      // R(:, [j1 j2]) = R(:, [j2, j1])
-```
-
-### 6.矩阵转置
-```cpp
-// Views, transpose, etc; all read-write except for .adjoint().
-// Eigen                           // Matlab
-R.adjoint()                        // R'
-R.transpose()                      // R.' or conj(R')
-R.diagonal()                       // diag(R)
-x.asDiagonal()                     // diag(x)
-R.transpose().colwise().reverse(); // rot90(R)
-R.conjugate()                      // conj(R)
-```
-### 7.矩阵乘积
-```cpp
-// All the same as Matlab, but matlab doesn't have *= style operators.
-// Matrix-vector.  Matrix-matrix.   Matrix-scalar.
-y  = M*x;          R  = P*Q;        R  = P*s;
-a  = b*M;          R  = P - Q;      R  = s*P;
-a *= M;            R  = P + Q;      R  = P/s;
-                   R *= Q;          R  = s*P;
-                   R += Q;          R *= s;
-                   R -= Q;          R /= s;
-```
-### 8.矩阵单个元素操作
-
-```cpp
-// Vectorized operations on each element independently
-// Eigen                  // Matlab
-R = P.cwiseProduct(Q);    // R = P .* Q
-R = P.array() * s.array();// R = P .* s
-R = P.cwiseQuotient(Q);   // R = P ./ Q
-R = P.array() / Q.array();// R = P ./ Q
-R = P.array() + s.array();// R = P + s
-R = P.array() - s.array();// R = P - s
-R.array() += s;           // R = R + s
-R.array() -= s;           // R = R - s
-R.array() < Q.array();    // R < Q
-R.array() <= Q.array();   // R <= Q
-R.cwiseInverse();         // 1 ./ P
-R.array().inverse();      // 1 ./ P
-R.array().sin()           // sin(P)
-R.array().cos()           // cos(P)
-R.array().pow(s)          // P .^ s
-R.array().square()        // P .^ 2
-R.array().cube()          // P .^ 3
-R.cwiseSqrt()             // sqrt(P)
-R.array().sqrt()          // sqrt(P)
-R.array().exp()           // exp(P)
-R.array().log()           // log(P)
-R.cwiseMax(P)             // max(R, P)
-R.array().max(P.array())  // max(R, P)
-R.cwiseMin(P)             // min(R, P)
-R.array().min(P.array())  // min(R, P)
-R.cwiseAbs()              // abs(P)
-R.array().abs()           // abs(P)
-R.cwiseAbs2()             // abs(P.^2)
-R.array().abs2()          // abs(P.^2)
-(R.array() < s).select(P,Q);  // (R < s ? P : Q)
-```
-
-### 9.矩阵化简
-```cpp
-// Reductions.
-int r, c;
-// Eigen                  // Matlab
-R.minCoeff()              // min(R(:))
-R.maxCoeff()              // max(R(:))
-s = R.minCoeff(&r, &c)    // [s, i] = min(R(:)); [r, c] = ind2sub(size(R), i);
-s = R.maxCoeff(&r, &c)    // [s, i] = max(R(:)); [r, c] = ind2sub(size(R), i);
-R.sum()                   // sum(R(:))
-R.colwise().sum()         // sum(R)
-R.rowwise().sum()         // sum(R, 2) or sum(R')'
-R.prod()                  // prod(R(:))
-R.colwise().prod()        // prod(R)
-R.rowwise().prod()        // prod(R, 2) or prod(R')'
-R.trace()                 // trace(R)
-R.all()                   // all(R(:))
-R.colwise().all()         // all(R)
-R.rowwise().all()         // all(R, 2)
-R.any()                   // any(R(:))
-R.colwise().any()         // any(R)
-R.rowwise().any()         // any(R, 2)
-```
-### 10.矩阵点乘
-```cpp
-// Dot products, norms, etc.
-// Eigen                  // Matlab
-x.norm()                  // norm(x).    Note that norm(R) doesn't work in Eigen.
-x.squaredNorm()           // dot(x, x)   Note the equivalence is not true for complex
-x.dot(y)                  // dot(x, y)
-x.cross(y)                // cross(x, y) Requires #include <Eigen/Geometry>
-```
-### 11.矩阵类型转换
-```cpp
- Type conversion
-// Eigen                           // Matlab
-A.cast<double>();                  // double(A)
-A.cast<float>();                   // single(A)
-A.cast<int>();                     // int32(A)
-A.real();                          // real(A)
-A.imag();                          // imag(A)
-// if the original type equals destination type, no work is done
-```
-### 12.求解线性方程组
-```cpp
-// Solve Ax = b. Result stored in x. Matlab: x = A \ b.
-x = A.ldlt().solve(b));  // A sym. p.s.d.    #include <Eigen/Cholesky>
-x = A.llt() .solve(b));  // A sym. p.d.      #include <Eigen/Cholesky>
-x = A.lu()  .solve(b));  // Stable and fast. #include <Eigen/LU>
-x = A.qr()  .solve(b));  // No pivoting.     #include <Eigen/QR>
-x = A.svd() .solve(b));  // Stable, slowest. #include <Eigen/SVD>
-// .ldlt() -> .matrixL() and .matrixD()
-// .llt()  -> .matrixL()
-// .lu()   -> .matrixL() and .matrixU()
-// .qr()   -> .matrixQ() and .matrixR()
-// .svd()  -> .matrixU(), .singularValues(), and .matrixV()
-```
-### 13.矩阵特征值
-```cpp
-// Eigenvalue problems
-// Eigen                          // Matlab
-A.eigenvalues();                  // eig(A);
-EigenSolver<Matrix3d> eig(A);     // [vec val] = eig(A)
-eig.eigenvalues();                // diag(val)
-eig.eigenvectors();               // vec
-// For self-adjoint matrices use SelfAdjointEigenSolver<>
-```
 ## 2.eigen的使用总结：
 ```cpp
 #include <iostream>
@@ -552,4 +321,284 @@ int main(){
     
 }
 
+```
+## 3.实践
+1. 四元数
+```cpp
+#include <iostream>
+#include <Eigen/Core>
+#include <Eigen/Geometry>
+ 
+using namespace std;
+using namespace Eigen;
+ 
+int main(int argc, char** argv) {
+  Quaterniond q1(0.35, 0.2, 0.3, 0.1), q2(-0.5, 0.4, -0.1, 0.2);
+  q1.normalize();
+  q2.normalize();
+  Vector3d t1(0.3, 0.1, 0.1), t2(-0.1, 0.5, 0.3);
+  Vector3d p1(0.5, 0, 0.2);
+ 
+  Isometry3d T1w(q1), T2w(q2);
+  T1w.pretranslate(t1);
+  T2w.pretranslate(t2);
+ 
+  Vector3d p2 = T2w * T1w.inverse() * p1;
+  cout << endl << p2.transpose() << endl;
+  return 0;
+}
+```
+2. useEigen
+3. useGeometry
+```cpp
+#include <iostream>
+#include <cmath>
+using namespace std;
+
+#include <Eigen/Core>
+// Eigen 几何模块
+#include <Eigen/Geometry>
+
+/****************************
+* 本程序演示了 Eigen 几何模块的使用方法
+****************************/
+
+int main ( int argc, char** argv )
+{
+    // Eigen/Geometry 模块提供了各种旋转和平移的表示
+    // 3D 旋转矩阵直接使用 Matrix3d 或 Matrix3f
+    Eigen::Matrix3d rotation_matrix = Eigen::Matrix3d::Identity();
+    // 旋转向量使用 AngleAxis, 它底层不直接是Matrix，但运算可以当作矩阵（因为重载了运算符）
+    Eigen::AngleAxisd rotation_vector ( M_PI/4, Eigen::Vector3d ( 0,0,1 ) );     //沿 Z 轴旋转 45 度
+    cout .precision(3);
+    cout<<"rotation matrix =\n"<<rotation_vector.matrix() <<endl;                //用matrix()转换成矩阵
+    // 也可以直接赋值
+    rotation_matrix = rotation_vector.toRotationMatrix();
+    // 用 AngleAxis 可以进行坐标变换
+    Eigen::Vector3d v ( 1,0,0 );
+    Eigen::Vector3d v_rotated = rotation_vector * v;
+    cout<<"(1,0,0) after rotation = "<<v_rotated.transpose()<<endl;
+    // 或者用旋转矩阵
+    v_rotated = rotation_matrix * v;
+    cout<<"(1,0,0) after rotation = "<<v_rotated.transpose()<<endl;
+
+    // 欧拉角: 可以将旋转矩阵直接转换成欧拉角
+    Eigen::Vector3d euler_angles = rotation_matrix.eulerAngles ( 2,1,0 ); // ZYX顺序，即roll pitch yaw顺序
+    cout<<"yaw pitch roll = "<<euler_angles.transpose()<<endl;
+
+    // 欧氏变换矩阵使用 Eigen::Isometry
+    Eigen::Isometry3d T=Eigen::Isometry3d::Identity();                // 虽然称为3d，实质上是4＊4的矩阵
+    T.rotate ( rotation_vector );                                     // 按照rotation_vector进行旋转
+    T.pretranslate ( Eigen::Vector3d ( 1,3,4 ) );                     // 把平移向量设成(1,3,4)
+    cout << "Transform matrix = \n" << T.matrix() <<endl;
+
+    // 用变换矩阵进行坐标变换
+    Eigen::Vector3d v_transformed = T*v;                              // 相当于R*v+t
+    cout<<"v tranformed = "<<v_transformed.transpose()<<endl;
+
+    // 对于仿射和射影变换，使用 Eigen::Affine3d 和 Eigen::Projective3d 即可，略
+
+    // 四元数
+    // 可以直接把AngleAxis赋值给四元数，反之亦然
+    Eigen::Quaterniond q = Eigen::Quaterniond ( rotation_vector );
+    cout<<"quaternion = \n"<<q.coeffs() <<endl;   // 请注意coeffs的顺序是(x,y,z,w),w为实部，前三者为虚部
+    // 也可以把旋转矩阵赋给它
+    q = Eigen::Quaterniond ( rotation_matrix );
+    cout<<"quaternion = \n"<<q.coeffs() <<endl;
+    // 使用四元数旋转一个向量，使用重载的乘法即可
+    v_rotated = q*v; // 注意数学上是qvq^{-1}
+    cout<<"(1,0,0) after rotation = "<<v_rotated.transpose()<<endl;
+
+    return 0;
+}
+```
+4. visualizeGeometry
+```cpp
+#include <iostream>
+#include <iomanip>
+using namespace std;
+
+#include <Eigen/Core>
+#include <Eigen/Geometry>
+using namespace Eigen;
+
+#include <pangolin/pangolin.h>
+
+struct RotationMatrix
+{
+    Matrix3d matrix = Matrix3d::Identity();
+};
+
+ostream& operator << ( ostream& out, const RotationMatrix& r ) 
+{
+    out.setf(ios::fixed);
+    Matrix3d matrix = r.matrix;
+    out<<'=';
+    out<<"["<<setprecision(2)<<matrix(0,0)<<","<<matrix(0,1)<<","<<matrix(0,2)<<"],"
+    << "["<<matrix(1,0)<<","<<matrix(1,1)<<","<<matrix(1,2)<<"],"
+    << "["<<matrix(2,0)<<","<<matrix(2,1)<<","<<matrix(2,2)<<"]";
+    return out;
+}
+
+istream& operator >> (istream& in, RotationMatrix& r )
+{
+    return in;
+}
+
+struct TranslationVector
+{
+    Vector3d trans = Vector3d(0,0,0);
+};
+
+ostream& operator << (ostream& out, const TranslationVector& t)
+{
+    out<<"=["<<t.trans(0)<<','<<t.trans(1)<<','<<t.trans(2)<<"]";
+    return out;
+}
+
+istream& operator >> ( istream& in, TranslationVector& t)
+{
+    return in;
+}
+
+struct QuaternionDraw
+{
+    Quaterniond q;
+};
+
+ostream& operator << (ostream& out, const QuaternionDraw quat )
+{
+    auto c = quat.q.coeffs();
+    out<<"=["<<c[0]<<","<<c[1]<<","<<c[2]<<","<<c[3]<<"]";
+    return out;
+}
+
+istream& operator >> (istream& in, const QuaternionDraw quat)
+{
+    return in;
+}
+
+int main ( int argc, char** argv )
+{
+    pangolin::CreateWindowAndBind ( "visualize geometry", 1000, 600 );
+    glEnable ( GL_DEPTH_TEST );
+    pangolin::OpenGlRenderState s_cam (
+        pangolin::ProjectionMatrix ( 1000, 600, 420, 420, 500, 300, 0.1, 1000 ),
+        pangolin::ModelViewLookAt ( 3,3,3,0,0,0,pangolin::AxisY )
+    );
+    
+    const int UI_WIDTH = 500;
+    
+    pangolin::View& d_cam = pangolin::CreateDisplay().SetBounds(0.0, 1.0, pangolin::Attach::Pix(UI_WIDTH), 1.0, -1000.0f/600.0f).SetHandler(new pangolin::Handler3D(s_cam));
+    
+    // ui
+    pangolin::Var<RotationMatrix> rotation_matrix("ui.R", RotationMatrix());
+    pangolin::Var<TranslationVector> translation_vector("ui.t", TranslationVector());
+    pangolin::Var<TranslationVector> euler_angles("ui.rpy", TranslationVector());
+    pangolin::Var<QuaternionDraw> quaternion("ui.q", QuaternionDraw());
+    pangolin::CreatePanel("ui")
+        .SetBounds(0.0, 1.0, 0.0, pangolin::Attach::Pix(UI_WIDTH));
+    
+    while ( !pangolin::ShouldQuit() )
+    {
+        glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+        
+        d_cam.Activate( s_cam );
+        
+        pangolin::OpenGlMatrix matrix = s_cam.GetModelViewMatrix();
+        Matrix<double,4,4> m = matrix;
+        // m = m.inverse();
+        RotationMatrix R; 
+        for (int i=0; i<3; i++)
+            for (int j=0; j<3; j++)
+                R.matrix(i,j) = m(j,i);
+        rotation_matrix = R;
+        
+        TranslationVector t;
+        t.trans = Vector3d(m(0,3), m(1,3), m(2,3));
+        t.trans = -R.matrix*t.trans;
+        translation_vector = t;
+        
+        TranslationVector euler;
+        euler.trans = R.matrix.transpose().eulerAngles(2,1,0);
+        euler_angles = euler;
+        
+        QuaternionDraw quat;
+        quat.q = Quaterniond(R.matrix);
+        quaternion = quat;
+        
+        glColor3f(1.0,1.0,1.0);
+        
+        pangolin::glDrawColouredCube();
+        // draw the original axis 
+        glLineWidth(3);
+        glColor3f ( 0.8f,0.f,0.f );
+        glBegin ( GL_LINES );
+        glVertex3f( 0,0,0 );
+        glVertex3f( 10,0,0 );
+        glColor3f( 0.f,0.8f,0.f);
+        glVertex3f( 0,0,0 );
+        glVertex3f( 0,10,0 );
+        glColor3f( 0.2f,0.2f,1.f);
+        glVertex3f( 0,0,0 );
+        glVertex3f( 0,0,10 );
+        glEnd();
+        
+        pangolin::FinishFrame();
+    }
+}
+```
+## 3.课后习题：
+1. 验证旋转矩阵是正交矩阵
+2. 罗德里格斯公式推导
+3. 四元数旋转某个点后仍然是虚四元数
+4. 旋转矩阵，轴角，欧拉角， 四元数的关系
+5. 假设我有一个大的 Eigen 矩阵，我想把它的左上角 3 × 3 的块取出来，然后赋值为I3×3 。请编程实现此事
+```cpp
+#include <iostream>
+#include "/usr/include/eigen3/Eigen/Dense"
+using namespace std;
+using namespace Eigen;
+ 
+int main()
+{
+    Matrix4d matrix_44 = Matrix4d::Constant(0.5);
+    cout << "Here is a matrix:\n" << matrix_44 << endl;
+    Matrix3d matrix_33 = Matrix3d::Constant(0.1);
+    matrix_44.block(0,0,3,3) = matrix_33;
+    cout << "左上角３×３的块取出来赋值为Matrix3_3\n" << matrix_44 << endl;
+    return 0;
+}
+```
+6. 设有小萝卜一号和小萝卜二号位于世界坐标系中。小萝卜一号的位姿为：q 1 =
+[0.35, 0.2, 0.3, 0.1], t 2 = [0.3, 0.1, 0.1] T （q 的第一项为实部。请你把 q 归一化后再
+进行计算）
+。这里的 q 和 t 表达的是 T cw ，也就是世界到相机的变换关系。小萝卜二号的位姿为 q 2 = [−0.5, 0.4, −0.1, 0.2], t = [−0.1, 0.5, 0.3] T 。现在，小萝卜一号看到
+某个点在自身的坐标系下，坐标为 p = [0.5, 0, 0.2] T ，求该向量在小萝卜二号坐标系
+下的坐标。请编程实现此事。
+```cpp
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <Eigen/Core>
+#include <Eigen/Geometry>
+ 
+using namespace std;
+using namespace Eigen;
+ 
+int main(int argc, char** argv) {
+  Quaterniond q1(0.35, 0.2, 0.3, 0.1), q2(-0.5, 0.4, -0.1, 0.2);
+  q1.normalize();
+  q2.normalize();
+  Vector3d t1(0.3, 0.1, 0.1), t2(-0.1, 0.5, 0.3);
+  Vector3d p1(0.5, 0, 0.2);
+ 
+  Isometry3d T1w(q1), T2w(q2);
+  T1w.pretranslate(t1);
+  T2w.pretranslate(t2);
+ 
+  Vector3d p2 = T2w * T1w.inverse() * p1;
+  cout << endl << p2.transpose() << endl;
+  return 0;
+}
 ```

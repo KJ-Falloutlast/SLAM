@@ -7227,6 +7227,11 @@ int main() {
    4. 类模板调用优先级：**全特化类>偏特化类>主模板类（优先级由高到低）**
    5. 模板类/模板函数的声明和定义要放在头文件中，否则在链接时会出错
    6. 函数模板同时存在：具体化模板，函数模板重载，常规函数重载，调用优先级：**普通函数 > 全特化模板函数 > 主模板函数重载 > 主模板函数** (具体化模板函数：template<> )
+   7. 注意：
+      1. 函数模板全特化函数名和函数调用都不需要加<int, int>,类模板偏特化和全特化在类名前要加class test<int, int>{}, class test<int, T>{},在调用类的时候，也需要加<int, int>，如Person<int, int>(1, 3);
+      2. 类模板偏特化时要按照主模板的形式，template<class T1, class T2>,那么偏特化和全特化为<int, T1>, <int , int>
+      3. 类模板没有自动类型推导的使用方式;类模板在模板参数列表中可以有默认参数
+
 ```cpp
 #include <iostream>
 using namespace std;
@@ -7383,7 +7388,7 @@ void test01()
 //2、类模板在模板参数列表中可以有默认参数
 void test02()
 {
-	Person <string> p("猪八戒", 999); //类模板中的模板参数列表 可以指定默认参数
+	Person <string> p("猪八戒", 999); //类模板中的模板参数列表 可以指定默认参数,此时T1 = string, T2 = int,T2的值可以被默认修改
 	p.showPerson();
 }
 int main() {
@@ -7548,6 +7553,182 @@ int main() {
 	test01();
 	test02();
 	return 0;
+}
+```
+## 12-6. 类模板成员函数类外实现
+
+```C++
+#include <iostream>
+using namespace std;
+#include <string>
+template<class T1, class T2>
+class Person{
+	private:
+		T1 a;
+		T2 b;
+	public:
+		Person(T1 i, T2 j);
+		void showPerson();
+};
+template<class T1, class T2>
+Person<T1, T2>::Person(T1 i, T2 j):a(i), b(j){
+
+}
+
+template<class T1, class T2>
+void Person<T1, T2>::showPerson(){
+	cout << " a= " <<  a << " b = " << b << endl;
+}
+void test(){
+	Person<int, int> p1(1, 2);
+	Person<int, string> p2(1, "dad");
+	p1.showPerson(); 
+	p2.showPerson(); 
+}
+
+int main(){
+	test();
+}
+```
+1. 总结：
+   1. 构造函数和成员函数都要上面加上template<class T1, class T2>,
+   2. 构造函数和成员函数名前面加上<T1， T2>,
+   
+## 12-7. 类模板分文件编写
+1. 问题：类模板成员函数创建时机是在调用阶段，导致分文件编写时链接不到
+2. 解决
+   1. 方式1：直接包括.cpp源文件
+   2. 将声明和实现写在同一个文件中，并更名为.hpp,hpp是约定的名称
+3. 例子
+   1. person.h
+```cpp
+#pragma once//防止重定义
+#include <iostream>
+using namespace std;
+#include <string>
+template<class T1, class T2>
+class Person{
+    private:
+        T1 a;
+        T2 b;
+    public:
+        Person(T1 i, T2 j);
+        void showPerson();
+};
+```
+   2. person.cpp
+```cpp
+#include "person.h"
+//类外实现
+template<class T1, class T2>
+Person<T1, T2>::Person(T1 i, T2 j):a(i), b{j}{
+
+}
+
+template<class T1, class T2>
+void Person<T1, T2>::showPerson(){
+    cout << "name = " << a << "  age = " << b << endl;
+}
+```
+   3. person.hpp
+```cpp
+#pragma once
+#include <iostream>
+using namespace std;
+#include <string>
+template<class T1, class T2>
+class Person{
+    private:
+        T1 a;
+        T2 b;
+    public:
+        Person(T1 i, T2 j);
+        void showPerson();
+};
+template<class T1, class T2>
+Person<T1, T2>::Person(T1 i, T2 j):a(i), b{j}{
+
+}
+
+template<class T1, class T2>
+void Person<T1, T2>::showPerson(){
+    cout << "name = " << a << "  age = " << b << endl;
+}
+```
+   4. main.cpp
+```cpp
+// #include "person.cpp"//方法1
+#include "person.hpp"//方法2
+// #include "person.h"//不行
+void test01(){
+    Person<string, int> p("tom", 12);
+    p.showPerson();
+/*
+1.将上面2行注释掉是不会出错的，但是一旦没注释就会出问题
+2.解决方法：
+    1.方法1：将person.h--->person.cpp,由于.cpp中已经include "person.h",且.cpp中有
+类的所有实现，所以结果不会出错；由于.h中只有类的定义，而无类成员函数的实现，所以只
+包括.h文件必定出错;而且普通类同样也会出现相同的情况
+    2.方法2：将.h和.cpp的文件写在一起，将后缀名改为.hpp文件
+    
+*/
+}
+int main(){
+    test01();
+}
+```
+   
+## 12-7. 类模板和友元
+```cpp
+#include <iostream>
+#include <string>
+using namespace std;
+//2-2. 类外实现
+template<class T1, class T2>//由于person是类模板，故需要声明<>
+class Person;
+
+template<class T1, class T2>//由于此时有person，故需要提前声明person
+void showPerson02(Person<T1, T2> &p){
+	cout << "name = " << p.m_Name << " age = " << p.m_Age << endl;	
+}
+
+template<class T1, class T2>
+class Person{
+	private:
+		T1 m_Name;
+		T2 m_Age;
+	public:
+		Person(T1 i, T2 j):m_Name(i), m_Age(j){
+
+		}
+		//1.类内实现
+		friend void showPerson01(Person<T1, T2> &p){
+			cout << "name = " << p.m_Name << " age = " << p.m_Age << endl;
+		}
+		//2.类内定义
+		friend void showPerson02<>(Person<T1, T2> &p);
+		/*
+		2-1.由于下方是函数模板的实现，所以要加上<>表示是全局函数模板
+		2-2.由于是一个函数模板，所以需要在类内声明，类外提前定义
+		*/
+
+};
+
+//1.类内测试
+void test01(){
+	Person<string, int> p("tom", 23);
+	showPerson01(p);//由于showPerson01是全局函数，故不能p.showPerson()
+
+}
+//2-1.类外测试
+
+void test02(){
+	Person<string, int> p("jack", 23);
+	showPerson02(p);
+}
+int main(){
+	test01();
+	test02();
 }
 ```
 # 13.c++高级教程
