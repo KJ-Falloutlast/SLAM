@@ -203,7 +203,7 @@ https://www.jianshu.com/p/260fbac1d4a2
 启动：clash;proxy_on,proxy_off分别代表开关代理
 
 
-## 3. 结束进程的方法：
+## 3. 进程问题：
 
    1. 常规篇：
 　首先，用ps查看进程，方法如下：
@@ -242,7 +242,11 @@ $ pgrep firefox
 看到了什么？没错火狐的PID，接下来又要打字了：
 
 $kill -s 9 1827
-
+3. 无法获得锁
+   1. 问题描述：正在等待缓存锁：无法获得锁 /var/lib/dpkg/lock-frontend。锁正由进程322
+   2. 解决方案：
+      1. sudo rm /var/cahe/apt/archives/lock
+      2. sudo rm /var/lib/dpkg/lock
 ## 3. 将anoconda设为默认python解释器的方法
   
   在终端输入$sudo gedit /etc/profile，打开profile文件。
@@ -430,12 +434,16 @@ W: 目标 DEP-11-icons-hidpi (multiverse/dep11/icons-64x64@2.tar) 在
 /etc/apt/sources.list:21 和 /etc/apt/sources.list:85 中被配置了多次
 注释掉重复的软件源
 
-14. 采用update-alternatives 切换版本
+2. 采用update-alternatives 切换版本
 
     update-alternatives是Debian提供的一个工具，通过链接的方式，但是其切换的过程非常方便。
     首先看一下update-alternatives的帮助信息：
 
     $ update-alternatives --help
+3. 目标 * 在 /etc/apt/sources.list:41 和 /etc/apt/sources.list.d/xenial-partner.list:4 中被配置了多次
+   1. 解决办法：*sudo vim /etc/apt/sources.list*,然后直接直接将重复的那几行注释掉就行
+
+
 ## 8. 用法：update-alternatives [<选项> ...] <命令>
 ```cpp
     命令：
@@ -570,6 +578,9 @@ ls -l | grep python
     "version": 4
   }
 ```
+## 18.软件问题
+1. amd64 = x64
+2. 
 # 3.c++学习问题
 
 1. endl的问题:
@@ -692,7 +703,7 @@ sudo cat tools/FY-21329.yaml > ~/.config/clash/config.yaml
 
 在配置开机启动之前，将配置文件移动到 /etc 目录：
 sudo mv ~/.config/clash /etc
-**此处要注意：1.在重新移动的过程中，要将原来的在/etc的clash文件删除然后才能执行此步骤,或者直接替换调/etc下的clash.ymal文件 2.在没有在配置开机启动前，linux会执行在.config下的yaml文件，所以配置好开机启动后，就要直接修改在/etc下的yaml文件 3.cfw 和 clash不要同时启动**
+**此处要注意：1.在重新移动的过程中，要将原来的在/etc的clash文件删除然后才能执行此步骤,或者直接替换调/etc下的clash.ymal文件 2.在没有在配置开机启动前，linux会执行在.config下的yaml文件，所以配置好开机启动后，就要直接修改在/etc下的yaml文件 3.cfw 和 clash不要同时启动 4.每次配置完后都要开机启动才能使节点生效**
 以后修改配置都记住修改 /etc/clash 目录下的这个配置文件。
 然后使用 vim 增加 systemd 配置 ,：
 sudo vim /etc/systemd/system/clash.service
@@ -714,6 +725,7 @@ sudo systemctl start clash.service  #手动启动
 sudo vim .bashrc
 增加以下内容
 
+
 ```sh
 # proxy on
 # proxy off
@@ -731,7 +743,8 @@ function proxy_on(){
             echo -e "Proxy On"
     }
 ```
-$source .bashrc  #使配置生效
+
+`$source .bashrc  #使配置生效`
 
 接下里就可以通过命令开关代理了
 proxy_on
@@ -743,44 +756,45 @@ proxy_off
       2. 将原来在/usr/local/bin/clash 复制到新的系统的/usr/local/bin这个路经
       3. 将原来在.config/clash 复制新的系统的.config/clash文件  (sudo cp -r olddir newdir)
       4. 将原来在/etc/clash 复制新的系统的/etc/clash文件   
-   5. 常用节点
+   5. *补充*：在ubuntu系统中也要设置为手动代理：
+      1. 127.0.0.1 7890*http*
+      2. 127.0.0.1 7890*https*
+      3. 127.0.0.1 7891*socks*
+      4. 127.0.0.1 *忽略主机*
+   6. 常用节点
 https://suo.yt/151bpdM(失效了)
-https://suo.yt/1LxmMPA
+https://suo.yt/1LxmMPA(gg)
 https://raw.githubusercontent.com/ssrsub/ssr/master/V2Ray
 https://suo.yt/ZKjZa7R
 https://suo.yt/uXoibye
 
 ## 5. wine的相关问题：
-   1. 未安装windows应用
-    $ sudo apt-get update
-    $ sudo apt-get install wine
-    $ sudo apt-get install winetricks ##直接运行winetricks来运行程序
+1. 未安装windows应用
+ $ sudo apt-get update
+ $ sudo apt-get install wine
+ $ sudo apt-get install winetricks ##直接运行winetricks来运行程序
 
-   2. wine新版 wine-5.12 微信、QQ 等软件输入框无法输入的问题解决办法
-    winetricks riched20
-    .文件删除：直接启动winetricks---->默认容器---->卸载程序
-    .文件安装：方法1：在当前目录下执行：wine XXX.exe;方法2：直接运行winetricks---->安装windows应用
-    .qq和微信文件的安装路径：/home/kim/.wine/drive_c/Program Files (x86)/Tencent
+2. wine新版 wine-5.12 微信、QQ 等软件输入框无法输入的问题解决办法
+ winetricks riched20
+ .文件删除：直接启动winetricks---->默认容器---->卸载程序
+ .文件安装：方法1：在当前目录下执行：wine XXX.exe;方法2：直接运行winetricks---->安装windows应用
+ .qq和微信文件的安装路径：/home/kim/.wine/drive_c/Program Files (x86)/Tencent
 
-   3. 问题:
-    . 描述：You are using a 64-bit WINEPREFIX. Note that many verbs only install 32-bit versions of packages. 
-    If you encounter problems, please retest in a clean 32-bit WINEPREFIX
-     before reporting a bug.
-    . 解决方案：winetricks riched20
-   4. 新的方案：
-
-    1. 首次使用需要添加仓库： wget -O- https://deepin-wine.i-m.dev/setup.sh | sh
-    2. 而后使用： apt install ... 安装对应软件包
-    3. 应用图标需要注销重登录后才会出现
-    4. 网址：<https://deepin-wine.i-m.dev/>
-
+3. 问题:
+ . 描述：You are using a 64-bit WINEPREFIX. Note that many verbs only install 32-bit versions of packages. 
+ If you encounter problems, please retest in a clean 32-bit WINEPREFIX
+  before reporting a bug.
+ . 解决方案：winetricks riched20
+4. winetricks配置方案
+   1. sudo apt install winetricks
+   2. winetricks **colorprofile corefonts d3dx9 fontfix fontsmooth-gray fontsmooth-rgb fontsmooth-bgr *gdiplus mfc40 mfc42 msxml3 msxml4 msxml6* riched20 riched30 tahoma urlmon vb6run vcrun6 vcrun2003 vcrun2005 vcrun2008 ie6 allfonts**(*直接安装相关依赖就行*)
+```sh
+winetricks colorprofile corefonts d3dx9 fontfix fontsmooth-gray fontsmooth-rgb fontsmooth-bgr gdiplus mfc40 mfc42 msxml3 msxml4 msxml6 riched20 riched30 tahoma urlmon vb6run vcrun6 vcrun2003 vcrun2005 vcrun2008 ie6 allfonts
+```
   
 ## 6. 删除在linux的垃圾图标
 看/usr/share/applications下是否有xxx.desktop，若有就直接删除
 可以到～/.local/share/applications下看是否有xxx.desktop,若有就直接
-
-
-
 
 ## 7. github的问题：
 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
@@ -796,3 +810,7 @@ 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
    2. step2:sudo apt update
 3. 若迁移系统后，源发生问题，则直接复制原来/etc/apt文件到新的系统中，sudo apt update若有错误，则按照2的方法改进
 
+
+## 10. 关于网站和学习细节的问题
+1. 将书签分类整理
+2. 在上网时将网站分类打开，不要弄得毫无逻辑

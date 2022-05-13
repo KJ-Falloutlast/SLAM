@@ -1,36 +1,23 @@
 #include <iostream>
 #include <string>
 using namespace std;
-class MyTest1{
+template<class T1, class T2>
+class Person{
+	private:
+		T1 a;
+		T2 b;
 	public:
-		void showMsg(){
-			cout << "test1" << endl;
+		Person(T1 i, T2 j):a(i), b(j){}
+		void showPerson(){
+			cout << " name  =  " << a << " age  = " << b << end;
 		}
+	
 };
-class MyTest2{
-	public:
-		void showMsg(){
-			cout << "test2" << endl;
-		}
-};
-
-template<class T>
-class MyClass{
-	public:
-		T m;
-		void func1(){
-			m.showMsg();
-		}
-		void func2(){
-			m.showMsg();
-		}		
-};
-
 void test(){
-	MyClass<MyTest1> mc;
-	mc.func1();
+	Person<string, int> p("tim", 12);
+	p.showPerson();
+	
 }
-
 int main(){
 	test();
 }

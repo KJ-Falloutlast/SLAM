@@ -30,7 +30,7 @@ int main()
 
     // 以上几种旋转的类型(除了欧拉角)都可以直接和目标相乘，从而旋转目标
     Eigen::Vector3d v(1, 0, 0);
-    Eigen::Vector3d v_rotated;
+    Eigen::Vector3d v_rotated; 
     v_rotated = rotation_vector * v;
     v_rotated = rotation_matrix * v;
     v_rotated = q * v;
