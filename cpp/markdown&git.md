@@ -148,13 +148,13 @@ markdown
 |  ----  | ----  |
 | 单元格  | 单元格 |
 | 单元格  | 单元格 |
+
 * 对齐方式：
 * -: 设置内容和标题栏居右对齐。
 :- 设置内容和标题栏居左对齐。
 :-: 设置内容和标题栏居中对齐。
 *
-
-13. 高级技巧
+1.  高级技巧
     * 支持HTML元素
       * 目前支持的 HTML 元素有：<kbd> <b> <i> <em> <sup> <sub> <br>等 
     - 转义
@@ -178,7 +178,7 @@ markdown
       - 方法2：$$....$$**这个用来写数学表达式的块**
       - 例如：$f(x) = sin(x)$
 
-13. markdown所支持的语言格式
+2.  markdown所支持的语言格式
     >actionscript3
     apache
       applescript
@@ -234,7 +234,7 @@ markdown
       xml - XML and also used for HTML with inline CSS and Javascript
       yaml
     
-14. 数学公式的输入：
+3.  数学公式的输入：
     * 希腊字母
       * 显示	命令	显示	命令
       α	\alpha	β	\beta

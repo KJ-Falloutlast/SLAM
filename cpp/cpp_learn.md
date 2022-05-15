@@ -2076,7 +2076,7 @@ int main ()
 {
  int  var[MAX] = {10, 100, 200};
  int *ptr[MAX];
- for (int i = 0; i < MAX; i++)
+ for (int i = 0; i6 < MAX; i++)
  {
     cout << "Value of var[" << i << "] = ";
     ptr[i] = &var[i]; 
@@ -2192,6 +2192,11 @@ pptr = &pt r
 .int (*func) (int a, int b):
     (*func)表示func是一个指针，然后后面跟着的()说明这个指针指向一个函数，所以为函数指针
 ```
+### 9.指针数组和数组指针的关系
+1. 关系：指针数组是指针的数组，所有元素都是指针；数组指针为：变量指向是一个指针，指向数组的首地址，数组的元素为非指针
+2. 例如
+   1. >char *arr[4] = {"hello", "world", "shannxi", "xian"};为指针数组
+   2. 
 
 
 ### 9.变量作用域
@@ -5686,6 +5691,37 @@ int main() {
    return 0;
 }
 ```
+#### 10.[]重载
+[]必须以成员函数的形式重载
+```cpp
+int& Array::operator[](int i){
+
+    return m_p[i];
+
+}
+
+
+const int & Array::operator[](int i) const{
+
+    return m_p[i];
+
+}
+```
+#### 11.重载总结
+1. 重载的规则
+   1. 能重载的运算符：
+   * > + - * / % ^ & | ~ ! = < > += = = /= %= ^= &= |= << >> <<= >>= == != <= >= && || ++ -- , -> - > () [] new new[] delete delete[]
+ *长度运算符 sizeof、条件运算符: ?、成员选择符. 和域解析运算符::不能被重载。*
+    2. 重载不能改变运算符的优先级和结合律
+    3. 重载不会改变运算符的用法，即操作数个数、位置都不会改变
+    4. 运算符重载函数不能有默认的参数，因为这改变了运算符操作数个数
+    5. 运算符重载函数既可作为类成员函数，也可为全局函数，注意全局函数如何要访问类对象的私有成员，需要声明为类的友元
+    6. **箭头运算符->、下标运算符[]、函数调用运算符()、赋值运算符 =，只能以成员函数的形式重载。**
+
+
+
+
+
 
 ### 4-8.继承
 #### 1.基本语法
@@ -7597,13 +7633,13 @@ int main(){
 1. 总结：
    1. 构造函数和成员函数都要上面加上template<class T1, class T2>,
    2. 构造函数和成员函数名前面加上<T1， T2>,
-   
-## 12-7. 类模板分文件编写
-1. 问题：类模板成员函数创建时机是在调用阶段，导致分文件编写时链接不到
-2. 解决
+   3. *在全局函数中(T1 a),就要加上template<T1>,若为(int a)，不需要加template<T1>*
+   4. *在(T1 a)这种情况下， 成员函数和全局函数在类外实现时* *需要加T1*，在类内定义和类内实现的时候*不需要加T1*
+2. 问题：类模板成员函数创建时机是在调用阶段，导致分文件编写时链接不到
+3. 解决
    1. 方式1：直接包括.cpp源文件
    2. 将声明和实现写在同一个文件中，并更名为.hpp,hpp是约定的名称
-3. 例子
+4. 例子
    1. person.h
 ```cpp
 #pragma once//防止重定义
@@ -7741,195 +7777,379 @@ int main(){
 #pragma once
 #include <iostream>
 using namespace std;
-
 template<class T>
 class MyArray{
-public:
-    
-	//构造函数
-	MyArray(int capacity)
-	{
-		this->m_Capacity = capacity;
-		this->m_Size = 0;
-		pAddress = new T[this->m_Capacity];
-	}
-
-	//拷贝构造
-	MyArray(const MyArray & arr)
-	{
-		this->m_Capacity = arr.m_Capacity;
-		this->m_Size = arr.m_Size;
-		this->pAddress = new T[this->m_Capacity];
-		for (int i = 0; i < this->m_Size; i++)
-		{
-			//如果T为对象，而且还包含指针，必须需要重载 = 操作符，因为这个等号不是 构造 而是赋值，
-			// 普通类型可以直接= 但是指针类型需要深拷贝
-			this->pAddress[i] = arr.pAddress[i];
+	public:
+		//有参构造
+		MyArray(int capacity){
+			cout << "有参构造调用" << endl;
+			m_Capacity = capacity;
+			m_Size = 0;
+			pAddress = new T[m_Capacity];//pAddress指针指向容量为m_Capacity，类型为T的数组
 		}
-	}
+		//拷贝构造函数(防止浅拷贝)->arr2(arr1)
+		MyArray(const MyArray &arr){
+			cout << "拷贝构造调用" << endl;
+			m_Capacity = arr.m_Capacity;//arr.m_Capacity是arr中的m_Capacity，而不是这个类的成员属性
+			m_Size = arr.m_Size;//编译器中的拷贝构造函数
+			/*
+			1. pAddress = arr.pAddress;之所以写这一行，是因为指针不能直接赋值
+			浅拷贝会导致堆区的数据重复释放，所以要深拷贝
+			*/
+			//深拷贝，直接在堆区开辟空间
+			pAddress = new T[arr.m_Capacity];
+			//将arr中的数据都拷贝过来
+			for (int i = 0; i < m_Size; i++){
+				pAddress[i] = arr.pAddress[i];
+			}
+		}
+		/*
+		1.operator= 防止浅拷贝，所以要重载=，如果此函数被删除，则arr1 = arr2会执行失败
+		2.防止arr2 = arr1拷贝失败 
+		*/
+		MyArray& operator= (const MyArray &arr){
+			//先判断堆区是否有数据，如果有，先释放
+			cout << "MyArray的operator=调用" << endl;
+			if (pAddress != NULL){
+				delete[] pAddress;
+				pAddress = NULL;
+				m_Capacity = 0;
+				m_Size = 0;
+			}
+			//深拷贝
+			m_Capacity = arr.m_Capacity;
+			m_Size = arr.m_Size;
+			pAddress = new T[arr.m_Capacity];//深拷贝
+			for (int i = 0; i < m_Size; i++){
+				pAddress[i] = arr.pAddress[i];//将arr中的数据元素i进行赋值
+			}
+			return *this;//相当于是构造和析构的综合
+		}
+		//尾插法
+		void pushBack(const T &val){//防止数据被修改所以用引用传值
+			//判断容量是否等于大小
+			if (m_Capacity == m_Size){
+				return;
+			}
+			pAddress[m_Size] = val;//m_Size是数组中的最后一个位置
+			m_Size++;//更新数组大小
 
-	//重载= 操作符  防止浅拷贝问题
-	MyArray& operator=(const MyArray& myarray) {
-
-		if (this->pAddress != NULL) {
-			delete[] this->pAddress;
-			this->m_Capacity = 0;
-			this->m_Size = 0;
 		}
 
-		this->m_Capacity = myarray.m_Capacity;
-		this->m_Size = myarray.m_Size;
-		this->pAddress = new T[this->m_Capacity];
-		for (int i = 0; i < this->m_Size; i++) {
-			this->pAddress[i] = myarray[i];
+		//尾删法
+		void popBack(){//防止数据被修改所以哟个引用传值
+			//让用户访问不到最后一个元素，即为尾删，逻辑删除
+			if (m_Size == 0){
+				return;
+			}
+			m_Size--;
+
 		}
-		return *this;
-	}
-
-	//重载[] 操作符  arr[0]
-	T& operator [](int index)
-	{
-		return this->pAddress[index]; //不考虑越界，用户自己去处理
-	}
-
-	//尾插法
-	void Push_back(const T & val)
-	{
-		if (this->m_Capacity == this->m_Size)
-		{
-			return;
+		//重载[]
+		T& operator[] (int index){//因为每个元素都是T的类型，所以返回值是T
+		//若是返回值是一个左值存在arr[0] = 100,则必须返回&,返回对象本身
+			return pAddress[index];//系统的[]
 		}
-		this->pAddress[this->m_Size] = val;
-		this->m_Size++;
-	}
-
-	//尾删法
-	void Pop_back()
-	{
-		if (this->m_Size == 0)
-		{
-			return;
+		//返回数组大小
+		int getSize(){
+			return m_Size;
 		}
-		this->m_Size--;
-	}
-
-	//获取数组容量
-	int getCapacity()
-	{
-		return this->m_Capacity;
-	}
-
-	//获取数组大小
-	int	getSize()
-	{
-		return this->m_Size;
-	}
-
-
-	//析构
-	~MyArray()
-	{
-		if (this->pAddress != NULL)
-		{
-			delete[] this->pAddress;
-			this->pAddress = NULL;
-			this->m_Capacity = 0;
-			this->m_Size = 0;
+		//返回数组容量
+		int getCapacity(){
+			return m_Capacity;
 		}
-	}
-
-private:
-	T * pAddress;  //指向一个堆空间，这个空间存储真正的数据
-	int m_Capacity; //容量
-	int m_Size;   // 大小
+		//析构函数释放
+		~MyArray(){
+			if(pAddress != NULL){
+				cout << "MyArray析构函数调用" << endl;//若此行能打印，则堆区数据被释放
+				delete[] pAddress;
+				pAddress = NULL;//将指针置空，防止野指针
+			
+			}
+		}
+	private:
+		T *pAddress;//指针指向堆区开辟的真实的数组
+		int m_Capacity;//数组容量
+		int m_Size;//数组大小
 };
 ```
 ```cpp
 #include "array.hpp"
 #include <string>
-
-void printIntArray(MyArray<int>& arr) {
-	for (int i = 0; i < arr.getSize(); i++) {
-		cout << arr[i] << " ";
+//1.普通数组
+void printIntArray(MyArray<int> &arr){
+	for (int i = 0; i < arr.getSize(); i++){
+		cout << arr[i] << endl;//直接利用重载[]来访问arr的元素
 	}
-	cout << endl;
 }
-
-//测试内置数据类型
-void test01()
-{
-	MyArray<int> array1(10);
-	for (int i = 0; i < 10; i++)
-	{
-		array1.Push_back(i);
+void test01(){
+	MyArray<int> arr1(5);//测试参构造调用，析构调用
+	// MyArray<int> arr2(arr1);//在测试拷贝调用和析构调用
+	// MyArray<int> arr3(100);//测试operator调用
+	// arr3 = arr1;
+	for(int i = 0; i < 5; i++){
+		//利用尾插法向数组中插入数据
+		arr1.Push_Back(i);
 	}
-	cout << "array1打印输出：" << endl;
-	printIntArray(array1);
-	cout << "array1的大小：" << array1.getSize() << endl;
-	cout << "array1的容量：" << array1.getCapacity() << endl;
+	printIntArray(arr1);
+	cout << "arr1的打印输出来" << endl;
+	cout << "arr1的容量是:" << arr1.getCapacity() << endl;
+	cout << "arr1的的大小是:" << arr1.getSize() << endl;
 
-	cout << "--------------------------" << endl;
+/*执行结果
+1.结果
+有参构造调用
+拷贝构造调用
+有参构造调用
+MyArray的operator=调用
+MyArray析构函数调用
+MyArray析构函数调用
+MyArray析构函数调用
 
-	MyArray<int> array2(array1);
-	array2.Pop_back();
-	cout << "array2打印输出：" << endl;
-	printIntArray(array2);
-	cout << "array2的大小：" << array2.getSize() << endl;
-	cout << "array2的容量：" << array2.getCapacity() << endl;
+2.执行顺序是：有参构造->拷贝构造->operator函数->析构函数(构造-其他-析构)
+3.执行了3次析构函数，意味着3个数组都被释放掉了
+4.若是想访问arr[i],直接访问是不行的，因为这是一个类，而非数组，所以需要重载[]
+5. 容量不会变，但是大小会变化，容量是能力，大小是内容
+*/
+
+//尾加
+	cout << "arr2尾加-----------" << endl;
+	MyArray<int> arr2(arr1);
+	printIntArray(arr2);
+	cout << "arr2的打印输出来" << endl;
+	cout << "arr2的容量是:" << arr2.getCapacity() << endl;
+	cout << "arr2的的大小是:" << arr2.getSize() << endl;
+
+//尾删
+	cout << "arr2尾删-----------" << endl;
+	arr2.Pop_Back();
+	cout << "arr2的打印输出来" << endl;
+	cout << "arr2的容量是:" << arr2.getCapacity() << endl;//容量不会变，但是大小会变化
+	cout << "arr2的的大小是:" << arr2.getSize() << endl;
+	
 }
-
-//测试自定义数据类型
-class Person {
-public:
-	Person() {} 
-		Person(string name, int age) {
-		this->m_Name = name;
-		this->m_Age = age;
-	}
-public:
-	string m_Name;
-	int m_Age;
+//2.自定义数据类型
+class Person{
+	public:
+		Person(){}
+		Person(string name, int age){
+			m_Name = name;
+			m_Age = age;
+		}
+		string m_Name;
+		int m_Age;
 };
+void printPersonArray(MyArray<Person> &arr){
+	for (int i = 0; i < arr.getSize(); i++){
+		cout << "name = " << arr[i].m_Name << "  age = " << arr[i].m_Age << endl;
 
-void printPersonArray(MyArray<Person>& personArr)
-{
-	for (int i = 0; i < personArr.getSize(); i++) {
-		cout << "姓名：" << personArr[i].m_Name << " 年龄： " << personArr[i].m_Age << endl;
 	}
 
 }
-
-void test02()
-{
-	//创建数组
-	MyArray<Person> pArray(10);
-	Person p1("孙悟空", 30);
-	Person p2("韩信", 20);
-	Person p3("妲己", 18);
-	Person p4("王昭君", 15);
-	Person p5("赵云", 24);
-
+void test02(){
+	MyArray<Person> arr(10);
+	Person p1("a", 1);
+	Person p2("b", 1);
+	Person p3("c", 1);
 	//插入数据
-	pArray.Push_back(p1);
-	pArray.Push_back(p2);
-	pArray.Push_back(p3);
-	pArray.Push_back(p4);
-	pArray.Push_back(p5);
-
-	printPersonArray(pArray);
-
-	cout << "pArray的大小：" << pArray.getSize() << endl;
-	cout << "pArray的容量：" << pArray.getCapacity() << endl;
-
+	arr.Push_Back(p1);
+	arr.Push_Back(p2);
+	arr.Push_Back(p3);
+	//打印数组
+	printPersonArray(arr);
+	//输出容量
+	cout << "arr的容量是:" << arr.getCapacity() << endl;//容量不会变，但是大小会变化
+	cout << "arr的的大小是:" << arr.getSize() << endl;
 }
-
-int main() {
-
-	//test01();
-	test02(); 
-	return 0;
+int main(){
+	test01();
+	test02();
 }
 ```
+升级版
+```cpp
+#pragma once
+#include <iostream>
+using namespace std;
+template<class T>
+class MyArray{
+	private:
+		T *pAddress;
+		int m_Capacity;
+		int m_Size;
+	public:	
+		MyArray(int capacity){
+			cout << "有参构造函数调用" << endl;
+			m_Capacity = capacity;
+			m_Size = 0;
+			pAddress = new T[m_Capacity];
+			/*
+			1.此处不可简写为pAddress = new T[capacity];
+			2.指针数组和数组指针的关系
+			3.此时pAddress为数组指针，他指向这个T[m_Capacity]的首地址，例如int *prt ; prt = &arr[10]<=>prt = new arr[10];
+			*/
+		}
+		MyArray(const MyArray &arr){
+			cout << "拷贝构造函数调用" << endl;
+			m_Capacity = arr.m_Capacity;
+			m_Size = arr.m_Size;
+			pAddress = new T[arr.m_Capacity];
+			for (int i = 0; i < m_Size; i++){
+				pAddress[i] = arr.pAddress[i];
+			}
+		}
+		MyArray& operator= (const MyArray &arr){
+			if (pAddress != NULL){
+				delete[] pAddress;
+				pAddress = NULL;
+				m_Size = 0;
+				m_Capacity = 0;
+			}
+			m_Size = arr.m_Size;
+			m_Capacity = arr.m_Capacity;
+			pAddress = new T[arr.pAddress];
+			for (int i = 0; i < m_Size; i++){
+				pAddress[i] = arr.pAddress[i];
+			}
+			return *this;
+		}
+		void Push_Back(const T &val){
+			if (m_Capacity == m_Size){
+				return;
+			}
+			pAddress[m_Size] = val;
+			m_Size++;
+		}
+		void Pop_Back(){
+			if (m_Size == 0){
+				return;
+			}
+			m_Size--;
+		}
+		int getCapacity(){
+			return m_Capacity;
+		}
+		int getSize(){
+			return m_Size;
+		}
+		T& operator[] (int index){
+			return pAddress[index];
+		}
+		~MyArray(){
+			if (pAddress != NULL){
+				cout << "析构函数调用" << endl;
+				delete[] pAddress;//删除一个数组
+				pAddress = NULL;
+			}
+
+		}
+};
+///---------------------------------//
+#include "array.hpp"
+#include <string>
+//1.验证拷贝构造
+void test01(){
+	MyArray<int> arr1(5);
+	MyArray<int> arr2(3);
+	arr2 = arr1;
+	MyArray<int> arr3(arr2);
+	
+
+}
+//2.验证数组
+void printArray(MyArray<int> arr){
+	//传参
+	for (int i = 0; i < arr.getCapacity(); i++){
+		// arr[i] = i;
+		// cout << arr[i] << endl;
+		arr.pushBack(i);
+		cout << arr[i] << endl;
+	} 
+	
+	cout << "the size = " << arr.getSize() << endl;
+	cout << "the capacity = " << arr.getCapacity() << endl;
+	//popback
+	for (int i = 0; i < arr.getCapacity(); i++){
+		arr.popBack();
+	} 
+	cout << "the size = " << arr.getSize() << endl;
+	cout << "the capacity = " << arr.getCapacity() << endl;
+}
+void test02(){
+	MyArray<int> arr1(5);
+	printArray(arr1);
+}
+//3.验证自定义数据类型
+class Person{
+	private:
+		string m_Name;
+		int m_Age;
+	public:
+		Person(){}//有有参构造了就不会有拷贝构造
+		Person(string name, int age): m_Name(name), m_Age(age){}
+	friend void printPerson(MyArray<Person> &p);
+};
+void printPerson(MyArray<Person> &p){
+	for (int i = 0; i < p.getSize(); i++){
+		cout << "name = " << p[i].m_Name << ";age = " << p[i].m_Age << endl;
+	}
+}
+void test03(){
+	Person p1("a", 1);
+	Person p2("b", 2);
+	Person p3("c", 3);
+	MyArray<Person> arr(5);
+	arr.pushBack(p1);
+	arr.pushBack(p2);
+	arr.pushBack(p3);
+	printPerson(arr);
+}
+int main(){
+	test01();
+	test02();
+	test03();
+}
+
+```
+# 13.STL
+## 13-1.STL诞生
+1. 诞生：建立数据结构和算法的一套标准
+2. 概念：
+   1. STL(Standard Template Libray)标准模板库
+   2. STL：容器(container),算法(algorithm),迭代器(iterator)
+   3. 容器和算法之间通过迭代器无缝连接
+   4. STL所有代码用到了模板类或者模板函数
+3. STL6大组件
+   1. 容器：各种数据结构：vector,list,deque,set, map
+   2. 算法：常用的算法：sort, find, copy, for_each
+   3. 迭代器：扮演了容器和算法的胶和剂
+   4. 仿函数：行为类似函数
+   5. 适配器：修饰容器或仿函数或迭代器接口的东西
+   6. 空间适配器：负责空间的配置与管理
+4. 容器，算法，迭代器
+   1. *容器*：置物，就是将运用最广泛的数据结构实现
+      1. 常用的数据结构：数组，链表，树， 栈，队列，集合，映射表
+      2. 分类：
+         1. 序列式容器：强调值的排序，每一个元素都有固定的位置
+         2. 关联式容器：二叉树结构，各个元素间没有严格的物理顺序
+   2. *算法*：有限的步骤，解决逻辑或者数学上的问题
+      1. 分类：质变算法和非质变算法
+         1. 质变算法：运算过程中会更改区间内元素的内容，例如：*拷贝，替换，删除*
+         2. 非质变算法：运算过程中不会改变区间内的元素内容，例如：*查找，计数，遍历，寻找极值*
+   3. *迭代器*：容器和算法的粘合剂，提供一种方法，能够依序寻访某个容器中所含的某个元素，而又无须暴露该容器的内部表示方式，可以理解为*pointer*
+      * 分类
+
+| 种类 | 功能  | 支持运算 |
+|------|-------| ------|
+|输入迭代器|对数据的只读访问|只读， 支持++，==, != |        
+|输出迭代器|对数据的只写访问|只写， 支持++ |        
+|前向迭代器|对数据的只读访问|读写， 支持++，==, != |        
+|双向迭代器|对数据的只读访问|读写， 支持++，==, !=，[n],<,<=,>,>= |
+|随机访问迭代器|读写操作，可以以跳跃的方式访问任意数据，功能最强迭代器|读写， 支持++，==, !=，[n],<,<=,>,>= |
+**目前更多的是双向迭代器和随机访问迭代器**
+## 13-2.vector
+1. 案例：
+
 # 13.c++高级教程
 ## 1. 命名空间
 1. 提出：当一个班上有2个同名学生时，不得不用其他的信息，比如说，年龄等等来区分他们；在c++中，你可能会有xyz()的函数，在另一个库中也有xyz()的函数，所以需要加命名空间加以区分
@@ -8031,7 +8251,7 @@ namespace first_space{
     }
     namespace second_space{
         void func(){
-            cout << "inside second_space" << endl;
+            cout << "inside second_space" << endl;D
         }
     }
 }

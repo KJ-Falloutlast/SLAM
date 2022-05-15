@@ -350,6 +350,7 @@ int main(int argc, char** argv) {
 ```
 2. useEigen
 3. useGeometry
+   1. 例1
 ```cpp
 #include <iostream>
 #include <cmath>
@@ -412,7 +413,115 @@ int main ( int argc, char** argv )
     return 0;
 }
 ```
-4. visualizeGeometry
+  2. 例2
+```cpp
+\一、旋转向量
+
+1.0 初始化旋转向量：旋转角为alpha，旋转轴为(x,y,z)
+
+Eigen::AngleAxisd rotation_vector(alpha,Vector3d(x,y,z))
+
+1.1 旋转向量转旋转矩阵
+
+Eigen::Matrix3d rotation_matrix;
+rotation_matrix=rotation_vector.matrix();
+
+Eigen::Matrix3d rotation_matrix;
+rotation_matrix=rotation_vector.toRotationMatrix();
+
+1.2 旋转向量转欧拉角(Z-Y-X，即RPY)
+
+Eigen::Vector3d eulerAngle=rotation_vector.matrix().eulerAngles(2,1,0);
+
+1.3 旋转向量转四元数
+
+Eigen::Quaterniond quaternion(rotation_vector);
+Eigen::Quaterniond quaternion;
+quaternion=rotation_vector;
+
+
+二、旋转矩阵
+
+2.0 初始化旋转矩阵
+
+Eigen::Matrix3d rotation_matrix;rotation_matrix<<x_00,x_01,x_02,x_10,x_11,x_12,x_20,x_21,x_22;
+
+2.1 旋转矩阵转旋转向量
+
+Eigen::AngleAxisd rotation_vector(rotation_matrix);
+
+
+Eigen::AngleAxisd rotation_vector;rotation_vector=rotation_matrix;
+
+Eigen::AngleAxisd rotation_vector;rotation_vector.fromRotationMatrix(rotation_matrix);
+
+2.2 旋转矩阵转欧拉角(Z-Y-X，即RPY)
+
+Eigen::Vector3d eulerAngle=rotation_matrix.eulerAngles(2,1,0);
+
+2.3 旋转矩阵转四元数
+
+Eigen::Quaterniond quaternion(rotation_matrix);
+
+Eigen::Quaterniond quaternion;quaternion=rotation_matrix;
+
+
+三、欧拉角
+
+3.0 初始化欧拉角(Z-Y-X，即RPY)
+
+Eigen::Vector3d eulerAngle(yaw,pitch,roll);
+
+3.1 欧拉角转旋转向量
+
+Eigen::AngleAxisd rollAngle(AngleAxisd(eulerAngle(2),Vector3d::UnitX()));//2是Z的欧拉角，UnitX()是旋转向量在X轴的分量
+Eigen::AngleAxisd pitchAngle(AngleAxisd(eulerAngle(1),Vector3d::UnitY()));//Y
+Eigen::AngleAxisd yawAngle(AngleAxisd(eulerAngle(0),Vector3d::UnitZ())); //X
+Eigen::AngleAxisd rotation_vector;rotation_vector=yawAngle*pitchAngle*rollAngle;//实际上是RPY
+
+3.2 欧拉角转旋转矩阵
+
+Eigen::AngleAxisd rollAngle(AngleAxisd(eulerAngle(2),Vector3d::UnitX()));
+Eigen::AngleAxisd pitchAngle(AngleAxisd(eulerAngle(1),Vector3d::UnitY()));
+Eigen::AngleAxisd yawAngle(AngleAxisd(eulerAngle(0),Vector3d::UnitZ())); 
+Eigen::Matrix3d rotation_matrix;
+rotation_matrix=yawAngle*pitchAngle*rollAngle;
+
+3.3 欧拉角转四元数
+
+Eigen::AngleAxisd rollAngle(AngleAxisd(eulerAngle(2),Vector3d::UnitX()));
+Eigen::AngleAxisd pitchAngle(AngleAxisd(eulerAngle(1),Vector3d::UnitY()));
+Eigen::AngleAxisd yawAngle(AngleAxisd(eulerAngle(0),Vector3d::UnitZ())); 
+Eigen::Quaterniond quaternion;
+quaternion=yawAngle*pitchAngle*rollAngle;
+
+
+四、四元数
+
+4.0 初始化四元数
+
+Eigen::Quaterniond quaternion(w,x,y,z);
+
+4.1 四元数转旋转向量
+
+Eigen::AngleAxisd rotation_vector(quaternion);
+
+Eigen::AngleAxisd rotation_vector;rotation_vector=quaternion;
+
+4.2 四元数转旋转矩阵
+
+Eigen::Matrix3d rotation_matrix;
+rotation_matrix=quaternion.matrix();
+
+Eigen::Matrix3d rotation_matrix;
+rotation_matrix=quaternion.toRotationMatrix();
+
+4.4 四元数转欧拉角(Z-Y-X，即RPY)
+
+Eigen::Vector3d eulerAngle=quaternion.matrix().eulerAngles(2,1,0);
+
+```
+1. visualizeGeometry
 ```cpp
 #include <iostream>
 #include <iomanip>

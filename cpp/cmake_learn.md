@@ -328,7 +328,7 @@ int main(){
 2. 执行顺序：cmake .------>make
 **cmakelists.txt** 
 ```cmake
-cmake_version_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.10)
 
 project(demo2)
 
