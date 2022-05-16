@@ -2176,12 +2176,12 @@ ptr = &var
 pptr = &pt r
 *pptr = *(&ptr) = ptr = &var
 **pptr = *(*pptr) = *(&var) = var    
-注意:每次在p前加入一个*,相当于对p进行  
+注意:每次在p前加入一个*,相当于对p进行 一次取值,
 6.对于**pptr,当未定义的时候，只能取得,pptr,&pptr,不能取得,*pptr,**pptr
 若var = 30,*pptr = &var,(pptr = &var是错误的),此时*(*pptr) = *(&var) = 30
 所以对于**pptr，*pptr = &var,即是保证2次寻址，pptr = &var就是1次寻址了，因为此时
 *pptr = *(&var) = 30,**pptr就失去了意义    
-7.指针和数组：int arr[]= {.......},int * ptr = arr<------> ptr = arr <---> ptr[i] = arr[i]                                                                       一次取值,
+7.指针和数组：int arr[]= {.......},int * ptr = arr<------> ptr = arr <---> ptr[i] = arr[i]                                                                       
 ```
 ### 8.指针函数：
 1.指针函数：
@@ -2194,11 +2194,49 @@ pptr = &pt r
 ```
 ### 9.指针数组和数组指针的关系
 1. 关系：指针数组是指针的数组，所有元素都是指针；数组指针为：变量指向是一个指针，指向数组的首地址，数组的元素为非指针
-2. 例如
-   1. >char *arr[4] = {"hello", "world", "shannxi", "xian"};为指针数组
-   2. 
+2. 例如：
+```cpp
+#include <iostream>
+using namespace std;
+void test01(){
+    int arr[] = {1, 2, 3};
+    int *ptr[3];
+    for (int i = 0; i < 3; i++){
+        ptr[i] = &arr[i];
+    }
+    for (int i = 0; i < 3; i++){
+        cout << ptr[i] << endl;
+        cout << *ptr[i] << endl;
+        cout << ptr + i << endl;
+        cout << *(ptr + i) << endl;
+    }
 
+}
 
+void test02(){
+    int arr[] = {1, 2, 3};
+    int *ptr = new int[3];
+    /*
+    1. 指针数组int *ptr = new int[3]，里面必须是int数据类型；而int *ptr[3]指针数组，
+    里面必须为指针
+    2. 指针数组的类型可以为其他,例如：int *ptr = new T[size];
+    
+    */
+    for (int i = 0; i < 3; i++){
+        ptr[i] = arr[i];
+    }
+    for (int i = 0; i < 3; i++){
+        cout << ptr[i] << endl;//ptr[i] = *(ptr + i)
+        cout << &ptr[i] << endl;//&ptr[i] = ptr + i
+        cout << *(ptr + i) << endl;
+        cout << ptr + i << endl;
+    }
+}
+int main(){
+    test01();
+    test02();
+}
+```
 ### 9.变量作用域
 #### 1.定义:
   局部变量:在函数或一个代码块内部声明的变量，称为局部变量,
@@ -8148,7 +8186,105 @@ int main(){
 |随机访问迭代器|读写操作，可以以跳跃的方式访问任意数据，功能最强迭代器|读写， 支持++，==, !=，[n],<,<=,>,>= |
 **目前更多的是双向迭代器和随机访问迭代器**
 ## 13-2.vector
-1. 案例：
+1. 案例
+```cpp
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+void myPrint(int val){
+    cout << val << endl;
+}//回调函数
+void test01(){
+    vector<int> vec;
+    //1. 插入数据
+    for (int i = 0; i < 5; i++){
+        vec.push_back(i);
+    }
+    //通过迭代器访问
+    vector<int>::iterator itBegin = vec.begin();//起始迭代器，指向容器中的第一个元素
+    vector<int>::iterator itEnd = vec.end();//结束迭代器，指向容器中最后元素的下一个位置
+
+    //方法1
+    while (itBegin != itEnd){
+        cout << *itBegin<< endl;
+        itBegin++;
+    }
+    //方法2
+    for (itBegin; itBegin != itEnd; itBegin++){
+        cout << *itBegin << endl;
+    }
+    //方法3
+
+    for_each(vec.begin(), vec.end(), myPrint);
+    //这是一个回调函数，
+
+}
+int main(){
+    test01();
+}
+```
+2. Vector中存放自定义数据类型
+例子：
+```cpp
+#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+class Person{
+    public:
+        Person(string name, int age):m_Name(name), m_Age(age){}
+        string m_Name;
+        int m_Age;
+};
+void test01(){
+    vector<Person> vec;
+    Person p1("a", 1);
+    Person p2("b", 2);
+    Person p3("c", 3);
+    vec.push_back(p1);
+    vec.push_back(p2);
+    vec.push_back(p3);
+    
+    vector<Person>::iterator iter = vec.begin();
+    for (; iter != vec.end(); iter++){
+        //1.方法1
+        cout << "name = " << iter->m_Name << 
+        "age = " << iter->m_Age << endl; 
+        /*
+        2.方法2：注意此时不能去掉()，iter是一个指针
+        iter = &vec, *iter = vec
+        */
+        cout << "name = " << (*iter).m_Name << 
+        "age = " << (*iter).m_Age << endl; 
+        
+    }
+
+    
+}
+void test02(){
+    vector<Person*> vec;
+    Person p1("a", 1);
+    Person p2("b", 2);
+    Person p3("c", 3);
+    vec.push_back(&p1);
+    vec.push_back(&p2);
+    vec.push_back(&p3);
+    vector<Person*>::iterator iter = vec.begin();
+    for (; iter != vec.end(); iter++){
+        cout << "name = " << (*iter)->m_Name << 
+        "age = " << (*iter)->m_Age << endl; 
+    }
+    /*总结
+    1.vector<Person>,iter->m_Name;vector<Person*>,(*iter)->m_Name
+    2.括号里面的是什么数据类型，就
+    */
+}
+int main(){
+    test01();
+    test02();
+}
+```
 
 # 13.c++高级教程
 ## 1. 命名空间

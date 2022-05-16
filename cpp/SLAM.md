@@ -353,176 +353,86 @@ int main(int argc, char** argv) {
    1. 例1
 ```cpp
 #include <iostream>
-#include <cmath>
-using namespace std;
-
-#include <Eigen/Core>
-// Eigen 几何模块
+#include <Eigen/Dense>
 #include <Eigen/Geometry>
+using namespace std;
+using namespace Eigen;
+void test(){
+    //三个对象作为媒介
+    AngleAxisd V(M_PI/4, Vector3d(0, 0, 1));
+    Matrix3d R(V);
+    Quaterniond q(V);
+    //1.对旋转向量进行构造
+    //1-1.方法1: V = R
+    AngleAxisd V1(M_PI/4, Vector3d(0, 0, 1));
+    V1 = R;
+    cout << "v1.matrix() = \n" << V1.matrix() << endl;
+    //1-2.方法2：V(R)
+    AngleAxisd V2(R); 
+    cout << "v2.matrix() = \n" << V2.matrix() << endl;
+    
+    //2.对四元数构造
+    //2-1.方法1：直接法
+    Quaterniond q1(cos(M_PI/8), 0 * sin(M_PI/8), 0 * sin(M_PI/8), 1 * sin(M_PI/8));
+    cout << "q1.coeffs() = \n" << q1.coeffs() << endl;
+    //2-2.方法2：利用旋转向量
+    Quaterniond q2(V);
+    cout << "q2.matrix() = \n" << q2.matrix() << endl;
+    cout << "q2.coeffs() = \n" << q2.coeffs() << endl;
+    cout << "q2.x() = " << q2.x() << endl;
+    cout << "q2.y() = " << q2.y() << endl;
+    cout << "q2.z() = " << q2.z() << endl;
+    cout << "q2.w() = " << q2.w() << endl;
+    //2-3.方法3:利用旋转矩阵
+    Quaterniond q3(R);
+    //2-3-1.planA
+    cout << "q3.matrix1 = \n" <<  q3.matrix() << endl;
+    //2-3-2.planB
+    cout << "q3.matrix2 = \n" <<  q3.toRotationMatrix() << endl;
+    
+    //3.对旋转矩阵构造
+    //3-1.利用旋转向量
+    cout << "V.matrix = \n" << V.matrix() << endl;
+    //3-2.利用四元数
+    Matrix3d R1(q);
+    cout << "R1(q) = \n" << R1 << endl;
 
-/****************************
-* 本程序演示了 Eigen 几何模块的使用方法
-****************************/
+    //4.对欧拉角进行构造
+    cout << "R.eulerAngles(2,1,0) = \n" << R.eulerAngles(2,1,0) << endl;
+    
+    //5.对欧式矩阵构造
+    Isometry3d T(R);
+    Vector3d V3(1, 2, 3);
+    T.pretranslate(V3);
+    
+    cout << "T.matrix = \n" <<  T.matrix() << endl;
 
-int main ( int argc, char** argv )
-{
-    // Eigen/Geometry 模块提供了各种旋转和平移的表示
-    // 3D 旋转矩阵直接使用 Matrix3d 或 Matrix3f
-    Eigen::Matrix3d rotation_matrix = Eigen::Matrix3d::Identity();
-    // 旋转向量使用 AngleAxis, 它底层不直接是Matrix，但运算可以当作矩阵（因为重载了运算符）
-    Eigen::AngleAxisd rotation_vector ( M_PI/4, Eigen::Vector3d ( 0,0,1 ) );     //沿 Z 轴旋转 45 度
-    cout .precision(3);
-    cout<<"rotation matrix =\n"<<rotation_vector.matrix() <<endl;                //用matrix()转换成矩阵
-    // 也可以直接赋值
-    rotation_matrix = rotation_vector.toRotationMatrix();
-    // 用 AngleAxis 可以进行坐标变换
-    Eigen::Vector3d v ( 1,0,0 );
-    Eigen::Vector3d v_rotated = rotation_vector * v;
-    cout<<"(1,0,0) after rotation = "<<v_rotated.transpose()<<endl;
-    // 或者用旋转矩阵
-    v_rotated = rotation_matrix * v;
-    cout<<"(1,0,0) after rotation = "<<v_rotated.transpose()<<endl;
+    //6.对向量旋转
+    Vector3d p(0, 0, 1);
+    Vector3d vector_rotated;
+    //6-1.利用旋转矩阵
+    vector_rotated = R * p;
+    //6-2.利用旋转向量
+    vector_rotated = V * p;
+    //6-3.利用四元数
+    vector_rotated = q * p;
+    //6-4.利用欧式矩阵
+    vector_rotated = T * p;
+    cout << "vector_rotated = \n" << vector_rotated << endl;
+     
+}
 
-    // 欧拉角: 可以将旋转矩阵直接转换成欧拉角
-    Eigen::Vector3d euler_angles = rotation_matrix.eulerAngles ( 2,1,0 ); // ZYX顺序，即roll pitch yaw顺序
-    cout<<"yaw pitch roll = "<<euler_angles.transpose()<<endl;
-
-    // 欧氏变换矩阵使用 Eigen::Isometry
-    Eigen::Isometry3d T=Eigen::Isometry3d::Identity();                // 虽然称为3d，实质上是4＊4的矩阵
-    T.rotate ( rotation_vector );                                     // 按照rotation_vector进行旋转
-    T.pretranslate ( Eigen::Vector3d ( 1,3,4 ) );                     // 把平移向量设成(1,3,4)
-    cout << "Transform matrix = \n" << T.matrix() <<endl;
-
-    // 用变换矩阵进行坐标变换
-    Eigen::Vector3d v_transformed = T*v;                              // 相当于R*v+t
-    cout<<"v tranformed = "<<v_transformed.transpose()<<endl;
-
-    // 对于仿射和射影变换，使用 Eigen::Affine3d 和 Eigen::Projective3d 即可，略
-
-    // 四元数
-    // 可以直接把AngleAxis赋值给四元数，反之亦然
-    Eigen::Quaterniond q = Eigen::Quaterniond ( rotation_vector );
-    cout<<"quaternion = \n"<<q.coeffs() <<endl;   // 请注意coeffs的顺序是(x,y,z,w),w为实部，前三者为虚部
-    // 也可以把旋转矩阵赋给它
-    q = Eigen::Quaterniond ( rotation_matrix );
-    cout<<"quaternion = \n"<<q.coeffs() <<endl;
-    // 使用四元数旋转一个向量，使用重载的乘法即可
-    v_rotated = q*v; // 注意数学上是qvq^{-1}
-    cout<<"(1,0,0) after rotation = "<<v_rotated.transpose()<<endl;
-
-    return 0;
+int main(){
+    test();
 }
 ```
-  2. 例2
+
+![各类角度转换](../pictures/各类角度转换.png)
+
+
+2. visualizeGeometry
 ```cpp
-\一、旋转向量
 
-1.0 初始化旋转向量：旋转角为alpha，旋转轴为(x,y,z)
-
-Eigen::AngleAxisd rotation_vector(alpha,Vector3d(x,y,z))
-
-1.1 旋转向量转旋转矩阵
-
-Eigen::Matrix3d rotation_matrix;
-rotation_matrix=rotation_vector.matrix();
-
-Eigen::Matrix3d rotation_matrix;
-rotation_matrix=rotation_vector.toRotationMatrix();
-
-1.2 旋转向量转欧拉角(Z-Y-X，即RPY)
-
-Eigen::Vector3d eulerAngle=rotation_vector.matrix().eulerAngles(2,1,0);
-
-1.3 旋转向量转四元数
-
-Eigen::Quaterniond quaternion(rotation_vector);
-Eigen::Quaterniond quaternion;
-quaternion=rotation_vector;
-
-
-二、旋转矩阵
-
-2.0 初始化旋转矩阵
-
-Eigen::Matrix3d rotation_matrix;rotation_matrix<<x_00,x_01,x_02,x_10,x_11,x_12,x_20,x_21,x_22;
-
-2.1 旋转矩阵转旋转向量
-
-Eigen::AngleAxisd rotation_vector(rotation_matrix);
-
-
-Eigen::AngleAxisd rotation_vector;rotation_vector=rotation_matrix;
-
-Eigen::AngleAxisd rotation_vector;rotation_vector.fromRotationMatrix(rotation_matrix);
-
-2.2 旋转矩阵转欧拉角(Z-Y-X，即RPY)
-
-Eigen::Vector3d eulerAngle=rotation_matrix.eulerAngles(2,1,0);
-
-2.3 旋转矩阵转四元数
-
-Eigen::Quaterniond quaternion(rotation_matrix);
-
-Eigen::Quaterniond quaternion;quaternion=rotation_matrix;
-
-
-三、欧拉角
-
-3.0 初始化欧拉角(Z-Y-X，即RPY)
-
-Eigen::Vector3d eulerAngle(yaw,pitch,roll);
-
-3.1 欧拉角转旋转向量
-
-Eigen::AngleAxisd rollAngle(AngleAxisd(eulerAngle(2),Vector3d::UnitX()));//2是Z的欧拉角，UnitX()是旋转向量在X轴的分量
-Eigen::AngleAxisd pitchAngle(AngleAxisd(eulerAngle(1),Vector3d::UnitY()));//Y
-Eigen::AngleAxisd yawAngle(AngleAxisd(eulerAngle(0),Vector3d::UnitZ())); //X
-Eigen::AngleAxisd rotation_vector;rotation_vector=yawAngle*pitchAngle*rollAngle;//实际上是RPY
-
-3.2 欧拉角转旋转矩阵
-
-Eigen::AngleAxisd rollAngle(AngleAxisd(eulerAngle(2),Vector3d::UnitX()));
-Eigen::AngleAxisd pitchAngle(AngleAxisd(eulerAngle(1),Vector3d::UnitY()));
-Eigen::AngleAxisd yawAngle(AngleAxisd(eulerAngle(0),Vector3d::UnitZ())); 
-Eigen::Matrix3d rotation_matrix;
-rotation_matrix=yawAngle*pitchAngle*rollAngle;
-
-3.3 欧拉角转四元数
-
-Eigen::AngleAxisd rollAngle(AngleAxisd(eulerAngle(2),Vector3d::UnitX()));
-Eigen::AngleAxisd pitchAngle(AngleAxisd(eulerAngle(1),Vector3d::UnitY()));
-Eigen::AngleAxisd yawAngle(AngleAxisd(eulerAngle(0),Vector3d::UnitZ())); 
-Eigen::Quaterniond quaternion;
-quaternion=yawAngle*pitchAngle*rollAngle;
-
-
-四、四元数
-
-4.0 初始化四元数
-
-Eigen::Quaterniond quaternion(w,x,y,z);
-
-4.1 四元数转旋转向量
-
-Eigen::AngleAxisd rotation_vector(quaternion);
-
-Eigen::AngleAxisd rotation_vector;rotation_vector=quaternion;
-
-4.2 四元数转旋转矩阵
-
-Eigen::Matrix3d rotation_matrix;
-rotation_matrix=quaternion.matrix();
-
-Eigen::Matrix3d rotation_matrix;
-rotation_matrix=quaternion.toRotationMatrix();
-
-4.4 四元数转欧拉角(Z-Y-X，即RPY)
-
-Eigen::Vector3d eulerAngle=quaternion.matrix().eulerAngles(2,1,0);
-
-```
-1. visualizeGeometry
-```cpp
 #include <iostream>
 #include <iomanip>
 using namespace std;
