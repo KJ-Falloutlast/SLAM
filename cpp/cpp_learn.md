@@ -6626,7 +6626,7 @@ class CPU{
 		virtual void calculate() = 0;
 };
 class VideoCard{
-	public:
+	public:`
 		virtual void display() = 0;
 };
 class Memory{
@@ -6634,7 +6634,7 @@ class Memory{
 		virtual void storage() = 0;
 };
 
-//1.Intel厂
+//1.Intel厂`
 class IntelCPU: public CPU{
 	public:
 		virtual void calculate(){
@@ -8186,7 +8186,7 @@ int main(){
 |随机访问迭代器|读写操作，可以以跳跃的方式访问任意数据，功能最强迭代器|读写， 支持++，==, !=，[n],<,<=,>,>= |
 **目前更多的是双向迭代器和随机访问迭代器**
 ## 13-2.vector
-1. 案例
+### 1. 案例
 ```cpp
 #include <iostream>
 #include <vector>
@@ -8263,7 +8263,7 @@ void test01(){
     
 }
 void test02(){
-    vector<Person*> vec;
+    vector<Person*> vec;//vector是Person*,则iterator是Person*
     Person p1("a", 1);
     Person p2("b", 2);
     Person p3("c", 3);
@@ -8285,7 +8285,120 @@ int main(){
     test02();
 }
 ```
+3. 总结:
+   1. vector<Person>,iter->m_Name;vector<Person*>,(*iter)->m_Name,括号里面的是什么数据类型，就直接用什么类型
+   2. 由于iterBegin是<Person>，所以printPerson也应该是Person类型
+   3. iter和vector的类型保持一致，例如要么都对应<Person>,或者<Person*>
+升级版
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <algorithm>
+using namespace std;
+class Person{
+    public:
+        string m_Name;
+        int m_Age;
+        Person(string name, int age): m_Name(name), m_Age(age){}
 
+};
+
+void printPerson(const Person &obj){
+    cout << "name = " << obj.m_Name << " age  =" << obj.m_Age << endl;
+
+}
+void test01(){
+    vector<Person> vec;
+    Person p1("a", 1);
+    Person p2("b", 2);
+    Person p3("c", 3);
+    vec.push_back(p1);
+    vec.push_back(p2);
+    vec.push_back(p3);
+    vector<Person>::iterator iterBegin = vec.begin();
+    vector<Person>::iterator iterEnd = vec.end();
+    //遍历方式1
+    //1-1.取值方法1
+    for (; iterBegin != iterEnd; iterBegin++){
+        cout << "name = " <<  iterBegin->m_Name << " age  =" << iterBegin->m_Age << endl;
+    }
+    //1-2.取值方法2
+    for (; iterBegin != iterEnd; iterBegin++){
+        cout << "name = " <<  (*iterBegin).m_Name << " age  =" << (*iterBegin).m_Age << endl;
+    }
+    
+    //遍历方式2
+    for_each(iterBegin, iterEnd, printPerson);
+    //由于iterBegin是<Person>，所以printPerson也应该是Person类型
+
+}
+//3.遍历方式3
+void test02(){
+    vector<Person*> vec;
+    Person p1("a", 1);
+    Person p2("b", 2);
+    Person p3("c", 3);
+    vec.push_back(&p1);
+    vec.push_back(&p2);
+    vec.push_back(&p3);
+    vector<Person*>::iterator iterBegin = vec.begin();
+    for (; iterBegin != vec.end(); iterBegin++){
+        cout << "name = " <<  (*iterBegin)->m_Name << " age  =" << (*iterBegin)->m_Age << endl;
+    }
+        
+}
+int main(){
+    test01();
+    test02();
+
+}
+```
+### 2.vector容器嵌套容器
+```cpp
+#include <vector>
+
+//容器嵌套容器
+void test01() {
+
+	vector< vector<int> >  v;
+
+	vector<int> v1;
+	vector<int> v2;
+	vector<int> v3;
+	vector<int> v4;
+
+	for (int i = 0; i < 4; i++) {
+		v1.push_back(i + 1);
+		v2.push_back(i + 2);
+		v3.push_back(i + 3);
+		v4.push_back(i + 4);
+	}
+
+	//将容器元素插入到vector v中
+	v.push_back(v1);
+	v.push_back(v2);
+	v.push_back(v3);
+	v.push_back(v4);
+
+
+	for (vector<vector<int>>::iterator it = v.begin(); it != v.end(); it++) {
+//it是最外面容器的第一个的元素的地址，(it*)是第一个容器的第一个元素的地址
+
+		for (vector<int>::iterator vit = (*it).begin(); vit != (*it).end(); vit++) {
+			cout << *vit << " ";
+		}
+		cout << endl;
+	}
+
+}
+
+int main() {
+
+	test01();
+	return 0;
+}
+```
 # 13.c++高级教程
 ## 1. 命名空间
 1. 提出：当一个班上有2个同名学生时，不得不用其他的信息，比如说，年龄等等来区分他们；在c++中，你可能会有xyz()的函数，在另一个库中也有xyz()的函数，所以需要加命名空间加以区分
