@@ -8185,8 +8185,8 @@ int main(){
 |双向迭代器|对数据的只读访问|读写， 支持++，==, !=，[n],<,<=,>,>= |
 |随机访问迭代器|读写操作，可以以跳跃的方式访问任意数据，功能最强迭代器|读写， 支持++，==, !=，[n],<,<=,>,>= |
 **目前更多的是双向迭代器和随机访问迭代器**
-## 13-2.vector
-### 1. 案例
+## 13-2.常用容器
+1. 案例
 ```cpp
 #include <iostream>
 #include <vector>
@@ -8289,6 +8289,8 @@ int main(){
    1. vector<Person>,iter->m_Name;vector<Person*>,(*iter)->m_Name,括号里面的是什么数据类型，就直接用什么类型
    2. 由于iterBegin是<Person>，所以printPerson也应该是Person类型
    3. iter和vector的类型保持一致，例如要么都对应<Person>,或者<Person*>
+   4. vector<Person>,在vector里面是Person类型，iter是第i个元素的地址，\*iter是第i个元素；iter->name, (*iter).name
+   5. vector<Person*>，在vector里面是指针，在vector里面是\*Person数据类型,\*iter是第i个元素的*地址*，(*iter)->name
 升级版
 ```cpp
 #include <iostream>
@@ -8354,7 +8356,7 @@ int main(){
 
 }
 ```
-### 2.vector容器嵌套容器
+2. vector容器嵌套容器
 ```cpp
 #include <vector>
 
@@ -8399,6 +8401,35 @@ int main() {
 	return 0;
 }
 ```
+## 13-1.string容器
+### 1. 基本概念：string本质上是一个类
+2. string和char*的区别：
+   1. char*是一个指针
+   2. string是一个类，类内部封装了char*，是一个char*型的容器
+3. 特点：
+   1. string类内部封装了很多成员方法
+   2. 例如find, copy, delete, replace, insert
+   3. string管理char*所分配的内存，不用担心复制越界和取值越界
+### 2.string构造函数
+1. 原型
+   1. string():创建一个空的字符串，例如string,str
+   2. string(const char* s);使用字符串s初始化
+   3. string(const string &str):使用一个string初始化另一个string
+   4. string(int n, char c);使用n个字符c初始化
+### 3.string赋值操作
+1. 功能描述：给string字符串进行赋值
+
+2. 赋值的函数原型：
+### 4.string字符串拼接
+string& operator+= (const char *str)//重载+=
+string& operator+= (const char c)//重载+=
+string& operator+= (const string &str)//重载+=
+string& operator+= (const char *s)//把字符串s连接到当前的字符串结尾
+string& operator+= (const char *s, int n)//把字符串的前N个字符连接到当前字符串的结尾
+string& operator+= (const char *str)//同operator+=(const string &str)
+string& append(const string &s,int pos, int n)
+//字符串s从pose开始的n个字符连接到字符串结尾
+
 # 13.c++高级教程
 ## 1. 命名空间
 1. 提出：当一个班上有2个同名学生时，不得不用其他的信息，比如说，年龄等等来区分他们；在c++中，你可能会有xyz()的函数，在另一个库中也有xyz()的函数，所以需要加命名空间加以区分
