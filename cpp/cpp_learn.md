@@ -4153,8 +4153,8 @@ Phone析构**
    1. 所有对象共享一个函数
    2. 静态成员函数只能访问静态成员变量
    3. 静态成员函数也有访问权限：private:static void func(){}
-，Person::func()无法访问
-3. 例子
+，Person::func()无法
+3. 
 ```cpp
 #include <iostream>
 using namespace std;
@@ -8416,19 +8416,367 @@ int main() {
    2. string(const char* s);使用字符串s初始化
    3. string(const string &str):使用一个string初始化另一个string
    4. string(int n, char c);使用n个字符c初始化
+2. 例子
+```cpp
+#include <iostream>
+#include <string>
+using namespace std;
+void test(){
+    string str1("a");
+    string str2(str1);
+    string str3(3, 'a');//第二个参数是char
+    cout << "str1 = " << str1 << endl;
+    cout << "str2 = " << str2 << endl;
+    cout << "str3 = " << str3 << endl;
+}
+int main(){
+    test();
+}
+```
 ### 3.string赋值操作
 1. 功能描述：给string字符串进行赋值
+```cpp
+#include <iostream>
+#include <string>
+using namespace std;
+/*
+运算：s1 = s2, 
+s1 += s2, s1.assign(s2), 
+s1.assign(3, 'a'), s1.assgin(s1, 3)
+*/
+void test01(){
+    string s1("a");
+    string s2(s1);
+    string s3("abcde");
+    string s4;
+    string s5;
+    s3 += s2;
+    s1.assign(s3);//将s3赋值给s1
+    s4.assign("abcde", 3);//把"abcde的前3个赋值给s4
+    s5.assign(3, 'a');//将3个a赋值给s5
+    cout << "s1 = " << s1 << endl;
+    cout << "s2 = " << s2 << endl;
+    cout << "s3 = " << s3 << endl;
+    cout << "s4 = " << s4 << endl;
+    cout << "s5 = " << s5 << endl;
+}
 
-2. 赋值的函数原型：
+int main() {
+	test01();
+	return 0;
+}
+```
 ### 4.string字符串拼接
-string& operator+= (const char *str)//重载+=
-string& operator+= (const char c)//重载+=
-string& operator+= (const string &str)//重载+=
-string& operator+= (const char *s)//把字符串s连接到当前的字符串结尾
-string& operator+= (const char *s, int n)//把字符串的前N个字符连接到当前字符串的结尾
-string& operator+= (const char *str)//同operator+=(const string &str)
-string& append(const string &s,int pos, int n)
-//字符串s从pose开始的n个字符连接到字符串结尾
+案例
+```cpp
+#include <iostream>
+#include <string>
+using namespace std;
+/*
+1.方法1：s1.append(s2)
+2.方法2：s2.append(s1, 3),//截取s1的前3个字符
+3.方法3： s3.append(s1, 4, 3) //截取s1的第4个字符开始往后3个元素
+*/ 
+void test(){
+    string s1("TimTiger");
+    string s2("aaaaa");
+    string s3("bbbbb");
+    s1.append(s2);
+    s2.append(s3, 2);        
+    s3.append(s3, 2, 3);        
+    cout << "s1 = " << s1 << endl;
+    cout << "s2 = " << s2 << endl;
+    cout << "s3 = " << s3 << endl;
+    
+}
+int main(){
+    test();
+}
+```
+### 5.string查找和替换
+```cpp
+#include <iostream>
+#include <string>
+using namespace std;
+//查找和替换
+//1.查找
+void test01(){
+    string s1 = "abcdefgde";
+    //1-1.find
+    s1.find("de");
+    int pos = s1.find("de");
+    //返回"de"的"d"的第一个索引,若是有返回相应的索引值，若是无返回-1
+    if(pos == -1){
+        cout << "未找到字符串" << endl;
+    }
+    else{
+        cout << "pos = " << pos << endl;
+    }
+    //1-2.rfind
+    //rfind是从右往左计算下标
+    pos = s1.rfind("de");
+    cout << "pos = " << pos << endl;
+    
+}
+
+//2.替换
+void test02(){
+    string s1 = "abcdefgde";
+    s1.replace(1, 3, "1114");
+    //将1-3:bcd替换成1114
+    cout << "s1 = " << s1 << endl;
+
+}
+int main(){
+    test01();
+    test02();
+}
+```
+### 6.string的比较
+```cpp
+#include <iostream>
+#include <string>
+using namespace std;
+//字符串比较
+void test01()
+{
+	string s1 = "hello";
+	string s2 = "aello";
+	int ret = s1.compare(s2);
+	//ret = 0:s1 = s2;ret > 0, s1 > s2; ret < 0, s1 < s2;
+    if (ret == 0) {
+		cout << "s1 等于 s2" << endl;
+	}
+	else if (ret > 0)
+	{
+		cout << "s1 大于 s2" << endl;
+	}
+	else
+	{
+		cout << "s1 小于 s2" << endl;
+	}
+}
+int main() {
+	test01();
+	return 0;
+}
+```
+
+### 7.string的访问和赋值
+```cpp
+#include <iostream>
+#include <string>
+using namespace std;
+//访问
+void test01(){
+    string s1("abcdefghi");
+    for(int i = 0; i < s1.size(); i++){
+        cout << "s1[" << i << "] = " << s1[i] << endl;
+    }
+    for(int i = 0; i < s1.size(); i++){
+        cout << "s1[" << i << "] = " << s1.at(i) << endl;
+    }
+
+}
+//赋值
+void test02(){
+    string s1("abcdefghi");
+    string s2("123456789");
+    for(int i = 0; i < s1.size(); i++){
+        s1[i] = s2[i];
+        cout << "s1[" << i << "] = " << s1[i] << endl;
+        
+    }
+}
+int main(){
+    // test01();
+    test02();
+}
+```
+### 8.string的字符存取
+```cpp
+#include <iostream>
+#include <string>
+using namespace std;
+//字符串插入和删除
+void test01()
+{
+	string str = "hello";
+	str.insert(1, "111");
+	cout << str << endl;
+    //在1号位置插入111
+	str.erase(1, 3); 
+     //从1号位置开始删除3个字符
+	cout << str << endl;
+}
+
+int main() {
+	test01();
+	return 0;
+}
+```
+### 9.string子串
+```cpp
+#include <iostream>
+#include <string>
+using namespace std;
+void test(){
+    string s("aaaaaa@qq.com");
+    int res = s.find("@");
+    cout << "username = " << s.substr(0, res) << endl;
+    //获取从0->index(@)-1的所有数据
+}
+int main(){
+    test();
+}
+```
+## 13-2.vector容器
+### 1.vector基本概念
+1. 功能：类似于数组
+2. 区别：数组是静态空间，vector可以动态扩展
+3. 动态扩展：并不是在原空间之后续接新空间， 而是寻找更大的内存空间，然后将原数据拷贝到新空间，释放原空间
+### 2.vector构造函数和赋值
+1. 功能
+   1. vector<T> v:采用模板类
+   2. vector(v.begin, v.end);将v[begin(), end()]区间中的元素拷贝给本身
+   3. vector(n, elem);构造函数将n个elem拷贝给本身
+   4. vector(const vector &vec) :拷贝构造函数
+2. 案例
+>1.构造
+``` cpp
+#include <vector>
+void printVector(vector<int>& v) {
+
+	for (vector<int>::iterator it = v.begin(); it != v.end(); it++) {
+		cout << *it << " ";
+	}
+	cout << endl;
+}
+
+void test01()
+{
+	vector<int> v1; //无参构造
+	for (int i = 0; i < 10; i++)
+	{
+		v1.push_back(i);
+	}
+	printVector(v1);
+
+	vector<int> v2(v1.begin(), v1.end());
+	printVector(v2);
+
+	vector<int> v3(10, 100);
+	printVector(v3);
+	
+	vector<int> v4(v3);
+	printVector(v4);
+}
+
+int main() {
+
+	test01();
+
+	system("pause");
+
+	return 0;
+}
+```
+>2.赋值
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+void printVector(vector<int>& v) {
+
+	for (vector<int>::iterator it = v.begin(); it != v.end(); it++) {
+		cout << *it << " ";
+	}
+	cout << endl;
+}
+
+//赋值操作和构造
+void test01()
+{
+	vector<int> v1; //无参构造
+	for (int i = 0; i < 10; i++)
+	{
+		v1.push_back(i);
+	}
+	printVector(v1);
+
+	vector<int>v2;
+	v2 = v1;
+	printVector(v2);
+
+	vector<int>v3;
+	v3.assign(v1.begin(), v1.end());
+    //将v1的首尾都赋值给v3，v1不会取end()
+	printVector(v3);
+
+	vector<int>v4;
+	v4.assign(10, 100);
+    //将10个100赋值给v4
+	printVector(v4);
+}
+
+int main() {
+
+	test01();
+	return 0;
+}
+```
+### 3.vector容量和大小
+1. 方法：
+   1. vec.capacity()
+   2. vec.size()
+   3. vec.empty()
+   4. vec.resize(5, 10), vec.resize(5);
+2. 案例
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+void printVector(vector<int>& v) {
+
+	for (vector<int>::iterator it = v.begin(); it != v.end(); it++) {
+		cout << *it << " ";
+	}
+	cout << endl;
+}
+
+void test01()
+{
+	vector<int> v1;
+	for (int i = 0; i < 10; i++)
+	{
+		v1.push_back(i);//
+	}
+	printVector(v1);
+	if (v1.empty())
+	{
+		cout << "v1为空" << endl;
+	}
+	else
+	{
+		cout << "v1不为空" << endl;
+		cout << "v1的容量 = " << v1.capacity() << endl;
+		cout << "v1的大小 = " << v1.size() << endl;
+	}
+
+	//resize 重新指定大小 ，若指定的更大，默认用0填充新位置，否则用给定值在尾部填充
+	v1.resize(15,10);//15个10
+	printVector(v1);
+
+	//resize 重新指定大小 ，若指定的更小，超出部分元素被删除
+	v1.resize(5);
+	printVector(v1);
+}
+
+int main() {
+	test01();
+	return 0;
+}
+```
 
 # 13.c++高级教程
 ## 1. 命名空间

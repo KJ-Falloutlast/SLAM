@@ -2517,7 +2517,6 @@ int main() {
 
 
 
-
 #### 3.2.3 vector赋值操作
 
 
@@ -2627,7 +2626,6 @@ int main() {
 
 ```C++
 #include <vector>
-
 void printVector(vector<int>& v) {
 
 	for (vector<int>::iterator it = v.begin(); it != v.end(); it++) {
