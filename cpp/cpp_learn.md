@@ -8580,7 +8580,7 @@ void test01(){
 }
 //赋值
 void test02(){
-    string s1("abcdefghi");
+    string s1;//s1为空值的时候也可以自动赋值
     string s2("123456789");
     for(int i = 0; i < s1.size(); i++){
         s1[i] = s2[i];
@@ -8604,9 +8604,9 @@ void test01()
 	string str = "hello";
 	str.insert(1, "111");
 	cout << str << endl;
-    //在1号位置插入111
+    //在1号位置插入111，此方法和substr()同理
 	str.erase(1, 3); 
-     //从1号位置开始删除3个字符
+     //删除从1-2的字符
 	cout << str << endl;
 }
 
@@ -8777,6 +8777,353 @@ int main() {
 	return 0;
 }
 ```
+### 4.vector数据存取
+1. 方法：
+```cpp
+#include <iostream>
+#include <vector>
+void test01()
+{
+	vector<int>v1;
+	for (int i = 0; i < 10; i++)
+	{
+		v1.push_back(i);
+	}
+
+	for (int i = 0; i < v1.size(); i++)
+	{
+		cout << v1[i] << " ";
+	}
+	cout << endl;
+
+	for (int i = 0; i < v1.size(); i++)
+	{
+		cout << v1.at(i) << " ";
+	}
+	cout << endl;
+
+	cout << "v1的第一个元素为： " << v1.front() << endl;
+	cout << "v1的最后一个元素为： " << v1.back() << endl;
+}
+
+int main() {
+	test01();
+	return 0;
+}
+```
+### 4.vector元素互换
+1. 注意：
+	1.size()是元素个数
+	2. capacity()是装的元素的内存总数
+	3.vector<int>(v)是匿名对象，可设为x,x.swap(v1)会利用v的元素个数来初始化元素个数，相当于v1和匿名对象互换，
+	互换后x变成了大内存，v变成了size = 3的容器，而匿名对象在执行完后被立马收回，所以这样会使v的size和capacity都变成3
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+void printVector(vector<int> &v){
+	vector<int>::iterator it = v.begin();
+	for (; it != v.end(); it++){
+		cout  << *it << " ";
+	}
+	cout << endl;
+}
+void test(){
+	vector<int> v1;
+	vector<int> v2;
+	for (int i = 0; i < 10; i++){
+		v1.push_back(i);
+	}
+	for (int i = 9; i >= 0; i--){
+		v2.push_back(i);
+	}
+	printVector(v1);
+	v2.swap(v1);
+	printVector(v1);
+	/*
+	1.size()是元素个数
+	2. capacity()是装的元素的内存总数
+	3.vector<int>(v)是匿名对象，可设为x,x.swap(v1)会利用v的元素个数来初始化元素个数，相当于v1和匿名对象互换，
+	互换后x变成了大内存，v变成了size = 3的容器，而匿名对象在执行完后被立马收回，所以这样会使
+	v的size和capacity都变成3
+	*/
+	cout << "the size of v1 = " << v1.size() << endl;
+	cout << "the capcity of v1 = " << v1.capacity() << endl;
+	v1.resize(3);
+	cout << "the size of v1 = " << v1.size() << endl;
+	cout << "the capcity of v1 = " << v1.capacity() << endl;
+	vector<int>(v1).swap(v1);//创建了一个匿名对象
+	cout << "the size of v1 = " << v1.size() << endl;
+	cout << "the capcity of v1 = " << v1.capacity() << endl;
+}
+
+int main(){
+	test();
+}
+执行结果：
+/*
+0 1 2 3 4 5 6 7 8 9 
+9 8 7 6 5 4 3 2 1 0 
+the size of v1 = 10
+the capcity of v1 = 16
+the size of v1 = 3
+the capcity of v1 = 16
+the size of v1 = 3
+the capcity of v1 = 3
+*/
+```
+### 5.vector预留空间
+1. reserve(int, len):容器预留len个元素长度，预留位置不初始化，元素不可访问
+2. 案例
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+void test01()
+{
+	vector<int> v;
+
+	//预留空间
+	v.reserve(100000);//若没有reserve，则分配的空间次数不止1次，有的话只有1次
+
+	int num = 0;
+	int* p;
+	for (int i = 0; i < 100000; i++) {
+		v.push_back(i);
+		/*
+		1.每次插入一个数字，内存都会扩展一次，
+		在插入100000个数字的过程中分配了多少次内存,
+        2.vector每次扩展一次，num都会加1,若是不插入元素的话，就不会扩展
+		*/
+		if (p != &v[0]) {
+			//若是不指向v的首地址的话，就直接指向首地址，当容器大小发生变化的时候，重新指向首地址
+			p = &v[0];
+			num++;
+		}
+	}
+
+	cout << "num:" << num << endl;
+}
+
+int main() {
+
+	test01();
+	return 0;
+}
+```
+## 13-3.deque容器
+1. 功能
+* 双端数组，可以对头端进行插入删除操作
+![容器](/pictures/deque.jpg)
+
+**deque的属性和方法和vector是一致的**
+
+2. deque与vector区别：
+* vector对于头部的插入删除效率低，数据量越大，效率越低
+* deque相对而言，对头部的插入删除速度回比vector快
+* vector访问元素时的速度会比deque快,这和两者内部实现有关
+3. 工作原理
+   1. deque内部有个中控器，维护每个缓冲区的内容，缓冲区中存放真是的数据，中控器维护的是缓冲区的地址，使得使用deque时像一片连续的内存空间
+![中控器](../pictures/clip_image002-1547547896341.jpg)
+
+### 1.deque的构造函数(double ended queue)
+```cpp
+#include <iostream>
+using namespace std;
+#include <deque>
+
+void printDeque(deque<int>& d) 
+{
+	for (deque<int>::iterator it = d.begin(); it != d.end(); it++) {
+		cout << *it << " ";
+
+	}
+	cout << endl;
+}
+//deque构造
+void test01() {
+
+	deque<int> d1; //无参构造函数
+	for (int i = 0; i < 10; i++)
+	{
+		d1.push_back(i);
+	}
+	printDeque(d1);
+	deque<int> d2(d1.begin(),d1.end());
+	printDeque(d2);
+
+	deque<int> d3(10,100);//插入10个100
+	printDeque(d3);
+
+	deque<int> d4 = d3;
+	printDeque(d4);
+}
+
+int main() {
+
+	test01();
+	return 0;
+}
+```
+### 2.deque的赋值操作
+1. 赋值操作：push_back(), assign(),  
+```cpp
+#include <iostream>
+using namespace std;
+#include <deque>
+void printDeque(const deque<int>& d) 
+{
+	for (deque<int>::const_iterator it = d.begin(); it != d.end(); it++) {
+		cout << *it << " ";
+
+	}
+	cout << endl;
+}
+//赋值操作
+void test01()
+{
+	deque<int> d1;
+	for (int i = 0; i < 10; i++)
+	{
+		d1.push_back(i);
+	}
+	printDeque(d1);
+
+	deque<int>d2;
+	d2 = d1;
+	printDeque(d2);
+
+	deque<int>d3;
+	d3.assign(d1.begin(), d1.end());//assign一定有2个参数
+	printDeque(d3);
+
+	deque<int>d4;
+	d4.assign(10, 100);
+	printDeque(d4);
+
+}
+
+int main() {
+	test01();
+	return 0;
+}
+```
+### 2.deque的大小操作
+```cpp
+deque.empty();
+deque.size();
+deque.capacity();
+deque.resize(num, elem);
+```
+### 2.deque的插入和删除
+1. **函数原型：**
+两端插入操作：
+- `push_back(elem);`          //在容器尾部添加一个数据
+- `push_front(elem);`        //在容器头部插入一个数据
+- `pop_back();`                   //删除容器最后一个数据
+- `pop_front();`                 //删除容器第一个数据
+
+指定位置操作：
+
+* `insert(pos,elem);`         //在pos位置插入一个elem元素的拷贝，返回新数据的位置。
+
+* `insert(pos,n,elem);`     //在pos位置插入n个elem数据，无返回值。
+
+* `insert(pos,beg,end);`    //在pos位置插入[beg,end)区间的数据，无返回值。
+
+* `clear();`                           //清空容器的所有数据
+
+* `erase(beg,end);`             //删除[beg,end)区间的数据，返回下一个数据的位置。
+
+* `erase(pos);`                    //删除pos位置的数据，返回下一个数据的位置。
+
+```cpp
+#include <iostream>
+using namespace std;
+#include <deque>
+
+void printDeque(const deque<int>& d) 
+{
+	for (deque<int>::const_iterator it = d.begin(); it != d.end(); it++) {
+		cout << *it << " ";
+
+	}
+	cout << endl;
+}
+//两端操作
+void test01()
+{
+	deque<int> d;
+	//尾插
+	d.push_back(10);
+	d.push_back(20);
+	//头插
+	d.push_front(100);
+	d.push_front(200);
+
+	printDeque(d);
+
+	//尾删
+	d.pop_back();
+	//头删
+	d.pop_front();
+	printDeque(d);
+}
+
+//插入
+void test02()
+{
+	deque<int> d;
+	d.push_back(10);
+	d.push_back(20);
+	d.push_front(100);
+	d.push_front(200);
+	printDeque(d);
+
+	d.insert(d.begin(), 1000);//在开始位置插入1000
+	printDeque(d);
+
+	d.insert(d.begin(), 2,10000);//在开始位置插入2个10000
+	printDeque(d);
+
+	deque<int>d2;
+	d2.push_back(1);
+	d2.push_back(2);
+	d2.push_back(3);//尾插1，2，3
+
+	d.insert(d.begin(), d2.begin(), d2.end());
+	//在d.begin()插入[d2.begin(), de.end())(左闭右开)的元素，无返回值
+	printDeque(d);
+
+}
+
+//删除
+void test03()
+{
+	deque<int> d;
+	d.push_back(10);
+	d.push_back(20);
+	d.push_front(100);
+	d.push_front(200);
+	printDeque(d);
+
+	d.erase(d.begin());//删除d.begin()位置的数据
+	printDeque(d);
+
+	d.erase(d.begin(), d.end());//删除[d.begin(), d.end())区间的数据
+	d.clear();
+	printDeque(d);
+}
+
+int main() {
+
+	test01();
+	test02();
+    test03();
+	return 0;
+}
+```
+  ​
 
 # 13.c++高级教程
 ## 1. 命名空间
