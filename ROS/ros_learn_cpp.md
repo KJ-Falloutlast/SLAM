@@ -2356,5 +2356,80 @@ int main(int argc, char *argv[])
       4. 查看文件:rosbag info 文件名
       5. 回放文件:rosbag play 文件名
    2. 编码方式(**注意要添加rosbag**依赖)
-   3. 
+      1. read_bag.cpp
+```cpp
+#include "ros/ros.h"
+#include "rosbag/bag.h"
+#include "std_msgs/String.h"
 
+
+int main(int argc, char *argv[])
+{
+    //1.创建节点和句柄
+    ros::init(argc, argv, "bag_write");
+    ros::NodeHandle nh;
+    //2.创建rosbag对象
+    rosbag::Bag bag;
+    //3.打开文件流
+    //参数1是文件名，餐数2是传参方式：write, read, append
+    bag.open("/home/kim-james/ROS_Space/catkin_ws_cpp/src/rosbag_demo/src/hello.bag", 
+    rosbag::BagMode::Write);
+    //4.写数据
+    //4-1.创建消息类型
+    std_msgs::String msg;
+    msg.data = "hello xxxx";
+    /*
+    参数1：话题
+    参数2：时间戳
+    参数1：消息
+    */
+   //4-2.写入文件
+    bag.write("/chatter", ros::Time::now(), msg);
+    bag.write("/chatter", ros::Time::now(), msg);
+    bag.write("/chatter", ros::Time::now(), msg);
+    //5.关闭文件流
+    bag.close();  
+    
+}
+```
+      2. read_bag.cpp
+```cpp
+#include "ros/ros.h"
+#include "rosbag/bag.h"
+#include "rosbag/view.h"
+#include "std_msgs/String.h"
+#include "std_msgs/Int32.h"
+
+int main(int argc, char *argv[])
+{
+
+    setlocale(LC_ALL,"");
+    //1.初始化节点和创建节点句柄
+    ros::init(argc,argv,"bag_read");
+    ros::NodeHandle nh;
+    //2.创建 bag 对象
+    rosbag::Bag bag;
+    //3.打开 bag 文件
+    bag.open("/home/kim-james/ROS_Space/catkin_ws_cpp/src/rosbag_demo/src/hello.bag",
+    rosbag::BagMode::Read);
+    //4.读取数据
+    //4-1.取出话题时间戳和消息，可以先获取消息的集合，再迭代取出消息的字段
+    for (auto &&m: rosbag::View(bag))//直接用auto for来循环,m为遍历rosbag::View(bag)中的对象
+    {
+        //解析消息类型
+        //话题
+        std::string topic = m.getTopic();//这里不是std_msgs::String
+        //时间
+        ros::Time time = m.getTime();
+        //消息
+        std_msgs::StringPtr p = m.instantiate<std_msgs::String>();//instantiate是例子的意思
+        ROS_INFO("解析的内容, topic: %s, time: %.2f, message: %s",
+                            topic.c_str(), 
+                            time.toSec(), 
+                            p->data.c_str());
+    }
+    //5.关闭文件流
+    bag.close();
+    return 0;
+}
+```

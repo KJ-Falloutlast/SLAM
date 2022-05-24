@@ -927,6 +927,9 @@ message("")
 
 ```
 ## 3-3.项目2
+![群](./../pictures/群.jpg)
+![转换关系](./../pictures/sophus.png)
+*注意在使用这个文件时，SE3 = SE3d, SO3 = SO3d, h = hpp*
 ```cmake
 cmake_minimum_required( VERSION 2.8 )
 project( useSophus )
