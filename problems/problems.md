@@ -151,7 +151,12 @@ cmakelists:project(model02)
    1. 解决方案：删除build和devep后重新catkin_make
 2. fatal error: pub_sub/Person.h: 没有那个文件或目录
    1. 解决方案：重新catkin_make
-
+3. 问题3
+   1. 描述
+```cpp
+/usr/bin/ld: turtle_control.cpp:(.text+0x21b): undefined reference to `tf2_ros::TransformListener::TransformListener(tf2::BufferCore&, bool, ros::TransportHints)'
+```
+   2. 解决方案：重新创建功能包
 ## 15. 自动补全的问题
 **直接使用这个配置就可以自动补全**
 ```json

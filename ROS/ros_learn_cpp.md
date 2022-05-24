@@ -2150,3 +2150,211 @@ int main(int argc, char *argv[])
     return 0;
 }
 ```
+### 5.坐标变换实例
+1. launch
+```launch
+<launch>
+    <!-- 1.启动乌龟GUI节点 -->
+    <node pkg = "turtlesim" type = "turtlesim_node" name = "turtle1" output = "screen"/>
+    <node pkg = "turtlesim" type = "turtle_teleop_key" name = "key" output = "screen"/>
+    <!-- 2. 生成新的乌龟节点 -->
+    <node pkg = "tf2_project" type = "test01_new_turtle" name = ""turtle2 output = "screen"/>
+    <!-- 3.启动2个乌龟相对世界坐标系的坐标关系的发布 -->
+    <!-- 
+        基本实现思路：
+            1.节点只需要编写一个
+            2.这个节点需要启动2次(turtle2和turtle1)
+     -->
+
+    <node pkg = "tf2_project" type = "test01_pub_turtle" name = "pub1" args = "turtle1" output = "screen" />
+    <node pkg = "tf2_project" type = "test01_pub_turtle" name = "pub2" args = "turtle2" output = "screen" />
+    <!-- 
+        4.需要订阅turtle1和turle2相对于世界坐标系的坐标消息，并转换成turtle1相对于turtle2的坐标关系,启动坐标转换节点
+        再生成速度消息
+     -->
+    <node pkg = "tf2_project" type = "test01_control_turtle2" name = "control"  output = "screen" />
+</launch>
+```
+1. new_turtle
+```cpp
+/* 
+    创建第二只小乌龟
+ */
+#include "ros/ros.h"
+#include "turtlesim/Spawn.h"
+
+int main(int argc, char *argv[])
+{
+    setlocale(LC_ALL,"");
+    //1.执行初始化
+    ros::init(argc,argv,"create_turtle");
+    //2.创建节点
+    ros::NodeHandle nh;
+    //3.创建服务客户端
+    ros::ServiceClient client = nh.serviceClient<turtlesim::Spawn>("/spawn");
+    //4.组织并请求消息
+    //4-1.创建消息类型
+    ros::service::waitForService("/spawn");//由于要保证服务通信的一对一的特性，所以需要先启动server,再启动client,否则报错
+    turtlesim::Spawn spawn;
+    spawn.request.name = "turtle2";
+    spawn.request.x = 1.0;
+    spawn.request.y = 2.0;
+    spawn.request.theta = 3.12415926;
+    //4-2.发布消息
+    bool flag = client.call(spawn);
+    if (flag)
+    {
+        ROS_INFO("乌龟2创建失败!");
+    }
+    else
+    {
+        ROS_INFO("乌龟2创建失败!");
+    }
+
+}
+```
+3. pub_turtle
+```cpp
+#include "ros/ros.h"
+#include "turtlesim/Pose.h"//turtlesim头文件
+#include "tf2_ros/transform_broadcaster.h"//动态坐标变换头文件(tf2_ros::TransformBroadcaster pub),如果是小写，那么2单词间有下划线，如果是首字母大写，那么2单词间无下滑线
+#include "geometry_msgs/TransformStamped.h"//发布的数据头文件(geometry_msgs::TransformStamped tfs)
+#include "tf2/LinearMath/Quaternion.h"//四元数头文件(tf2::Quaternion qtn)
+//声明变量来接受传递的参数
+std::string turtle_name;//即是lauargs
+
+void doPose(const turtlesim::Pose::ConstPtr &pose){
+    //4-1.创建发布对象
+    static tf2_ros::TransformBroadcaster pub;//动态坐标广播器
+    geometry_msgs::TransformStamped tfs;
+    tfs.header.frame_id = "world";//世界坐标系
+    tfs.child_frame_id = turtle_name;//乌龟坐标系
+    tfs.header.stamp = ros::Time::now();
+    //坐标系偏移量设计
+    tfs.transform.translation.x = pose->x;//turtle1相对于world的坐标
+    tfs.transform.translation.y = pose->y;
+    tfs.transform.translation.z = 0;
+    //坐标系四元数设计
+    /*
+        位姿信息中无四元数，但是有个偏航角，又已知乌龟是2D，无roll和pitch,所以可以得出乌龟的欧拉角是
+        0,0, theta
+    */
+    tf2::Quaternion qtn;
+    qtn.setRPY(0, 0, pose->theta);
+    tfs.transform.rotation.x = qtn.getX(); 
+    tfs.transform.rotation.y = qtn.getY();
+    tfs.transform.rotation.z = qtn.getZ();
+    tfs.transform.rotation.w = qtn.getW();
+    //4-3.发布
+    pub.sendTransform(tfs);
+
+}
+int main(int argc, char **argv){
+    //1.创建头文件
+    setlocale(LC_ALL, "");
+    //2.初始化节点和创建节点句柄
+    ros::init(argc, argv, "turtle_name");
+    ros::NodeHandle nh;
+    //3.解析传入的命名空间
+    /*
+        解析launch文件通过args传入的参数
+
+    */
+    if (argc != 2){
+        ROS_ERROR("请传入一个参数");
+        return 1;
+    }
+    else{
+        turtle_name = argv[1];
+        ROS_INFO("乌龟%s坐标发送启动", turtle_name.c_str());
+    }
+    //4.创建订阅者对象
+    ros::Subscriber sub = nh.subscribe<turtlesim::Pose>(turtle_name + "/pose", 1000, doPose);//接受来自与turtlesimnode的数据
+    //此处不能少<turtlesim::Pose>； 3-2.此处必须为/turtle1/pose,否则当启动乌龟节点后无法订阅到乌龟的位姿
+    
+    //5.回调函数处理
+    
+    //6.spin()
+    ros::spin();
+    return 0;
+}
+```
+4. control_turtle
+```cpp
+/*  
+    订阅 turtle1 和 turtle2 的 TF 广播信息，查找并转换时间最近的 TF 信息
+    将 turtle1 转换成相对 turtle2 的坐标，在计算线速度和角速度并发布
+    实现流程:
+        1.包含头文件
+        2.初始化 ros 节点
+        3.创建 ros 句柄
+        4.创建 TF 订阅对象
+        5.处理订阅到的 TF
+        6.spin
+*/
+//1.包含头文件
+#include "ros/ros.h"
+#include "tf2_ros/transform_listener.h"//发布者头文件
+#include "tf2_ros/buffer.h"//创建缓存
+#include "geometry_msgs/PointStamped.h"//点戳
+#include "tf2_geometry_msgs/tf2_geometry_msgs.h"//坐标转换
+#include "geometry_msgs/TransformStamped.h"//变换戳
+#include "geometry_msgs/Twist.h"//用于发布twist对象
+
+int main(int argc, char *argv[])
+{
+    setlocale(LC_ALL,"");
+    // 1.初始化 ros 节点和创建节点句柄
+    ros::init(argc,argv,"sub_TF");
+    ros::NodeHandle nh;
+    // 2.创建接听者和发布者
+    tf2_ros::Buffer buffer;
+    tf2_ros::TransformListener listener(buffer);
+    ros::Publisher pub = nh.advertise<geometry_msgs::Twist>("/turtle2/cmd_vel",1000);//控制第二只乌龟运动
+    //3.组织发布消息
+    ros::Rate rate(10);//10HZ的发布频率
+    while (ros::ok())
+    {
+        try
+        {
+            //3-1.先获取 turtle1 相对 turtle2 的坐标信息
+            geometry_msgs::TransformStamped tfs = buffer.lookupTransform("turtle2","turtle1",ros::Time(0));//ros::Time(0)表示紧密跟随
+            ROS_INFO("turtle1相对于turtle2的信息: 父级:%s, 子级:%s, 偏移量(%.2f, %.2f, %.2f)", 
+            tfs.header.frame_id.c_str(), tfs.child_frame_id.c_str(),
+            tfs.transform.translation.x,
+            tfs.transform.translation.y,
+            tfs.transform.translation.z);
+            //此处是记录的子级坐标系相对于父级坐标系的坐标消息
+            //3-2.根据坐标信息生成速度信息 -- geometry_msgs/Twist.h
+            geometry_msgs::Twist twist;//速度消息对象
+            twist.linear.x = sqrt(pow(tfs.transform.translation.x,2) + pow(tfs.transform.translation.y,2));
+            twist.angular.z = atan2(tfs.transform.translation.y,tfs.transform.translation.x);
+
+            //3-3.发布速度信息 -- 需要提前创建 publish 对象
+            pub.publish(twist);
+        }
+        catch(const std::exception& e)
+        {
+            // std::cerr << e.what() << '\n';
+            ROS_INFO("错误提示:%s",e.what());
+        }
+        //3-4.睡觉
+        rate.sleep();
+        // 4.spin
+        ros::spinOnce();
+    }
+
+    return 0;
+}
+```
+## 4-2.rosbag
+1. rosbag的使用
+   1. 命令行
+      1. 创建bags目录
+      2. 录制：rosbag record -a -O 目标文件(a = all, o = output)
+      3. ctrl+c结束
+      4. 查看文件:rosbag info 文件名
+      5. 回放文件:rosbag play 文件名
+   2. 编码方式(**注意要添加rosbag**依赖)
+   3. 
+

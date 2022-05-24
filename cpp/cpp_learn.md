@@ -8951,7 +8951,7 @@ void test01() {
 	printDeque(d1);
 	deque<int> d2(d1.begin(),d1.end());
 	printDeque(d2);
-
+             
 	deque<int> d3(10,100);//插入10个100
 	printDeque(d3);
 
@@ -9041,6 +9041,64 @@ deque.resize(num, elem);
 #include <iostream>
 using namespace std;
 #include <deque>
+void printDeque(deque<int> &d){
+	deque<int>::iterator it = d.begin();
+	for (; it != d.end(); it++){
+		cout << *it << " ";
+	}
+	cout << endl;
+}
+void test01(){
+	//1.***pop和push插入和删除***
+	deque<int> d1;
+	d1.push_back(1);
+	d1.push_back(2);
+	d1.push_front(3);
+	d1.push_front(4);
+	printDeque(d1);
+	d1.pop_back();
+	d1.pop_front();
+	printDeque(d1);
+	//2.***insert和erase和swap***
+	//2-1.insert
+	deque<int> d2 = {1, 2, 3, 4};
+	d2.insert(d2.begin(), 5);
+	printDeque(d2);
+
+	d2.insert(d2.begin(), 2, 1000);
+	printDeque(d2);
+	
+	d2.insert(d2.begin(), d1.begin(), d1.end());
+	printDeque(d2);
+	//2-2. swap
+	deque<int> d3 = {1, 2, 3};
+	deque<int> d4 = {1, 2};
+	d3.swap(d4);//d3和d4互换
+	printDeque(d3);
+	//2-2.erase and clear
+	d2.erase(d2.end());
+	printDeque(d2);
+	
+	d2.erase(d2.begin());
+	printDeque(d2);
+	
+	d2.clear();
+	printDeque(d2);
+}
+int main(){
+	test01();
+}
+```
+### 3.deque数据存取
+1. 方法：
+   1. deque[i], deque.at(i)
+   2. d.front(), d.back()
+```cpp
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <deque>
+using namespace std;
 
 void printDeque(const deque<int>& d) 
 {
@@ -9050,81 +9108,73 @@ void printDeque(const deque<int>& d)
 	}
 	cout << endl;
 }
-//两端操作
+
+//数据存取
 void test01()
 {
-	deque<int> d;
-	//尾插
-	d.push_back(10);
-	d.push_back(20);
-	//头插
-	d.push_front(100);
-	d.push_front(200);
 
-	printDeque(d);
-
-	//尾删
-	d.pop_back();
-	//头删
-	d.pop_front();
-	printDeque(d);
-}
-
-//插入
-void test02()
-{
 	deque<int> d;
 	d.push_back(10);
 	d.push_back(20);
 	d.push_front(100);
 	d.push_front(200);
-	printDeque(d);
 
-	d.insert(d.begin(), 1000);//在开始位置插入1000
-	printDeque(d);
+	for (int i = 0; i < d.size(); i++) {
+		cout << d[i] << " ";
+	}
+	cout << endl;
 
-	d.insert(d.begin(), 2,10000);//在开始位置插入2个10000
-	printDeque(d);
 
-	deque<int>d2;
-	d2.push_back(1);
-	d2.push_back(2);
-	d2.push_back(3);//尾插1，2，3
+	for (int i = 0; i < d.size(); i++) {
+		cout << d.at(i) << " ";
+	}
+	cout << endl;
 
-	d.insert(d.begin(), d2.begin(), d2.end());
-	//在d.begin()插入[d2.begin(), de.end())(左闭右开)的元素，无返回值
-	printDeque(d);
+	cout << "front:" << d.front() << endl;
+
+	cout << "back:" << d.back() << endl;
 
 }
 
-//删除
-void test03()
+int main() {
+	test01();
+	return 0;
+}
+```
+### 4.排序操作
+```cpp
+#include <deque>
+#include <algorithm>
+void printDeque(const deque<int>& d) 
 {
+	for (deque<int>::const_iterator it = d.begin(); it != d.end(); it++) {
+		cout << *it << " ";
+
+	}
+	cout << endl;
+}
+
+void test01()
+{
+
 	deque<int> d;
 	d.push_back(10);
 	d.push_back(20);
 	d.push_front(100);
 	d.push_front(200);
+
+	printDeque(d);
+	sort(d.begin(), d.end());//按照从小到大的顺序排序
 	printDeque(d);
 
-	d.erase(d.begin());//删除d.begin()位置的数据
-	printDeque(d);
-
-	d.erase(d.begin(), d.end());//删除[d.begin(), d.end())区间的数据
-	d.clear();
-	printDeque(d);
 }
 
 int main() {
 
 	test01();
-	test02();
-    test03();
-	return 0;
+
 }
 ```
-  ​
-
 # 13.c++高级教程
 ## 1. 命名空间
 1. 提出：当一个班上有2个同名学生时，不得不用其他的信息，比如说，年龄等等来区分他们；在c++中，你可能会有xyz()的函数，在另一个库中也有xyz()的函数，所以需要加命名空间加以区分
@@ -9332,7 +9382,7 @@ int main()
 2. 当n = 0时，try会抛出一个整形异常，抛出异常后，try立即停止执行，该整型异常会被类型匹配的第一个catch块捕获，即进入catch(int e)块执行，该catch块执行完毕后程序继续往后执行，直到正常结束
 
 ```
-# 3.cout. precision
+## 3.cout. precision
 ```cpp
 #include <iostream>
 using namespace std;
@@ -9354,3 +9404,31 @@ int main()
 0.00123
 ```
 cout.precision(n)是指保留n位有效数字，即从左往右数，除了0之外有多少个数字
+
+## 4.typedef
+1. 功能：为数据类型定义一个新的名字，也就是类型的别名
+2. 案例
+```cpp
+#include<stdio.h>
+typedef int A;
+int main(void)
+{
+	A a = 10;
+	printf("a = %d", a);
+	return 0;
+}
+//////////////////////
+#include <stdio.h>
+typedef int INT;//将INT指代为int类型
+typedef int* PINT;
+int main()
+{
+	INT a = 10;
+	PINT b, c;//b,c都为指向整型的指针
+	b = &a;//b指向a
+	c = b;//c 也指向a
+	printf("addr of a = %p\n", c);//打印a的地址
+	return 0;
+}
+
+```
