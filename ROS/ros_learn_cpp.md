@@ -2348,7 +2348,10 @@ int main(int argc, char *argv[])
 }
 ```
 ## 4-2.rosbag
-1. rosbag的使用
+1. rqt的启动
+   1. rqt
+   2. rosrun rqt_gui rqt_gui
+2. rosbag的使用
    1. 命令行
       1. 创建bags目录
       2. 录制：rosbag record -a -O 目标文件(a = all, o = output)
@@ -2433,3 +2436,92 @@ int main(int argc, char *argv[])
     return 0;
 }
 ```
+## 4-2.rqt_graph
+1. 启动：rqt
+2. 节点，话题的操作：圈圈是节点，方框是话题，箭头是发布订阅方向
+![节点](/pictures/rosgraph.png)
+3. rqt_console:plugins->logger
+4. rqt_plot
+   1. 作用：可以以输出2D动态图
+   2. 使用：plugins->visualizations->plots
+5. rqt_bag
+   1. roslaunch启动节点
+   2. rqt_bag
+   3. 启动rqt
+   4. plugigs->logging->Bag
+   5. 记录，保存
+   6. 重开一个rqt->record->右键publish
+
+
+# 5.机器人仿真系统
+## 5-1.概述
+1. 机器人系统仿真的内容：机器人建模（URDF）,创建仿真环境(Gazebo),感知环境(Rviz)
+2. 作用：
+   1. 低成本
+   2. 高效
+   3. 高安全性
+3. 缺陷：会失真
+4. 相关组件
+   1. URDF:Unified Robot Description Format:标准化机器人描述格式，以xml描述机器人的结构，比如底盘，摄像头，激光雷达，机械臂，被C++解释器转化为可视化的机器人模型
+   2. rviz:ROS Visualization Tool,为ROS的三维可视化工具
+   3. gazebo:3D动态模拟器，用于显示机器人模型并创建仿真环境能够在复杂室内和室外环境中有效模拟机器人。
+   4. 组合
+      1. 非仿真环境：使用URDF结合Rviz直接感知真实环境信息
+      2. 仿真环境：三者结合
+
+## 5-2.URDF集成Rviz基本流程
+1. 步骤：
+   1. 功能包：urdf xacro
+   2. 新建目录
+      1. launch：配置文件  
+      2. urdf：存储urdf文件的目录
+      3. meshes：渲染文件
+      4. config：launch文件
+   3. 编写URDF文件:创建一个.urdf文件
+```urdf
+<robot name="mycar">
+    <link name="base_link">
+        <visual>
+            <geometry>
+                <box size="0.5 0.2 0.1" />
+            </geometry>
+        </visual>
+    </link>
+</robot>
+```
+   4. 在launch中集成URDF和Rviz
+```launch
+<launch>
+
+    <!-- 设置参数 -->
+    <param name="robot_description" textfile="$(find urdf_rviz)/urdf/urdf/show_mycar.rviz" />
+
+    <!-- 启动 rviz -->
+    <node pkg="rviz" type="rviz" name="rviz" args = "-d $(find urdf_rviz)/config/show_mycar.rviz"/>
+
+</launch>
+```
+   5. 保存rviz在config文件下
+   6. 重新打开rivz
+
+## 5-2.URDF语法详解
+### 1.robot
+1. 属性：指定机器人模型的名称
+2. 子标签：其余的标签都是子标签，如link, joint,
+
+### 2.link
+1. 作用：描述机器人的某个部件:比如机器人底座，轮子，激光雷达..,每一个部件对应一个link,在link标签中，可以设计部件形状，尺寸，颜色，等等
+2. 属性：name:为连杆命名
+3. 子标签
+   1. visual:描述外观
+      1. geometry:设置连杆形状
+         1. 标签1:box(盒装)
+            1. 属性：size = x y z(长宽高)
+         2. 标签2：cylinder(圆柱)
+            1. 属性：radius = 半径 length = 高度
+         3. 标签3：sphere(球体)
+            1. 属性:radius = 半径
+         4. 标签4：mesh(为连杆添加皮肤)
+            1. 属性：filename=资源路径(格式:package://<packagename>/<path>/文件)
+      2. origin:设置偏移量和倾斜弧度
+         1. 属性1:xyz = x偏移 y偏移 z偏移

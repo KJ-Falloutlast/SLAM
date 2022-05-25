@@ -3720,10 +3720,8 @@ int main() {
 	//{
 	//	cout << "姓名： " << (*it).m_Name << " 分数： " << (*it).m_Score << endl;
 	//}
-
 	//2、给5名选手打分
 	setScore(v);
-
 	//3、显示最后得分
 	showScore(v);
 
