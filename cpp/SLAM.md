@@ -726,12 +726,13 @@ target_link_libraries( useSophus ${Sophus_LIBRARIES} )
 ```
 ## 3-2.项目1
 ```cpp
+//以下所有的Eigen::aligned_allocator<Sophus::SE3>都可以去掉
 #include <sophus/se3.h>//针对于se3
 #include <string>
 #include <iostream>
 #include <fstream>
 #include <Eigen/Core>
-//下面3个文件主要是面对usleep(5000)报错的
+//下面3个文件主要是面对usleep(5000)报错的 
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -746,12 +747,12 @@ string trajectory_file = "/home/kim-james/ROS_Space/SLAM_ws/slam_test/ch3/trajec
 
 // function for plotting trajectory, don't edit this code
 // start point is red and end point is blue
-void DrawTrajectory(vector<Sophus::SE3, Eigen::aligned_allocator<Sophus::SE3>>);
+void DrawTrajectory(vector<Sophus::SE3>);
 
 int main(int argc, char **argv) {
 
-    vector<Sophus::SE3, Eigen::aligned_allocator<Sophus::SE3>> poses;
-    //只有加入了Eigen::aligned_allocator<Sophus::SE3>才可以允许vector加入SE3
+    vector<Sophus::SE3> poses;
+    //只有加入了Eigen::aligned_allocator<Sophus::SE3>才可以允许vector加入SE3，但是可以去掉
     // 定义一个文件读取器
     fstream file(trajectory_file); 
     double time, tx, ty, tz, qx, qy, qz, qw; 
@@ -780,14 +781,14 @@ int main(int argc, char **argv) {
 }
 
 /*******************************************************************************************/
-void DrawTrajectory(vector<Sophus::SE3, Eigen::aligned_allocator<Sophus::SE3>> poses) {
+void DrawTrajectory(vector<Sophus::SE3> poses) {
     if (poses.empty()) {
         cerr << "Trajectory is empty!" << endl;
         return;
     }
 
     // create pangolin window and plot the trajectory
-    pangolin::CreateWindowAndBind("Trajectory Viewer", 1024, 768);//pangolin的图像大小
+    pangolin::CreateWindowAndBind("Trajectory Viewer", 1024, 768);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -868,63 +869,6 @@ target_link_libraries(pub ${roscpp_LIBRARIES})#将变量用$括起来
 IN ===> message("CMAKE_SOURCE_DIR=${CMAKE_SOURCE_DIR}")
 OUT ===> CMAKE_SOURCE_DIR = /xxxx/xxx
 
-3. 例子
-3-1.输入
-cmake_minimum_required(VERSION 3.18)
-
-project(show_vars VERSION 1.0.1)
-
-# 为了分行确定输出内容
-message("")
-
-message("1.PROJECT_BINARY_DIR = ${PROJECT_BINARY_DIR}")
-message("2.PROJECT_SOURCE _DIR = ${_DIR}")
-message("3.CMAKE_CURRENT_SOURCE_DIR = ${CMAKE_CURRENT_SOURCE_DIR}")
-message("4.CMAKE_CURRRENT_BINARY_DIR = ${CMAKE_CURRRENT_BINARY_DIR}")
-message("5.CMAKE_CURRENT_LIST_FILE = ${CMAKE_CURRENT_LIST_FILE}")
-message("6.CMAKE_CURRENT_LIST_LINE = ${CMAKE_CURRENT_LIST_LINE}")
-message("7.CMAKE_MODULE_PATH = ${CMAKE_MODULE_PATH}")
-message("8.CMAKE_SOURCE_DIR = ${CMAKE_SOURCE_DIR}")
-message("9.EXECUTABLE_OUTPUT_PATH = ${EXECUTABLE_OUTPUT_PATH}")
-message("10.LIBRARY_OUTPUT_PATH = ${LIBRARY_OUTPUT_PATH}")
-message("11.PROJECT_NAME = ${PROJECT_NAME}")
-message("12.PROJECT_VERSION_MAJOR = ${PROJECT_VERSION_MAJOR}")
-message("13.PROJECT_VERSION_MINOR = ${PROJECT_VERSION_MINOR}")
-message("14.PROJECT_VERSION_PATCH = ${PROJECT_VERSION_PATCH}")
-message("15.CMAKE_SYSTEM = ${CMAKE_SYSTEM}")
-message("16.CMAKE_SYSTEM_NAME = ${CMAKE_SYSTEM_NAME}")
-message("17.CMAKE_SYSTEM_VERSION = ${CMAKE_SYSTEM_VERSION}")
-message("18.BUILD_SHARED_LIBS = ${BUILD_SHARED_LIBS}")
-message("19.CMAKE_C_FLAGS = ${CMAKE_C_FLAGS}")
-message("20.CMAKE_CXX_FLAGS = ${CMAKE_CXX_FLAGS}")
-message("21.CMAKE_SYSTEM_PROCESSOR   = ${CMAKE_SYSTEM_PROCESSOR}")
-# 为了分行确定输出内容
-message("")
-
-3-2.输出
-
-[cmake] 1.PROJECT_BINARY_DIR = C:/Users/xxxx/xxxx/CMAKE_VAR/build
-[cmake] 2.PROJECT_SOURCE _DIR = 
-[cmake] 3.CMAKE_CURRENT_SOURCE_DIR = C:/Users/xxxx/xxxx/CMAKE_VAR
-[cmake] 4.CMAKE_CURRRENT_BINARY_DIR = 
-[cmake] 5.CMAKE_CURRENT_LIST_FILE = C:/Users/xxx/xxxx/CMAKE_VAR/CMakeLists.txt
-[cmake] 6.CMAKE_CURRENT_LIST_LINE = 14
-[cmake] 7.CMAKE_MODULE_PATH = 
-[cmake] 8.CMAKE_SOURCE_DIR = C:/Users/xxxx/xxxx/CMAKE_VAR
-[cmake] 9.EXECUTABLE_OUTPUT_PATH = 
-[cmake] 10.LIBRARY_OUTPUT_PATH = 
-[cmake] 11.PROJECT_NAME = show_vars
-[cmake] 12.PROJECT_VERSION_MAJOR = 1
-[cmake] 13.PROJECT_VERSION_MINOR = 0
-[cmake] 14.PROJECT_VERSION_PATCH = 1
-[cmake] 15.CMAKE_SYSTEM = Windows-10.0.22000
-[cmake] 16.CMAKE_SYSTEM_NAME = Windows
-[cmake] 17.CMAKE_SYSTEM_VERSION = 10.0.22000
-[cmake] 18.BUILD_SHARED_LIBS = 
-[cmake] 19.CMAKE_C_FLAGS = /DWIN32 /D_WINDOWS
-[cmake] 20.CMAKE_CXX_FLAGS = /DWIN32 /D_WINDOWS /GR /EHsc
-[cmake] 21.CMAKE_SYSTEM_PROCESSOR   = AMD64
-
 ```
 ## 3-3.项目2
 ![群](./../pictures/群.jpg)
@@ -946,109 +890,205 @@ target_link_libraries( useSophus ${Sophus_LIBRARIES} )
 ```cpp
 #include <iostream>
 #include <cmath>
-using namespace std; 
-
 #include <Eigen/Core>
 #include <Eigen/Geometry>
-
 #include "sophus/so3.h"
 #include "sophus/se3.h"
+using namespace std; 
+int main(){
+    /* SO3的使用*/
+    //1.构造SO3
+    Eigen::AngleAxisd V(M_PI/2, Eigen::Vector3d(0, 0, 1));
+    Eigen::Quaterniond q(V);
+    Eigen::Matrix3d R(V);
+    //通过旋转向量，旋转矩阵和四元数
+    Sophus::SO3 SO3_V(0, 0, M_PI/2);
+    Sophus::SO3 SO3_R(R);
+    Sophus::SO3 SO3_q(q);
+    cout << "so3 from V = \n" << SO3_V << endl;
+    cout << "SO3 from V = \n" << SO3_V.matrix() << endl;
+    cout << "so3 from R = \n" << SO3_R << endl;
+    cout << "so3 from q = \n" << SO3_q << endl;
 
-int main( int argc, char** argv )
-{
-    // 沿Z轴转90度的旋转矩阵
-    Eigen::Matrix3d R = Eigen::AngleAxisd(M_PI/2, Eigen::Vector3d(0,0,1)).toRotationMatrix();
-    
-    Sophus::SO3 SO3_R(R);               // Sophus::SO(3)可以直接从旋转矩阵构造
-    Sophus::SO3 SO3_v( 0, 0, M_PI/2 );  // 亦可从旋转向量构造
-    Eigen::Quaterniond q(R);            // 或者四元数
-    Sophus::SO3 SO3_q( q );
-    // 上述表达方式都是等价的
-    // 输出SO(3)时，以so(3)形式输出
-    cout<<"SO(3) from matrix: "<<SO3_R<<endl;
-    cout<<"SO(3) from vector: "<<SO3_v<<endl;
-    cout<<"SO(3) from quaternion :"<<SO3_q<<endl;
-    
-    // 使用对数映射获得它的李代数
+    //2.对数映射和 hat,vee的转换
     Eigen::Vector3d so3 = SO3_R.log();
-    cout<<"so3 = "<<so3.transpose()<<endl;
-    // hat 为向量到反对称矩阵
-    cout<<"so3 hat=\n"<<Sophus::SO3::hat(so3)<<endl;
-    // 相对的，vee为反对称到向量
-    cout<<"so3 hat vee= "<<Sophus::SO3::vee( Sophus::SO3::hat(so3) ).transpose()<<endl; // transpose纯粹是为了输出美观一些
+    cout << "so3 hat = \n" << Sophus::SO3::hat(so3) << endl;
+    cout << "so3 hat vee = \n" << Sophus::SO3::vee(Sophus::SO3::hat(so3)) << endl;
     
-    // 增量扰动模型的更新
-    Eigen::Vector3d update_so3(1e-4, 0, 0); //假设更新量为这么多
-    Sophus::SO3 SO3_updated = Sophus::SO3::exp(update_so3)*SO3_R;
-    cout<<"SO3 updated = "<<SO3_updated<<endl;
+    //3.扰动模型
+    Eigen::Vector3d updated_V(1, 0, 0);
+    Sophus::SO3 SO3_updated = Sophus::SO3::exp(updated_V) * SO3_R;
+    cout << " SO3_updated = \n" << SO3_updated << endl;       
+    cout << " SO3_updated.matrix = \n" << SO3_updated.matrix() << endl;       
+    /*SE3的使用*/
+    //1.构造SE3
+    Eigen::Vector3d t(1, 0, 0);
+    Sophus::SE3 SE3_R(R, t);
+    Sophus::SE3 SE3_q(q, t);
+    cout << "se3 from R,t = \n" << SE3_R << endl;
+    cout << "SE3 from R,t = \n" << SE3_R.matrix() << endl;
+    cout << "se3 from R,t = \n" << SE3_q << endl;
+    cout << "SE3 from R,t = \n" << SE3_q.matrix() << endl;
+    //2.对数映射和hat vee
     
-    /********************萌萌的分割线*****************************/
-    cout<<"************我是分割线*************"<<endl;
-    // 对SE(3)操作大同小异
-    Eigen::Vector3d t(1,0,0);           // 沿X轴平移1
-    Sophus::SE3 SE3_Rt(R, t);           // 从R,t构造SE(3)
-    Sophus::SE3 SE3_qt(q,t);            // 从q,t构造SE(3)
-    cout<<"SE3 from R,t= "<<endl<<SE3_Rt<<endl;
-    cout<<"SE3 from q,t= "<<endl<<SE3_qt<<endl;
-    // 李代数se(3) 是一个六维向量，方便起见先typedef一下
-    typedef Eigen::Matrix<double,6,1> Vector6d;
-    Vector6d se3 = SE3_Rt.log();
-    cout<<"se3 = "<<se3.transpose()<<endl;
-    // 观察输出，会发现在Sophus中，se(3)的平移在前，旋转在后.
-    // 同样的，有hat和vee两个算符
-    cout<<"se3 hat = "<<endl<<Sophus::SE3::hat(se3)<<endl;
-    cout<<"se3 hat vee = "<<Sophus::SE3::vee( Sophus::SE3::hat(se3) ).transpose()<<endl;
-    
-    // 最后，演示一下更新
-    Vector6d update_se3; //更新量
-    update_se3.setZero();
-    Sophus::SE3 SE3_updated = Sophus::SE3::exp(update_se3)*SE3_Rt;
-    cout<<"SE3 updated = "<<endl<<SE3_updated.matrix()<<endl;
-    
-    return 0;
+    typedef Eigen::Matrix<double, 6, 1> Vector6d;
+    Vector6d se3 = SE3_R.log();//对数映射
+    cout << "se3  = \n " <<  se3 << endl;
+    cout << "se3 hat =  \n" <<  Sophus::SE3::hat(se3) << endl;
+    cout << "se3 hat vee =  \n" <<  Sophus::SE3::vee(Sophus::SE3::hat(se3)) << endl;
+
+    //3.扰动
+    Vector6d v1;
+    v1 << 1, 0, 0, 0, 0, 0;
+    Sophus::SE3  SE3_updated = Sophus::SE3::exp(v1) * SE3_R;
+    cout << "SE3_updated  = \n" << SE3_updated << endl;
+    cout << "SE3_updated.matrix = \n" << SE3_updated.matrix() << endl;
+
 }
 ```
 ```cpp
-SO(3) from matrix:      0      0 1.5708
+hus_test/build   master ✚  ./demo01
+so3 from V = 
+     0      0 1.5708
 
-SO(3) from vector:      0      0 1.5708
+SO3 from V = 
+          0          -1           0
+          1           0           0
+          0           0           1
+so3 from R = 
+     0      0 1.5708
 
-SO(3) from quaternion :     0      0 1.5708
+so3 from q = 
+     0      0 1.5708
 
-so3 =      0      0 1.5708
-so3 hat=
+so3 hat = 
       0 -1.5708       0
  1.5708       0      -0
      -0       0       0
+so3 hat vee = 
+     0
+     0
+1.5708
+ SO3_updated = 
+ 0.779333 -0.779333   1.42656
 
-so3 hat vee=      0      0 1.5708
+ SO3_updated.matrix = 
+    0           -1            0
+    0.540302     0            0
+    0.841471     0     0.540302
+se3 from R,t = 
+      0      0 1.5708
+1 0 0
 
-SO3 updated =  7.85398e-05 -7.85398e-05       1.5708
-
-************我是分割线*************
-SE3 from R,t= 
+SE3 from R,t = 
+          0          -1           0           1
+          1           0           0           0
+          0           0           1           0
+          0           0           0           1
+se3 from R,t = 
      0      0 1.5708
 1 0 0
 
-SE3 from q,t= 
-     0      0 1.5708
-1 0 0
-
-se3 =  0.785398 -0.785398         0         0         0    1.5708
-
-se3 hat = 
+SE3 from R,t = 
+          0          -1           0           1
+          1           0           0           0
+          0           0           1           0
+          0           0           0           1
+se3  = 
+  0.785398
+-0.785398
+        0
+        0
+        0
+   1.5708
+se3 hat =  
         0   -1.5708         0  0.785398
    1.5708         0        -0 -0.785398
        -0         0         0         0
         0         0         0         0
+se3 hat vee =  
+ 0.785398
+-0.785398
+        0
+        0
+        0
+   1.5708
+SE3_updated  = 
+     0      0 1.5708
+2 0 0
 
-se3 hat vee =  0.785398 -0.785398         0         0         0    1.5708
-
-SE3 updated = 
-2.22045e-16          -1           0           1
-          1 2.22045e-16           0           0
+SE3_updated.matrix = 
+          0          -1           0           2
+          1           0           0           0
           0           0           1           0
           0           0           0           1
-
 ```
+*方法2*
+```cpp
+#include <iostream>
+#include "sophus/se3.h"
+#include "sophus/so3.h"
+#include <Eigen/Core>
+#include <Eigen/Geometry>
+using namespace std;
+void printSO3(){
+    //1.SO3的构造
+    Eigen::AngleAxisd V(M_PI/2, Eigen::Vector3d(0, 0, 1));
+    Eigen::Quaterniond q(V);    
+    Eigen::Matrix3d R(V);
+    Sophus::SO3 SO3_R(R);
+    Sophus::SO3 SO3_q(q);
+    cout << "SO3_R = \n" << SO3_R << endl;
+    cout << "SO3_R.matrix = \n" << SO3_R.matrix() << endl;
+    cout << "SO3_R = \n" << SO3_R << endl;
+    cout << "SO3_R.matrix = \n" << SO3_R.matrix() << endl;
+    //2.so3 and hat&vee
+    Eigen::Vector3d so3 = SO3_R.log();
+    cout << "so3 = \n" << SO3_R.log() << endl;
+    cout << "so3 hat = \n" << Sophus::SO3::hat(so3) << endl;
+    cout << "so3 hat vee = \n" << Sophus::SO3::vee(Sophus::SO3::hat(so3)) << endl;
+    //3.扰动
+    Eigen::Vector3d V1(0, 0, 1.57);
+    cout << "SO3 = \n" << Sophus::SO3::exp(V1) << endl;//旋转向量
+    cout << "SO3.matrix() = \n" << Sophus::SO3::exp(V1).matrix() << endl;//旋转矩阵
+    Sophus::SO3 SO3_updated = Sophus::SO3::exp(V1) * SO3_R;
+    cout << "SO3_updated = \n" << SO3_updated << endl;//扰动后的向量
+    cout << "SO3_updated.matrix = \n" << SO3_updated.matrix() << endl;//扰动后的矩阵
 
+}
+void printSE3(){
+    //1.SE3的构造
+    Eigen::AngleAxisd V(M_PI/2, Eigen::Vector3d(0, 0, 1));
+    Eigen::Quaterniond q(V);
+    Eigen::Vector3d t(0, 0, 1);    
+    Eigen::Matrix3d R(V);
+    Sophus::SE3 SE3_R(R, t);
+    Sophus::SE3 SE3_q(q, t);
+    cout << "SE3_R = \n" << SE3_R << endl;
+    cout << "SE3_R.matrix = \n" << SE3_R.matrix() << endl;
+    cout << "SE3_q = \n" << SE3_q << endl;
+    cout << "SE3_q.matrix = \n" << SE3_q.matrix() << endl;
+    //2.so3 and hat&vee
+    typedef Eigen::Matrix<double, 6, 1> Vector6d;
+    Vector6d se3 = SE3_R.log();
+    cout << "se3 = \n" << SE3_R.log() << endl;
+    cout << "se3 hat = \n" << Sophus::SE3::hat(se3) << endl;
+    cout << "se3 hat vee = \n" << Sophus::SE3::vee(Sophus::SE3::hat(se3)) << endl;
+    //3.扰动
+    Vector6d V1;
+    V1.setZero();
+    V1(0, 0) = 1;
+    cout << "SE3 = \n" << Sophus::SE3::exp(V1) << endl;//变换向量
+    cout << "SE3.matrix() = \n" << Sophus::SE3::exp(V1).matrix() << endl;//变换矩阵
+    Sophus::SE3 SE3_updated = Sophus::SE3::exp(V1) * SE3_R;
+    cout << "SE3_updated = \n" << SE3_updated << endl;//扰动后的向量
+    cout << "SE3_updated.matrix = \n" << SE3_updated.matrix() << endl;//扰动后的矩阵
+
+}
+int main(){
+    cout << "***********SO3************" << endl;
+    printSO3();
+    cout << "***********SE3************" << endl;
+    printSE3();
+}
+```
