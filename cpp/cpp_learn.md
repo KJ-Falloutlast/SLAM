@@ -9285,6 +9285,391 @@ int main() {
 	return 0;
 }
 ```
+## 13-4.stack容器
+### 1.概念
+1. 概念：stack是一种先进后出的数据结构，它只有一个出口,只有顶端的元素才可以被外界使用，所以栈不允许有遍历行为;顶部是栈底，底部是栈顶(出口是栈顶，闭口是栈底），只有底部才能入栈和出栈![栈](./../pictures/stack.jpg)
+2. 特点
+   1. 不允许遍历:遍历是指无需修改容器的大小就能访问到里面的每一个元素
+   2. 先进后出
+   3. 应用：子弹壳
+3. 接口：构造，赋值， 存取，大小
+   1. stack s1(1), s2 = s1, s.pop(), s.push(), s.size(), s.empty
+### 2.操作
+```cpp
+#include <stack>
+#include <iostream>
+using namespace std;
+//栈容器常用接口
+void test01()
+{
+	//创建栈容器 栈容器必须符合先进后出
+	stack<int> s;
+
+	//向栈中添加元素，叫做 压栈 入栈
+	s.push(10);
+	s.push(20);
+	s.push(30);
+
+	while (!s.empty()) {
+		//输出栈顶元素
+		cout << "栈顶元素为： " << s.top() << endl;
+		//弹出栈顶元素
+		s.pop();
+	}
+	cout << "栈的大小为：" << s.size() << endl;
+
+}
+
+int main() {
+
+	test01();
+	return 0;
+}
+```
+## 13-5.queue容器
+![queue](./../pictures/queue.jpg)
+1. 功能
+   1. 概念：queue是一种先进先出的数据结构，他有2个出口,对头只能出数据，队尾只能进数据，入队push,出队pop
+   2. 特点
+      1. 先进先出
+      2. 不能遍历
+2. 使用
+```cpp
+#include <queue>
+#include <string>
+#include <iostream>
+using namespace std;
+class Person{
+	public:
+		string m_Name;
+		int m_Age;
+		Person(string name, int age):m_Name(name), m_Age(age){};
+};
+void test(){
+	Person p1("a", 1);
+	Person p2("b", 2);
+	Person p3("c", 3);
+	queue<Person> q;
+	q.push(p1);
+	q.push(p2);
+	q.push(p3);
+	while (!q.empty()){
+		cout << "the front name = " << q.front().m_Name <<";  the back name = " << q.back().m_Age 
+		<< "; the size = " << q.size() << endl;
+		q.pop();
+	}
+}
+int main(){
+	test();
+}
+```
+## 13-6.list容器
+![list](./../pictures/list.jpg)
+![list](./../pictures/链表.jpg)
+### 1.概念
+   1. 功能：由多个节点构成的数据结构，每一节点由数据域和指针域构成，STL中的链表为双向循环链表，*它的指针域有2个指针，第一个prev指针，指向上一个对象，若无是NULL； 第二个是next指针，指向下一个对象，若无是NULL*，循环的意思是*第一个节点prev指针指向最后一个节点的back(), 最后一个节点的next()指针指向第一个节点的front()*
+   2. 优点：可以对任意位置进行快速插入或者删除元素
+   3. 缺点：遍历速度没有数组快，因为查找元素需要指针，占用空间比数组大，因为数据域和指针域有相同的大小
+
+### 2.构造函数
+1. 构造函数
+   1. l
+   2. l1(l2)
+   3. l2(l1.begin(),l1.end())
+   4. l2(10, 1000)
+   5. l2 = {1, 2, 3}
+
+```cpp
+#include <list>
+void printList(const list<int>& L) {
+
+	for (list<int>::const_iterator it = L.begin(); it != L.end(); it++) {
+		cout << *it << " ";
+	}
+	cout << endl;
+}
+
+void test01()
+{
+	list<int>L1;
+	L1.push_back(10);
+	L1.push_back(20);
+	L1.push_back(30);
+	L1.push_back(40);
+
+	printList(L1);
+
+	list<int>L2(L1.begin(),L1.end());
+	printList(L2);
+
+	list<int>L3(L2);
+	printList(L3);
+
+	list<int>L4(10, 1000);
+	printList(L4);
+}
+
+int main() {
+
+	test01();
+	return 0;
+}
+```
+### 2.赋值和交换
+1. 方法:
+   1. l1 = l2
+   2. l1.assign(l2)
+   3. l1.assign(l1.begin(), l2.end())
+   4. l1.assign(10, 5)
+   5. l2.swap(l2)
+```cpp
+#include <string>
+#include <iostream>
+using namespace std;
+#include <list>
+
+void printList(const list<int>& L) {
+
+	for (list<int>::const_iterator it = L.begin(); it != L.end(); it++) {
+		cout << *it << " ";
+	}
+	cout << endl;
+}
+
+//赋值和交换
+void test01()
+{
+	list<int>L1;
+	L1.push_back(10);
+	L1.push_back(20);
+	L1.push_back(30);
+	L1.push_back(40);
+	printList(L1);
+
+	//赋值
+	list<int>L2;
+	L2 = L1;
+	printList(L2);
+
+	list<int>L3;
+	L3.assign(L2.begin(), L2.end());
+	printList(L3);
+
+	list<int>L4;
+	L4.assign(10, 100);
+	printList(L4);
+
+}
+
+//交换
+void test02()
+{
+
+	list<int>L1;
+	L1.push_back(10);
+	L1.push_back(20);
+	L1.push_back(30);
+	L1.push_back(40);
+
+	list<int>L2;
+	L2.assign(10, 100);
+
+	cout << "交换前： " << endl;
+	printList(L1);
+	printList(L2);
+
+	cout << endl;
+
+	L1.swap(L2);
+
+	cout << "交换后： " << endl;
+	printList(L1);
+	printList(L2);
+
+}
+
+int main() {
+
+	//test01();
+	test02();
+	return 0;
+}
+```
+### 3.大小操作
+1. 方法
+   1. resize()
+   2. empty()
+   3. size()
+```cpp
+#include <list>
+
+void printList(const list<int>& L) {
+
+	for (list<int>::const_iterator it = L.begin(); it != L.end(); it++) {
+		cout << *it << " ";
+	}
+	cout << endl;
+}
+
+//大小操作
+void test01()
+{
+	list<int>L1;
+	L1.push_back(10);
+	L1.push_back(20);
+	L1.push_back(30);
+	L1.push_back(40);
+
+	if (L1.empty())
+	{
+		cout << "L1为空" << endl;
+	}
+	else
+	{
+		cout << "L1不为空" << endl;
+		cout << "L1的大小为： " << L1.size() << endl;
+	}
+
+	//重新指定大小
+	L1.resize(10);
+	printList(L1);
+
+	L1.resize(2);
+	printList(L1);
+}
+
+int main() {
+	test01();
+	return 0;
+}
+```
+### 4.大小操作
+1. 方法
+* push_back(elem);//在容器尾部加入一个元素
+* pop_back();//删除容器中最后一个元素
+* push_front(elem);//在容器开头插入一个元素
+* pop_front();//从容器开头移除第一个元素
+* insert(pos,elem);//在pos位置插elem元素的拷贝，返回新数据的位置。
+* insert(pos,n,elem);//在pos位置插入n个elem数据，无返回值。
+* insert(pos,beg,end);//在pos位置插入[beg,end)区间的数据，无返回值。
+* erase(beg,end);//删除[beg,end)区间的数据，返回下一个数据的位置。
+* erase(pos);//删除pos位置的数据，返回下一个数据的位置。
+* remove(elem);//删除容器中所有与elem值匹配的元素。
+* clear();//移除容器的所有数据
+* *总结*
+  * push_back(),push_front(), pop_back(), pop_front()
+  * insert():insert(it, 10), insert(it, 2, 10), insert(it, l1.begin(), l1.end())
+  * remove():remove(10)
+  * erase():erase(it), erase(l1.begin(), l2.end())
+  * clear()
+  * 注意：
+    * **insert是插入到某个元素的前面，当iter对准a[0]时，将元素insert到a[0]前面,插入完毕后，指针仍然对准a[0]，但此时a[0]已经发生偏移**
+    * **push_back按照原来顺序，push_front倒序**
+1. 例1
+```cpp
+#include <queue>
+#include <string>
+#include <iostream>
+using namespace std;
+#include <list>
+void printList(list<int> &l){
+	for (list<int>::iterator it = l.begin(); it != l.end(); it++){
+		cout <<  *it << " ";
+	}
+	cout << endl;
+}
+void test(){
+	//*******1.尾插尾删************
+	list<int> l;
+	for (int i = 3; i >= 0; i--){
+		l.push_back(i);
+	}
+	for (int i = 4; i < 7; i++){
+		l.push_front(i);
+	}
+	printList(l);
+	//6 5 4 3 2 1
+	l.pop_front();
+	l.pop_back();
+	printList(l);
+
+	//***********2.insert************
+	//insert是插入到某个元素的前面，当iter对准a[0]时，将元素insert到a[0]前面,插入完毕后，指针仍然对准a[0]，但此时a[0]已经发生偏移
+	list<int>::iterator it = l.begin();
+	l.insert(++it, 10);//++it和it++不一样，++it为立刻就加，而it++是下一步执行才加
+	printList(l);
+	//5 10 4 3 2 1 
+	list<int> l1 = {100, 200};
+	l.insert(it, l1.begin(), l1.end());
+	printList(l);
+	//5 10 100 200 4 3 2 1
+
+	//***********3.erase and remove*********
+	l.erase(it);//此时it对准4，所以删除4
+	printList(l);
+	//5 10 100 200 3 2 1
+	l.remove(10);
+	printList(l);
+	//5 100 200 3 2 1
+	
+	//*********4.clear()********
+	l.clear();
+	printList(l);
+}
+
+int main(){
+	test();
+}
+```
+3. 例2
+```cpp
+#include <vector>
+#include <list>
+#include <iostream>
+ 
+using namespace std;
+ 
+bool sort_desc(int a, int b)
+{
+return a > b;
+}
+ 
+int main(int argc, char *argv[])
+{
+ 
+    list<int> mylist;
+    //push_back按照原来顺序，push_front倒序
+    mylist.push_back(5);
+    mylist.push_back(8);
+    mylist.push_back(9);
+    mylist.push_back(2);
+    mylist.push_back(4);
+    mylist.push_back(6);
+    //5 8 9 2 4 6
+ 
+    list<int> index;
+    index.push_back(1);
+    index.push_back(3);
+    index.push_back(4);
+    index.sort(sort_desc);//对下标数组进行降序
+ 
+    for(list<int>::iterator iter=index.begin(); iter!=index.end(); iter++)
+    {
+        list<int>::iterator delIter=mylist.begin();
+        advance(delIter, *iter);//按照由大到小的下标顺序进行删除元素，这样被删除元素的下标是永远不会变的
+        mylist.erase(delIter);
+    }
+ 
+    for(list<int>::iterator iter=mylist.begin(); iter!=mylist.end(); iter++)
+    {
+        cout << *iter << " ";
+    }
+    cout << endl;
+ 
+    return 0;
+}
+```
+
 # 13.c++高级教程
 ## 1. 命名空间
 1. 提出：当一个班上有2个同名学生时，不得不用其他的信息，比如说，年龄等等来区分他们；在c++中，你可能会有xyz()的函数，在另一个库中也有xyz()的函数，所以需要加命名空间加以区分
@@ -9541,4 +9926,131 @@ int main()
 	return 0;
 }
 
+```
+## 5.sort()详解
+1. 定义：sort(begin, end, cmp),begin和end是第一个和最后一个元素的下一个位置的指针，cmp为排序准则，不写的话是从小到大排序，从大到小是greater<int>(),cmp还可以自定义
+2. 自定义排序
+   1. 比如说我们按照每个数的个位进行从大到小排序
+```cpp
+
+#include<iostream>
+#include<algorithm>
+using namespace std;
+
+bool cmp(int x,int y){
+	return x % 10 > y % 10;
+}
+//按照个位数大小排序，按返回值为true来排序
+int main(){
+	int num[10] = {65,59,96,13,21,80,72,33,44,99};
+	sort(num, num+10, cmp);//num是第一数的指针，num+10是第10个元素后面一个元素指针
+	for(int i=0;i<10;i++){
+		cout<<num[i]<<" ";
+	}//输出结果：59 99 96 65 44 13 33 72 21 80
+
+	return 0;
+	
+} 
+```
+   2. 结构体排序(类排序同理)
+      1. 方法1(利用数组)
+```cpp
+//按照成绩排序
+#include<iostream>
+#include<string>
+#include<algorithm>
+using namespace std;
+class Student{
+    public:
+        string name;
+        int score;
+        Student(){};
+        Student(string n, int s):name(n), score(s){};
+
+};
+bool cmp_stu(Student x, Student y){
+    return x.score > y.score;
+}
+
+int main(){
+    Student stu[3];//此处只能用数组，因为
+    string n;
+    int s;
+    for (int i = 0; i < 3; i++){
+        cin>> n >> s;
+        stu[i] = Student(n, s);
+    } 
+    sort(stu, stu+3, cmp_stu);//这里不能加多，否则会数组越界
+    
+    for (int i = 0; i < 3; i++){
+        cout << "name = " << stu[i].name << "; age =  " << stu[i].score <<endl;
+    }    
+}
+```
+      1. 方法2(利用list)
+```cpp
+#include<iostream>
+#include<string>
+#include<list>
+#include<algorithm>
+using namespace std;
+class Student{
+    public:
+        string name;
+        int score;
+        Student(){};
+        Student(string n, int s):name(n), score(s){};
+
+};
+bool cmp_stu(Student x, Student y){
+    return x.score > y.score;
+}
+
+int main(){
+    list<Student> stu;//此处只能用数组，因为
+    string name;
+    int score;
+    for (int i = 0; i < 3; i++){
+        cin>> name >> score;
+        Student s(name, score);
+        stu.push_back(s);
+    } 
+    stu.sort(cmp_stu);//此处是括号内是自定义排序方法
+    for (list<Student>::iterator it = stu.begin(); it != stu.end(); it++){
+        cout << "name = " << it->name << " score = " << it->score << endl;
+    }
+    
+}
+```
+## 6.auto详解
+1. 代替复杂的变量声明
+```cpp
+list<int> l1;
+l1.push_back(1);
+l1.push_back(2);
+l1.push_back(3);
+
+for (list<int>::iterator i = l1.begin(); i!= l1.end(); i++){
+	cout << i.operator->() << endl;
+	cout << *i << endl;
+}
+//list<int>::iterator i = l1.begin() <=> auto i = l1.begin();
+```
+2. 定义模板参数，用于声明依赖模板参数的变量
+```cpp
+template <typename _Tx,typename _Ty>
+void Multiply(_Tx x, _Ty y)
+{
+    auto v = x+y;
+    std::cout << v;
+}
+//此时不知道x,y的类型，所以用auto
+```
+3. 函数模板依赖于模板参数的返回值
+```cpp
+template <typename _Tx, typename _Ty>
+auto multiply(_Tx x, _Ty y)->decltype(x*y)
+{
+    return x*y;
+}
 ```

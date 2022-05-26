@@ -1092,3 +1092,263 @@ int main(){
     printSE3();
 }
 ```
+## 3-3.pangolin的使用
+1. 使用方法1
+[链接](https://blog.csdn.net/u011341856/article/details/107199600?spm=1001.2101.3001.6650.8&utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7ERate-8-107199600-blog-65441315.pc_relevant_paycolumn_v3&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7ERate-8-107199600-blog-65441315.pc_relevant_paycolumn_v3&utm_relevant_index=11)
+```cpp
+//以下所有的Eigen::aligned_allocator<Sophus::SE3>都可以去掉
+#include <sophus/se3.h>//针对于se3
+#include <string>
+#include <iostream>
+#include <fstream>
+#include <Eigen/Core>
+//下面3个文件主要是面对usleep(5000)报错的 
+#include <unistd.h>
+#include <stdio.h>
+
+// need pangolin for plotting trajectory
+#include <pangolin/pangolin.h>
+
+using namespace std;
+
+// path to trajectory file
+string trajectory_file = "/home/kim-james/ROS_Space/SLAM_ws/slam_test/ch3/trajectory/trajectory.txt";
+
+// function for plotting trajectory, don't edit this code
+// start point is red and end point is blue
+void DrawTrajectory(vector<Sophus::SE3>);
+int main(int argc, char **argv) {
+
+    vector<Sophus::SE3> poses;//poses为旋转矩阵的容器
+    //只有加入了Eigen::aligned_allocator<Sophus::SE3>才可以允许vector加入SE3，但是可以去掉
+    // 定义一个文件读取器
+    fstream file(trajectory_file); 
+    double time, tx, ty, tz, qx, qy, qz, qw; 
+    //按照time, translation, quaternion顺序读取
+    //若是eof()返回0，说明数据没读完,所以!0 = 1,eof() = end of file
+    while (!file.eof()){
+        file >> time >> 
+        tx >> ty >> tz >> 
+        qx >> qy >> qz >> qw; 
+        //处理读取的数据
+        //处理平移
+        Eigen::Vector3d t(tx, ty, tz);
+        //处理四元数(注意顺序)
+        Eigen::Quaterniond q(qw, qx, qy, qz);
+        //注意归一化
+        q.normalize();
+        //将四元数转换为旋转矩阵
+        Eigen::Matrix3d R(q);
+        //存入到Sophus对应的SE3 -> T,转化为变换矩阵
+        Sophus::SE3 SE3_from_Eigen(R, t);
+        poses.push_back(SE3_from_Eigen); //传入的是SE3的vector
+    }
+    cout << "the number of points = " << poses.size() << endl;//points = 120
+    DrawTrajectory(poses);//先声明后使用
+    return 0;
+}
+
+/*******************************************************************************************/
+void DrawTrajectory(vector<Sophus::SE3> poses) {
+    
+    if (poses.empty()) {
+        cerr << "Trajectory is empty!" << endl;
+        return;
+    }
+
+    // create pangolin window and plot the trajectory
+    pangolin::CreateWindowAndBind("Trajectory Viewer", 1024, 768);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    pangolin::OpenGlRenderState s_cam(
+            pangolin::ProjectionMatrix(1024, 768, 500, 500, 512, 389, 0.1, 1000),
+            pangolin::ModelViewLookAt(0, -0.1, -1.8, 0, 0, 0, 0.0, -1.0, 0.0)
+    );
+
+    pangolin::View &d_cam = pangolin::CreateDisplay()
+            .SetBounds(0.0, 1.0, pangolin::Attach::Pix(175), 1.0, -1024.0f / 768.0f)
+            .SetHandler(new pangolin::Handler3D(s_cam));
+
+    while (pangolin::ShouldQuit() == false) {
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        d_cam.Activate(s_cam);
+        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+
+        glLineWidth(2);
+        //size_t: size of type 
+        for (int i = 0; i < poses.size() - 1; i++) {
+            glColor3f(1 - (float)i / poses.size(), 0.0f, (float) i / poses.size());//颜色变化的算法
+            /*
+            1.(float)i：将i转成float类型
+            2.poses.size()为vector的大小
+            2.auto = vector<Sophus::SE3>
+            */
+            glBegin(GL_LINES);//画线开始
+            auto p1 = poses[i], p2 = poses[i + 1];
+            glVertex3d(p1.translation()[0], p1.translation()[1], p1.translation()[2]);//p1点的(x, y, z)坐标
+            glVertex3d(p2.translation()[0], p2.translation()[1], p2.translation()[2]);//p2点的(x, y, z)坐标
+            glEnd();//画线结束，将p1和p2连成一条线
+        }
+        pangolin::FinishFrame();//绘图
+    }
+}
+```
+2. 基本用法
+```cpp
+#include <pangolin/pangolin.h>
+#include <iostream>
+int main()
+{
+    // 1.创建名称为“Main”的GUI窗口，尺寸为640×640
+    pangolin::CreateWindowAndBind("Main",640,480);
+    // 2.启动深度测试，开启这个功能后，窗口只会绘制面朝相机的那一面像素，要使用3D可视化就要开启这个功能
+    glEnable(GL_DEPTH_TEST);
+    //3.打开颜色混合，把某一像素位置原来的颜色和将要画上去的颜色通过某种方式混合，实现特殊的效果
+    glEnable(GL_BLEND);
+    //4.紧跟glEnable(GL_BLEND)表示颜色的混合方式
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    /*5.创建一个观察相机视图，用真实的相机来模拟真实的世界
+    5-1.ProjectMatrix(int h, int w, int fu, int fv, int cu, int cv, int znear, int zfar)
+    依次是观察相机的图像高度，宽度，4个内参，以及最近和最远视距
+    5-2.ModelViewLookAt(double x, double y, double z,double lx, double ly, double lz, AxisDirection Up)
+    x,y,z为相机所在的位置;lx,ly,lz为相机所看视点的位置;AxixDirection UP为相机轴的方向
+    以自己脑袋为例，前3个参数为脑袋的位置，4-6参数为眼睛所看的方向, 最后参数为头顶的朝向
+    */
+    pangolin::OpenGlRenderState s_cam(
+        pangolin::ProjectionMatrix(640,480,420,420,320,320,0.2,100),
+        pangolin::ModelViewLookAt(2,0,2, 0,0,0, pangolin::AxisY)
+    );
+
+    //6.创建相机视图句柄，需要用它来显示前面设置的相机拍摄的内容
+    pangolin::Handler3D handler(s_cam); //交互相机视图句柄
+    //7.进行显示设置，SetBounds前4个参数为视图在视窗中的范围(下，上，左，右)，最后一个参数为长宽比
+    //(0, 1, 0, 1)：第一个0表示显示的拍摄窗口的下边在整个GUI的最下面，第二个参数1表示上边在GUI的最上面，中间就用0.5
+    pangolin::View& d_cam = pangolin::CreateDisplay()
+            .SetBounds(0.0, 1.0, 0.0, 1.0, -640.0f/480.0f)
+            .SetHandler(&handler);
+    //8.检测是否关闭OpenGL窗口
+    while( !pangolin::ShouldQuit() )
+    {
+        //9.清空颜色和深度缓存
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        //10.激活并设置状态矩阵
+        d_cam.Activate(s_cam);
+ /*--------  11.绘图  --------*/
+        //11-1.在原点创建一个立方体对象
+        pangolin::glDrawColouredCube();
+        
+        //11-2.绘制点
+        //点的大小
+        glPointSize(30.0);//
+        //开始画点
+        glBegin(GL_POINTS);//后面s不能掉
+        //设置点1的颜色:rgb, float类型
+        glColor3f(0, 1, 0);
+        //设置点1的坐标， 3维float类型
+        glVertex3f(0 , 0, 0);
+        //设置点2的颜色,坐标
+        glColor3f(1, 0, 0);
+        glVertex3f(0 , 1, 0);
+        //结束画点
+        glEnd();
+        //11-3.绘制线段
+        //11-3-1.设置大小
+        glLineWidth(4);
+        //11-3-2.开始画线条
+        glBegin(GL_LINES);
+        //设置颜色
+        glColor3f(0, 1, 0);
+        //设置起点
+        glVertex3f(0, 0, 0);
+        glVertex3f(0, 1, 0);
+        //结束画线
+        glEnd();
+        
+        //11-3.绘制折线
+        glLineWidth(2);
+        //  开始
+        glBegin ( GL_LINE_STRIP );
+        //  设置颜色
+        glColor3f(0, 1, 0);
+        //  设置折点坐标
+        glVertex3f(0, 0, 0);
+        glVertex3f(0, 1, 0);
+        glVertex3f(1, 1, 0);
+        //  结束
+        glEnd();
+
+        //11-4.绘制封闭的不规则图形
+        //  设置大小
+        glLineWidth(2);
+        //  开始
+        glBegin ( GL_LINE_LOOP );
+        //  设置颜色
+        glColor3f(0, 1, 0);
+        //  设置折点坐标
+        glVertex3f(0, 0, 0);
+        glVertex3f(0, 1, 0);
+        glVertex3f(1, 1, 0);
+        //  结束
+        glEnd();
+        //11.运行帧循环以推进窗口事件
+        pangolin::FinishFrame();
+    }
+    
+    return 0;
+}
+```
+3. GUI
+```cpp
+#include <pangolin/pangolin.h>
+
+void function(){
+    std::cout << "Hello pangolin" << std::endl;
+}
+
+int main() {
+    pangolin::CreateWindowAndBind("Main",640,480);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    pangolin::OpenGlRenderState s_cam(
+            pangolin::ProjectionMatrix(640,480,420,420,320,320,0.2,100),
+            pangolin::ModelViewLookAt(2,0,2, 0,0,0, pangolin::AxisY)
+    );
+
+    pangolin::Handler3D handler(s_cam);
+    pangolin::View& d_cam = pangolin::CreateDisplay()
+            .SetBounds(0.0, 1.0, 0.0, 1.0, -640.0f/480.0f)
+            .SetHandler(&handler);
+
+    pangolin::CreatePanel("ui").SetBounds(0.0, 1.0, 0.0, pangolin::Attach::Pix(180));//创建
+
+    pangolin::Var<bool> a_button("ui.A_Button", false, false);//设置一个按钮，默认值为false，最后一个false表示按钮形式
+    pangolin::Var<double> a_double("ui.A_Double", 3, 0, 5);//设置一个double的、可拖动变换值的玩意(不知道咋形容)！
+    pangolin::Var<int> a_int("ui.A_Int", 2, 0, 5);//设置一个int的、可拖动变换值的玩意
+    pangolin::Var<std::function<void(void)>> reset("ui.Reset", function);//设置一个按钮，用于调用function函数
+
+    while( !pangolin::ShouldQuit() )
+    {
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        d_cam.Activate(s_cam);
+
+        if (pangolin::Pushed(a_button)){//如果a_button按钮被点，就运行if里面的语句
+            std::cout << "You tough a_buttom" << std::endl;
+            a_double = 0;
+            a_int = 0;
+        }
+
+        glColor3f(1.0, 1.0, 1.0);
+        pangolin::glDrawColouredCube();
+
+        pangolin::FinishFrame();
+    }
+
+    return 0;
+}
+```
