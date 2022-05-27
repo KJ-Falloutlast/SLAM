@@ -1093,6 +1093,45 @@ int main(){
 }
 ```
 ## 3-3.pangolin的使用
+模板
+```cpp
+#include <iostream>
+#include <pangolin/pangolin.h>
+#include <Eigen/Core>
+#include <Eigen/Geometry>
+#include <vector>
+#include <string>
+#include "sophus/se3.h"
+using namespace std;
+
+int main()
+{
+    pangolin::CreateWindowAndBind("Main",640,480);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    pangolin::OpenGlRenderState s_cam(
+        pangolin::ProjectionMatrix(640,480,420,420,320,320,0.2,100),
+        pangolin::ModelViewLookAt(2,0,2, 0,0,0, pangolin::AxisY)
+    );
+
+    pangolin::Handler3D handler(s_cam); //交互相机视图句柄
+    pangolin::View& d_cam = pangolin::CreateDisplay()
+            .SetBounds(0.0, 1.0, 0.0, 1.0, -640.0f/480.0f)
+            .SetHandler(&handler);
+    while( !pangolin::ShouldQuit() )
+    {
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        d_cam.Activate(s_cam);
+ /*-------- .绘图  --------*/
+    /*---------------*/
+
+        pangolin::FinishFrame();
+    }
+    
+    return 0;
+}
+```
 1. 使用方法1
 [链接](https://blog.csdn.net/u011341856/article/details/107199600?spm=1001.2101.3001.6650.8&utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7ERate-8-107199600-blog-65441315.pc_relevant_paycolumn_v3&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7ERate-8-107199600-blog-65441315.pc_relevant_paycolumn_v3&utm_relevant_index=11)
 ```cpp
@@ -1188,6 +1227,7 @@ void DrawTrajectory(vector<Sophus::SE3> poses) {
             */
             glBegin(GL_LINES);//画线开始
             auto p1 = poses[i], p2 = poses[i + 1];
+            //vertex为顶点
             glVertex3d(p1.translation()[0], p1.translation()[1], p1.translation()[2]);//p1点的(x, y, z)坐标
             glVertex3d(p2.translation()[0], p2.translation()[1], p2.translation()[2]);//p2点的(x, y, z)坐标
             glEnd();//画线结束，将p1和p2连成一条线
@@ -1402,5 +1442,150 @@ int main() {
     }
 
     return 0;
+}
+```
+## 3-4.计算轨迹误差
+
+**2阶范数就是向量的模**
+```cpp
+#include <sophus/se3.h>//针对于se3
+#include <string>
+#include <iostream>
+#include <fstream>
+#include <Eigen/Core>
+#include <unistd.h>
+#include <stdio.h>
+#include <pangolin/pangolin.h>
+using namespace std;
+
+// path to trajectory file
+string trajectory_est= "/home/kim-james/ROS_Space/SLAM_ws/slam_test/ch3/trajectory/estimated.txt";
+string trajectory_ground= "/home/kim-james/ROS_Space/SLAM_ws/slam_test/ch3/trajectory/groundtruth.txt";
+
+// start point is red and end point is blue
+void DrawTrajectory(vector<Sophus::SE3> poses_est, vector<Sophus::SE3> poses_gd);
+int main(int argc, char **argv) {
+    //1.组织数据
+    vector<Sophus::SE3> poses_est;//poses为旋转矩阵的容器
+    vector<Sophus::SE3> poses_gd;//poses为旋转矩阵的容器
+
+    fstream file_est(trajectory_est); 
+    fstream file_ground(trajectory_ground); 
+    double time, tx, ty, tz, qx, qy, qz, qw; 
+    //按照time, translation, quaternion顺序读取
+    //若是eof()返回0，说明数据没读完,所以!0 = 1,eof() = end of file
+    while (!file_est.eof()){
+        file_est >> time >> 
+        tx >> ty >> tz >> 
+        qx >> qy >> qz >> qw; 
+        //处理读取的数据
+        //处理平移
+        Eigen::Vector3d t(tx, ty, tz);
+        //处理四元数(注意顺序)
+        Eigen::Quaterniond q(qw, qx, qy, qz);
+        //注意归一化
+        q.normalize();
+        //将四元数转换为旋转矩阵
+        Eigen::Matrix3d R(q);
+        //存入到Sophus对应的SE3 -> T,转化为变换矩阵
+        Sophus::SE3 SE3_from_Eigen(R, t);
+        poses_est.push_back(SE3_from_Eigen); //传入的是SE3的vector
+    }
+    
+    while (!file_ground.eof()){
+        file_ground >> time >> 
+        tx >> ty >> tz >> 
+        qx >> qy >> qz >> qw; 
+        //处理读取的数据
+        //处理平移
+        Eigen::Vector3d t(tx, ty, tz);
+        //处理四元数(注意顺序)
+        Eigen::Quaterniond q(qw, qx, qy, qz);
+        //注意归一化
+        q.normalize();
+        //将四元数转换为旋转矩阵
+        Eigen::Matrix3d R(q);
+        //存入到Sophus对应的SE3 -> T,转化为变换矩阵
+        Sophus::SE3 SE3_from_Eigen(R, t);
+        poses_gd.push_back(SE3_from_Eigen); //传入的是SE3的vector
+    }
+    cout << "the number of ground_points = " << poses_gd.size() << endl;//points = 120
+    cout << "the number of est_points = " << poses_gd.size() << endl;//points = 120
+    
+    //2.开始测试RMSE
+    double RMSE = 0;
+    double e = 0;
+    //定义好轨迹点的存放容器
+    Sophus::SE3 p_est;
+    Sophus::SE3 p_gd;
+    for (int i = 0; i < poses_est.size(); i++){
+        p_est = poses_est[i];
+        p_gd = poses_gd[i];
+        //e = ||log(Tg.inserve * Te)||2
+        e = (p_gd.inverse() * p_est).log().norm();
+        RMSE = RMSE + e * e / poses_est.size();
+    }
+    RMSE = sqrt(RMSE);
+    cout << "The RMSE of trajectory = " << RMSE << endl;
+    
+    //3.画图
+    DrawTrajectory(poses_est, poses_gd);//先声明后使用
+
+    return 0;
+}
+
+/*******************************************************************************************/
+void DrawTrajectory(vector<Sophus::SE3> poses_est, vector<Sophus::SE3> poses_gd) {
+    
+
+    // create pangolin window and plot the trajectory
+    pangolin::CreateWindowAndBind("Trajectory Viewer", 1024, 768);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    pangolin::OpenGlRenderState s_cam(
+            pangolin::ProjectionMatrix(1024, 768, 500, 500, 512, 389, 0.1, 1000),
+            pangolin::ModelViewLookAt(0, -0.1, -1.8, 0, 0, 0, 0.0, -1.0, 0.0)
+    );
+    
+    pangolin::Handler3D handler(s_cam); 
+    
+    pangolin::View& d_cam = pangolin::CreateDisplay()
+            .SetBounds(0.0, 1.0, 0.0, 1.0, -640.0f/480.0f)
+            .SetHandler(&handler);
+
+    while (pangolin::ShouldQuit() == false) {
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        d_cam.Activate(s_cam);
+        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+
+        glLineWidth(2);
+        //pose_est
+        for (int i = 0; i < poses_est.size() - 1; i++) {
+            // glColor3f(1 - (float)i / poses_est.size(), 0.0f, (float) i / poses_est.size());//颜色变化的算法,起点为红色，终点为蓝色
+            glColor3f(1.0f, 0.0f, 0.0f);//估计轨迹为红色
+            glBegin(GL_LINES);//画线开始
+            auto p1 = poses_est[i], p2 = poses_est[i + 1];
+            glVertex3d(p1.translation()[0], p1.translation()[1], p1.translation()[2]);//p1点的(x, y, z)坐标
+            glVertex3d(p2.translation()[0], p2.translation()[1], p2.translation()[2]);//p2点的(x, y, z)坐标
+            glEnd();//画线结束，将p1和p2连成一条线
+
+        }
+        //pose_ground
+        for (int i = 0; i < poses_gd.size() - 1; i++) {
+
+            glColor3f(0.0f, 0.0f, 1.0f);//实际轨迹为蓝色
+            glBegin(GL_LINES);//画线开始
+            auto p1 = poses_gd[i], p2 = poses_gd[i + 1];
+            glVertex3d(p1.translation()[0], p1.translation()[1], p1.translation()[2]);//p1点的(x, y, z)坐标
+            glVertex3d(p2.translation()[0], p2.translation()[1], p2.translation()[2]);//p2点的(x, y, z)坐标
+            glEnd();//画线结束，将p1和p2连成一条线
+
+        }
+        pangolin::FinishFrame();//绘图
+    }
+
 }
 ```

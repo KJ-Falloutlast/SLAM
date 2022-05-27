@@ -8260,6 +8260,7 @@ int main(){
 	test();
 }
 ```
+
 6. 案例
 ```cpp
 #include <iostream>
