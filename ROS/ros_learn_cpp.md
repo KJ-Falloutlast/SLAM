@@ -2598,64 +2598,83 @@ int main(int argc, char *argv[])
       1. 属性:xyz用于设置围绕哪个关节轴运动
 4. 案例
 ```urdf
- <!-- 
-    需求: 创建机器人模型，底盘为长方体，
-         在长方体的前面添加一摄像头，
-         摄像头可以沿着 Z 轴 360 度旋转
-
- -->
-<robot name="mycar">
-    <!-- 底盘 -->
-    <link name="base_link">
+<!-- 需求:设置机器人底盘，并添加摄像头 -->
+<robot name = "mycar">
+    <!-- 1.底盘link -->
+    <link name = "base_link">
+    <!-- 可视化标签 -->
         <visual>
+            <!-- 形状 -->
             <geometry>
-                <box size="0.5 0.2 0.1" />
-            </geometry>
-            <origin xyz="0 0 0" rpy="0 0 0" />
-            <material name="blue">
-                <color rgba="0 0 1.0 0.5" />
+                <!-- 立方体 -->
+                <box size = "0.3 0.2 0.1"/>
+                <!-- xyz的长度 -->
+             </geometry>
+            <!-- 偏移量 -->
+            <origin xyz = "0 0 0.05" rpy = "0 0 0" /> <!--rpy对应xyz翻滚-->
+            <!-- rpy对应xyz, x, y, z分别对应前，左，上 -->
+            <!-- 颜色 -->
+            <material name = "car_color">
+                <color rgba = "0.7 0.5 0 0.5"/>
+                <!-- a是透明度，1是不透明，0是透明(如果完全是0的话就无法看见) -->
             </material>
         </visual>
     </link>
-
-    <!-- 摄像头 -->
-    <link name="camera">
+    <!-- 2.摄像头link-->
+    <link name = "camera">
+    <!-- 可视化标签 -->
         <visual>
+            <!-- 形状 -->
             <geometry>
-                <box size="0.02 0.05 0.05" />
-            </geometry>
-            <origin xyz="0 0 0" rpy="0 0 0" />
-            <material name="red">
-                <color rgba="1 0 0 0.5" />
+                <box size = "0.15 0.1 0.05"/>
+             </geometry>
+             <!-- 先试用默认 -->
+            <origin xyz = "0 0 0" rpy = "0 0 0" /> <!--rpy对应xyz翻滚-->
+            <material name = "camera_color">
+                <color rgba = "0.7 0.5 0 0.5"/>
             </material>
         </visual>
     </link>
-
-    <!-- 关节 -->
-    <joint name="camera2baselink" type="continuous">
-        <parent link="base_link"/>
-        <child link="camera" />
-        <!-- 需要计算两个 link 的物理中心之间的偏移量 -->
-        <origin xyz="0.2 0 0.075" rpy="0 0 0" />
-        <axis xyz="0 0 1" />
+    <!--注意模型的生成位置都是在几何体的几何中心  -->
+    <!-- 3.关节-->
+    <joint name = "camera2base" type = "continuous">
+        <!-- 父级link -->
+        <parent link = "base_link" />
+        <!-- 子级link -->
+        <child link = "camera" />
+        <!-- 偏移量 :指的是child连杆相对于parent连杆的位置-->
+        <origin xyz = "0 0 0.125" rpy = "0 0 0" />
+        <!-- 关节参考轴 (围绕x,y,z轴的运动，0表示固定，1表示运动)-->
+        <axis xyz = "0 0 1" />
     </joint>
-
 </robot>
 ```
 ```launch
 <launch>
 
-    <param name="robot_description" textfile="$(find urdf_rviz_demo)/urdf/urdf/urdf03_joint.urdf" />
-    <node pkg="rviz" type="rviz" name="rviz" args="-d $(find urdf_rviz_demo)/config/helloworld.rviz" /> 
+    <!-- 设置参数 -->
+    <param name="robot_description" textfile="$(find urdf_rviz)/urdf/urdf/demo03_joint.urdf" />
 
-    <!-- 添加关节状态发布节点 -->
-    <node pkg="joint_state_publisher" type="joint_state_publisher" name="joint_state_publisher" />
-    <!-- 添加机器人状态发布节点 -->
+    <!-- 启动 rviz -->
+    <node pkg="rviz" type="rviz" name="rviz" args = "-d $(find urdf_rviz)/config/show_mycar.rviz" />
+    <!-- 保存的操作 利用args = "文件名",注意此时保存在结束时候不能再次保存，否则可能导致读取文件失败-->
+    <!-- 
+        只有2条语句点的问题
+        1.表现：设置显示位置和颜色异常
+        2.提示：no transform from camera to base_link：缺少camera到base_link的坐标变换
+        3.原因：rviz在显示URDF时，必须要发布不同坐标系的关系
+        4.解决：ROS中提供了机器人模型的坐标发布节点
+        rosrun joint_state_publisher joint_state_publisher(发布关节状态)
+        rosrun robot_state_publisher robot_state_publisher(发布机器人状态)
+     -->
+     <!-- 关节发布节点 -->
+    <node pkg="joint_state_publisher" type="joint_state_publisher" name = "joint_state_publisher"/>
+    <!-- 机器人发布节点 -->
     <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" />
-    <!-- 可选:用于控制关节运动的节点 -->
+    <!-- 关节控制节点(非必须) -->
     <node pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" name="joint_state_publisher_gui" />
-
 </launch>
+
 ```
 ### 4.base_footprint优化urdf
 ```urdf
@@ -2674,7 +2693,7 @@ int main(int argc, char *argv[])
         </visual>
     </link>
 
-    <!-- 添加底盘 -->
+    <!-- 1.添加底盘 -->
     <link name="base_link">
         <visual>
             <geometry>
@@ -2687,14 +2706,14 @@ int main(int argc, char *argv[])
         </visual>
     </link>
 
-    <!-- 底盘与原点连接的关节 -->
+    <!-- 2.底盘与原点连接的关节 -->
     <joint name="base_link2base_footprint" type="fixed">
         <parent link="base_footprint" />
         <child link="base_link" />
         <origin xyz="0 0 0.05" />
     </joint>
 
-    <!-- 添加摄像头 -->
+    <!-- 3.添加摄像头 -->
     <link name="camera">
         <visual>
             <geometry>
@@ -2706,7 +2725,7 @@ int main(int argc, char *argv[])
             </material>
         </visual>
     </link>
-    <!-- 关节 -->
+    <!-- 4.添加关节 -->
     <joint name="camera2baselink" type="continuous">
         <parent link="base_link"/>
         <child link="camera" />
@@ -2715,5 +2734,171 @@ int main(int argc, char *argv[])
     </joint>
 
 </robot>
+
 ```
-*launch文件不变*
+```launch
+<launch>
+
+    <!-- 设置参数 -->
+    <param name="robot_description" textfile="$(find urdf_rviz)/urdf/urdf/demo04_base_footprint.urdf" />
+
+    <!-- 启动 rviz -->
+    <node pkg="rviz" type="rviz" name="rviz" args = "-d $(find urdf_rviz)/config/show_mycar.rviz" />
+    <!-- 保存的操作 利用args = "文件名",注意此时保存在结束时候不能再次保存，否则可能导致读取文件失败-->
+     <!-- 关节发布节点 -->
+    <node pkg="joint_state_publisher" type="joint_state_publisher" name = "joint_state_publisher"/>
+    <!-- 机器人发布节点 -->
+    <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" />
+    <!-- 关节控制节点(此节点非必须) -->
+    <node pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" name="joint_state_publisher_gui" />
+</launch>
+```
+### 5.实践
+![robot](./../pictures/robot.jpg)
+```urdf
+<robot name="mycar">
+    <!-- 设置 base_footprint  -->
+    <link name="base_footprint">
+        <visual>
+            <geometry>
+                <sphere radius="0.001" />
+            </geometry>
+        </visual>
+    </link>
+
+    <!-- 1.添加底盘 -->
+
+    <!-- 1-1.添加父级link -->
+    <link name="base_link">
+        <visual>
+            <geometry>
+                <!-- 圆柱体，半径0.1,高度0.08 -->
+                <cylinder radius="0.2" length="0.1" />
+            </geometry>
+            <!-- 相对world坐标系无偏移 -->
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <!-- 颜色 -->
+            <material name="yellow">
+                <color rgba="0.8 0.3 0.1 0.5" />
+            </material>
+        </visual>
+    </link>
+    <!-- 1-2.添加父级link相对于base_footprint link的关节 -->
+    <joint name="base_link2base_footprint" type="fixed">
+        <parent link="base_footprint" />
+        <child link="base_link"/>
+        <!-- base_link相对于base_footprint偏移0.055 -->
+        <origin xyz="0 0 0.07" />
+    </joint>
+
+
+    <!-- 2.添加驱动轮 -->
+
+    <link name="left_wheel">
+        <visual>
+            <geometry>
+                <cylinder radius="0.02" length="0.01" />
+            </geometry>
+            <origin xyz="0 0 0" rpy="1.5705 0 0" />
+            <material name="black">
+                <color rgba="0.0 0.0 0.0 1.0" />
+            </material>
+        </visual>
+
+    </link>
+
+    <joint name="left_wheel2base_link" type="continuous">
+        <parent link="base_link" />
+        <child link="left_wheel" />
+        <origin xyz="0 -0.2 -0.05" />
+        <axis xyz="0 1 0" />
+    </joint>
+
+
+    <link name="right_wheel">
+        <visual>
+            <geometry>
+                <cylinder radius="0.02" length="0.01" />
+            </geometry>
+            <origin xyz="0 0 0" rpy="1.5705 0 0" />
+            <material name="black">
+                <color rgba="0.0 0.0 0.0 1.0" />
+            </material>
+        </visual>
+
+    </link>
+
+    <joint name="right_wheel2base_link" type="continuous">
+        <parent link="base_link" />
+        <child link="right_wheel" />
+        <origin xyz="0 0.2 -0.05" />
+        <axis xyz="0 1 0" />
+    </joint>
+
+
+    <!-- 3.添加万向轮(支撑轮) -->
+    <link name="front_wheel">
+        <visual>
+            <geometry>
+                <sphere radius="0.01" />
+            </geometry>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <material name="black">
+                <color rgba="0.0 0.0 0.0 1.0" />
+            </material>
+        </visual>
+    </link>
+
+    <joint name="front_wheel2base_link" type="continuous">
+        <parent link="base_link" />
+        <child link="front_wheel" />
+        <origin xyz="0.18 0 -0.06" />
+        <axis xyz="1 1 1" />
+    </joint>
+
+    <link name="back_wheel">
+        <visual>
+            <geometry>
+                <sphere radius="0.01" />
+            </geometry>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <material name="black">
+                <color rgba="0.0 0.0 0.0 1.0" />
+            </material>
+        </visual>
+    </link>
+
+    <joint name="back_wheel2base_link" type="continuous">
+        <parent link="base_link" />
+        <child link="back_wheel" />
+        <origin xyz="-0.18 0 -0.06" />
+        <axis xyz="1 1 1" />
+    </joint>    
+
+</robot>
+```
+```launch
+<launch>
+    <!-- 将 urdf 文件内容设置进参数服务器 -->
+    <param name="robot_description" textfile="$(find urdf_rviz)/urdf/urdf/demo05_robot.urdf" />
+
+    <!-- 启动 rivz -->
+    <node pkg="rviz" type="rviz" name="rviz_test" args="-d $(find urdf_rviz)/config/show_mycar.rviz" />
+
+    <!-- 启动机器人状态和关节状态发布节点 -->
+    <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" />
+    <node pkg="joint_state_publisher" type="joint_state_publisher" name="joint_state_publisher" />
+
+    <!-- 启动图形化的控制关节运动节点 -->
+    <node pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" name="joint_state_publisher_gui" />
+
+</launch>
+```
+### 6.urdf工具箱
+1. urdf_to_graphiz可以看urdf模型结构显示不同的link的层级关系，但是使用前要安装sudo apt install liburdfdom_tools
+2. 命令
+   1. check_urdf urdf文件(看urdf语法错误)
+   2. urdf_to_graphiz urdf文件(看urdf结构)
+
+## 5-3.URDF优化
+1. 

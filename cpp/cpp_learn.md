@@ -8186,7 +8186,81 @@ int main(){
 |随机访问迭代器|读写操作，可以以跳跃的方式访问任意数据，功能最强迭代器|读写， 支持++，==, !=，[n],<,<=,>,>= |
 **目前更多的是双向迭代器和随机访问迭代器**
 ## 13-2.常用容器
-1. 案例
+### 1.常用方法总结
+1. 构造和赋值
+   1. v1 = {1, 2};
+   2. v1(v2)
+   3. v1(10, 100)
+   4. v1(v2.begin(), v2.end());
+   5. v1 = v2
+   6. v1.assign(v2)
+   7. v1.assign(10, 100)
+   8. v1.assign(v2.begin(), v2.end())
+2. 插入，删除,交换,排序
+   1. v1.push_back(1)
+   2. v1.push_front(1)
+   3. v1.pop_back(1)
+   4. v1.pop_front(1)
+   5. v1.insert(it, 10)
+   6. v1.insert(it, 10, 10)
+   7. v1.insert(it, v2.begin(), v2.end())
+   8. v1.erase(it)
+   9. v1.erase(v1.begin(), v1.end())
+   10. v1.remove(10)
+   11. v1.clear()
+   12. v1.swap(v2)
+   13. v1.sort()**默认从小到大**
+   14. advance(it, n);指的是迭代器前进n个单位，n为负数就倒退
+3. 容量和大小
+   1. v1.capacity()
+   2. v1.size()
+   3. v1.resize(10)
+   4. v1.resize(10, 5)
+   5. v1.empty()
+4. 访问
+   1. 通过迭代器:vector<int>::iterator it = vec.begin()
+   2. 通过索引:v[i],(list必须通过迭代器访问)
+   3. advance(it, n):+n(前进)往右边，-n往左边
+   4. prev(it, n)
+   5. next(it, n)
+   6. distance(it1, it2)：获取 [it1,it2) 范围内包含元素的个数
+5. 注意点
+   1. **erase后，iter指向被删除元素下一个元素的地址**
+   2. insert后，iter所指向的元素不变
+   3. vector等这些容器中，begin()是第一个元素,end()是最后一个元素的下一个元素NULL的地址
+   4. **所有元素的iter都是左边在前，右边在后**
+   5. prev(it, +n)(n>0)：表示prev指向it*前面*n个元素地址，next(it, +n):表示next指向it*后面*n个元素的地址,advance(it, n)，将it往*后面*移n个元素
+
+```cpp
+#include <iostream>     // std::cout
+#include <iterator>     // std::advance
+#include <vector>
+using namespace std;
+void test(){
+	vector<int> vec = {1, 2, 3, 4, 5};
+	vector<int>::iterator it = vec.begin();
+	//advance
+	advance(it, 3);
+	cout << "(it, 3) = " << *it << endl;//it指向4
+	//prev
+	auto it_p = prev(it, 2);//it_p指向2
+	cout << "(it_p, 2) = " << *it_p << endl;
+	//next
+	auto it_n = next(it, 2);//it_n指向NULL
+	cout << "(it_N, 2) = " << *it_n << endl;
+	//distance
+	int n = distance(it_p, it_n);
+	cout << "the distance of it_p and it_n = " << n << endl;
+	//begin_end
+	for (auto it = begin(vec); it != end(vec); it++){
+		cout << "it = " << *it << "; ";
+	}
+}
+int main(){
+	test();
+}
+```
+6. 案例
 ```cpp
 #include <iostream>
 #include <vector>
@@ -9927,7 +10001,8 @@ int main()
 }
 
 ```
-## 5.sort()详解
+## 5.STL补充
+### 1.sort()详解
 1. 定义：sort(begin, end, cmp),begin和end是第一个和最后一个元素的下一个位置的指针，cmp为排序准则，不写的话是从小到大排序，从大到小是greater<int>(),cmp还可以自定义
 2. 自定义排序
    1. 比如说我们按照每个数的个位进行从大到小排序
@@ -10020,6 +10095,125 @@ int main(){
         cout << "name = " << it->name << " score = " << it->score << endl;
     }
     
+}
+```
+### 3.advance
+**所有元素的iter都是左边前，右边后**
+1. advance
+```cpp
+    #include <iostream>     // std::cout
+    #include <iterator>     // std::advance
+    #include <vector>
+    using namespace std;
+    int main() {
+        //创建一个 vector 容器
+        vector<int> myvector{1,2,3,4};
+        //it为随机访问迭代器，其指向 myvector 容器中第一个元素
+        vector<int>::iterator it = myvector.begin();
+        //借助 advance() 函数将 it 迭代器前进 2 个位置,若前面没有数字的情况下直接找后面的元素
+		//erase返回指向被删除元素下一元素的迭代器
+        advance(it, 3);
+        cout << "3, *it = " << *it << endl;
+		myvector.erase(it);
+		//前进往右边，后退往左边
+        //继续使用it，其指向 myvector 容器中最后一个元素之后的位置
+        //借助 advance() 函数将 it 迭代器后退 3 个位置
+        advance(it, -2);
+        cout << "-3, *it = " << *it;
+        return 0;
+    }
+```
+2. distance():将迭代器前进或后退指定长度的距离
+```cpp
+#include <iostream>     // std::cout
+#include <iterator>     // std::distance
+#include <list>         // std::list
+using namespace std;
+
+int main() {
+    //创建一个空 list 容器
+    list<int> mylist;
+    //向空 list 容器中添加元素 0~9
+    for (int i = 0; i < 10; i++) {
+        mylist.push_back(i);
+    }
+    //指定 2 个双向迭代器，用于执行某个区间
+    list<int>::iterator first = mylist.begin();//指向元素 0
+    list<int>::iterator last = mylist.end();//指向元素 9 之后的位置
+    //获取 [first,last) 范围内包含元素的个数
+    cout << "distance() = " << distance(first, last);
+    return 0;
+}
+```
+3. begin_end
+```cpp
+#include <iostream>     // std::cout
+#include <vector>       // std::vector, std::begin, std::end
+using namespace std;
+int main() {
+    //创建并初始化 vector 容器,传入参数为容器
+    std::vector<int> myvector{ 1,2,3,4,5 };
+    //调用 begin() 和 end() 函数遍历 myvector 容器
+    for (auto it = begin(myvector); it != end(myvector); ++it)
+        cout << *it << ' ';//只有一句话的时候不需要用{}
+    cout << endl;
+    
+    //定义一个普通数组
+    int arr[] = { 1,2,3,4,5 };
+    //创建一个空 vector 容器，传入参数为数组
+    vector<int> myvector1;
+    //将数组中的元素添加到 myvector 容器中存储
+    for (int *it = begin(arr); it != end(arr); ++it)
+        myvector1.push_back(*it);
+    //输出 myvector1 容器中存储的元素
+    for (auto it = myvector1.begin(); it != myvector1.end(); ++it)
+        cout << *it << ' ';
+    return 0;
+}
+```
+4. prev
+```cpp
+#include <iostream>     // std::cout
+#include <iterator>     // std::next
+#include <list>         // std::list
+using namespace std;
+int main() {
+    //创建并初始化一个 list 容器
+    list<int> mylist{ 1,2,3,4,5 };
+    list<int>::iterator it = mylist.end();
+    //获取一个距离 it 迭代器 2 个元素的迭代器，由于 2 为正数，newit 位于 it 左侧
+    auto newit = prev(it, 2);
+    //等同于list<int>::iterator newit = next(it, 2)
+    cout << "prev(it, 2) = " << *newit << endl;
+   
+    //n为负数，newit 位于 it 右侧
+    it = mylist.begin();
+    newit = prev(it, -2);
+    cout << "prev(it, -2) = " << *newit;
+    return 0;
+}
+```
+5. next
+```cpp
+#include <iostream>     // std::cout
+#include <iterator>     // std::next
+#include <list>         // std::list
+using namespace std;
+//next(it, n)表示next迭代器默认在it的右边n个元素
+int main() {
+    //创建并初始化一个 list 容器
+    list<int> mylist{ 1,2,3,4,5 };
+    list<int>::iterator it = mylist.begin();
+    //获取一个距离 it 迭代器 2 个元素的迭代器，由于 2 为正数，newit 位于 it 右侧
+    auto newit = next(it, 2);
+    //list<int>::iterator newit = next(it, 2)
+    cout << "next(it, 2) = " << *newit << endl;
+   
+    //n为负数，newit 位于 it 左侧
+    it = mylist.end();
+    newit = next(it, -2);
+    cout << "next(it, -2) = " << *newit;
+    return 0;
 }
 ```
 ## 6.auto详解
