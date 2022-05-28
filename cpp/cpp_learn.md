@@ -9836,6 +9836,294 @@ int main(){
 }
 ```
 
+## 13-7.set/multiset容器
+1. 区别：set不允许容器中有重复的元素，multiset允许容器中有重复的元素
+2. 关联容器和顺序容器的区别：关联容器是通过关键字来保存和访问的，顺序容器的元素是根据容器中的位置来保存和访问的
+3. 分类：
+   1.  set:只包括一个关键字
+   2.  map:通过键值对来访问
+### 1.set构造和赋值
+1. 函数
+   1. s = {1, 2}
+   2. s1(s2)
+   3. s1
+   4. s1 = s2
+```cpp
+#include <set>
+void printSet(set<int> & s)
+{
+	for (set<int>::iterator it = s.begin(); it != s.end(); it++)
+	{
+		cout << *it << " ";
+	}
+	cout << endl;
+}
+
+//构造和赋值
+void test01()
+{
+	set<int> s1;
+
+	s1.insert(10);
+	s1.insert(30);
+	s1.insert(20);
+	s1.insert(40);
+    //set不允许插入重复的值
+	printSet(s1);
+
+	//拷贝构造
+	set<int>s2(s1);
+	printSet(s2);
+
+	//赋值
+	set<int>s3;
+	s3 = s2;
+	printSet(s3);
+}
+
+int main() {
+	test01();
+	return 0;
+}
+```
+### 2.set大小和交换
+1. 函数
+   1. size();//返回容器中元素的个数
+   2. empty();//判断容器是否为空
+   3. swap();//交换2个集合容器
+   4. **set()不支持resize(),因为无重复元素
+```cpp
+#include <set>
+
+void printSet(set<int> & s)
+{d
+void test01()
+{
+
+	set<int> s1;
+	
+	s1.insert(10);
+	s1.insert(30);
+	s1.insert(20);
+	s1.insert(40);
+
+	if (s1.empty())
+	{
+		cout << "s1为空" << endl;
+	}
+	else
+	{
+		cout << "s1不为空" << endl;
+		cout << "s1的大小为： " << s1.size() << endl;
+	}
+
+}
+
+//交换
+void test02()
+{
+	set<int> s1;
+
+	s1.insert(10);
+	s1.insert(30);
+	s1.insert(20);
+	s1.insert(40);
+
+	set<int> s2;
+
+	s2.insert(100);
+	s2.insert(300);
+	s2.insert(200);
+	s2.insert(400);
+
+	cout << "交换前" << endl;
+	printSet(s1);
+	printSet(s2);
+	cout << endl;
+
+	cout << "交换后" << endl;
+	s1.swap(s2);
+	printSet(s1);
+	printSet(s2);
+}
+
+int main() {
+
+	//test01();
+
+	test02();
+	return 0;
+}
+```
+
+#### 3.set插入和删除和交换
+1. 函数
+   1. s.insert(1);//插入元素1
+   <!-- 2. s.insert(it, 1, 2);不成立-->
+   <!-- 3. s.insert(it, 1); 不成立-->
+   4. s.erase(it);
+   5. s.erase(it, s1.begin(), s1.end());
+   6. s.erase(1);//删除元素1
+   8. s1.swap(s2)//s1, s2互换
+```C++
+#include <set>
+
+void printSet(set<int> & s)
+{
+	for (set<int>::iterator it = s.begin(); it != s.end(); it++)
+	{
+		cout << *it << " ";
+	}
+	cout << endl;
+}
+
+//插入和删除
+void test01()
+{
+	set<int> s1;
+	//插入
+	s1.insert(10);
+	s1.insert(30);
+	s1.insert(20);
+	s1.insert(40);
+	printSet(s1);
+
+	//删除
+	s1.erase(s1.begin());
+	printSet(s1);
+
+	s1.erase(30);
+	printSet(s1);
+
+	//清空
+	//s1.erase(s1.begin(), s1.end());
+	s1.clear();
+	printSet(s1);
+}
+
+int main() {
+
+	test01();
+	return 0;
+}
+```
+#### 4.set插入和删除和交换
+1. 方法
+* `find(key);`                  //查找key是否存在,若存在，返回该键的元素的迭代器；若不存在，返回set.end();
+* `count(key);`                //统计key的元素个数
+2. 例子
+```C++
+#include <set>
+
+//查找和统计
+void test01()
+{
+	set<int> s1;
+	//插入
+	s1.insert(10);
+	s1.insert(30);
+	s1.insert(20);
+	s1.insert(40);
+	
+	//查找
+	set<int>::iterator pos = s1.find(30);
+
+	if (pos != s1.end())
+	{
+		cout << "找到了元素 ： " << *pos << endl;
+	}
+	else
+	{
+		cout << "未找到元素" << endl;
+	}
+
+	//统计
+	int num = s1.count(30);
+	cout << "num = " << num << endl;
+}
+
+int main() {
+
+	test01();
+	return 0;
+}
+```
+#### 5.set和mutiset的区别
+1. 区别
+* set不可以插入重复数据，而multiset可以
+* set插入数据的同时会返回插入结果，表示插入是否成功
+* multiset不会检测数据，因此可以插入重复数据
+2. 实例
+```C++
+#include <set>
+#include <iostream>
+using namespace std;
+//set和multiset区别
+void test01()
+{
+	//1.set
+    set<int> s;
+	pair<set<int>::iterator, bool>  ret = s.insert(10);
+    //第一个是set迭代器，第二个是bool，用于判断是否插入重复的值，重复返回flase,不重复返回true
+    //ret.first是iterator, ret.second是bool
+	if (ret.second) {
+		cout << "第一次插入成功!" << endl;
+	}
+	else {
+		cout << "第一次插入失败!" << endl;
+	}
+
+	ret = s.insert(10);
+	if (ret.second) {
+		cout << "第二次插入成功!" << endl;
+	}
+	else {
+		cout << "第二次插入失败!" << endl;
+	}
+    //2.multiset
+	multiset<int> ms;
+	ms.insert(10);
+	ms.insert(10);
+
+	for (multiset<int>::iterator it = ms.begin(); it != ms.end(); it++) {
+		cout << *it << " ";
+	}
+	cout << endl;
+}
+
+int main() {
+
+	test01();
+	return 0;
+}
+```
+#### 6.对组的创建
+1. 对组是成对出现的数据
+2. 创建方式
+* pair<type, type> p ( value1, value2 );
+* pair<type, type> p = make_pair( value1, value2 );
+
+```C++
+#include <string>
+
+//对组创建
+void test01()
+{
+	pair<string, int> p(string("Tom"), 20);
+	cout << "姓名： " <<  p.first << " 年龄： " << p.second << endl;
+
+	pair<string, int> p2 = make_pair("Jerry", 10);
+	cout << "姓名： " << p2.first << " 年龄： " << p2.second << endl;
+}
+
+int main() {
+
+	test01();
+	return 0;
+}
+```
+
+
 # 13.c++高级教程
 ## 1. 命名空间
 1. 提出：当一个班上有2个同名学生时，不得不用其他的信息，比如说，年龄等等来区分他们；在c++中，你可能会有xyz()的函数，在另一个库中也有xyz()的函数，所以需要加命名空间加以区分
@@ -10340,290 +10628,3 @@ auto multiply(_Tx x, _Ty y)->decltype(x*y)
     return x*y;
 }
 ```
-## 13-7.set/multiset容器
-1. 区别：set不允许容器中有重复的元素，multiset允许容器中有重复的元素
-2. 关联容器和顺序容器的区别：关联容器是通过关键字来保存和访问的，顺序容器的元素是根据容器中的位置来保存和访问的
-3. 分类：
-   1.  set:只包括一个关键字
-   2.  map:通过键值对来访问
-### 1.set构造和赋值
-1. 函数
-   1. s = {1, 2}
-   2. s1(s2)
-   3. s1
-   4. s1 = s2
-```cpp
-#include <set>
-void printSet(set<int> & s)
-{
-	for (set<int>::iterator it = s.begin(); it != s.end(); it++)
-	{
-		cout << *it << " ";
-	}
-	cout << endl;
-}
-
-//构造和赋值
-void test01()
-{
-	set<int> s1;
-
-	s1.insert(10);
-	s1.insert(30);
-	s1.insert(20);
-	s1.insert(40);
-    //set不允许插入重复的值
-	printSet(s1);
-
-	//拷贝构造
-	set<int>s2(s1);
-	printSet(s2);
-
-	//赋值
-	set<int>s3;
-	s3 = s2;
-	printSet(s3);
-}
-
-int main() {
-	test01();
-	return 0;
-}
-```
-### 2.set大小和交换
-1. 函数
-   1. size();//返回容器中元素的个数
-   2. empty();//判断容器是否为空
-   3. swap();//交换2个集合容器
-   4. **set()不支持resize(),因为无重复元素
-```cpp
-#include <set>
-
-void printSet(set<int> & s)
-{d
-void test01()
-{
-
-	set<int> s1;
-	
-	s1.insert(10);
-	s1.insert(30);
-	s1.insert(20);
-	s1.insert(40);
-
-	if (s1.empty())
-	{
-		cout << "s1为空" << endl;
-	}
-	else
-	{
-		cout << "s1不为空" << endl;
-		cout << "s1的大小为： " << s1.size() << endl;
-	}
-
-}
-
-//交换
-void test02()
-{
-	set<int> s1;
-
-	s1.insert(10);
-	s1.insert(30);
-	s1.insert(20);
-	s1.insert(40);
-
-	set<int> s2;
-
-	s2.insert(100);
-	s2.insert(300);
-	s2.insert(200);
-	s2.insert(400);
-
-	cout << "交换前" << endl;
-	printSet(s1);
-	printSet(s2);
-	cout << endl;
-
-	cout << "交换后" << endl;
-	s1.swap(s2);
-	printSet(s1);
-	printSet(s2);
-}
-
-int main() {
-
-	//test01();
-
-	test02();
-	return 0;
-}
-```
-
-#### 3.set插入和删除和交换
-1. 函数
-   1. s.insert(1);//插入元素1
-   <!-- 2. s.insert(it, 1, 2);不成立-->
-   <!-- 3. s.insert(it, 1); 不成立-->
-   4. s.erase(it);
-   5. s.erase(it, s1.begin(), s1.end());
-   6. s.erase(1);//删除元素1
-   8. s1.swap(s2)//s1, s2互换
-```C++
-#include <set>
-
-void printSet(set<int> & s)
-{
-	for (set<int>::iterator it = s.begin(); it != s.end(); it++)
-	{
-		cout << *it << " ";
-	}
-	cout << endl;
-}
-
-//插入和删除
-void test01()
-{
-	set<int> s1;
-	//插入
-	s1.insert(10);
-	s1.insert(30);
-	s1.insert(20);
-	s1.insert(40);
-	printSet(s1);
-
-	//删除
-	s1.erase(s1.begin());
-	printSet(s1);
-
-	s1.erase(30);
-	printSet(s1);
-
-	//清空
-	//s1.erase(s1.begin(), s1.end());
-	s1.clear();
-	printSet(s1);
-}
-
-int main() {
-
-	test01();
-	return 0;
-}
-```
-#### 4.set插入和删除和交换
-1. 方法
-* `find(key);`                  //查找key是否存在,若存在，返回该键的元素的迭代器；若不存在，返回set.end();
-* `count(key);`                //统计key的元素个数
-2. 例子
-```C++
-#include <set>
-
-//查找和统计
-void test01()
-{
-	set<int> s1;
-	//插入
-	s1.insert(10);
-	s1.insert(30);
-	s1.insert(20);
-	s1.insert(40);
-	
-	//查找
-	set<int>::iterator pos = s1.find(30);
-
-	if (pos != s1.end())
-	{
-		cout << "找到了元素 ： " << *pos << endl;
-	}
-	else
-	{
-		cout << "未找到元素" << endl;
-	}
-
-	//统计
-	int num = s1.count(30);
-	cout << "num = " << num << endl;
-}
-
-int main() {
-
-	test01();
-	return 0;
-}
-```
-#### 5.set和mutiset的区别
-1. 区别
-* set不可以插入重复数据，而multiset可以
-* set插入数据的同时会返回插入结果，表示插入是否成功
-* multiset不会检测数据，因此可以插入重复数据
-2. 实例
-```C++
-#include <set>
-#include <iostream>
-using namespace std;
-//set和multiset区别
-void test01()
-{
-	//1.set
-    set<int> s;
-	pair<set<int>::iterator, bool>  ret = s.insert(10);
-    //第一个是set迭代器，第二个是bool，用于判断是否插入重复的值，重复返回flase,不重复返回true
-    //ret.first是iterator, ret.second是bool
-	if (ret.second) {
-		cout << "第一次插入成功!" << endl;
-	}
-	else {
-		cout << "第一次插入失败!" << endl;
-	}
-
-	ret = s.insert(10);
-	if (ret.second) {
-		cout << "第二次插入成功!" << endl;
-	}
-	else {
-		cout << "第二次插入失败!" << endl;
-	}
-    //2.multiset
-	multiset<int> ms;
-	ms.insert(10);
-	ms.insert(10);
-
-	for (multiset<int>::iterator it = ms.begin(); it != ms.end(); it++) {
-		cout << *it << " ";
-	}
-	cout << endl;
-}
-
-int main() {
-
-	test01();
-	return 0;
-}
-```
-#### 6.对组的创建
-1. 对组是成对出现的数据
-2. 创建方式
-* pair<type, type> p ( value1, value2 );
-* pair<type, type> p = make_pair( value1, value2 );
-
-```C++
-#include <string>
-
-//对组创建
-void test01()
-{
-	pair<string, int> p(string("Tom"), 20);
-	cout << "姓名： " <<  p.first << " 年龄： " << p.second << endl;
-
-	pair<string, int> p2 = make_pair("Jerry", 10);
-	cout << "姓名： " << p2.first << " 年龄： " << p2.second << endl;
-}
-
-int main() {
-
-	test01();
-	return 0;
-}
-```
-
