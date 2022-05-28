@@ -4763,8 +4763,8 @@ int main() {
 **示例：**
 
 ```C++
-#include <set>
 
+#include <set>
 void printSet(set<int> & s)
 {
 	for (set<int>::iterator it = s.begin(); it != s.end(); it++)
