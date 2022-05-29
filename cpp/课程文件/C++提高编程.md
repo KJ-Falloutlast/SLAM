@@ -5316,56 +5316,39 @@ int main() {
 ```C++
 #include <set>
 #include <string>
-
-class Person
-{
-public:
-	Person(string name, int age)
-	{
-		this->m_Name = name;
-		this->m_Age = age;
-	}
-
-	string m_Name;
-	int m_Age;
-
+#include <iostream>
+using namespace std;
+class Person{
+    public:
+        string m_Name;
+        int m_Age;
+        Person(string name, int age):m_Name(name), m_Age(age){} 
 };
-class comparePerson
-{
-public:
-	bool operator()(const Person& p1, const Person &p2)
-	{
-		//按照年龄进行排序  降序
-		return p1.m_Age > p2.m_Age;
-	}
+class ComparePerson{
+    public:
+        bool operator() (const Person &p1, const Person &p2){
+            return p1.m_Age > p2.m_Age;
+        }
+        //此处必须要加const,因为如果不加const, 就会修改Person对选哪个，否则会报错
 };
+//按照降序排列
 
-void test01()
-{
-	set<Person, comparePerson> s;
-
-	Person p1("刘备", 23);
-	Person p2("关羽", 27);
-	Person p3("张飞", 25);
-	Person p4("赵云", 21);
-
-	s.insert(p1);
-	s.insert(p2);
-	s.insert(p3);
-	s.insert(p4);
-
-	for (set<Person, comparePerson>::iterator it = s.begin(); it != s.end(); it++)
-	{
-		cout << "姓名： " << it->m_Name << " 年龄： " << it->m_Age << endl;
-	}
+void test(){
+    set<Person, ComparePerson> s;
+    Person p1("a", 4);
+    Person p2("b", 2);
+    Person p3("c", 1);
+    Person p4("d", 3);
+    s.insert(p1);
+    s.insert(p2);
+    s.insert(p3);
+    s.insert(p4);
+    for (set<Person, ComparePerson>::iterator it = s.begin(); it != s.end(); it++){
+        cout << "name = " << it->m_Name << ";  age = " << it->m_Age << endl;
+    }
 }
-int main() {
-
-	test01();
-
-	system("pause");
-
-	return 0;
+int main(){
+    test();
 }
 ```
 

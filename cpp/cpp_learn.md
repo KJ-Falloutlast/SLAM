@@ -9365,6 +9365,64 @@ int main() {
 	return 0;
 }
 ```
+方法2
+```cpp
+#include <iostream>     // std::cout
+#include <vector>         // std::list
+#include <list>         // std::list
+#include <algorithm>         // std::list
+using namespace std;
+class Person{
+    public:
+        string m_Name;
+        int m_Score;
+        Person(string name, int score):m_Name(name), m_Score(score){}
+
+};
+void setPerson(vector<Person> &v){
+    //此处必须采用引用传值的方式，否则在printScore中无法得到push_back之后的值
+    string nameSeed = "ABCDE";
+    list<int> d_score;
+    for (int i = 0; i < 5; i++){
+        //1.定义性质
+        string name = "player";
+        int score = 0;
+        int sum = 0;
+        name += nameSeed[i];
+        //2.生成score 的 deque
+        for (int i = 0; i < 10; i++){
+            int score = rand() % 41 + 60;
+            d_score.push_back(score);
+        }
+        d_score.sort();//从小到大排序
+        d_score.pop_back();
+        d_score.pop_front();
+        //3.取得平均分
+        for (list<int>::iterator it = d_score.begin(); it != d_score.end(); it++){
+            sum += *it;
+        }
+        int avg = sum / d_score.size();
+        //4.插入
+        Person p(name, avg);
+        v.push_back(p);
+    }
+    
+}
+
+void printScore(vector<Person> &v){
+    for (vector<Person>::iterator it = v.begin(); it != v.end(); it++){
+        cout << "name = " << it->m_Name << "  score = " << it->m_Score << endl;
+    }
+}
+
+int main(){
+    //随机数种子
+    srand((unsigned int)time(NULL));//保证rand()%41每次都不一样
+    vector<Person> v;
+    setPerson(v);
+    printScore(v);
+}
+```
 ## 13-4.stack容器
 ### 1.概念
 1. 概念：stack是一种先进后出的数据结构，它只有一个出口,只有顶端的元素才可以被外界使用，所以栈不允许有遍历行为;顶部是栈底，底部是栈顶(出口是栈顶，闭口是栈底），只有底部才能入栈和出栈![栈](./../pictures/stack.jpg)
@@ -9842,6 +9900,99 @@ int main(){
 3. 分类：
    1.  set:只包括一个关键字
    2.  map:通过键值对来访问
+4. 总结
+```cpp
+#include <iostream>
+#include <list>
+#include <set>
+#include <vector>
+using namespace std;
+void printSet(set<int> &s){
+    for (set<int>::iterator s_it = s.begin(); s_it != s.end(); s_it++){
+        cout << *s_it  << " ";
+        //不能使用v[i]和v.at(i)访问
+    }
+    cout << endl;
+}
+void test(){
+    //1.构造和赋值
+    //1-1.构造
+    set<int> s1 = {4, 2, 1, 3, 5, 4, 4};
+    set<int> s2(s1);
+    set<int> s3 = {10, 20, 30};
+    set<int> s4 = s1;
+    printSet(s1);
+
+    //2.插入和删除和交换
+    
+    //2-1.插入
+    s1.insert(6);
+    s1.insert(7);
+    printSet(s1);
+    //1 2 3 4 5 6 7
+    
+    //2-2.删除
+    s1.erase(6);//方法1
+    //1 2 3 4 5 7
+    set<int>::iterator it = s1.begin();
+    s1.erase(it);//方法2
+    //2 3 4 5 7
+    printSet(s1);
+    s1.erase(s1.begin(), s1.end());//方法3
+    printSet(s1);//无
+    s1.clear();//无
+    //2-3.交换
+    s1.swap(s3);
+    printSet(s1);
+    //10 20 30
+
+    //3.容量和大小
+    s1 = {4, 2, 1, 3, 5};
+    if (!s1.empty()){
+        cout << "the size of the set = " << s1.size() << endl;
+    }
+    //4.查找和统计
+    set<int>::iterator pos = s1.find(2);
+    if (pos != s1.end()){
+        cout << "*pos = " << *pos << endl;
+    }
+    else{
+        cout << "未找到元素" << endl;
+    }
+    int num = s1.count(4);
+    //对于set,统计的结果要么是0要么是1
+    cout << "num = " << num << endl;
+
+    //5.set和mutiset
+    s1 = {1, 2, 3};
+    pair<set<int>::iterator, bool> res = s1.insert(10);
+    //insert必须对应iter和bool类型
+    if (res.second){
+        cout<< "插入成功" << endl;
+    }
+    else{
+        cout << "插入失败" << endl;
+    }
+    res = s1.insert(10);
+    //第二次要用res接收才行
+    if (res.second){
+        cout<< "插入成功" << endl;
+    }
+    else{
+        cout << "插入失败" << endl;
+    }
+    //6.pair
+    pair<string, int> p1("a", 1);
+    //6-1.构造方法1
+    cout << "p1.first = " << p1.first << "; p1.second = " << p1.second << endl;
+    //6-2.构造方法2
+    pair<string, int> p2 = make_pair("a", 2);
+    cout << "p2.first = " << p2.first << "; p2.second = " << p2.second << endl;
+}
+int main(){
+    test();
+}
+```
 ### 1.set构造和赋值
 1. 函数
    1. s = {1, 2}
@@ -9956,7 +10107,7 @@ int main() {
 }
 ```
 
-#### 3.set插入和删除和交换
+### 3.set插入和删除和交换
 1. 函数
    1. s.insert(1);//插入元素1
    <!-- 2. s.insert(it, 1, 2);不成立-->
@@ -10007,10 +10158,10 @@ int main() {
 	return 0;
 }
 ```
-#### 4.set插入和删除和交换
+### 4.set插入和删除和交换
 1. 方法
 * `find(key);`                  //查找key是否存在,若存在，返回该键的元素的迭代器；若不存在，返回set.end();
-* `count(key);`                //统计key的元素个数
+* `count(key);`                //统计key的元素个数 
 2. 例子
 ```C++
 #include <set>
@@ -10048,7 +10199,7 @@ int main() {
 	return 0;
 }
 ```
-#### 5.set和mutiset的区别
+### 5.set和mutiset的区别
 1. 区别
 * set不可以插入重复数据，而multiset可以
 * set插入数据的同时会返回插入结果，表示插入是否成功
@@ -10097,7 +10248,7 @@ int main() {
 	return 0;
 }
 ```
-#### 6.对组的创建
+### 6.对组的创建
 1. 对组是成对出现的数据
 2. 创建方式
 * pair<type, type> p ( value1, value2 );
@@ -10120,6 +10271,424 @@ int main() {
 
 	test01();
 	return 0;
+}
+```
+
+### 7.排序
+1. 案例1
+```cpp
+#include <set>
+#include <iostream>
+using namespace std;
+class MyCompare{
+	public:
+		bool operator() (int a, int b){
+			return a > b;
+		}
+};
+void test(){
+	//1.自动排序
+	set<int> s = {2, 4, 1, 3, 5};
+	for (set<int>::iterator it = s.begin(); it != s.end(); it++){
+		cout << *it << " ";
+	}
+	cout << endl;
+	//2.自定义排序
+	set<int, MyCompare> s1 = {2, 4, 1, 3, 5};
+	for (set<int>::iterator it = s1.begin(); it != s1.end(); it++){
+		cout << *it << " ";
+	}
+	cout << endl;
+
+}
+int main(){
+	test();
+}
+```
+
+## 13-8 map/ multimap容器
+1. 基本概念 
+   1. map中所有元素是pair
+   2. pair中第一个元素是key,起到索引作用；第二个元素是vlaue
+   3. 所有元素会根据元素的key自动排序
+2. 本质和优点
+   1. map/mutimap属于关联式容器
+   2. 优点：可以根据key迅速找到value
+3. map和multimap区别
+   1. map不允许重复的key
+   2. multimap允许重复的key
+
+### 1.map的构造和赋值
+1. 方法
+* `map<T1, T2> mp;`                     //map默认构造函数: 
+* `map(const map &mp);`             //拷贝构造函数
+* `map& operator=(const map &mp);`    //重载等号操作符
+
+2. 实例
+```C++
+#include <map>
+
+void printMap(map<int,int>&m)
+{
+	for (map<int, int>::iterator it = m.begin(); it != m.end(); it++)
+	{
+		cout << "key = " << it->first << " value = " << it->second << endl;
+	}
+	cout << endl;
+}
+
+void test01()
+{
+	map<int,int>m; //默认构造
+	m.insert(pair<int, int>(1, 10));
+	m.insert(pair<int, int>(2, 20));
+	m.insert(pair<int, int>(3, 30));
+	printMap(m);
+
+	map<int, int>m2(m); //拷贝构造
+	printMap(m2);
+
+	map<int, int>m3;
+	m3 = m2; //赋值
+	printMap(m3);
+}
+
+int main() {
+
+	test01();
+	return 0;
+}
+```
+### 2.map插入和删除
+1. 方法
+- `insert(elem);`           //在容器中插入元素。
+- `clear();`                    //清除所有元素
+- `erase(pos);`              //删除pos迭代器所指的元素，返回下一个元素的迭代器。
+- `erase(beg, end);`    //删除区间[beg,end)的所有元素 ，返回下一个元素的迭代器。
+- `erase(key);`            //删除容器中值为key的元素。
+2. 案例
+```C++
+#include <map>
+void printMap(map<int,int> &m)
+{
+	for (map<int, int>::iterator it = m.begin(); it != m.end(); it++)
+	{
+		cout << "key = " << it->first << " value = " << it->second << endl;
+	}
+	cout << endl;
+}
+
+void test01()
+{
+	//插入
+	map<int, int> m;
+	//第一种插入方式
+	m.insert(pair<int, int>(1, 10));
+	//第二种插入方式
+	m.insert(make_pair(2, 20));
+	//第三种插入方式
+	m.insert(map<int, int>::value_type(3, 30));
+	//第四种插入方式
+	m[4] = 40; 
+	printMap(m);
+
+	//删除
+	m.erase(m.begin());
+	printMap(m);
+
+	m.erase(3);
+	printMap(m);
+
+	//清空
+	m.erase(m.begin(),m.end());
+	m.clear();
+	printMap(m);
+}
+
+int main() {
+
+	test01();
+
+	system("pause");
+
+	return 0;
+}
+```
+### 3.大小和容量
+1. 方法
+   1. s.size()
+   2. s.empty()
+
+### 4.查找和统计
+1. 方法
+- `find(key);`                  //查找key是否存在,若存在，返回该键的元素的迭代器；若不存在，返回set.end();
+- `count(key);`                //统计key的元素个数
+2. 实例
+```C++
+#include <map>
+
+//查找和统计
+void test01()
+{
+	map<int, int>m; 
+	m.insert(pair<int, int>(1, 10));
+	m.insert(pair<int, int>(2, 20));
+	m.insert(pair<int, int>(3, 30));
+
+	//查找
+	map<int, int>::iterator pos = m.find(3);
+
+	if (pos != m.end())
+	{
+		cout << "找到了元素 key = " << (*pos).first << " value = " << (*pos).second << endl;
+	}
+	else
+	{
+		cout << "未找到元素" << endl;
+	}
+
+	//统计
+	int num = m.count(3);
+	cout << "num = " << num << endl;
+}
+
+int main() {
+
+	test01();
+	return 0;
+}
+```
+### 5.排序
+```C++
+#include <map>
+
+class MyCompare {
+public:
+	bool operator()(int v1, int v2) {
+		return v1 > v2;
+	}
+};
+
+void test01() 
+{
+	//默认从小到大排序
+	//利用仿函数实现从大到小排序
+	map<int, int, MyCompare> m;
+
+	m.insert(make_pair(1, 10));
+	m.insert(make_pair(2, 20));
+	m.insert(make_pair(3, 30));
+	m.insert(make_pair(4, 40));
+	m.insert(make_pair(5, 50));
+
+	for (map<int, int, MyCompare>::iterator it = m.begin(); it != m.end(); it++) {
+		cout << "key:" << it->first << " value:" << it->second << endl;
+	}
+}
+int main() {
+
+	test01();
+
+	system("pause");
+
+	return 0;
+}
+```
+### 6.总结
+```cpp
+#include <set>
+#include <map>
+#include <iostream>
+using namespace std;
+void printMap(map<int, int> &m){
+	for (map<int, int>::iterator it = m.begin(); it != m.end(); it++){
+		cout << "m.first = " << it->first << ";  m.second = " << it->second << endl;
+	}
+	cout << "***********************************************"<< endl;
+}
+
+class MyCompare{
+	public:
+		bool operator() (int v1, int v2){
+			return v1 > v2;
+		}
+		//此处不能传入引用，因为不能改变
+};
+void printSortMap(map<int, int, MyCompare> &m){
+	for (map<int, int, MyCompare>::iterator it = m.begin(); it != m.end(); it++){
+		cout << "m.first = " << it->first << ";  m.second = " << it->second << endl;
+	}
+	cout << "***********************************************"<< endl;
+}
+
+void test(){
+	//1.排序和构造
+	//1-1.默认构造
+	map<int, int> m;
+	m.insert(pair<int, int>(1, 1));
+	m.insert(pair<int, int>(2, 2));
+	m.insert(pair<int, int>(3, 3));
+	printMap(m);
+	//1-2.拷贝构造
+	map<int, int> m2(m);
+	//1-3.赋值
+	map<int, int> m3 = {{1, 1}, {3, 3}, {2, 4}};	
+	//结果会按照key从小到大排序
+	map<int, int> m4 = m3;
+	
+	//2.插入，删除，排序, 交换
+	map<int, int> m5;
+	//2-1.插入
+	//2-1-1.方法1
+	m5.insert(pair<int, int>(1, 10));
+	//2-1-2.方法2
+	m5.insert(make_pair(2, 20));
+	//2-1-3.方法3
+	m5.insert(map<int, int>::value_type(3, 30));
+	//2-1-4.方法4
+	m5[4] = 40; 
+	//(1, 10),(2, 20), (3, 30), (4, 40)
+	printMap(m5);
+	
+	//2-2.删除
+	//2-2-1.方法1
+	m5.erase(m5.begin());
+	printMap(m5);
+	//(2, 20), (3, 30), (4, 40)
+	//方法1+
+	map<int, int>::iterator it = m5.begin();
+	advance(it, 2);
+	cout << "advanceIter = " << it->first << ", " << it->second << endl;
+	m5.erase(it);
+	printMap(m5);
+	//(2, 20), (3, 30)
+	//2-2-1.方法2
+	m5.erase(3);
+	printMap(m5);
+	//(2, 20), (4, 40)
+	
+	//2-2.清空
+	m.erase(m.begin(),m.end());
+	m.clear();
+	printMap(m);
+
+	//2-3.交换
+	m5.swap(m2);
+	printMap(m5);
+	//(1, 1), (2, 2), (3, 3)
+
+	//3.大小和容量
+	if (m.empty()){
+		cout << "m为空" << endl;
+	}
+	else{
+		cout << "m.size() = " << m.size() << endl;
+	}
+
+	//4.查找和统计
+	//4-1.查找
+	map<int, int>::iterator pos = m5.find(2);
+	//若找到elem,则pos指向elem,否则指向end()
+	if (pos != m.end()){
+		cout << "找到了元素 key = " << pos->first << " ;vlaue =" 
+		<< pos->second << endl;
+	}
+	else{
+		cout << "未找到元素" << endl;
+	}
+	//4-2.统计
+	int num = m5.count(3);
+	cout << "num = " << num << endl;
+
+	//5.排序
+	map<int, int, MyCompare> m6 = {{1, 2}, {6, 5}, {5, 7}, {3, 6}};
+	//默认按照从小到大顺序排序，加入仿函数后为自定义
+	printSortMap(m6);
+
+	
+}
+
+int main(){
+	test();
+}
+```
+简化版本
+```cpp
+#include <iostream>
+#include <list>
+#include <map>
+#include <vector>
+using namespace std;
+void printMap(map<int, int> &m){
+    for (map<int, int>::iterator it = m.begin(); it != m.end(); it++){
+        cout << "map.key = " << it->first << " map.value = " << it->second << endl;
+    }
+    cout << "********************************************" << endl;
+}
+class MyCompare{
+    public:
+        bool operator() (int a, int b){
+            return a > b;
+        }
+};
+
+void printSortMap(map<int, int, MyCompare> &m){
+    for (map<int, int, MyCompare>::iterator it = m.begin(); it != m.end(); it++){
+        cout << "map.key = " << it->first << " map.value = " << it->second << endl;
+    }
+    cout << "********************************************" << endl;
+}
+
+void test(){
+    //1.构造和赋值
+    map<int, int> m1 = {{1, 2}, {3, 3}, {4, 5}, {2, 4}};
+    map<int, int> m2(m1);   
+    map<int, int> m3 = m1;
+    map<int, int> m4;
+    //2.插入，删除，交换，排序
+    //2-1.插入
+    m1.insert(pair<int, int>(5, 6));
+    m1.insert(make_pair(5, 6));
+    m1.insert(map<int, int>::value_type(6, 7));
+    m1[6] = 7;
+    printMap(m1);
+    //2-2.删除
+    map<int, int>::iterator it = m1.begin();
+    advance(it, 3);
+    m1.erase(it);
+    printMap(m1);
+    m1.erase(m1.begin(), m1.end());
+    m1.clear();
+    printMap(m1);
+    //2-3.交换
+    m1.swap(m2);
+    printMap(m1);
+    //2-4.排序
+    map<int, int, MyCompare> m5 = {{1, 2}, {3, 3}, {4, 5}, {2, 4}};
+    printSortMap(m5);
+
+    //3.大小，容量
+    if(m5.empty()){
+        cout << "m5 为空" << endl;
+    }
+    else{
+        cout << "m5不为空, size() = " << m5.size() << endl;
+    }
+    //4.查找和统计
+    map<int, int>::iterator pos = m1.find(3);
+    int num = m1.count(3);
+    if (pos != m1.end()){
+        cout << "查询成功 key = " << pos->first << "  vlaue = " << pos->second << endl;
+        cout << "num = " << num << endl;
+    }
+    else{
+        cout << "查询失败" << endl; 
+    }
+
+}
+
+int main(){
+    test();
 }
 ```
 

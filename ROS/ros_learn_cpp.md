@@ -3080,6 +3080,7 @@ int main(int argc, char *argv[])
 </robot>
 ```
 ### 3.xacro完整使用流程
+1. 案例
 ```xml
 <!--
     使用 xacro 优化 URDF 版的小车底盘实现：
@@ -3185,3 +3186,28 @@ int main(int argc, char *argv[])
 
 </robot>
 ```
+2. 总结
+   1. robot
+      1. link(**link可以在xacro:macro里面，也可以在外面**)
+      2. xacro:property name = "xxx" value = "xxx"
+      3. xacro:macro name = "add_wheel" params = "name flag"
+         1. link name = "xxx"
+            1. visual
+               1. geometry
+                  1. cylinder radius = "xxx" length = "xxx"
+                  2. origin xyz = "xxx" rpy = "xxx"
+                  3. material name = "xxx"
+                     1. color rgba = "xxxx"
+            2. collison
+            3. inertia
+         2. joint name = "xxx" type = "continuous"
+            1. parent link = "a"
+            2. child link = "b"
+            3. origin xyz = "xxx"
+            4. axis xyz = "xxx"
+      4. xacro:add_wheel name = "xxx" flag = "1"
+```xml
+
+
+
+
