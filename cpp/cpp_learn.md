@@ -10731,7 +10731,165 @@ int main ()
    return 0;
 }
 ```
-4. using指令
+### 7.案例
+![multimap](./../pictures/multimap.jpg)
+```cpp
+/*
+1.
+- 公司今天招聘了10个员工（ABCDEFGHIJ），10名员工进入公司之后，需要指派员工在那个部门工作
+- 员工信息有: 姓名  工资组成；部门分为：策划、美术、研发
+- 随机给10名员工分配部门和工资
+- 通过multimap进行信息的插入  key(部门编号) value(员工)
+- 分部门显示员工信息
+2.multimap的特性
+将含有多个相同的key的元素按照从小到大的顺序排序，
+*/
+#include <vector>
+#include <string>
+#include <map>
+#include <iostream>
+using namespace std;
+#define CEHUA 0
+#define MEISHU 1
+#define YANFA 2
+class Worker{
+    public:
+        string name;
+        int salary;
+};
+void setWorker(vector<Worker> &v){
+    string nameSeed = "ABCDEFGHIJ";
+    for (int i = 0; i < 10; i++){
+        Worker worker;
+        string name = "worker";
+        name += nameSeed[i];
+        int salary = rand() % 10000 + 10000;
+        worker.name = name;
+        worker.salary = salary;
+        v.push_back(worker);
+    }
+}
+void setGroup(vector<Worker> &v, multimap<int, Worker> &m){
+    for (vector<Worker>::iterator it = v.begin(); it != v.end(); it++){
+        int deptID = rand() % 3;
+        m.insert(make_pair(deptID, *it));
+    }    
+}
+
+void showWorkerByGroup(multimap<int, Worker> &m){
+    cout << "***************策划部门*********************" << endl;
+    multimap<int, Worker>::iterator pos = m.find(CEHUA);
+    int count = m.count(CEHUA);
+    int index = 0;
+    for (; pos != m.end() && index < count; pos++, index++){
+        cout << "name = " << pos->second.name << "; salary = " << pos->second.salary << endl;
+    }
+    cout << "***************美术部门*********************" << endl;
+    pos = m.find(MEISHU);
+    count = m.count(MEISHU);
+    index = 0;
+    for (; pos != m.end() && index < count; pos++, index++){
+        cout << "name = " << pos->second.name << "; salary = " << pos->second.salary << endl;
+    }
+
+    cout << "***************研发部门*********************" << endl;
+    pos = m.find(YANFA);
+    count = m.count(YANFA);
+    index = 0;
+    for (; pos != m.end() && index < count; pos++, index++){
+        cout << "name = " << pos->second.name << "; salary = " << pos->second.salary << endl;
+    }
+
+}
+
+int main(){
+    srand((unsigned int)time(NULL));
+    vector<Worker> v;
+    multimap<int, Worker> m;
+    setWorker(v);
+    setGroup(v, m);
+    showWorkerByGroup(m);
+}
+
+```
+## 13-9.函数对象
+### 1.定义
+1. 概念
+   1. 重载函数调用操作符的类，其对象常称为函数对象
+   2. 函数对象使用重载的()时，行为类似于函数的调用，也叫做仿函数
+2. 函数对象的使用
+   1. 特点
+      1. 函数对象在使用时，可以像普通函数那样调用，可以有返回值
+      2. 函数对象超出普通函数的概念，函数对象可以有自己的状态
+      3. 函数对象可以作为参数传递
+   2. 例子
+```cpp
+//1、函数对象在使用时，可以像普通函数那样调用, 可以有参数，可以有返回值
+class MyAdd
+{
+public :
+	int operator()(int v1,int v2)
+	{
+		return v1 + v2;
+	}
+};
+
+void test01()
+{
+	MyAdd myAdd;
+	cout << myAdd(10, 10) << endl;
+}
+
+//2、函数对象可以有自己的状态
+class MyPrint
+{
+public:
+	MyPrint()
+	{
+		count = 0;
+	}
+	void operator()(string test)
+	{
+		cout << test << endl;
+		count++; //统计使用次数
+	}
+
+	int count; //内部自己的状态
+};
+void test02()
+{
+	MyPrint myPrint;
+	myPrint("hello world");
+	myPrint("hello world");
+	myPrint("hello world");
+	cout << "myPrint调用次数为： " << myPrint.count << endl;
+}
+
+//3、函数对象可以作为参数传递
+void doPrint(MyPrint &mp , string test)
+{
+	mp(test);
+}
+
+void test03()
+{
+	MyPrint myPrint;
+	doPrint(myPrint, "Hello C++");
+}
+
+int main() {
+
+	//test01();
+	//test02();
+	test03();
+	return 0;
+}
+```
+
+
+
+
+3. using指令
    1. 使用方法1
 >利用using namespace，这样在使用命名空间的时候就不用在前面加上命名空间的名称,这个指令会告诉编译器，后续的代码会使用指定命名空间中的名称
 ```cpp

@@ -589,6 +589,9 @@ ls -l | grep python
 ## 19.输入法问题：
 1. 问题：若是无法输入中文了，直接删掉.config下的fctix文件和/home目录下的配置文件，然后按照linux搜狗输入法重装
 
+## 20.安装opencv的问题
+[当source /etc/bash.bashrc失败怎么做？](https://blog.csdn.net/PecoHe/article/details/97476135)
+[步骤](https://blog.csdn.net/public669/article/details/99044895?spm=1001.2101.3001.6650.5&utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7Edefault-5-99044895-blog-120614133.pc_relevant_aa&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7Edefault-5-99044895-blog-120614133.pc_relevant_aa&utm_relevant_index=10)
 # 3.c++学习问题
 
 1. endl的问题:
