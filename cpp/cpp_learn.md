@@ -10824,65 +10824,58 @@ int main(){
       3. 函数对象可以作为参数传递
    2. 例子
 ```cpp
-//1、函数对象在使用时，可以像普通函数那样调用, 可以有参数，可以有返回值
-class MyAdd
-{
-public :
-	int operator()(int v1,int v2)
-	{
-		return v1 + v2;
-	}
+#include <vector>
+#include <string>
+#include <map>
+#include <iostream>
+using namespace std;
+//1.函数对象可以调用
+class MyFunc{
+    public:
+        void operator() (int a, int b){
+            cout << "myfunc调用" << endl;
+            cout << "a = " << a << "; b = " << b << endl;
+        }//和普通函数一样，前面是什么值就返回什么值
+        int operator() (int a){
+            return a;
+        }
 };
-
-void test01()
-{
-	MyAdd myAdd;
-	cout << myAdd(10, 10) << endl;
+void test01(){
+    MyFunc myfunc;
+    myfunc(1, 2);
+    myfunc(1);//类似于函数重载，但是函数重载要满足：函数名相同，返回值相同，作用域相同，参数不同
+    cout << "a = " << myfunc(1) << endl;
 }
-
-//2、函数对象可以有自己的状态
-class MyPrint
-{
-public:
-	MyPrint()
-	{
-		count = 0;
-	}
-	void operator()(string test)
-	{
-		cout << test << endl;
-		count++; //统计使用次数
-	}
-
-	int count; //内部自己的状态
+//2.函数对象可以自己的状态
+class MyPrint{
+    public:
+        int count = 0;
+        MyPrint(){
+            count++;
+        }
+        void operator() (string test){
+            MyPrint myprint;
+            cout << "count = " << count << endl;
+            cout << "test = " << test << endl;
+        }
+        
 };
-void test02()
-{
-	MyPrint myPrint;
-	myPrint("hello world");
-	myPrint("hello world");
-	myPrint("hello world");
-	cout << "myPrint调用次数为： " << myPrint.count << endl;
+void test02(){
+    MyPrint myprint;
+    myprint("a");
 }
-
-//3、函数对象可以作为参数传递
-void doPrint(MyPrint &mp , string test)
-{
-	mp(test);
+//3.函数对象可以作为参数传递
+void doPrint(MyPrint &mp, string str){
+    mp(str);
 }
-
-void test03()
-{
-	MyPrint myPrint;
-	doPrint(myPrint, "Hello C++");
+void test03(){
+    MyPrint myprint;
+    doPrint(myprint, "a");
 }
-
-int main() {
-
-	//test01();
-	//test02();
-	test03();
-	return 0;
+int main(){
+    test01();
+    test02();
+    test03();
 }
 ```
 
