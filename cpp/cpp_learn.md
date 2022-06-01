@@ -10691,46 +10691,6 @@ int main(){
     test();
 }
 ```
-
-
-# 13.c++高级教程
-## 1. 命名空间
-1. 提出：当一个班上有2个同名学生时，不得不用其他的信息，比如说，年龄等等来区分他们；在c++中，你可能会有xyz()的函数，在另一个库中也有xyz()的函数，所以需要加命名空间加以区分
-2. 定义：
-```cpp
-namespace name{
-    void code(){
-
-    }
-}
-name::code();
-```
-3. 例子
-```cpp
-#include <iostream>
-using namespace std;
-// 第一个命名空间
-namespace first_space{
-   void func(){
-      cout << "Inside first_space" << endl;
-   }
-}
-// 第二个命名空间
-namespace second_space{
-   void func(){
-      cout << "Inside second_space" << endl;
-   }
-}
-int main ()
-{
-   // 调用第一个命名空间中的函数
-   first_space::func();
-   
-   // 调用第二个命名空间中的函数
-   second_space::func(); 
-   return 0;
-}
-```
 ### 7.案例
 ![multimap](./../pictures/multimap.jpg)
 ```cpp
@@ -10879,8 +10839,879 @@ int main(){
 }
 ```
 
+### 2.谓词
+1. 定义
+   1. 返回bool类型的仿函数为谓词
+   2. 如果operator()接收一个参数，那么叫做一元谓词
+   3. 如果operator()接收2个参数，那么叫做2元谓词
+2. 案例
+```cpp
+#include <vector>
+#include <algorithm>
+#include <iostream>
+using namespace std;
+//1.一元谓词
+class GreaterFive{
+	public:
+		bool operator()(int val) {
+			return val > 5;
+		}
+};
+class MyCompare
+{
+public:
+	bool operator()(int num1, int num2)
+	{
+		return num1 > num2;
+	}
+};
 
 
+void test01() {
+
+	vector<int> v;
+	for (int i = 0; i < 10; i++)
+	{
+		v.push_back(i);
+	}
+	//方法1：创建函数对象
+	GreaterFive greaterfive;
+	//方法2.直接用匿名对象
+	// vector<int>::iterator it = find_if(v.begin(), v.end(), GreaterFive());
+	vector<int>::iterator it = find_if(v.begin(), v.end(), greaterfive);
+	//函数名+（）为匿名函数对象
+	/*
+	注意：
+	1.匿名对象:函数名+（）为匿名函数对象
+	2.find_if:当找到在区间内满足条件的第一个地址后，返回这个地址，若未找到，则返回区间的最后一个地址v.end()
+	*/ 
+	if (it == v.end()) {
+		cout << "没找到!" << endl;
+	}
+	else {
+		cout << "找到:" << *it << endl;
+	}
+
+}
+
+void test02(){
+    vector<int> v;
+    for (int i = 0; i < 10; i++){
+        v.push_back(i);
+    }
+    cout << "*********before Sort***********" << endl;
+    printVector(v);
+    sort(v.begin(), v.end(), MyCompare());
+    cout << "*********after Sort***********" << endl;
+    printVector(v);
+}
+int main(){
+    test01();
+    test02();
+}
+
+```
+## 13-10.STL算法
+1. 概述
+   1. 算法主要由<algorithm> <functional> <numeric>
+   2. <numeric>体积很小，只包括几个序列上面进行简单的数学运算和模板函数
+   3. <functional>定义了一些模板类，用以声明函数对象
+
+
+### 1.常用遍历算法
+
+#### 1-1.for_each
+1. **函数原型：**
+* `for_each(iterator beg, iterator end, _func);  `
+
+  // 遍历算法 遍历容器元素
+
+  // beg 开始迭代器
+
+  // end 结束迭代器
+
+  // _func 函数或者函数对象
+
+
+2. 
+**示例：**
+
+```C++
+#include <algorithm>
+#include <vector>
+
+//普通函数
+void print01(int val) 
+{
+	cout << val << " ";
+}
+//函数对象
+class print02 
+{
+ public:
+	void operator()(int val) 
+	{
+		cout << val << " ";
+	}
+};
+
+//for_each算法基本用法
+void test01() {
+
+	vector<int> v;
+	for (int i = 0; i < 10; i++) 
+	{
+		v.push_back(i);
+	}
+
+	//遍历算法
+	for_each(v.begin(), v.end(), print01);
+	cout << endl;
+
+	for_each(v.begin(), v.end(), print02());
+	cout << endl;
+}
+
+int main() {
+
+	test01();
+
+	system("pause");
+
+	return 0;
+}
+```
+
+#### 1-2.transform
+
+1. **函数原型：**
+
+* `transform(iterator beg1, iterator end1, iterator beg2, _func);`
+
+//beg1 源容器开始迭代器
+
+//end1 源容器结束迭代器
+
+//beg2 目标容器开始迭代器
+
+//_func 函数或者函数对象(print or print())
+
+
+
+2. **示例：**
+
+```C++
+#include<vector>
+#include<algorithm>
+
+//常用遍历算法  搬运 transform
+
+class TransForm
+{
+public:
+	int operator()(int val)
+	{
+		return val;
+	}
+
+};
+
+class MyPrint
+{
+public:
+	void operator()(int val)
+	{
+		cout << val << " ";
+	}
+};
+
+void test01()
+{
+	vector<int>v;
+	for (int i = 0; i < 10; i++)
+	{
+		v.push_back(i);
+	}
+
+	vector<int>vTarget; //目标容器
+
+	vTarget.resize(v.size()); // 目标容器需要提前开辟空间
+
+	transform(v.begin(), v.end(), vTarget.begin(), TransForm());
+
+	for_each(vTarget.begin(), vTarget.end(), MyPrint());
+}
+
+int main() {
+
+	test01();
+
+	system("pause");
+
+	return 0;
+}
+```
+总结
+```cpp
+#include <vector>
+#include <functional>
+#include <algorithm>
+#include <iostream>
+using namespace std;
+//1.for_each
+//1-1.利用仿函数
+class MyPrint{
+	public:
+		void operator()(int val){
+			cout  << val << " ";
+		}
+};
+//1-2.利用函数
+void myprint(int val){
+	cout << val << " ";
+}
+void test01(){
+	vector<int> v;
+	for (int i = 0; i < 10; i++){
+		v.push_back(i);
+	}
+	cout << "********利用仿函数********"<< endl;
+	for_each(v.begin(), v.end(), MyPrint());
+	cout << endl;
+	//利用for_each的机制相当于把v.begin()和v.end()里面的所有元素放入到回调函数myprint中，然后输出
+	cout << "********利用函数********"<< endl;
+	for_each(v.begin(), v.end(), myprint);
+	cout << endl;
+}
+//2.transform
+//2-1.利用仿函数
+class MyTrans{
+	public:
+		int operator() (int val){
+			return val;
+		}
+};
+//2-2.利用函数
+int mytrans(int val){
+	return val;
+}
+void test02(){
+	vector<int> v;
+	for (int i = 0; i < 10; i++){
+		v.push_back(i);
+	}
+	vector<int> v2;
+	v2.resize(v.size());
+	//必须要resize才能分配容量
+	//1.利用仿函数
+	transform(v.begin(), v.end(), v2.begin(), MyTrans());
+	//2.利用函数
+	transform(v.begin(), v.end(), v2.begin(), mytrans);
+	/*注意
+	1.transform的仿函数或者函数必须有返回值
+	2.当完成transform的时候，并不会输出所有的值,所以还需要打印
+	*/
+	cout << "********利用仿函数********"<< endl;
+	for_each(v2.begin(), v2.end(), myprint);
+	cout << endl;
+	cout << "********利用函数********"<< endl;
+	for_each(v2.begin(), v2.end(), MyPrint());
+	cout << endl;
+}
+int main(){
+	test01();
+	test02();
+}
+```
+
+
+### 2.常用查找算法
+
+1. **算法简介：**
+
+- `find`                     //查找元素
+- `find_if`               //按条件查找元素
+- `adjacent_find`    //查找相邻重复元素
+- `binary_search`    //二分查找法
+- `count`                   //统计元素个数
+- `count_if`             //按条件统计元素个数
+
+#### 2-1.find
+
+1. **功能描述：**
+* 查找指定元素，找到返回指定元素的迭代器，找不到返回结束迭代器end()
+2. **函数原型：**
+
+- `find(iterator beg, iterator end, value);  `
+
+  // 按值查找元素，找到返回指定位置迭代器，找不到返回结束迭代器位置
+
+  // beg 开始迭代器
+
+  // end 结束迭代器
+
+  // value 查找的元素
+
+3. **示例：**
+
+```C++
+#include <algorithm>
+#include <vector>
+#include <string>
+#include <iostream>
+using namespace std;
+//1.普通类型查找
+void test01() {
+	vector<int> v;
+	for (int i = 0; i < 10; i++) {
+		v.push_back(i + 1);
+	}
+	//查找容器中是否有 5 这个元素
+	vector<int>::iterator it = find(v.begin(), v.end(), 5);
+	if (it == v.end()) 
+	{
+		cout << "没有找到!" << endl;
+	}
+	else 
+	{
+		cout << "找到:" << *it << endl;
+	}
+}
+//2.自定义类型查找
+class Person {
+public:
+	Person(string name, int age) 
+	{
+		this->m_Name = name;
+		this->m_Age = age;
+	}
+	//重载==
+    //让底层find知道如何对比person数据类型
+	bool operator==(const Person& p) 
+	{
+    //const是防治修改person对象
+		if (this->m_Name == p.m_Name && this->m_Age == p.m_Age) 
+		{
+            //当自己年龄和姓名和传入的年龄和姓名是一样的，就返回true
+			return true;
+		}
+		return false;
+	}
+
+public:
+	string m_Name;
+	int m_Age;
+};
+
+void test02() {
+
+	vector<Person> v;
+
+	//创建数据
+	Person p1("aaa", 10);
+	Person p2("bbb", 20);
+	Person p3("ccc", 30);
+	Person p4("ddd", 40);
+
+	v.push_back(p1);
+	v.push_back(p2);
+	v.push_back(p3);
+	v.push_back(p4);
+
+	vector<Person>::iterator it = find(v.begin(), v.end(), p3);
+    /*
+    1.底层的执行逻辑是：开始it在v.begin()位置，然后，将p2和pi逐一比对，当满足条件时才返回p2的迭代器
+    2.若能查找到p2，则返回p2的迭代器
+    */
+	if (it == v.end()) 
+	{
+		cout << "没有找到!" << endl;
+	}
+	else 
+	{
+		cout << "找到姓名:" << it->m_Name << " 年龄: " << it->m_Age << endl;
+	}
+}
+int main(){
+    test01();
+    test02();
+}
+```
+#### 2-2.find_if
+
+1. **函数原型：**
+
+- `find_if(iterator beg, iterator end, _Pred);  `
+
+  // 按值查找元素，找到返回指定位置迭代器，找不到返回结束迭代器位置
+
+  // beg 开始迭代器
+
+  // end 结束迭代器
+
+  // _Pred 函数或者谓词（返回bool类型的仿函数）
+
+2. **示例：**
+
+```C++
+#include <algorithm>
+#include <vector>
+#include <string>
+
+//内置数据类型
+class GreaterFive
+{
+public:
+	bool operator()(int val)
+	{
+		return val > 5;
+	}
+};
+
+void test01() {
+
+	vector<int> v;
+	for (int i = 0; i < 10; i++) {
+		v.push_back(i + 1);
+	}
+
+	vector<int>::iterator it = find_if(v.begin(), v.end(), GreaterFive());
+	if (it == v.end()) {
+		cout << "没有找到!" << endl;
+	}
+	else {
+		cout << "找到大于5的数字:" << *it << endl;
+	}
+}
+
+//自定义数据类型
+class Person {
+public:
+	Person(string name, int age)
+	{
+		this->m_Name = name;
+		this->m_Age = age;
+	}
+public:
+	string m_Name;
+	int m_Age;
+};
+
+class Greater20
+{
+public:
+	bool operator()(Person &p)
+	{
+		return p.m_Age > 20;
+	}
+
+};
+
+void test02() {
+
+	vector<Person> v;
+
+	//创建数据
+	Person p1("aaa", 10);
+	Person p2("bbb", 20);
+	Person p3("ccc", 30);
+	Person p4("ddd", 40);
+
+	v.push_back(p1);
+	v.push_back(p2);
+	v.push_back(p3);
+	v.push_back(p4);
+
+	vector<Person>::iterator it = find_if(v.begin(), v.end(), Greater20());
+	if (it == v.end())
+	{
+		cout << "没有找到!" << endl;
+	}
+	else
+	{
+		cout << "找到姓名:" << it->m_Name << " 年龄: " << it->m_Age << endl;
+	}
+}
+
+int main() {
+
+	//test01();
+
+	test02();
+
+	system("pause");
+
+	return 0;
+}
+```
+
+####  2-3. adjacent_find
+
+1. **功能描述：**
+
+* 查找相邻重复元素
+
+2. **函数原型：**
+
+- `adjacent_find(iterator beg, iterator end);  `
+
+  // 查找相邻重复元素,返回相邻元素的第一个位置的迭代器
+
+  // beg 开始迭代器
+
+  // end 结束迭代器
+
+3. **示例：**
+
+```C++
+#include <algorithm>
+#include <vector>
+
+void test01()
+{
+	vector<int> v;
+	v.push_back(1);
+	v.push_back(2);
+	v.push_back(5);
+	v.push_back(2);
+	v.push_back(4);
+	v.push_back(4);
+	v.push_back(3);
+
+	//查找相邻重复元素
+	vector<int>::iterator it = adjacent_find(v.begin(), v.end());
+	if (it == v.end()) {
+		cout << "找不到!" << endl;
+	}
+	else {
+		cout << "找到相邻重复元素为:" << *it << endl;
+	}
+}
+```
+
+####  2-4.binary_search
+
+1. **功能描述：**
+* 查找指定元素是否存在
+
+2. **函数原型：**
+
+- `bool binary_search(iterator beg, iterator end, value);  `
+
+  // 查找指定的元素，查到 返回true  否则false
+
+  // 注意: 在**无序序列中不可用**
+
+  // beg 开始迭代器
+
+  // end 结束迭代器
+
+  // value 查找的元素
+
+3. **示例：**
+
+```C++
+#include <algorithm>
+#include <vector>
+
+void test01()
+{
+	vector<int>v;
+
+	for (int i = 0; i < 10; i++)
+	{
+		v.push_back(i);
+	}
+	//二分查找
+	bool ret = binary_search(v.begin(), v.end(),2);
+	if (ret)
+	{
+		cout << "找到了" << endl;
+	}
+	else
+	{
+		cout << "未找到" << endl;
+	}
+}
+
+int main() {
+
+	test01();
+	return 0;
+}
+```
+
+4. **总结：**二分查找法查找效率很高，值得注意的是查找的容器中元素必须的有序序列
+
+####  2-3.count
+
+1. **功能描述：**
+* 统计元素个数
+2. **函数原型：**
+
+- `count(iterator beg, iterator end, value);  `
+
+  // 统计元素出现次数
+
+  // beg 开始迭代器
+
+  // end 结束迭代器
+
+  // value 统计的元素
+
+3. **示例：**
+
+```C++
+#include <algorithm>
+#include <vector>
+
+//内置数据类型
+void test01()
+{
+	vector<int> v;
+	v.push_back(1);
+	v.push_back(2);
+	v.push_back(4);
+	v.push_back(5);
+	v.push_back(3);
+	v.push_back(4);
+	v.push_back(4);
+
+	int num = count(v.begin(), v.end(), 4);
+
+	cout << "4的个数为： " << num << endl;
+}
+
+//自定义数据类型
+class Person
+{
+public:
+	Person(string name, int age)
+	{
+		this->m_Name = name;
+		this->m_Age = age;
+	}
+	bool operator==(const Person & p)
+	{
+		if (this->m_Age == p.m_Age)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	string m_Name;
+	int m_Age;
+};
+
+void test02()
+{
+	vector<Person> v;
+
+	Person p1("刘备", 35);
+	Person p2("关羽", 35);
+	Person p3("张飞", 35);
+	Person p4("赵云", 30);
+	Person p5("曹操", 25);
+
+	v.push_back(p1);
+	v.push_back(p2);
+	v.push_back(p3);
+	v.push_back(p4);
+	v.push_back(p5);
+    
+    Person p("诸葛亮",35);
+
+	int num = count(v.begin(), v.end(), p);
+	cout << "num = " << num << endl;
+}
+int main() {
+
+	//test01();
+
+	test02();
+
+	system("pause");
+
+	return 0;
+}
+```
+
+**总结：** 统计自定义数据类型时候，需要配合重载 `operator==`
+
+
+####  2-6.count_if
+
+1. **功能描述：**
+
+* 按条件统计元素个数
+
+2. **函数原型：**
+
+- `count_if(iterator beg, iterator end, _Pred);  `
+
+  // 按条件统计元素出现次数
+
+  // beg 开始迭代器
+
+  // end 结束迭代器
+
+  // _Pred 谓词
+
+**示例：**
+
+```C++
+#include <algorithm>
+#include <vector>
+
+class Greater4
+{
+public:
+	bool operator()(int val)
+	{
+		return val >= 4;
+	}
+};
+
+//内置数据类型
+void test01()
+{
+	vector<int> v;
+	v.push_back(1);
+	v.push_back(2);
+	v.push_back(4);
+	v.push_back(5);
+	v.push_back(3);
+	v.push_back(4);
+	v.push_back(4);
+
+	int num = count_if(v.begin(), v.end(), Greater4());
+
+	cout << "大于4的个数为： " << num << endl;
+}
+
+//自定义数据类型
+class Person
+{
+public:
+	Person(string name, int age)
+	{
+		this->m_Name = name;
+		this->m_Age = age;
+	}
+
+	string m_Name;
+	int m_Age;
+};
+
+class AgeLess35
+{
+public:
+	bool operator()(const Person &p)
+	{
+		return p.m_Age < 35;
+	}
+};
+void test02()
+{
+	vector<Person> v;
+
+	Person p1("刘备", 35);
+	Person p2("关羽", 35);
+	Person p3("张飞", 35);
+	Person p4("赵云", 30);
+	Person p5("曹操", 25);
+
+	v.push_back(p1);
+	v.push_back(p2);
+	v.push_back(p3);
+	v.push_back(p4);
+	v.push_back(p5);
+
+	int num = count_if(v.begin(), v.end(), AgeLess35());
+	cout << "小于35岁的个数：" << num << endl;
+}
+
+
+int main() {
+
+	//test01();
+
+	test02();
+
+	system("pause");
+
+	return 0;
+}
+```
+
+3. **总结：**按值统计用count，按条件统计用count_if
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 13.c++高级教程
+## 1. 命名空间
+1. 提出：当一个班上有2个同名学生时，不得不用其他的信息，比如说，年龄等等来区分他们；在c++中，你可能会有xyz()的函数，在另一个库中也有xyz()的函数，所以需要加命名空间加以区分
+2. 定义：
+```cpp
+namespace name{
+    void code(){
+
+    }
+}
+name::code();
+```
+3. 例子
+```cpp
+#include <iostream>
+using namespace std;
+// 第一个命名空间
+namespace first_space{
+   void func(){
+      cout << "Inside first_space" << endl;
+   }
+}
+// 第二个命名空间
+namespace second_space{
+   void func(){
+      cout << "Inside second_space" << endl;
+   }
+}
+int main ()
+{
+   // 调用第一个命名空间中的函数
+   first_space::func();
+   
+   // 调用第二个命名空间中的函数
+   second_space::func(); 
+   return 0;
+}
+```
 
 3. using指令
    1. 使用方法1

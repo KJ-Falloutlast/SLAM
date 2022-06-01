@@ -626,6 +626,10 @@ ls -l | grep python
     "version": 4
   }
 ```
+## 21.解压慢的问题
+[rar解压](https://www.csdn.net/tags/MtjaUgysNTYzMjEtYmxvZwO0O0OO0O0O.html)
+1. sudo apt-get install unrar
+2. sudo apt-get install rar
 # 3.c++学习问题
 
 1. endl的问题:
@@ -824,7 +828,7 @@ https://suo.yt/dsXxAuV(**稳定**)
  .文件删除：直接启动winetricks---->默认容器---->卸载程序
  .文件安装：方法1：在当前目录下执行：wine XXX.exe;方法2：直接运行winetricks---->安装windows应用
  .qq和微信文件的安装路径：/home/kim/.wine/drive_c/Program Files (x86)/Tencent
-
+                                                                                                                                                                                           
 3. 问题:
  . 描述：You are using a 64-bit WINEPREFIX. Note that many verbs only install 32-bit versions of packages. 
  If you encounter problems, please retest in a clean 32-bit WINEPREFIX
