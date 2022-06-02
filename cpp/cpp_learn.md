@@ -10488,9 +10488,6 @@ void test01()
 int main() {
 
 	test01();
-
-	system("pause");
-
 	return 0;
 }
 ```
@@ -10910,7 +10907,189 @@ int main(){
     test02();
 }
 
+/*
+注意：
+1.sort:返回值都可
+2.find：返回值都可
+3.find_if：返回值都可
+4.for_each：返回值都可
+5.transform:：返回值必须为非void
+*/
 ```
+
+### 3.仿函数
+#### 3-1.算术仿函数
+
+
+1. **仿函数原型：**
+
+* `template<class T> T plus<T>`                //加法仿函数
+* `template<class T> T minus<T>`              //减法仿函数
+* `template<class T> T multiplies<T>`    //乘法仿函数
+* `template<class T> T divides<T>`         //除法仿函数
+* `template<class T> T modulus<T>`         //取模仿函数
+* `template<class T> T negate<T>`           //取反仿函数
+
+
+
+2. **示例：**
+
+```C++
+#include <functional>
+//negate
+void test01()
+{
+	negate<int> n;
+	cout << n(50) << endl;
+}
+
+//plus
+void test02()
+{
+	plus<int> p;
+	cout << p(10, 20) << endl;
+}
+
+int main() {
+
+	test01();
+	test02();
+
+	system("pause");
+
+	return 0;
+}
+```
+
+#### 3-2.关系仿函数
+1. **仿函数原型：**
+
+* `template<class T> bool equal_to<T>`                    //等于
+* `template<class T> bool not_equal_to<T>`            //不等于
+* `template<class T> bool greater<T>`                      //大于
+* `template<class T> bool greater_equal<T>`          //大于等于
+* `template<class T> bool less<T>`                           //小于
+* `template<class T> bool less_equal<T>`               //小于等于
+
+2. **示例：**
+
+```C++
+#include <functional>
+#include <vector>
+#include <algorithm>
+
+class MyCompare
+{
+public:
+	bool operator()(int v1,int v2)
+	{
+		return v1 > v2;
+	}
+};
+void test01()
+{
+	vector<int> v;
+
+	v.push_back(10);
+	v.push_back(30);
+	v.push_back(50);
+	v.push_back(40);
+	v.push_back(20);
+
+	for (vector<int>::iterator it = v.begin(); it != v.end(); it++) {
+		cout << *it << " ";
+	}
+	cout << endl;
+
+	//自己实现仿函数
+	//sort(v.begin(), v.end(), MyCompare());
+	//STL内建仿函数  大于仿函数
+	sort(v.begin(), v.end(), greater<int>());
+
+	for (vector<int>::iterator it = v.begin(); it != v.end(); it++) {
+		cout << *it << " ";
+	}
+	cout << endl;
+}
+
+int main() {
+
+	test01();
+
+	system("pause");
+
+	return 0;
+}
+```
+
+#### 3-3.逻辑仿函数
+
+1. **函数原型：**
+
+* `template<class T> bool logical_and<T>`              //逻辑与
+* `template<class T> bool logical_or<T>`                //逻辑或
+* `template<class T> bool logical_not<T>`              //逻辑非
+
+
+
+2. **示例：**
+
+```C++
+#include <vector>
+#include <functional>
+#include <algorithm>
+void test01()
+{
+	vector<bool> v;
+	v.push_back(true);
+	v.push_back(false);
+	v.push_back(true);
+	v.push_back(false);
+
+	for (vector<bool>::iterator it = v.begin();it!= v.end();it++)
+	{
+		cout << *it << " ";
+	}
+	cout << endl;
+
+	//逻辑非  将v容器搬运到v2中，并执行逻辑非运算
+	vector<bool> v2;
+	v2.resize(v.size());
+	transform(v.begin(), v.end(),  v2.begin(), logical_not<bool>());
+	for (vector<bool>::iterator it = v2.begin(); it != v2.end(); it++)
+	{
+		cout << *it << " ";
+	}
+	cout << endl;
+}
+
+int main() {
+
+	test01();
+	return 0;
+}
+```
+#### 3-4.内建函数对象总结
+1. 算数
+   1. negate<int> n;
+   2. minus<int> m(10, 20)
+   3. plus<int> p(10, 20)
+   4. multiplies<int> mul(1, 2)
+   5. divides<int> div(1, 2)
+   6. modulus<int> mod(1, 2)
+2. 关系(**返回bool**)
+   1. greater<int>()
+   2. greater_equal<int>()
+   3. less<int>()
+   4. less_equal<int>()
+   5. equal_to<int>()
+   6. not_equal_to<int>()
+3. 逻辑(**返回bool**)
+   1. logical_and<int>()
+   2. logical_or<int>()
+   3. logical_not<int>()
+
+
 ## 13-10.STL算法
 1. 概述
    1. 算法主要由<algorithm> <functional> <numeric>
@@ -11254,94 +11433,85 @@ int main(){
 2. **示例：**
 
 ```C++
-#include <algorithm>
 #include <vector>
-#include <string>
-
-//内置数据类型
-class GreaterFive
-{
-public:
-	bool operator()(int val)
-	{
-		return val > 5;
-	}
+#include <functional>
+#include <algorithm>
+#include <iostream>
+using namespace std;
+//1.普通数据类型
+//1-1.仿函数
+class Greater5{	
+	public:	
+		bool operator()(int val){
+			return val > 5;		
+		}
 };
-
-void test01() {
-
+//1-2.普通函数
+bool cmp1(int val){
+	return val > 5;
+}
+class Person{
+	public:
+		string m_Name;
+		int m_Age;
+		Person(string n, int a):m_Name(n), m_Age(a){}
+};
+//2.自定义数据类型
+//2-1.仿函数
+class GreaterAge{
+	public:	
+		bool operator()(const Person &p){
+			if (p.m_Age > 20){
+				return true;
+			}
+			return false;
+		}
+};
+//2-2.函数
+bool cmp2(const Person &p){
+	if (p.m_Age > 20){
+		return true;
+	}
+	return false;
+}
+void test01(){
 	vector<int> v;
-	for (int i = 0; i < 10; i++) {
-		v.push_back(i + 1);
+	for (int i = 0; i < 10; i++){
+		v.push_back(i);
+	}	
+	// vector<int>::iterator it = find_if(v.begin(), v.end(), Greater5());
+	vector<int>::iterator it = find_if(v.begin(), v.end(), cmp1);
+	if (it == v.end()){
+		cout << "未找到" << endl;
 	}
-
-	vector<int>::iterator it = find_if(v.begin(), v.end(), GreaterFive());
-	if (it == v.end()) {
-		cout << "没有找到!" << endl;
-	}
-	else {
-		cout << "找到大于5的数字:" << *it << endl;
+	else{
+		cout << "找到，值为*it = "  << *it << endl;
 	}
 }
-
-//自定义数据类型
-class Person {
-public:
-	Person(string name, int age)
-	{
-		this->m_Name = name;
-		this->m_Age = age;
-	}
-public:
-	string m_Name;
-	int m_Age;
-};
-
-class Greater20
-{
-public:
-	bool operator()(Person &p)
-	{
-		return p.m_Age > 20;
-	}
-
-};
-
-void test02() {
-
+void test02(){
 	vector<Person> v;
-
-	//创建数据
-	Person p1("aaa", 10);
-	Person p2("bbb", 20);
-	Person p3("ccc", 30);
-	Person p4("ddd", 40);
-
+	Person p1("a", 1);
+	Person p2("a", 2);
+	Person p3("a", 3);
+	Person p4("a", 23);
 	v.push_back(p1);
 	v.push_back(p2);
 	v.push_back(p3);
 	v.push_back(p4);
-
-	vector<Person>::iterator it = find_if(v.begin(), v.end(), Greater20());
-	if (it == v.end())
-	{
-		cout << "没有找到!" << endl;
+	// vector<Person>::iterator it = find_if(v.begin(), v.end(), GreaterAge());
+	vector<Person>::iterator it = find_if(v.begin(), v.end(), cmp2);
+	if (it != v.end()){
+		cout << "找到了值, name = " << it->m_Name << ";  age = " << it->m_Age << endl;
 	}
-	else
-	{
-		cout << "找到姓名:" << it->m_Name << " 年龄: " << it->m_Age << endl;
+	else{
+		cout << "not found" << endl;
 	}
+	
 }
 
-int main() {
-
-	//test01();
-
+int main(){
+	test01();
 	test02();
-
-	system("pause");
-
-	return 0;
 }
 ```
 
@@ -11355,37 +11525,31 @@ int main() {
 
 - `adjacent_find(iterator beg, iterator end);  `
 
-  // 查找相邻重复元素,返回相邻元素的第一个位置的迭代器
+  //若能找到，则返回相邻重复第一个元素的迭代器
 
   // beg 开始迭代器
 
   // end 结束迭代器
 
-3. **示例：**
+1. **示例：**
 
 ```C++
-#include <algorithm>
+#include <iostream>
 #include <vector>
-
-void test01()
-{
-	vector<int> v;
-	v.push_back(1);
-	v.push_back(2);
-	v.push_back(5);
-	v.push_back(2);
-	v.push_back(4);
-	v.push_back(4);
-	v.push_back(3);
-
-	//查找相邻重复元素
-	vector<int>::iterator it = adjacent_find(v.begin(), v.end());
-	if (it == v.end()) {
-		cout << "找不到!" << endl;
-	}
-	else {
-		cout << "找到相邻重复元素为:" << *it << endl;
-	}
+#include <algorithm>
+using namespace std;
+void test01(){
+    vector<int> v = {1, 1, 2, 2, 3, 5};
+    vector<int>::iterator it = adjacent_find(v.begin(), v.end());
+    if (it != v.end()){
+        cout << "查找到了, *it = "<< *it << endl;
+    }
+    else{
+        cout << "未查找到" << endl;
+    }
+}
+int main(){
+    test01();
 }
 ```
 
@@ -11398,7 +11562,7 @@ void test01()
 
 - `bool binary_search(iterator beg, iterator end, value);  `
 
-  // 查找指定的元素，查到 返回true  否则false
+  // 查找指定的元素，查到 返回true  否则false(**注意此处返回的是bool**)
 
   // 注意: 在**无序序列中不可用**
 
@@ -11413,7 +11577,16 @@ void test01()
 ```C++
 #include <algorithm>
 #include <vector>
-
+#include <iostream>
+using namespace std;
+void cmp(bool res){
+    if (res){
+        cout << "找到了" << endl;
+    }
+    else{
+        cout << "未找到" << endl;
+    }
+}
 void test01()
 {
 	vector<int>v;
@@ -11422,16 +11595,19 @@ void test01()
 	{
 		v.push_back(i);
 	}
-	//二分查找
+	//1.有序序列
 	bool ret = binary_search(v.begin(), v.end(),2);
-	if (ret)
-	{
-		cout << "找到了" << endl;
-	}
-	else
-	{
-		cout << "未找到" << endl;
-	}
+	cmp(ret);
+    //2.无序序列
+    vector<int> v2 = {1, 3, 2, 6, 5, 4};
+    //未排序前，未找到
+    bool ret2 = binary_search(v2.begin(), v2.end(), 4);
+    cmp(ret2);
+    //排序后
+    sort(v2.begin(), v2.end());
+    bool ret3 = binary_search(v2.begin(), v2.end(), 4); 
+    cmp(ret3);
+    
 }
 
 int main() {
@@ -11440,9 +11616,6 @@ int main() {
 	return 0;
 }
 ```
-
-4. **总结：**二分查找法查找效率很高，值得注意的是查找的容器中元素必须的有序序列
-
 ####  2-3.count
 
 1. **功能描述：**
@@ -11464,78 +11637,51 @@ int main() {
 ```C++
 #include <algorithm>
 #include <vector>
-
-//内置数据类型
-void test01()
-{
-	vector<int> v;
-	v.push_back(1);
-	v.push_back(2);
-	v.push_back(4);
-	v.push_back(5);
-	v.push_back(3);
-	v.push_back(4);
-	v.push_back(4);
-
-	int num = count(v.begin(), v.end(), 4);
-
-	cout << "4的个数为： " << num << endl;
+#include <iostream>
+using namespace std;
+//1.内置数据类型
+void test01(){
+    vector<int> v = {1, 2, 3, 4, 5, 5, 5};
+    int num = count(v.begin(), v.end(), 5);
+    //注意count返回的是int
+    cout << "the number of 5  = " << num << endl;
 }
-
-//自定义数据类型
-class Person
-{
-public:
-	Person(string name, int age)
-	{
-		this->m_Name = name;
-		this->m_Age = age;
-	}
-	bool operator==(const Person & p)
-	{
-		if (this->m_Age == p.m_Age)
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	}
-	string m_Name;
-	int m_Age;
+//2.自定义数据类型
+class Person{
+    public:
+        string m_Name;
+        int m_Age;
+        Person(string name, int age):m_Name(name), m_Age(age){}
+        bool operator== (const Person &p){
+            //注意次数是==,而非=
+            if (m_Age == p.m_Age){
+                return true;
+            }
+            return false;
+        }
 };
 
-void test02()
-{
-	vector<Person> v;
-
-	Person p1("刘备", 35);
-	Person p2("关羽", 35);
-	Person p3("张飞", 35);
-	Person p4("赵云", 30);
-	Person p5("曹操", 25);
-
-	v.push_back(p1);
-	v.push_back(p2);
-	v.push_back(p3);
-	v.push_back(p4);
-	v.push_back(p5);
-    
-    Person p("诸葛亮",35);
-
-	int num = count(v.begin(), v.end(), p);
-	cout << "num = " << num << endl;
+void test02(){
+    vector<Person> v;
+    Person p1("a", 1);
+    Person p2("b", 3);
+    Person p3("c", 3);
+    Person p4("d", 4);
+    Person p("e", 3);
+    v.push_back(p1);
+    v.push_back(p2);
+    v.push_back(p3);
+    v.push_back(p4);
+    int num = count(v.begin(), v.end(), p);
+    /*
+    count的底层逻辑，对v中的所有元素与p进行比较，若v[i].m_Age = p.m_Age, 
+    则返回true,否则返回false,然后返回true的所有数量
+    */
+    cout << "和e年龄相同人的个数为" << num <<"个"<< endl;
 }
-int main() {
-
-	//test01();
-
-	test02();
-
-	system("pause");
-
-	return 0;
+int main(){
+    test01();
+    test02();
 }
 ```
 
@@ -11558,88 +11704,195 @@ int main() {
 
   // end 结束迭代器
 
-  // _Pred 谓词
+  // _Pred 谓词或者函数
 
 **示例：**
 
 ```C++
 #include <algorithm>
 #include <vector>
-
-class Greater4
-{
-public:
-	bool operator()(int val)
-	{
-		return val >= 4;
-	}
+#include <iostream>
+using namespace std;
+//1.普通数据类型
+//1-1.仿函数
+class Greater5{
+    public:
+        bool operator() (int val){
+            return val > 5;
+        }
 };
-
-//内置数据类型
-void test01()
-{
-	vector<int> v;
-	v.push_back(1);
-	v.push_back(2);
-	v.push_back(4);
-	v.push_back(5);
-	v.push_back(3);
-	v.push_back(4);
-	v.push_back(4);
-
-	int num = count_if(v.begin(), v.end(), Greater4());
-
-	cout << "大于4的个数为： " << num << endl;
+//1-2.函数
+bool greater5(int val){
+    return val > 5;
 }
-
-//自定义数据类型
+void test01(){
+    vector<int> v;
+    for (int i = 0; i < 10; i++){
+        v.push_back(i);
+    }
+    int num1 = count_if(v.begin(), v.end(), Greater5());
+    int num2 = count_if(v.begin(), v.end(), greater5);
+    cout << "num1 = " << num1 << endl;
+    cout << "num2 = " << num2 << endl;
+}
+//2.自定义数据类型
+//2-1.仿函数
 class Person
 {
 public:
 	Person(string name, int age)
 	{
-		this->m_Name = name;
-		this->m_Age = age;
+		m_Name = name;
+		m_Age = age;
 	}
 
 	string m_Name;
 	int m_Age;
 };
-
-class AgeLess35
-{
-public:
-	bool operator()(const Person &p)
-	{
-		return p.m_Age < 35;
-	}
+class GreaterAge{
+    public:
+        bool operator() (const Person &p){
+            if (p.m_Age > 30){
+                return true;
+            }
+            return false;
+        }
 };
-void test02()
+//2-2.函数
+bool greaterAge(const Person &p){
+    return p.m_Age > 30;
+}
+void test02(){
+    vector<Person> v;
+	Person p1("a", 35);
+	Person p2("b", 35);
+	Person p3("c", 35);
+	Person p4("d", 30);
+    v.push_back(p1);
+    v.push_back(p2);
+    v.push_back(p3);
+    v.push_back(p4);
+    int num3 = count_if(v.begin(), v.end(), GreaterAge());
+    int num4 = count_if(v.begin(), v.end(), greaterAge);
+    cout << "num3 = " << num3 << endl;
+    cout << "num4 = " << num4 << endl;
+}
+int main(){
+    test01();
+    test02();
+}
+```
+3. **总结：**按值统计用count，按条件统计用count_if
+
+### 3.常用排序算法
+1. 算法简介
+   1. sort:对容器元素排序
+   2. random_shuffle:洗牌，制定范围内的元素随机调整次序
+   3. merge:容器元素合并，并存储到另一个容器中
+   4. reverse:翻转指定范围的元素
+#### 3-1.sort
+
+1. **函数原型：**
+
+- `sort(iterator beg, iterator end, _Pred);  `
+
+  // 按值查找元素，找到返回指定位置迭代器，找不到返回结束迭代器位置
+
+  //  beg    开始迭代器
+
+  //  end    结束迭代器
+
+  // _Pred  谓词
+
+2. **示例：**
+
+```c++
+#include <algorithm>
+#include <vector>
+
+void myPrint(int val)
 {
-	vector<Person> v;
-
-	Person p1("刘备", 35);
-	Person p2("关羽", 35);
-	Person p3("张飞", 35);
-	Person p4("赵云", 30);
-	Person p5("曹操", 25);
-
-	v.push_back(p1);
-	v.push_back(p2);
-	v.push_back(p3);
-	v.push_back(p4);
-	v.push_back(p5);
-
-	int num = count_if(v.begin(), v.end(), AgeLess35());
-	cout << "小于35岁的个数：" << num << endl;
+	cout << val << " ";
 }
 
+void test01() {
+	vector<int> v;
+	v.push_back(10);
+	v.push_back(30);
+	v.push_back(50);
+	v.push_back(20);
+	v.push_back(40);
+
+	//sort默认从小到大排序
+	sort(v.begin(), v.end());
+	for_each(v.begin(), v.end(), myPrint);
+	cout << endl;
+
+	//从大到小排序
+	sort(v.begin(), v.end(), greater<int>());
+	for_each(v.begin(), v.end(), myPrint);
+	cout << endl;
+}
 
 int main() {
 
-	//test01();
+	test01();
 
-	test02();
+	return 0;
+}
+```
+
+#### 3-2 random_shuffle
+
+1. **功能描述：**
+
+* 洗牌   指定范围内的元素随机调整次序
+
+2. **函数原型：**
+- `random_shuffle(iterator beg, iterator end);  `
+
+  // 指定范围内的元素随机调整次序
+
+  // beg 开始迭代器
+
+  // end 结束迭代器
+
+3. **示例：**
+
+```c++
+#include <algorithm>
+#include <vector>
+#include <ctime>
+
+class myPrint
+{
+public:
+	void operator()(int val)
+	{
+		cout << val << " ";
+	}
+};
+
+void test01()
+{
+	srand((unsigned int)time(NULL));
+	vector<int> v;
+	for(int i = 0 ; i < 10;i++)
+	{
+		v.push_back(i);
+	}
+	for_each(v.begin(), v.end(), myPrint());
+	cout << endl;
+
+	//打乱顺序
+	random_shuffle(v.begin(), v.end());
+	for_each(v.begin(), v.end(), myPrint());
+	cout << endl;
+}
+
+int main() {
+
+	test01();
 
 	system("pause");
 
@@ -11647,7 +11900,393 @@ int main() {
 }
 ```
 
-3. **总结：**按值统计用count，按条件统计用count_if
+**总结：**使用时记得加随机数种子
+
+#### 3-3 merge
+
+1. **功能描述：**
+
+* 两个容器元素合并，并存储到另一容器中
+
+2. **函数原型：**
+
+- `merge(iterator beg1, iterator end1, iterator beg2, iterator end2, iterator dest);  `
+
+  // 容器元素合并，并存储到另一容器中
+
+  // 注意: 两个容器必须是**有序的**
+
+  // beg1   容器1开始迭代器
+  // end1   容器1结束迭代器
+  // beg2   容器2开始迭代器
+  // end2   容器2结束迭代器
+  // dest    目标容器开始迭代器
+
+  ​
+
+3. **示例：**
+
+```c++
+#include <algorithm>
+#include <vector>
+
+class myPrint
+{
+public:
+	void operator()(int val)
+	{
+		cout << val << " ";
+	}
+};
+
+void test01()
+{
+	vector<int> v1;
+	vector<int> v2;
+	for (int i = 0; i < 10 ; i++) 
+    {
+		v1.push_back(i);
+		v2.push_back(i + 1);
+	}
+
+	vector<int> vtarget;
+	//目标容器需要提前开辟空间
+	vtarget.resize(v1.size() + v2.size());
+	//合并  需要两个有序序列
+	merge(v1.begin(), v1.end(), v2.begin(), v2.end(), vtarget.begin());
+	for_each(vtarget.begin(), vtarget.end(), myPrint());
+	cout << endl;
+}
+
+int main() {
+
+	test01();
+
+	system("pause");
+
+	return 0;
+}
+```
+
+**总结：**merge合并的两个容器必须的有序序列
+
+#### 3-4. reverse
+
+1. **函数原型：**
+
+- `reverse(iterator beg, iterator end);  `
+
+  // 反转指定范围的元素
+
+  // beg 开始迭代器
+
+  // end 结束迭代器
+
+
+2. **示例：**
+
+```c++
+#include <algorithm>
+#include <vector>
+
+class myPrint
+{
+public:
+	void operator()(int val)
+	{
+		cout << val << " ";
+	}
+};
+
+void test01()
+{
+	vector<int> v;
+	v.push_back(10);
+	v.push_back(30);
+	v.push_back(50);
+	v.push_back(20);
+	v.push_back(40);
+
+	cout << "反转前： " << endl;
+	for_each(v.begin(), v.end(), myPrint());
+	cout << endl;
+
+	cout << "反转后： " << endl;
+
+	reverse(v.begin(), v.end());
+	for_each(v.begin(), v.end(), myPrint());
+	cout << endl;
+}
+
+int main() {
+
+	test01();
+	return 0;
+}
+```
+#### 3-5. 总结
+```cpp
+#include <algorithm>
+#include <vector>
+#include <iostream>
+using namespace std;
+void printVector(vector<int> &v){
+	for (vector<int>::iterator it = v.begin(); it != v.end(); it++){
+		cout << *it << " ";
+	}
+	cout << endl;
+}
+bool cmp(int a, int b){
+	return a > b;
+}
+//1.sort
+void test01(){
+	vector<int> v;
+	for (int i = 0; i < 10; i++){
+		v.push_back(i);
+	}
+	sort(v.begin(), v.end(), greater<int>());//方法1
+	sort(v.begin(), v.end(), cmp);//方法2,cmp必须返回bool
+	//第三个参数可以为仿函数，函数，内置仿函数，总之要返回bool类型
+	printVector(v);
+}	
+
+//2.random_shuffle
+void test02(){
+	srand((unsigned int)time(NULL)); 
+	vector<int> v;
+	for (int i = 0; i < 10; i++){
+		v.push_back(i);
+	}
+	random_shuffle(v.begin(), v.end());
+	//要使用random_shuffle，必须要加srand((unsigned int)time(NULL))
+	printVector(v);
+}
+//3.merge
+void test03(){
+	vector<int> v1 = {1, 3, 2, 4};
+	vector<int> v2 = {5, 4, 2, 3};
+	// for (int i = 0; i < 10; i++){
+	// 	v1.push_back(i);
+	// 	v1.push_back(i + 1);
+	// }
+	vector<int> v3;
+	v3.resize(v1.size() + v2.size());
+	merge(v1.begin(), v1.end(), v2.begin(), v2.end(), v3.begin());
+	//v1,v2可以无序也可有序
+	printVector(v3);
+}	
+//4.reverse
+void test04(){
+	vector<int> v;
+	for (int i = 0; i < 10; i++){
+		v.push_back(i + 1);
+	}
+	reverse(v.begin(), v.end());
+	printVector(v);
+}
+
+int main(){
+	test01();
+	test02();
+	test03();
+	test04();
+}
+```
+### 5.常用拷贝和替换算法
+
+1. **算法简介：**
+
+- `copy`                      // 容器内指定范围的元素拷贝到另一容器中
+- `replace`                // 将容器内指定范围的旧元素修改为新元素
+- `replace_if `          // 容器内指定范围满足条件的元素替换为新元素
+- `swap`                     // 互换两个容器的元素
+
+
+#### 5-1.函数定义
+
+1. copy
+- `copy(iterator beg, iterator end, iterator dest);  `
+
+  // 按值查找元素，找到返回指定位置迭代器，找不到返回结束迭代器位置
+
+  // beg  开始迭代器
+
+  // end  结束迭代器
+
+  // dest 目标起始迭代器
+
+
+2. replace
+- `replace(iterator beg, iterator end, oldvalue, newvalue);  `
+
+  // 将区间内旧元素 替换成 新元素
+
+  // beg 开始迭代器
+
+  // end 结束迭代器
+
+  // oldvalue 旧元素
+
+  // newvalue 新元素
+
+
+
+3. replace_if
+- `replace_if(iterator beg, iterator end, _pred, newvalue);  `
+
+  // 按条件替换元素，满足条件的替换成指定元素
+
+  // beg 开始迭代器
+
+  // end 结束迭代器
+
+  // _pred 谓词
+
+  // newvalue 替换的新元素
+
+4. swap
+- `swap(container c1, container c2);  `
+
+  // 互换两个容器的元素
+
+  // c1容器1
+
+  // c2容器2
+
+#### 5-2.案例
+```cpp
+#include <algorithm>
+#include <vector>
+#include <iostream>
+using namespace std;
+void printVector(vector<int> &v){
+	for (vector<int>::iterator it = v.begin(); it != v.end(); it++){
+		cout << *it << " ";
+	}
+	cout << endl;
+}
+//1.copy
+void test01(){
+    vector<int> v1;
+    for (int i = 0; i < 10; i++){
+        v1.push_back(i);
+    }
+    vector<int> v2;
+    //拷贝的容器需要提前开辟空间
+    v2.resize(v1.size());
+    copy(v1.begin(), v1.end(), v2.begin());
+    printVector(v2);
+}
+//2.replace
+void test02(){
+    vector<int> v1 = {1, 2, 3, 4, 4, 4};
+    replace(v1.begin(), v1.end(), 4, 100);
+    //将4换成100
+    printVector(v1);
+}
+//3.replace_if
+class Greater5{
+    public:
+        bool operator() (int val){
+            return val > 5;
+        }
+};
+void test03(){
+    vector<int> v;
+    for (int i = 0; i < 10; i++){
+        v.push_back(i);
+    }
+    replace_if(v.begin(), v.end(), Greater5(), 100);
+    //将v中>5的数全部替换为100
+    printVector(v);
+}
+//4.swap
+void test04(){
+    vector<int> v1 = {1, 2, 3};
+    vector<int> v2 = {4, 5, 6};
+    v1.swap(v2);
+    //交换的元素必须是同种类型
+    printVector(v1);
+}
+int main(){
+    test01();
+    test02();
+    test03();
+    test04();
+}
+```
+
+
+
+### 6.常用算术生成算法
+#### 6-1.定义
+1. **注意：**
+
+* 算术生成算法属于小型算法，使用时包含的头文件为 `#include <numeric>`
+
+
+2. accumulate
+- `accumulate(iterator beg, iterator end, value);  `
+
+  // 计算容器元素累计总和
+
+  // beg 开始迭代器
+
+  // end 结束迭代器
+
+  // value 起始值
+
+
+3. fill
+- `fill(iterator beg, iterator end, value);  `
+
+  // 向容器中填充元素
+
+  // beg 开始迭代器
+
+  // end 结束迭代器
+
+  // value 填充的值
+#### 6-2.案例
+```cpp
+#include <algorithm>
+#include <vector>
+#include <iostream>
+#include <numeric>
+using namespace std;
+void printVector(vector<int> &v){
+	for (vector<int>::iterator it = v.begin(); it != v.end(); it++){
+		cout << *it << " ";
+	}
+	cout << endl;
+}
+void test01(){
+    vector<int> v;
+	for (int i = 0; i <= 100; i++) {
+		v.push_back(i);
+	}
+    int num = accumulate(v.begin(), v.end(), 0);
+    //参数3是起始值
+    cout << "total = " << num <<endl;
+}
+void test02(){
+    vector<int> v;
+    v.resize(10);
+    //使用fill前要resize
+    fill(v.begin(), v.end(), 100);
+    printVector(v);
+}
+int main(){
+    test01();
+    test02();
+}
+```
+
+
+
+
+
 
 
 
@@ -12179,3 +12818,8 @@ auto multiply(_Tx x, _Ty y)->decltype(x*y)
     return x*y;
 }
 ```
+## 7.srand((unsigned) time(NULL))详解
+1. 流程
+   1. time(NULL)指使用time(NULL)获得时间，再将其转化为 usigned int类型，最后再传给srand()
+2. 使用
+   1. 如果想在一个程序中生成随机数序列，需要至多在生成随机数之前设置一次随机种子。 即：只需在主程序开始处调用srand((unsigned)time(NULL)); 后面直接用rand就可以了。不要在for等循环放置srand((unsigned)time(NULL));
