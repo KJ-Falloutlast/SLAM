@@ -3601,7 +3601,6 @@ controllers: {
     </xacro:macro>
 
 <!-- 立方体惯性矩阵 -->
-
  <xacro:macro name="Box_inertial_matrix" params="m l w h">
        <inertial>
                <mass value="${m}" />
