@@ -18,3 +18,28 @@
 4. 常量使用
 5. 宏定义和宏调用<xacro:macro name = "" params = ""> </xacro:macro>
 6. 文件包含:<xacro:include filename = ""/>
+7. 打开assitant后，需要将配置文件保存在src目录下
+
+## 1-2.相关问题
+1. launch
+```xml
+<launch>
+    <arg name="ur3" />
+    <!-- 加载机器人模型参数 -->
+    <param name="robot_description" command="$(find xacro)/xacro --inorder $(find ur3)/urdf/ur3.urdf" />
+
+    <!-- 设置GUI参数，显示关节控制插件 -->
+    <param name="use_gui" value="true"/>
+
+    <!-- 运行joint_state_publisher节点，发布机器人的关节状态  -->
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+    <node name="joint_state_publisher_gui" pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" />
+    
+    <!-- 运行robot_state_publisher节点，发布tf  -->
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+   <!-- type = "robot_state_publisher" -->
+    <!-- 运行rviz可视化界面 -->
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find ur3)/urdf.rviz" required="true" />
+</launch>
+```
+**注意在启动rviz后要更换坐标系**

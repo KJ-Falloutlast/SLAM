@@ -12286,8 +12286,86 @@ int main(){
 
 
 
+### 7.常用集合算法
 
+1. **算法简介：**
 
+- `set_intersection`          // 求两个容器的交集
+
+- `set_union`                       // 求两个容器的并集
+
+- `set_difference `              // 求两个容器的差集
+
+2. 案例
+```cpp
+##include <algorithm>
+#include <vector>
+#include <iostream>
+#include <numeric>
+using namespace std;
+void printVector(vector<int> &v){
+    for (vector<int>::iterator it = v.begin(); it != v.end(); it++){
+        cout << *it << " ";
+    }
+    cout << endl;
+}
+void test01(){
+    //1.set_insersection
+    vector<int> v1;
+    for (int i = 0; i < 10; i++){
+        v1.push_back(i);
+    }
+    //v1 = {0-9}, v2 = {5-8}
+    vector<int> v2 = {7, 8, 9, 10, 11};
+    vector<int> v3;
+    v3.resize(min(v1.size(), v2.size()));
+
+    vector<int>::iterator it2 
+    = set_intersection(v1.begin(), v1.end(), v2.begin(), v2.end(), v3.begin());
+    //返回v3的最后一个元素的迭代器
+    printVector(v3);
+    //v3 = {5, 6, 7, 8}
+    
+    //2.set_union
+    vector<int> v4;
+    v4.resize(v1.size() + v2.size());
+    //并集的大小是返回2个集合的大小之和
+    vector<int>::iterator it3 = set_union(v1.begin(), v1.end(), v2.begin(), v2.end(), v4.begin());
+    printVector(v4);
+    //v4 = {0-9},其余多的位置用0来代替
+
+    //3.set_difference
+    vector<int> v5;
+    v5.resize(max(v1.size(), v2.size()));
+    //差集要取得2个集合的最大值,v5 = v1-v2就是取得除了在v1中2者交集以外的其他元素
+    // vector<int>::iterator it5 = set_difference(v1.begin(), v1.end(), v2.begin(), v2.end(), v5.begin());
+    //v1-v2 = {0, 1, 2, 3, 4, 5, 6}
+    vector<int>::iterator it5 = set_difference(v2.begin(), v2.end(), v1.begin(), v1.end(), v5.begin());
+    //v2-v1 = {10, 11}
+    printVector(v5);
+    
+    //4.set_symmetric_difference
+    vector<int> v6;
+    v6.resize(v1.size() + v2.size());
+    vector<int>::iterator it6 = set_symmetric_difference(v1.begin(), v1.end(), v2.begin(), v2.end(), v6.begin());
+    //v1^v2 = {0, 1, 2, 3, 4, 5, 6, 10 ,11}
+    printVector(v6);
+    /*总结
+    1.交集就是要取这两个集合大小的最小的那一个，v1 & v2 不大于 min(v1.size(), v2.size())
+    2.并就是要取这两个集合之和，v1 | v2 不大于 (v1.size() + v2.size())
+    3.差集就是取这两个集合中某个集合除交集之外的元素，v1 - v2 不大于 max(v1.size(), v2.size())
+    4.对称差集就是取这两个集合中除了交集之外的元素，v1 ^ v2 不大于 (v1.size() + v2.size())
+    5.求集合的元素必须是有序容器
+    6.求完集合后的iter返回的是新集合的最后一个元素的迭代器
+    */
+
+}
+    
+
+int main(){
+    test01();
+}
+```
 
 
 

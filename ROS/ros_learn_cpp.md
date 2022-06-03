@@ -3495,6 +3495,7 @@ controllers: {
  ```
 
 ## 5-5.urdf集成gazebo
+### 1.URDF集成gazebo的集成流程
 1. 创建功能包： urdf、xacro、gazebo_ros、gazebo_ros_control、gazebo_plugins
 2. 编写urdf文件
 ```xml
@@ -3574,4 +3575,46 @@ controllers: {
 -->
 
 </launch>
+```
+### 2.urdf集成gazebo相关设置
+1. collision:如果link是标准的几何体形状，那么和link和visual属性设置一致就行
+2. inertial:惯性矩阵的设置需要结合link的质量和外形参数动态生成
+```xml
+<!-- 球体惯性矩阵-->
+    <xacro:macro name="sphere_inertial_matrix" params="m r">
+        <inertial>
+            <mass value="${m}" />
+            <inertia ixx="${2*m*r*r/5}" ixy="0" ixz="0"
+                iyy="${2*m*r*r/5}" iyz="0" 
+                izz="${2*m*r*r/5}" />
+        </inertial>
+    </xacro:macro>
+
+<!-- 圆柱形惯性矩阵 -->
+<xacro:macro name="cylinder_inertial_matrix" params="m r h">
+        <inertial>
+            <mass value="${m}" />
+            <inertia ixx="${m*(3*r*r+h*h)/12}" ixy = "0" ixz = "0"
+                iyy="${m*(3*r*r+h*h)/12}" iyz = "0"
+                izz="${m*r*r/2}" /> 
+        </inertial>
+    </xacro:macro>
+
+<!-- 立方体惯性矩阵 -->
+
+ <xacro:macro name="Box_inertial_matrix" params="m l w h">
+       <inertial>
+               <mass value="${m}" />
+               <inertia ixx="${m*(h*h + l*l)/12}" ixy = "0" ixz = "0"
+                   iyy="${m*(w*w + l*l)/12}" iyz= "0"
+                   izz="${m*(w*w + h*h)/12}" />
+       </inertial>
+   </xacro:macro>
+```
+**注意：除了base_footprint外,机器人的每个刚体部分都要设置惯性矩阵，且惯性矩阵必须通过计算得出，如果随意指定，就会导致机器人在gazebo中移动抖动**
+3. 颜色设置
+```xml
+<gazebo reference="link节点名称">
+     <material>Gazebo/Blue</material>
+</gazebo>
 ```
