@@ -70,3 +70,120 @@ int main(int argc, char** argv) {
    1. 参数1是保存路径
    2. 参数2是图像内存对象
 
+# 2.opencv基础
+1. Mat基本结构
+   1. header:头部|数据部分
+   2. 赋值，克隆，拷贝
+2. 创建方法
+   1. m1.copyTo(m2)
+   2. m1 = m2
+   3. m1 = Scalar(255 0 0)
+
+
+# 3.案例
+1. quickopencv.h
+```cpp
+#pragma once
+#include <opencv2/opencv.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <iostream>
+using namespace std;
+using namespace cv;
+class QuickDemo{
+    public:
+        void colorSpace_Demo(Mat &image);
+        void mat_creation_demo(Mat &image);
+};
+```
+2. quickopencv.cpp
+```cpp
+#include "../include/quickopencv.h"
+void QuickDemo::colorSpace_Demo(Mat &image){
+    Mat gray, hsv;
+    cvtColor(image, hsv, COLOR_BGR2HSV);//转hsv
+    cvtColor(image, gray, COLOR_BGR2GRAY);//转灰度
+    imshow("HSV", hsv);
+    imshow("灰度", gray);
+    imwrite("/home/kim-james/ROS_Space/opencv_ws/ch1/picture/hsv.png", hsv);
+    //千万不要忘记hsv.png和gray.png
+    imwrite("/home/kim-james/ROS_Space/opencv_ws/ch1/picture/gray.png", gray);
+    /*
+    1.R G B:0-255
+    2.H:0-180,S,V:0-255;H,S是改变颜色的通道，V是改变亮度的通道
+    */
+}
+void QuickDemo::mat_creation_demo(Mat &image){
+    //第一讲:创建图像基本操作
+    // Mat m1, m2;
+    // m1 = image.clone();
+    // image.copyTo(m2);
+    //创建空白图像
+
+    //第二讲:mat操作
+    //1.mat的赋值
+    //1-1.利用矩阵
+    Mat m3 = Mat::zeros(Size(400, 400), CV_8UC3);
+    
+    //1-2.直接赋值
+    // m3 = 123;//表示把第一个通道变为123;
+
+    //1-3.利用scalar(a, b, c); 默认为:BGR
+    m3 = Scalar(255, 0, 0);//表示把3个通道都变成127
+    /*
+    1.产生8X8的0矩阵，8表示8位，
+    UC表示usigned char,1表示单通道
+    2.如果是3，则是表示3通道的矩阵，所以变成了8X24的矩阵，
+    由于有3个通道，所以列数变成了3x8,故列数为(cols * channels)
+    3.mat支持对任意操作符的重载，所以可以大胆使用
+    4.Size()的大小会改变图像的大小，所以size越大图像就越大
+    */
+
+    cout << m3 << endl;
+    cout << "width = " << m3.cols 
+    << " height = " << m3.rows 
+    << " channels = " << m3.channels() << endl;
+    
+    //2.mat的拷贝操作
+    //2-1.m1 = m2
+    Mat m4;
+    m4 = m3;
+    m4 = Scalar(0, 0, 255);//m4不会被scalar改变
+    //此时m4会随着m3的变化而变化
+
+    // 2-2.m1 = m2.clone()
+    m4 = m3.clone();
+    m4 = Scalar(0, 0, 255);//m4会被scalar改变
+    
+    //2-3.m3.copyTo()
+    m3.copyTo(m4);/m4会被scalar改变
+    //当调用m3的copyTo()和clone()，不会改变m4的值
+    imshow("创建图像m3", m3);
+    imshow("创建图像m4", m4);
+    //m3和m4都变成了黄色
+}
+```
+3. main.cpp
+```cpp
+#include <opencv2/opencv.hpp>
+#include <iostream>
+#include <math.h>
+#include <opencv2/highgui/highgui_c.h>//主要解决CV_WINDOW_AUTOSIZE问题
+#include "../include/quickopencv.h"
+using namespace cv;
+
+int main(int argc, char** argv) {
+	Mat src = imread("/home/kim-james/ROS_Space/opencv_ws/opencv_tutorial_data/images/63_12_map.png");
+    
+    if (src.empty()){
+        return -1;
+    }
+    namedWindow("input", WINDOW_FREERATIO);//任意窗口大小
+    imshow("input", src);//imshow只支持8位的输入
+    QuickDemo qd;
+    qd.colorSpace_Demo(src);
+    qd.mat_creation_demo(src);
+    waitKey(0);
+    destroyAllWindows();
+
+}
+```

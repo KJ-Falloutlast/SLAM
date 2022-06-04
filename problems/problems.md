@@ -157,6 +157,11 @@ cmakelists:project(model02)
 /usr/bin/ld: turtle_control.cpp:(.text+0x21b): undefined reference to `tf2_ros::TransformListener::TransformListener(tf2::BufferCore&, bool, ros::TransportHints)'
 ```
    2. 解决方案：重新创建功能包
+4. 问题4
+   1. 描述 :
+```RLException: Invalid <param> tag: Cannot load command parameter [robot_description]: command [['/opt/ros/noetic/lib/xacro/xacro', '/home/kim-james/ROS_Space/catkin_ws_cpp/src/urdf_gazebo/urdf/xacro/car.xacro']] returned with code [2]. 
+```
+2. 解决
 ## 15. 自动补全的问题
 **直接使用这个配置就可以自动补全**
 ```json

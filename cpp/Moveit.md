@@ -43,3 +43,27 @@
 </launch>
 ```
 **注意在启动rviz后要更换坐标系**
+
+# 2.第2讲
+## 2-1.moveitSetupAssitant
+1. start:导入urdf文件
+2. 碰撞矩阵:generate
+3. virtual_joints:虚拟关节,类似于base_link和world坐标系的关系，若是机器人是固定的，则不需要设置虚拟关节
+4. define planning groups：
+   1. 添加一个规划组
+   2. 选择求解器：正解或者逆解
+      1. 默认kdl
+      2. 求解时间选择默认
+      3. 求解次数：3次
+   3. ompl:RPT(**运动规划算法**)
+   4. 添加manipulator-Chain:
+      1. Base Link:base_link(**最内侧的link**)
+      2. Tip Link:tool0(**最外侧的link**)
+   5. robot Poses
+      1. add pose:命名为home,所有关节的角度都设置为0
+   6. End Effectors:终端夹爪
+   7. Passive Joints:主要用于将不重要关节剔除运动规划考虑,**若所有关节都需要运动的情况下，就不要设置**
+   8. Controllers:控制器,**不建议使用**
+   9. Simulation: 能产生一个仿真文件
+   10. 3D Preception:主要用于视觉(**8-10都还不成熟，谨慎使用**)
+   11. 
