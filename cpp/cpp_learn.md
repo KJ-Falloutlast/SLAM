@@ -13492,3 +13492,27 @@ auto multiply(_Tx x, _Ty y)->decltype(x*y)
    1. time(NULL)指使用time(NULL)获得时间，再将其转化为 usigned int类型，最后再传给srand()
 2. 使用
    1. 如果想在一个程序中生成随机数序列，需要至多在生成随机数之前设置一次随机种子。 即：只需在主程序开始处调用srand((unsigned)time(NULL)); 后面直接用rand就可以了。不要在for等循环放置srand((unsigned)time(NULL));
+
+## 8.exit()函数详解
+```cpp
+#include <iostream>
+#include <cstdlib> // Needed to use the exit function
+using namespace std;
+
+// Function prototype
+void someFunction();
+
+int main ()
+{
+    someFunction ();
+    return 0;
+}
+void someFunction()
+{
+    cout << "This program terminates with the exit function. \n";
+    cout << "Bye!\n";
+    exit (0);//exit后的程序不会被执行
+    cout << "This message will never be displayed\n";
+    cout << "because the program has already terminated.\n";
+}
+```

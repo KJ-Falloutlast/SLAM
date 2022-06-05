@@ -3621,146 +3621,156 @@ controllers: {
 ```
 
 ### 2.案例
-1. mycar_base
+#### 1.错误解决
+1. 错误的解决方法
+   1. **rosrun xacro xacro filemame.xacro > filename.urdf
+   2. check_urdf filename.urdf**检查urdf文件是否出问题**
+   3. 写xacro的注意事项
+      1. 对于inertial.xacro文件，要include进入各个文件，以防报错
+      2. 每写完一个xacro文件，都要xacro检查一遍
+      3. 当把所有的xacro文件集合到asm.xacro中时，要输出为urdf，然后check_urdf xxx.urdf检查
+#### 2.综合文件
+1. car_base
 ```xml
+<!-- 根标签，必须声明 xmlns:xacro -->
 <robot name="my_base" xmlns:xacro="http://www.ros.org/wiki/xacro">
-    <!-- 封装变量、常量 -->
-    <xacro:property name="PI" value="3.14159"/>
-    <!-- 宏:黑色设置 -->
-    <material name="black">
-        <color rgba="0.0 0.0 0.0 1.0" />
-    </material>
-    <!-- 底盘属性 -->
+    <!-- 要调用xacro:inertial函数，一定要将路径包含进来 -->
+    <xacro:include filename = "/home/kim-james/ROS_Space/catkin_ws_cpp/src/gazebo_robot/urdf/head.xacro"/>
+    <!-- 1.base_link -->
+    <!-- 1-1.base_link属性 -->
+    <xacro:property name="PI" value="3.141"/>
     <xacro:property name="base_footprint_radius" value="0.001" /> <!-- base_footprint 半径  -->
     <xacro:property name="base_link_radius" value="0.2" /> <!-- base_link 半径 -->
     <xacro:property name="base_link_length" value="0.1" /> <!-- base_link 长 -->
-    <xacro:property name="base_link_m" value="0.5" /> <!-- 质量 -->
     <xacro:property name="earth_space" value="0.015" /> <!-- 离地间距 -->
+    <xacro:property name="base_link_m" value="0.5" /> <!-- 离地间距 -->
 
-    <!-- 1.底盘 -->
-    <!-- 1-1.base_footprint -->
+    <!-- base_footprint -->
     <link name="base_footprint">
-    	<visual>
-        	<geometry>
-          		<sphere radius="${base_footprint_radius}" />
-        	</geometry>
-      	</visual>
-    </link>
-  <!-- 1-2.base_link -->
-    <link name="base_link">
-      <!-- 1-2-1.visual -->
-    	<visual>
-        	<geometry>
-          		<cylinder radius="${base_link_radius}" length="${base_link_length}" />
-        	</geometry>
-        	<origin xyz="0 0 0" rpy="0 0 0" />
-        	<material name="yellow">
-          		<color rgba="0.5 0.3 0.0 0.5" />
-        	</material>
+      <visual>
+        <geometry>
+          <sphere radius="${base_footprint_radius}" />
+        </geometry>
       </visual>
-      <!-- 1-2-2.collision -->
-      <collision>
-    		<geometry>
-          		<cylinder radius="${base_link_radius}" length="${base_link_length}" />
-        	</geometry>
-        	<origin xyz="0 0 0" rpy="0 0 0" />
-      </collision>
-      <!-- 1-2-3.inertial -->
-      <!-- <xacro:cylinder_inertial_matrix m = "${base_link_m}" r = "${base_link_radius}" h = "${base_link_length}"/> -->
     </link>
+    <!-- 1-2.link -->
+    <link name="base_link">
+      <visual>
+        <geometry>
+          <cylinder radius="${base_link_radius}" length="${base_link_length}" />
+        </geometry>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <material name="yellow">
+          <color rgba="0.5 0.3 0.0 0.5" />
+        </material>
+      </visual>
+      
+      <collision>
+        <geometry>
+          <cylinder radius="${base_link_radius}" length="${base_link_length}" />
+        </geometry>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+      </collision>
+      <xacro:cylinder_inertial_matrix m="${base_link_m}" r="${base_link_radius}" h = "${base_link_length}" />
 
-    <!-- 1-3.joint -->
+    </link>
+    <!-- joint -->
     <joint name="base_link2base_footprint" type="fixed">
-    	<parent link="base_footprint" />
-    	<child link="base_link" />
-    	<origin xyz="0 0 ${earth_space + base_link_length / 2 }" />
+      <parent link="base_footprint" />
+      <child link="base_link" />
+      <origin xyz="0 0 ${earth_space + base_link_length / 2 }" />
     </joint>
-	<!-- 1-4.颜色（注意这是一个双标签） -->
+    <!-- color -->
     <gazebo reference = "base_link">
-		<material>Gazebo/Yellow</material>
+      <material>Gazebo/Red</material>
     </gazebo>
 
-
-    <!-- 2.驱动轮 -->
-    <!-- 驱动轮属性 -->
+    <!-- 2.wheel -->
+    <!-- 属性 -->
     <xacro:property name="wheel_radius" value="0.0325" /><!-- 半径 -->
     <xacro:property name="wheel_length" value="0.015" /><!-- 宽度 -->
-    <xacro:property name="wheel_m" value="0.05" /><!-- 质量-->
-    <!-- 驱动轮宏实现 -->
+    <xacro:property name="wheel_m" value="0.015" />
+    <!-- 宏实现 -->
     <xacro:macro name="add_wheels" params="name flag">
-		<!-- 2-1.link -->
-		<link name="${name}_wheel">
-			<!-- 2-2-1.visual-->
-			<visual>
-				<geometry>
-					<cylinder radius="${wheel_radius}" length="${wheel_length}" />
-				</geometry>
-				<origin xyz="0.0 0.0 0.0" rpy="${PI / 2} 0.0 0.0" />
-				<material name="black" />
-			</visual>
-			<!-- 2-2-2.collision -->
-			<collision>
-				<geometry>
-					<cylinder radius="${wheel_radius}" length="${wheel_length}" />
-				</geometry>
-				<origin xyz="0.0 0.0 0.0" rpy="${PI / 2} 0.0 0.0" />
-			</collision>
-			<!-- 2-2-3.inertial -->
-			<!-- <xacro:cylinder_inertial_matrix m="${wheel_m}" r="${wheel_radius}" h="${wheel_length}" /> -->
-		</link>
-		<!-- 2-2.joint -->
-		<joint name="${name}_wheel2base_link" type="continuous">
-			<parent link="base_link" />
-			<child link="${name}_wheel" />
-			<origin xyz="0 ${flag * base_link_radius} ${-(earth_space + base_link_length / 2 - wheel_radius) }" />
-			<axis xyz="0 1 0" />
-		</joint>
-		<!-- 2-3.颜色 -->
-		<gazebo reference = "${name}_wheel">
-			<material>Gazebo/Red</material>
-		</gazebo>
+    <!-- 1.link -->
+      <link name="${name}_wheel">
+        <!-- 1-2.visual -->
+        <visual>
+          <geometry>
+            <cylinder radius="${wheel_radius}" length="${wheel_length}" />
+          </geometry>
+          <origin xyz="0.0 0.0 0.0" rpy="${PI / 2} 0.0 0.0" />
+          <material name="yellow">
+            <color rgba="0.5 0.3 0.0 0.5" />
+          </material>
+        </visual>
+        <!-- 1-3.collision -->
+        <collision>
+          <geometry>
+            <cylinder radius="${wheel_radius}" length="${wheel_length}" />
+          </geometry>
+          <origin xyz="0.0 0.0 0.0" rpy="${PI / 2} 0.0 0.0" />
+        </collision>
+        <!-- 1-4.inertial -->
+        <xacro:cylinder_inertial_matrix m ="${wheel_m}" r="${wheel_radius}" h ="${wheel_length}" />
+      </link>
+      <!-- 2.joint -->
+      <joint name="${name}_wheel2base_link" type="continuous">
+        <parent link="base_link" />
+        <child link="${name}_wheel" />
+        <origin xyz="0 ${flag * base_link_radius} ${-(earth_space + base_link_length / 2 - wheel_radius) }" />
+        <axis xyz="0 1 0" />
+      </joint>
+      <!-- 3.color -->
+      <gazebo reference = "${name}_wheel">
+        <material>Gazebo/Red</material>
+      </gazebo>
+    <!-- 宏调用 -->
     </xacro:macro>
     <xacro:add_wheels name="left" flag="1" />
     <xacro:add_wheels name="right" flag="-1" />
     
-		
-		<!-- 3.支撑轮 -->
-    <!-- 支撑轮属性 -->
-    <xacro:property name="support_wheel_radius" value="0.0075" /> <!-- 支撑轮半径 -->
-    <xacro:property name="support_wheel_m" value="1.5" /> <!-- 支撑轮质量 -->
-    <!-- 支撑轮宏 -->
+    
+    <!-- 3.support_wheel -->
+     <!-- 属性 -->
+    <xacro:property name="support_wheel_radius" value="0.0075" />
+    <xacro:property name="support_wheel_m" value="0.03" />
+    <!--  宏 -->
     <xacro:macro name="add_support_wheel" params="name flag" >
       <!-- 3-1.link -->
-		<link name="${name}_wheel">
-			<!-- 3-1-1.visual -->
-			<visual>
-				<geometry>
-					<sphere radius="${support_wheel_radius}" />
-				</geometry>
-				<origin xyz="0 0 0" rpy="0 0 0" />
-				<material name="black" />
-			</visual>
-		<!-- 3-1-2.collision -->
-			<collision> 
-				<geometry>
-					<sphere radius="${support_wheel_radius}" />
-				</geometry>
-				<origin xyz="0 0 0" rpy="0 0 0" />
-			</collision> 
-		<!-- 3-1-3.inertial -->
-			<!-- <xacro:sphere_inertial_matrix m = "${support_wheel_m}" r = "${support_wheel_radius}"/> -->
-		</link>
-	<!-- 3-2.joint -->
-		<joint name="${name}_wheel2base_link" type="continuous">
-			<parent link="base_link" />
-			<child link="${name}_wheel" />
-			<origin xyz="${flag * (base_link_radius - support_wheel_radius)} 0 ${-(base_link_length / 2 + earth_space / 2)}" />
-			<axis xyz="1 1 1" />
-		</joint>
-	<!-- 3-3.颜色 -->
-		<gazebo reference = "${name}_wheel">
-			<material>Gazebo/Red</material>
-		</gazebo>
+      <link name="${name}_support_wheel">
+        <!-- 3-1-1.visual -->
+        <visual>
+          <geometry>
+            <sphere radius="${support_wheel_radius}" />
+          </geometry>
+          <origin xyz="0 0 0" rpy="0 0 0" />
+          <material name="red">
+            <color rgba="0.8 0.3 0.0 0.5" />
+          </material>
+        </visual>
+        <!-- 3-1-2.collison -->
+        <collision>
+          <geometry>
+            <sphere radius="${support_wheel_radius}" />
+          </geometry>
+          <origin xyz="0 0 0" rpy="0 0 0" />
+        </collision>
+        <!-- 3-1-3.inertial -->
+        <xacro:sphere_inertial_matrix m = "${support_wheel_m}" r = "${support_wheel_radius}"/>
+      </link>
+     
+      <!-- 3-2.joint -->
+      <joint name="${name}_support_wheel2base_link" type="continuous">
+        <parent link="base_link" />
+        <child link="${name}_support_wheel" />
+        <origin xyz="${flag * (base_link_radius - support_wheel_radius)} 0 ${-(base_link_length / 2 + earth_space / 2)}" />
+        <axis xyz="1 1 1" />
+      </joint>
+      <!-- 3-3.color -->
+      <gazebo reference = "${name}_support_wheel">
+        <material>Gazebo/Red</material>
+      </gazebo>
     </xacro:macro>
 
     <xacro:add_support_wheel name="front" flag="1" />
@@ -3768,20 +3778,22 @@ controllers: {
 
 </robot>
 ```
-2. mycar_camera
+2. car_camera
 ```xml
 <robot name="my_camera" xmlns:xacro="http://wiki.ros.org/xacro">
-    <!-- 1.property -->
+    <xacro:include filename = "/home/kim-james/ROS_Space/catkin_ws_cpp/src/gazebo_robot/urdf/head.xacro"/>
+    <!-- 要将car_base include进来方便检查，检查完后可以注释掉了-->
+    <!-- 1.定义属性 -->
     <xacro:property name = "camera_length" value = "0.02"/>
     <xacro:property name = "camera_width" value = "0.05"/>
     <xacro:property name = "camera_height" value = "0.04"/>
     <xacro:property name = "camera_x" value = "0.1"/>
     <xacro:property name = "camera_y" value = "0"/>
     <xacro:property name = "camera_z" value = "${(base_link_length + camera_height) / 2}"/>
-    <xacro:property name = "camera_m" value = "0.01"/> <!--the mass of camera-->
+    <xacro:property name = "camera_m" value  = "0.01"/>
     <!-- 2.link -->
     <link name = "camera">
-        <!-- 2-1.visual -->
+        <!--2-1.visual -->
         <visual>
             <geometry>
                 <box size = "${camera_length} ${camera_width} ${camera_height}"/>
@@ -3790,35 +3802,39 @@ controllers: {
                 <color rgba = "0.5 0 1 0.5"/>
             </material>
             <origin xyz = "0 0 0" rpy = "0 0 0"/>
+            <!-- link 下 origin xyz 表示几何中心在world坐标系中的位置， rpy表示刚体相对于xyz的欧拉角 -->
         </visual>
-        <!-- 2-2.collision -->
+        <!-- collision -->
         <collision>
             <geometry>
                 <box size = "${camera_length} ${camera_width} ${camera_height}"/>
             </geometry>
-            <origin xyz = "0 0 0" rpy = "0 0 0"/>
+            <material name = "black">
+                <color rgba = "0.5 0 1 0.5"/>
+            </material>
         </collision>
-        <!-- 2-3.inertial -->
-        <!-- <xacro:box_inertial_matrix m = "${camera_m}" l = "${camera_length}" w = "${camera_width}" h = "${camera_height}"/> -->
+        <!-- inertial -->
+        <xacro:Box_inertial_matrix m = "${camera_m}" l = "${camera_length}" w = "${camera_width}" h = "${camera_height}"/>
     </link>
     <!-- 3.joint -->
     <joint name = "camera2base_link" type = "fixed">
         <parent link = "base_link"/>
         <child link = "camera"/>
         <origin xyz = "${camera_x} ${camera_y} ${camera_z}"/>
+        <!-- joint 下的 origin表示几何中心相对于parent坐标系的距离 -->
     </joint>
-    <!-- 4.颜色-->
-    <gazebo reference = "camera">
+    <!-- 4.color -->
+    <gazebo reference = "camera"> <!--reference指的是参考的连杆-->
         <material>Gazebo/Blue</material>
     </gazebo>
-    
 </robot>
 ```
-3. mycar_laser
+3. car_laser
 ```xml
 <robot name="my_laser" xmlns:xacro="http://wiki.ros.org/xacro">
-    <!-- 1.laser_support -->
-    <!--property -->
+    <xacro:include filename = "/home/kim-james/ROS_Space/catkin_ws_cpp/src/gazebo_robot/urdf/head.xacro"/>
+    <!-- 1.定义laser_support -->
+    <!-- 1-1.定义属性 -->
     <xacro:property name = "laser_support_length" value = "0.4"/>
     <xacro:property name = "laser_support_radius" value = "0.02"/>
     <xacro:property name = "laser_support_x" value = "0"/>
@@ -3826,9 +3842,15 @@ controllers: {
     <xacro:property name = "laser_support_z" value = "${(base_link_length + laser_support_length) / 2}"/>
     <xacro:property name = "laser_support_m" value = "0.02"/>
     
-    <!-- 1-1.link-->
+    <xacro:property name = "laser_length" value = "0.05"/>
+    <xacro:property name = "laser_radius" value = "0.06"/>
+    <xacro:property name = "laser_x" value = "0"/>
+    <xacro:property name = "laser_y" value  = "0"/>
+    <xacro:property name = "laser_z" value = "${(laser_length + laser_support_length)/2 }"/>
+    <xacro:property name = "laser_m" value = "0.1"/>
+    <!-- 因为laser是相对于laser_support,所以它的几何中心点的坐标是相对与laser_support而非base_link -->
+    <!-- link-->
     <link name = "laser_support">
-        <!-- 1-1-1.visual -->
         <visual>
             <geometry>
                 <cylinder length = "${laser_support_length}" radius = "${laser_support_radius}"/>
@@ -3838,40 +3860,28 @@ controllers: {
             </material>
             <origin xyz = "0 0 0" rpy = "0 0 0"/>
         </visual>
-        <!-- 1-1-2.collision -->
         <collision>
             <geometry>
                 <cylinder length = "${laser_support_length}" radius = "${laser_support_radius}"/>
             </geometry>
             <origin xyz = "0 0 0" rpy = "0 0 0"/>
         </collision>
-        <!-- 1-1-3.inertial -->
-        <xacro:cylinder_inertial_matrix m = "${laser_support_m}" r = "${laser_support_radius}"/>
+        <xacro:cylinder_inertial_matrix m = "${laser_support_m}" r = "${laser_support_radius}" h = "${laser_support_length}"/>
     </link>
-
-    <!--1-2.joint -->
+    <!-- 2.joint -->
     <joint name = "laser_support2base_link" type = "fixed">
         <parent link = "base_link"/>
         <child link = "laser_support"/>
         <origin xyz = "${laser_support_x} ${laser_support_y} ${laser_support_z}"/>
     </joint>
-    <!-- 1-3.颜色 -->
-    <gazebo reference = "laser_support">
+    <!-- 3.color -->
+    <gazebo reference = "laser_support"> <!--reference指的是参考的连杆-->
         <material>Gazebo/White</material>
     </gazebo>
 
-    <!-- 2.laser -->
-    <!-- laser property -->
-    <xacro:property name = "laser_length" value = "0.05"/>
-    <xacro:property name = "laser_radius" value = "0.06"/>
-    <xacro:property name = "laser_x" value = "0"/>
-    <xacro:property name = "laser_y" value  = "0"/>
-    <xacro:property name = "laser_z" value = "${(laser_length + laser_support_length)/2 }"/>
-    <xacro:property name = "laser_m" value = "0.1"/>
-
+    <!-- 2.定义laser -->
     <!-- 2-1.link -->
     <link name = "laser" >
-        <!-- 2-1-1.visual -->
         <visual>
             <geometry>
                 <cylinder length = "${laser_length}" radius = "${laser_radius}"/>
@@ -3881,94 +3891,76 @@ controllers: {
                 <color rgba = "0.8 0.2 0 1"/>
             </material>
         </visual>
-        <!-- 2-1-2.collision -->
         <collision>
             <geometry>
                 <cylinder length = "${laser_length}" radius = "${laser_radius}"/>
             </geometry>
             <origin xyz = "0 0 0" rpy = "0 0 0"/>
         </collision>
-        <!-- 2-1-3.inertial -->
-        <!-- <xacro:cylinder_inertial_matrix m = "${laser_m}" r = "${laser_radius}"/> -->
+        <xacro:cylinder_inertial_matrix m = "${laser_m}" r = "${laser_radius}" h = "${laser_length}"/>
     </link>
-    <!-- 2-2.joint -->
+    <!-- 2-2.定义joint -->
     <joint name = "laser2laser_support" type = "fixed">
         <parent link = "laser_support"/>
         <child  link = "laser"/>
         <origin xyz = "${laser_x} ${laser_y} ${laser_z}"/>
     </joint>
     <!-- 2-3.color -->
-    <gazebo reference = "laser">
+    <gazebo reference = "laser"> <!--reference指的是参考的连杆-->
         <material>Gazebo/Black</material>
     </gazebo>
 </robot>
 ```
-4. myhead
+4. head
 ```xml
-<robot name="base" xmlns:xacro="http://wiki.ros.org/xacro">
-    <!-- Macro for inertia matrix -->
-    <xacro:macro name="sphere_inertial_matrix" params="m r">
-        <inertial>
-            <mass value="${m}" />
-            <inertia ixx="${2*m*r*r/5}" ixy="0" ixz="0"
-                iyy="${2*m*r*r/5}" iyz="0" 
-                izz="${2*m*r*r/5}" />
-        </inertial>
-    </xacro:macro>
+<robot name="head" xmlns:xacro="http://wiki.ros.org/xacro">
+  <!-- Macro for inertia matrix -->
+  <xacro:macro name="sphere_inertial_matrix" params="m r">
+    <inertial>
+      <mass value="${m}" />
+      <inertia ixx="${2*m*r*r/5}" ixy="0" ixz="0"
+          iyy="${2*m*r*r/5}" iyz="0" 
+          izz="${2*m*r*r/5}" />
+    </inertial>
+  </xacro:macro>
 
-    <xacro:macro name="cylinder_inertial_matrix" params="m r h">
-        <inertial>
-            <mass value="${m}" />
-            <inertia ixx="${m*(3*r*r+h*h)/12}" ixy = "0" ixz = "0"
-                iyy="${m*(3*r*r+h*h)/12}" iyz = "0"
-                izz="${m*r*r/2}" /> 
-        </inertial>
-    </xacro:macro>
+  <xacro:macro name="cylinder_inertial_matrix" params="m r h">
+    <inertial>
+      <mass value="${m}" />
+      <inertia ixx="${m*(3*r*r+h*h)/12}" ixy = "0" ixz = "0"
+          iyy="${m*(3*r*r+h*h)/12}" iyz = "0"
+          izz="${m*r*r/2}" /> 
+    </inertial>
+  </xacro:macro>
 
-    <xacro:macro name="box_inertial_matrix" params="m l w h">
-       <inertial>
-               <mass value="${m}" />
-               <inertia ixx="${m*(h*h + l*l)/12}" ixy = "0" ixz = "0"
-                   iyy="${m*(w*w + l*l)/12}" iyz= "0"
-                   izz="${m*(w*w + h*h)/12}" />
-       </inertial>
-   </xacro:macro>
+  <xacro:macro name="Box_inertial_matrix" params="m l w h">
+    <inertial>
+      <mass value="${m}" />
+      <inertia ixx="${m*(h*h + l*l)/12}" ixy = "0" ixz = "0"
+          iyy="${m*(w*w + l*l)/12}" iyz= "0"
+          izz="${m*(w*w + h*h)/12}" />
+      </inertial>
+  </xacro:macro>
 </robot>
+
 ```
-5. mycar
-```xml
-<robot name="mycar" xmlns:xacro="http://www.ros.org/wiki/xacro">
-    <!-- 包含底盘，摄像头， 雷达, 的xacro -->
-    <xacro:include filename = "/home/kim-james/ROS_Space/catkin_ws_cpp/src/urdf_gazebo/urdf/xacro/mycar_base.xacro"/>
-    <xacro:include filename = "/home/kim-james/ROS_Space/catkin_ws_cpp/src/urdf_gazebo/urdf/xacro/mycar_camera.xacro"/>
-    <xacro:include filename = "/home/kim-james/ROS_Space/catkin_ws_cpp/src/urdf_gazebo/urdf/xacro/mycar_laser.xacro"/>
-    <xacro:include filename = "/home/kim-james/ROS_Space/catkin_ws_cpp/src/urdf_gazebo/urdf/xacro/myhead.xacro"/>
-</robot>
-```
-6. launch
+5. launch
 ```xml
 <launch>
     <!-- 1.导入xacro和.xacor文件,必须要用到command-->
-    <param name="robot_description1" command="$(find xacro)/xacro $(find urdf_rviz)/urdf/xacro/car.xacro" />
+    <param name="robot_description" command="$(find xacro)/xacro $(find gazebo_robot)/urdf/car_asm.xacro" />
     <!-- 2.启动 rivz -->
-    <node pkg="rviz" type="rviz" name="rviz_test" args="-d $(find urdf_rviz)/config/show_mycar.rviz" />
+    <!-- <node pkg="rviz" type="rviz" name="rviz" args="-d $(find gazebo_robot)/config/show_mycar.rviz" /> -->
 
     <!-- 3.启动机器人状态和关节状态发布节点 -->
     <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" />
     <node pkg="joint_state_publisher" type="joint_state_publisher" name="joint_state_publisher" />
 
     <!-- 4.启动图形化的控制关节运动节点 -->
-    <node pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" name="joint_state_publisher_gui" />
+    <!-- <node pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" name="joint_state_publisher_gui" /> -->
 
-    <!-- 5.集成arbotix控制节点 -->
-    <node pkg = "arbotix_python" type = "arbotix_driver" name = "driver" output = "screen">
-        <!-- 导入控制节点 ,注意格式,$(find pkg)/xxxxx/xxxx-->
-        <rosparam command = "load" file = "$(find urdf_rviz)/config/control.yaml"/>
-        <!-- sim意味着这是一个仿真模型 -->
-        <param name = "sim" value = "true"/>
-    </node>
+    <!-- 5.启动gazebo -->
+    <include file = "$(find gazebo_ros)/launch/empty_world.launch"/>
+    <node pkg = "gazebo_ros" type = "spawn_model" name = "model" args = "-urdf -model mycar -param robot_description"/>
 </launch>
-<!-- 
-    1.开始要启动odom：里程计作为FixedFrame
- -->
 ```
