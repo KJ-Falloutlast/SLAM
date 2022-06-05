@@ -486,3 +486,46 @@ target_link_libraries(main mymath)
       5. add_executable(main src/main.cpp)
       6. target_link_libraries(main mymath)
    2. **library == nonmain.cpp , executable == main.cpp**
+
+
+# 3.案例
+## 3-1.opencv相关cmake
+1. 多文件多文件夹
+```cmake
+
+project(quickopencv)
+# 最小支持版本
+cmake_minimum_required(VERSION 3.10)
+# 添加c++ 11标准支持
+set( CMAKE_CXX_FLAGS "-std=c++11" )
+#寻找opencv包
+find_package(OpenCV REQUIRED)
+#寻找opencv头文件
+include_directories(${OpenCV_INCLUDE_DIRS})
+
+#1.包含头文件
+include_directories(./include)
+#2.包含头文件实现
+add_library(quickopencv src/quickopencv.cpp)
+#3.包含可执行文件
+add_executable(main src/main.cpp)
+# add_executable(demo01 src/demo01.cpp)
+
+#4.将头文件实现link到opencv包上
+target_link_libraries(quickopencv ${OpenCV_LIBS})#注意此处也是libs
+#5.将可执行文件link到头文件上
+target_link_libraries(main quickopencv)
+target_link_libraries(demo01 ${OpenCV_LIBS})#此处是libs
+
+
+```
+2. 多文件单文件夹
+```cmake
+project(cmake)
+find_package(OpenCV REQUIRED)
+include_directories(${OpenCV_INCLUDE_DIRS})
+
+add_executable(demo01 src/demo01.cpp)
+target_link_libraries(demo01 ${${OpenCV_LIBS}})
+#注意此处是可执行文件demo01 link到OpeCV_LIBS上
+```

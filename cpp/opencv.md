@@ -78,7 +78,40 @@ int main(int argc, char** argv) {
    1. m1.copyTo(m2)
    2. m1 = m2
    3. m1 = Scalar(255 0 0)
-
+3. Vec3b:
+   1. 可以看做vector<uchar, 3>,即一个uchar类型，长度为3个vector
+   2. color[0] = 255 (0, 1, 2分别代表BGR通道)
+   3. 读取像素:
+      1. imread读取到的Mat图像，都是用uchar类型存储,对于RGB三通道，每个点都是Vec3b
+      2. >Mat mat = imread("test.jpg");
+      3. mat.at<Vec3b>(row, col)[0] = 255;修改(row, col)的B通道，[1], [2]同理
+      4. ```mat.at<uchar>(row, col):单通道，返回uchar类型; mat.ar<Vec4b>(row, col):4通道，返回<Vec4b>,返回一个uchar数组，长度为4```
+4. Vec3b案例
+```cpp
+#include <opencv2/opencv.hpp>
+#include <iostream>
+using namespace cv;
+using namespace std;
+int main()
+{
+    Mat m(3, 3, CV_8UC3);
+    Vec3b vec;
+    for (int row = 0; row < 3; row++){
+        for (int col = 0; col < 3; col++){
+            vec[0] = row;
+            vec[1] = col;
+            vec[2] = row + col;
+            m.at<Vec3b>(row, col) = vec;
+        }
+    }
+    cout << "M = " << endl << m << endl;
+    Vec3b a = m.at<Vec3b>(2, 2);
+    int b = m.at<Vec3b>(2, 2)[0];//
+    cout << "M(2, 2) = " << a <<  endl;
+    cout << "M(2, 2)[0] = " << b << endl;
+}
+}
+```
 
 # 3.案例
 1. quickopencv.h
