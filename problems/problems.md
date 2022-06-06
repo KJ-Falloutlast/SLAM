@@ -635,6 +635,42 @@ ls -l | grep python
 [rar解压](https://www.csdn.net/tags/MtjaUgysNTYzMjEtYmxvZwO0O0OO0O0O.html)
 1. sudo apt-get install unrar
 2. sudo apt-get install rar
+
+## 22.安装nvida驱动的问题
+1. 问题：
+   1. 问题：zsh: no matches found
+      1. 解决：setopt no_nomatch + source ~/.zshrc 
+   2. 问题：退出kyy的方法
+      1. 进入：ctrl + alt + f4
+      2. 退出：ctrl + alt + prtscr
+   3. 问题:sudo service lightdm start
+      1. ```Job for lightdm.service failed because the control process exited with error code.```
+      2. 解决：卸载重装
+   4. 安装nivida驱动后黑屏
+      1. 解决：进入第一个ubuntu高级选项中的recovery模式->进入root
+      2. sudo apt --purge remove "*nvidia*"
+      3. sudo /usr/bin/nvidia-uninstall
+   5. 显卡驱动的安装
+      1. [方法](https://blog.csdn.net/qq_44442727/article/details/119923070)
+      2. [网站](https://www.nvidia.cn/Download/Find.aspx?lang=cn)
+      3.  [方法3]()
+      4.  步骤 **最核心的步骤，其余不需要考虑**
+          1. ubuntu-drivers devices
+          2. sudo ubuntu-drivers autoinstall 
+   6. 桌面发生变化的问题
+      1. 问题描述:安装完unity后，桌面发生改变
+      2. 解决方案:sudo apt remove unity
+   7. 改变lightdm的方法
+      1. sudo dpkg-reconfigure lightdm**选择gdm**
+
+2. NVIDda安装配置:
+   1. [方法1](https://blog.csdn.net/chentianting/article/details/85089403)
+   2. 
+
+
+
+
+
 # 3.c++学习问题
 
 1. endl的问题:

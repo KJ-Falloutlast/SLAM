@@ -3620,7 +3620,7 @@ controllers: {
 </gazebo>
 ```
 
-### 2.案例
+### 3.案例
 #### 1.错误解决
 1. 错误的解决方法
    1. **rosrun xacro xacro filemame.xacro > filename.urdf
@@ -3964,3 +3964,9 @@ controllers: {
     <node pkg = "gazebo_ros" type = "spawn_model" name = "model" args = "-urdf -model mycar -param robot_description"/>
 </launch>
 ```
+
+### 4.URDF仿真环境搭建
+1. [模型网址](git clone https://github.com/osrf/gazebo_models)
+2. 将得到的gazebo_models文件夹复制到/usr/share/gazebo-*/models
+3. 重启gazebo，打开insert就可以插入道具了
+
