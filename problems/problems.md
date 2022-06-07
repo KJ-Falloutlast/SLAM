@@ -617,6 +617,8 @@ ls -l | grep python
                 "/usr/local/lib/**",
                 "/usr/include/pcl-1.8",
                 "/usr/include/eigen3",
+                "/usr/local/include/sophus",
+                "/usr/include/eigen3/Eigen/",
                 "/usr/include/x86_64-linux-gnu/qt5/QtWidgets",
                 "/usr/include/x86_64-linux-gnu/qt5",
                 "/usr/include/x86_64-linux-gnu/qt5/QtCore"
@@ -629,7 +631,7 @@ ls -l | grep python
         }
     ],
     "version": 4
-  }
+}
 ```
 ## 21.解压慢的问题
 [rar解压](https://www.csdn.net/tags/MtjaUgysNTYzMjEtYmxvZwO0O0OO0O0O.html)
