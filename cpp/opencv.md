@@ -85,8 +85,122 @@ int main(int argc, char** argv) {
       1. imread读取到的Mat图像，都是用uchar类型存储,对于RGB三通道，每个点都是Vec3b
       2. >Mat mat = imread("test.jpg");
       3. mat.at<Vec3b>(row, col)[0] = 255;修改(row, col)的B通道，[1], [2]同理
-      4. ```mat.at<uchar>(row, col):单通道，返回uchar类型; mat.ar<Vec4b>(row, col):4通道，返回<Vec4b>,返回一个uchar数组，长度为4```
-4. Vec3b案例
+      4. ```mat.at<uchar>(row, col):单通道，返回uchar类型; mat.ar<Vec4b>(row, col):4通道，返回<Vec4b>,返回一个uchar数组，长度为4``
+4. 图像遍历的方法
+```cpp
+#include <../include/quickopencv.h>
+#include <opencv2/opencv.hpp>
+#include <map>
+#include <iostream>
+using namespace cv;
+using namespace std;
+//1.使用数组
+void test01(){
+    // 9 % 3 = 0, 3 % 9  = 3;取模运算 = a/b后的余数
+    Mat grayImage(5, 5, CV_8UC1);       //创建一个大小为600x800的单通道灰度图
+    Mat colorImage(3, 3, CV_8UC3);      //创建一个大小为600x800的三通道彩色图
+
+    //1.单通道遍历所有像素并设置像素值
+    for(int i = 0; i < grayImage.rows; ++i)         //遍历行
+        for(int j = 0; j < grayImage.cols; ++j)     //遍历列
+            grayImage.at<uchar>(i, j) = (i + j) % 255;
+
+    //2.3通道遍历所有像素并设置像素值
+    for(int i = 0; i < colorImage.rows; ++i)         //遍历行
+        for(int j = 0; j < colorImage.cols; ++j)     //遍历列
+        {
+            Vec3b pixel;            //定义三通道像素值变量
+            pixel[0] = i % 255;     //Blue
+            pixel[1] = j % 255;     //Green
+            pixel[2] = (i + j) % 255;           //Red
+
+            colorImage.at<Vec3b>(i, j) = pixel;
+        }
+
+    //显示简历图像的结果
+    namedWindow("grayImage", WINDOW_AUTOSIZE);
+    imshow("grayImage", grayImage);
+
+    namedWindow("colorImage", WINDOW_AUTOSIZE);
+    imshow("colorImage", colorImage);
+    cout << "M(grayImage) = \n " <<  grayImage << endl;
+    cout << "M(colorImage) = \n " << colorImage << endl;
+    waitKey(0);
+
+}
+//2.使用迭代器
+void test02(){
+    Mat grayImage(400, 600, CV_8UC1);       //创建一个大小为600x800的单通道灰度图
+    Mat colorImage(400, 600, CV_8UC3);      //创建一个大小为600x800的三通道彩色图
+
+    //1.单通道遍历所有像素并设置像素值
+    MatIterator_<uchar> grayit, grayend;
+    for(grayit = grayImage.begin<uchar>(), grayend = grayImage.end<uchar>(); grayit != grayend; ++grayit)
+        *grayit = rand() % 255;
+
+    //2.3通道遍历所有像素并设置像素值
+    MatIterator_<Vec3b> colorit, colorend;
+    for(colorit = colorImage.begin<Vec3b>(), colorend = colorImage.end<Vec3b>(); colorit != colorend; ++colorit)
+    {
+        (*colorit)[0] = rand() % 255;       //Blue
+        (*colorit)[1] = rand() % 255;       //Green
+        (*colorit)[2] = rand() % 255;       //Red
+    }
+
+
+    //显示简历图像的结果
+    namedWindow("grayImage", WINDOW_AUTOSIZE);
+    imshow("grayImage", grayImage);
+
+    namedWindow("colorImage", WINDOW_AUTOSIZE);
+    imshow("colorImage", colorImage);
+
+    waitKey(0);
+}
+//通过指针遍历
+void test03(){
+    Mat grayImage(5, 5, CV_8UC1);       //创建一个大小为600x800的单通道灰度图
+    Mat colorImage(3, 3, CV_8UC3);      //创建一个大小为600x800的三通道彩色图
+
+    //1.单通道遍历所有像素并设置像素值
+    for(int i = 0; i < grayImage.rows; ++i)
+    {
+        uchar* p = grayImage.ptr<uchar>(i);     //获取第i行第一个像素的指针
+        for(int j = 0; j < grayImage.cols; ++j)
+            p[j] = (i + j) % 255;               //对每个i行的所有像素进行赋值操作
+    }
+
+    //2.3通道遍历所有像素并设置像素值
+
+    for(int i = 0; i < colorImage.rows; ++i)
+    {
+        Vec3b* p = colorImage.ptr<Vec3b>(i);
+        for(int j = 0; j < colorImage.cols; ++j)
+        {
+            p[j][0] = i % 255;      //Blue
+            p[j][1] = j % 255;      //Gree
+            p[j][2] = (i + j) % 255;//Red
+        }
+    }
+
+    //显示简历图像的结果
+    namedWindow("grayImage", WINDOW_AUTOSIZE);
+    imshow("grayImage", grayImage);
+
+    namedWindow("colorImage", WINDOW_AUTOSIZE);
+    imshow("colorImage", colorImage);
+    cout << "M(grayImage) = \n " <<  grayImage << endl;
+    cout << "M(colorImage) = \n " << colorImage << endl;
+    waitKey(0);//waitKey(0)表示用户无限等待
+}
+int main()
+{
+    // test01();
+    // test02();
+    test03();
+}
+```
+5. Vec3b案例
 ```cpp
 #include <opencv2/opencv.hpp>
 #include <iostream>

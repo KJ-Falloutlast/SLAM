@@ -3969,4 +3969,8 @@ controllers: {
 1. [模型网址](git clone https://github.com/osrf/gazebo_models)
 2. 将得到的gazebo_models文件夹复制到/usr/share/gazebo-*/models
 3. 重启gazebo，打开insert就可以插入道具了
-
+4. launch
+```xml
+<launch>
+    
+</launch>

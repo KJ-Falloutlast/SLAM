@@ -513,7 +513,7 @@ add_executable(main src/main.cpp)
 
 #4.将头文件实现link到opencv包上
 target_link_libraries(quickopencv ${OpenCV_LIBS})#注意此处也是libs
-#5.将可执行文件link到头文件上
+#5.将可执行文件link到头文件实现上
 target_link_libraries(main quickopencv)
 target_link_libraries(demo01 ${OpenCV_LIBS})#此处是libs
 

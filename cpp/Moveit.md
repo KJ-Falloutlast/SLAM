@@ -77,6 +77,9 @@
 6. 执行规划出的轨迹
 
 # 3.第4讲
+1. 正向运动学和逆向运动学的区别
+   1. 正向运动学是已知每个关节的转角来求末端执行器的*位姿和位置(T)*
+   2. 逆向运动学是已知末端执行器的位置和位姿(T)来求*每个关节的转角*
 ## 3-1.正向运动学
 ```cpp
 //fk代表正运动学:forward kinematics, IK:Inverse kinematics
@@ -354,6 +357,7 @@ int main(int argc, char **argv)
 
 ```
 ## 2-4.轨迹重定义
+**要学会查询API文档**
 ```cpp
 #include <ros/ros.h>
 #include <moveit/move_group_interface/move_group_interface.h>

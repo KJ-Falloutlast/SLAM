@@ -6730,7 +6730,7 @@ int main(){
 ```
 ## 5.文本文件
 ### 5-1.文本文件
-#### 1.读文件
+#### 1.写文件
 1. 写文件步骤如下：
    1. 包含头文件   
      \#include <fstream\>
@@ -6826,11 +6826,11 @@ void test01(){
         return;
     }
     //4.读数据
-    //第一种：
-    // char buf[1024] = {0};
-    // while (ifs >> buf){
-    //     cout << buf << endl;
-    // }
+    // 第一种：
+    char buf[1024] = {0};
+    while (ifs >> buf){
+        cout << buf << endl;
+    }
     //第二种
     // char buf[1024] = {0};//定义一个1024字节的char数组,并将所有元素赋值为0
     // while (ifs.getline(buf, sizeof(buf))){//数组名指向第一个元素的地址
@@ -13515,4 +13515,64 @@ void someFunction()
     cout << "This message will never be displayed\n";
     cout << "because the program has already terminated.\n";
 }
+```
+## 9.输入输出流
+1. 例1
+```cpp
+#include <iostream>
+using namespace std;
+int main(){
+	char str[10];
+	char c;
+	int n;
+	cout << "请输入一组数" << endl;
+	c = cin.get();//只能get到输入流的一个元素，所以此时输入流中少了一个元素，需要用cin.puckback(c)将其补充回来
+	// cin.putback(c);表示将输入的第一个字符拿回来，若次行没有的话，就不能读取到第一个元素
+	cin >> str;
+	cout << str << endl;
+}
+```
+2. 例2
+```cpp
+#include <iostream>
+#include <algorithm>
+using namespace std;
+int main()
+{
+    char c;
+    int n;
+    char  str[256];
+    cout << "Enter a number or a word: ";
+    c = cin.get();//默认输入的是字符串，例如输入的是123，实际上是"123";"1", "2", "3"分别是子串
+    if ( (c >= '0') && (c <= '9') )//表示输入的是0-9的单个数字，即使是123，也不能满足该要求
+    {
+        cout << c << " ---  the middle output" << endl;
+        cin.putback (c);
+        cin>> n;
+        cout<< "You have entered number " << n << endl;
+    }
+    else
+    {
+        cout << c << " ---  the middle output" << endl;//c是输入的第一个字符
+        cin.putback (c);//将输入的对象abc拿回来，然后cin追加到str里面，最后以字符串的形式cout输出
+        cin>> str;//将输入的对象abc输入进来
+
+        cout<< " You have entered word " << str << endl;//cout输出
+    }
+    return 0;
+}
+/*
+1.putback调用形式是cin.putback(ch),其作用是把前面用get和getline函数从输入流中读取的字符ch返回到出入流，
+插入到当前指针的位置，供后面读取。
+直观理解就是把输入流里面的内容看做是一个字符串的列队，里面存放发的是一个个的字符，而这里的putback函数相当于是
+队列的push函数
+2.<< 表示输入， >>表示输出
+流程：
+char c = cin.get()
+char str[10]
+cin.putback()
+cin >> str
+cout << str
+
+*/
 ```
