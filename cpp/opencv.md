@@ -293,6 +293,7 @@ void QuickDemo::mat_creation_demo(Mat &image){
     //2.mat的拷贝操作
     //2-1.m1 = m2
     Mat m4;
+    
     m4 = m3;
     m4 = Scalar(0, 0, 255);//m4不会被scalar改变
     //此时m4会随着m3的变化而变化
