@@ -12497,8 +12497,9 @@ public:
 ```
 3. speechManager.cpp
 ```cpp
+//一届比赛分为2轮，第一轮有2组比赛，第二轮有一组比赛
 #include "speechManager.h"
-//构造函数实现
+//构造函数实
 SpeechManager::SpeechManager()
 {
 	//调用初始化比赛

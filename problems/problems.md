@@ -452,7 +452,12 @@ W: 目标 DEP-11-icons-hidpi (multiverse/dep11/icons-64x64@2.tar) 在
     $ update-alternatives --help
 3. 目标 * 在 /etc/apt/sources.list:41 和 /etc/apt/sources.list.d/xenial-partner.list:4 中被配置了多次
    1. 解决办法：*sudo vim /etc/apt/sources.list*,然后直接直接将重复的那几行注释掉就行
-
+4. 仓库问题
+   1. 问题描述:**仓库 “http://ppa.launchpad.net/fcitx-team/nightly/ubuntu bionic Release” 没有 Release 文件。**
+   2. 解决方法：
+      1. cd /etc/apt/sources.list.d
+      2. 找到错误提示的网址:http://ppa.launchpad.net/fcitx-team/nightly/ubuntu bionic Release
+      3. 删除文件:sudo rm fcitx-team-ubuntu-nightly-bionic.list和xxx.list.save
 
 ## 8. 用法：update-alternatives [<选项> ...] <命令>
 ```cpp
