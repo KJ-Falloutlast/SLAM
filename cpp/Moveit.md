@@ -539,4 +539,15 @@ int main(int argc, char **argv)
     return 0;
 }
 ```
+## 3-6.更换运动学插件
+1. 步骤
+   1. sudo apt install ros-noetic-trac-ik-kinematics-plugin 
+   2. yaml
+```yaml
+manipulator:
+  kinematics_solver: trac_ik_kinematics_plugins/TRAC_IKKinematicsPlugin
+  kinematics_solver_search_resolution: 0.005
+  kinematics_solver_timeout: 0.005
+  #  kinematics_solver: kdl_kinematics_plugin/KDLKinematicsPlugin
+```
 

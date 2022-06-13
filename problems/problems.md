@@ -190,6 +190,12 @@ cmakelists:project(model02)
   "version": 4
 }
 ```
+## 16. Segmentation Fault
+1. 概念:"Segmentation fault in Linux"所谓的段错误就是指访问的内存超过了系统所给这个程序的内存空间
+2. 产生原因
+   1. 数组越界
+   2. 内存越界
+   3. 试图把一个整数按照字符串的方式输出
 
 # 2.linux学习问题
 
@@ -524,6 +530,34 @@ $ sudo update-alternatives --config python
     * 0            /usr/bin/python2.7   2         自动模式
       1            /usr/bin/python2.7   2         手动模式
       2            /usr/bin/python3.4   1         手动模式
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     要维持当前值[*]请按回车键，或者键入选择的编号：
     原来是因为默认选中了自动模式，而Python2的优先级高于Python3，这时候只要键入2，就可以使用Python3了。

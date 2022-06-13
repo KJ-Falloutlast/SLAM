@@ -1,16 +1,22 @@
 #include <iostream>
 #include <vector>
 #include <list>
+#include <fstream>
+#include <boost/format.hpp>
 #include <algorithm>
 using namespace std;
-int main(){
-	list<int> l1;
-	l1.push_back(1);
-	l1.push_back(2);
-	l1.push_back(3);
-//使用auto自动推导
-	for (auto i = l1.begin(); i!= l1.end(); i++){
-		cout << i.operator->() << endl;
-		cout << *i << endl;
+void test01(){
+	ofstream ofs("a.csv", ios::out);
+	ifstream ifs("a.csv", ios::in);
+	for (int i = 0; i < 10; i++){
+		ofs << i << " ";
 	}
+	char buf[10] = {0};
+	while (ifs >> buf){
+		cout << buf << endl; 
+	}
+
+}
+int main(){
+	test01();
 }

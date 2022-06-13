@@ -13577,3 +13577,8 @@ cout << str
 
 */
 ```
+## 10.boost format
+1. 功能：用来格式化std::string字符串以及配合std::cout来代替c语言的printf()
+2. 格式
+   1. >boost::format("format-string") % arg1 %arg2 % arg3....%argN;
+   2. 

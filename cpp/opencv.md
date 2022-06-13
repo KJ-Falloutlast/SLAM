@@ -1,4 +1,4 @@
-# 1.opencv基础
+# 1.opencv和点云处理基础
 ## 1-1.加载修改和保存图像
 1. imread
    1. 功能：加载图像文件，使得图像文件成为一个mat对象，其中第一个参数为图像文件名称
@@ -70,7 +70,7 @@ int main(int argc, char** argv) {
    1. 参数1是保存路径
    2. 参数2是图像内存对象
 
-# 2.opencv基础
+## 1-3.opencv基础
 1. Mat基本结构
    1. header:头部|数据部分
    2. 赋值，克隆，拷贝
@@ -227,7 +227,7 @@ int main()
 }
 ```
 
-# 3.案例
+## 1-4.案例
 1. quickopencv.h
 ```cpp
 #pragma once
@@ -259,6 +259,53 @@ void QuickDemo::colorSpace_Demo(Mat &image){
     2.H:0-180,S,V:0-255;H,S是改变颜色的通道，V是改变亮度的通道
     */
 }
+```
+3. main.cpp
+```cpp
+#include <opencv2/opencv.hpp>
+#include <iostream>
+#include <math.h>
+#include <opencv2/highgui/highgui_c.h>//主要解决CV_WINDOW_AUTOSIZE问题
+#include "../include/quickopencv.h"
+using namespace cv;
+
+int main(int argc, char** argv) {
+	Mat src = imread("/home/kim-james/ROS_Space/opencv_ws/opencv_tutorial_data/images/63_12_map.png");
+    
+    if (src.empty()){
+        return -1;
+    }
+    namedWindow("input", WINDOW_FREERATIO);//任意窗口大小
+    imshow("input", src);//imshow只支持8位的输入
+    QuickDemo qd;
+    qd.colorSpace_Demo(src);
+    qd.mat_creation_demo(src);
+    waitKey(0);
+    destroyAllWindows();
+
+}
+```
+### 1.图像的读取和显示
+2. quickopencv.cpp
+```cpp
+#include "../include/quickopencv.h"
+void QuickDemo::colorSpace_Demo(Mat &image){
+    Mat gray, hsv;
+    cvtColor(image, hsv, COLOR_BGR2HSV);//转hsv
+    cvtColor(image, gray, COLOR_BGR2GRAY);//转灰度
+    imshow("HSV", hsv);
+    imshow("灰度", gray);
+    imwrite("/home/kim-james/ROS_Space/opencv_ws/ch1/picture/hsv.png", hsv);
+    //千万不要忘记hsv.png和gray.png
+    imwrite("/home/kim-james/ROS_Space/opencv_ws/ch1/picture/gray.png", gray);
+    /*
+    1.R G B:0-255
+    2.H:0-180,S,V:0-255;H,S是改变颜色的通道，V是改变亮度的通道
+    */
+}
+```
+### 2.图像的创建和赋值
+```cpp
 void QuickDemo::mat_creation_demo(Mat &image){
     //第一讲:创建图像基本操作
     // Mat m1, m2;
@@ -310,28 +357,378 @@ void QuickDemo::mat_creation_demo(Mat &image){
     //m3和m4都变成了黄色
 }
 ```
-3. main.cpp
+### 3.图像的读写操作
 ```cpp
-#include <opencv2/opencv.hpp>
+
+```
+
+## 1-5.补充知识
+### 1.scalar
+1. 例子1
+```cpp
 #include <iostream>
-#include <math.h>
-#include <opencv2/highgui/highgui_c.h>//主要解决CV_WINDOW_AUTOSIZE问题
-#include "../include/quickopencv.h"
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/core/core.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <stdio.h>
+using namespace std;
 using namespace cv;
+void scalar_demo1(){
+	Mat M(4,4,CV_32FC2,Scalar(1,3));//一般来说,2通道的mat,Scalar只要写2个数字,3通道及其以上的mat,scalar只要写3个数字
+	cout<<M<<endl;
+    /*
+    1.创建一个2通道，且每个通道的值都为（1,3），深度为32，4行4列的图像矩阵。CV_32F表示每个元素的值的类型为32位浮点数，C2表示通道数为2，
+    Scalar（1,3）表示对矩阵每个元素都赋值为（1,3），第一个通道中的值都是1，第二个通道中的值都是3.
+    2.成为矩阵的时候先分配后赋值,比如说是,Mat(4, 4, 8UC3, Scalar(255, 255, 0)),则生成的矩阵为
+    [255 255 0 255 255 0 255 255 0
+     255 255 0 255 255 0 255 255 0
+     255 255 0 255 255 0 255 255 0
+     255 255 0 255 255 0 255 255 0]
+    */
+}
+void scalar_demo2(){
+	Mat M(4,4,CV_32FC3,Scalar(1,2,3));
+    //创建一个4x4的3通道的32位浮点数的矩阵,矩阵中的每一个元素赋值为(1,2,3),第一个通道中的值为1,第二个是2, 第三个是3
+	cout<<M<<endl;
+}
+void scalar_demo3(){
+	Mat M(4,4,CV_32FC4,Scalar(1,2,3));
+	cout<<M<<endl;
+}
+void scalar_demo4(){
+	Mat blue_m(256,256,CV_8UC3,Scalar(255,0,0));//BGR
+    //生成1个256x256的3通道的usignedchar的矩阵,每个元素是(255,0,0)
+	Mat green_m(256,256,CV_8UC3,Scalar(0,255,0));
+	Mat red_m(256,256,CV_8UC3,Scalar(0,0,255));
+	imshow("Blue",blue_m);
+	waitKey(0);
+	imshow("Green",green_m);
+	waitKey(0);
+	imshow("Red",red_m);
+	waitKey(0);
+	
+}
+int main(void)
+{
+	//resize_img();
+	//convert_color_space();
+	scalar_demo1();
+	cout<<"**********************************"<<endl;
+	scalar_demo2();
+	cout<<"**********************************"<<endl;
+	scalar_demo3();
+	scalar_demo4();
+	return 0;
+}
+/*
+[1, 3, 1, 3, 1, 3, 1, 3;
+ 1, 3, 1, 3, 1, 3, 1, 3;
+ 1, 3, 1, 3, 1, 3, 1, 3;
+ 1, 3, 1, 3, 1, 3, 1, 3]
+**********************************
+[1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3;
+ 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3;
+ 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3;
+ 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3]
+**********************************
+[1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0;
+ 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0;
+ 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0;
+ 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0]
+*/
+```
+### 2.
 
-int main(int argc, char** argv) {
-	Mat src = imread("/home/kim-james/ROS_Space/opencv_ws/opencv_tutorial_data/images/63_12_map.png");
-    
-    if (src.empty()){
-        return -1;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 2.点云处理
+## 2-1.点云的基本概念
+1. 概念：同一空间参考系下表达目标空间分布和目标表面特性的海量点集合，是在获取物体表面每个采样点的空间坐标后得到的点的集合，称为点云(Point Cloud)
+2. 数据类型
+   1. 类型
+```cpp
+//1.
+pcl::PointCloud<pcl::PointXYZ>
+//PointXY成员:float x, y, z表达了xyz3d的信息，可以通过points[i].data[0] or points[i].x访问点x的坐标值
+pcl::PointCloud<pcl::PointXYZI>
+//PointXYZI成员:float x, y, z, intensity;表示XYZ信息加上强度信息的类型
+pcl::PointCloud<pcl::PointXYZRGB>
+//PointCloudRGB成员:float x, y, z; 表示xyz信息加上rgb信息，rgb存储为一个float
+pcl::PointCloud<pcl::PointXYZRGBA>
+/*PointXYZRGBA成员: float x, y, z, unit32_t rgba;
+表示XYZ信息加上RGBA信息，RGBA用32bit的int型存储的
+*/
+```
+   2. 转换
+      1. pcl::PointCloud<pcl::PointXYZ> cloud;(点云对象)
+      2. pcl::PointCloud<pcl::PointXYZ>::ptr cloudPtr;(点云指针)
+      3. pcl::PointXYZ overlap(点)
+      4. >cloud = * cloudPtr; cloudPtr = cloud.makeshared()
+      5. 访问单个点:
+         1. cloud.points[i].x;
+         2. cloudPtr->points[i].x;
+         3. overlap.x;
+      6. 获取点数
+         1. sizeof(overlap);
+         2. cloud.size();
+         3. cloudPtr->size();
+## 2-2.代码实例
+1. 创建点云数据(pcl_create.cpp)
+```cpp
+#include <ros/ros.h>
+#include <pcl/point_cloud.h>
+#include <pcl_conversions/pcl_conversions.h>
+#include <sensor_msgs/PointCloud2.h>
+ 
+main (int argc, char **argv)
+{
+    ros::init (argc, argv, "pcl_create");
+ 
+    ros::NodeHandle nh;
+    ros::Publisher pcl_pub = nh.advertise<sensor_msgs::PointCloud2> ("pcl_output", 1);
+    pcl::PointCloud<pcl::PointXYZ> cloud;
+    sensor_msgs::PointCloud2 output;
+ 
+    // Fill in the cloud data
+    cloud.width  = 100;
+    cloud.height = 1;
+    cloud.points.resize(cloud.width * cloud.height);
+ 
+    for (size_t i = 0; i < cloud.points.size (); ++i)
+    {
+        cloud.points[i].x = 1024 * rand () / (RAND_MAX + 1.0f);
+        cloud.points[i].y = 1024 * rand () / (RAND_MAX + 1.0f);
+        cloud.points[i].z = 1024 * rand () / (RAND_MAX + 1.0f);
     }
-    namedWindow("input", WINDOW_FREERATIO);//任意窗口大小
-    imshow("input", src);//imshow只支持8位的输入
-    QuickDemo qd;
-    qd.colorSpace_Demo(src);
-    qd.mat_creation_demo(src);
-    waitKey(0);
-    destroyAllWindows();
+ 
+    //Convert the cloud to ROS message
+    pcl::toROSMsg(cloud, output);
+    output.header.frame_id = "odom";
+ 
+    ros::Rate loop_rate(1);
+    while (ros::ok())
+    {
+        pcl_pub.publish(output);
+        ros::spinOnce();
+        loop_rate.sleep();
+    }
+ 
+    return 0;
+}
+```
+```cmake
+cmake_minimum_required(VERSION 2.8.3)
+project(chapter10_tutorials)
+find_package(catkin REQUIRED COMPONENTS
+  pcl_conversions
+  pcl_ros
+  roscpp
+  sensor_msgs
+  rospy
+)
+ 
+find_package(PCL REQUIRED)
+catkin_package()
+ 
+include_directories(
+  ${catkin_INCLUDE_DIRS}
+  ${PCL_INCLUDE_DIRS}
+)
+ 
+link_directories(${PCL_LIBRARY_DIRS})
+ 
+ 
+add_executable(pcl_create src/pcl_create.cpp)
+target_link_libraries(pcl_create ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 
+add_executable(pcl_read src/pcl_read.cpp)
+add_executable(pcl_write src/pcl_write.cpp)
+ 
+target_link_libraries(pcl_read ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+target_link_libraries(pcl_write ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+```
+2. 加载点云数据(pcl_read.cpp)
+```cpp
+#include <ros/ros.h>
+#include <pcl/point_cloud.h>
+#include <pcl_conversions/pcl_conversions.h>
+#include <sensor_msgs/PointCloud2.h>
+#include <pcl/io/pcd_io.h>
+ 
+main(int argc, char **argv)
+{
+    ros::init (argc, argv, "pcl_read");
+ 
+    ros::NodeHandle nh;
+    ros::Publisher pcl_pub = nh.advertise<sensor_msgs::PointCloud2> ("pcl_output", 1);
+ 
+    sensor_msgs::PointCloud2 output;
+    pcl::PointCloud<pcl::PointXYZ> cloud;
+ 
+    pcl::io::loadPCDFile ("test_pcd.pcd", cloud);
+ 
+    pcl::toROSMsg(cloud, output);
+    output.header.frame_id = "odom";
+ 
+    ros::Rate loop_rate(1);
+    while (ros::ok())
+    {
+        pcl_pub.publish(output);
+        ros::spinOnce();
+        loop_rate.sleep();
+    }
+ 
+    return 0;
+}
+```
+3. 保存点云数据(pcl_write.cpp)
+```cpp
+#include <ros/ros.h>
+#include <pcl/point_cloud.h>
+#include <pcl_conversions/pcl_conversions.h>
+#include <sensor_msgs/PointCloud2.h>
+#include <pcl/io/pcd_io.h>
+ 
+void cloudCB(const sensor_msgs::PointCloud2 &input)
+{
+    pcl::PointCloud<pcl::PointXYZ> cloud;
+    pcl::fromROSMsg(input, cloud);
+    pcl::io::savePCDFileASCII ("write_pcd_test.pcd", cloud);
+}
+ 
+main (int argc, char **argv)
+{
+    ros::init (argc, argv, "pcl_write");
+    ros::NodeHandle nh;
+    ros::Subscriber bat_sub = nh.subscribe("pcl_output", 10, cloudCB);
+    ros::spin();
+ 
+    return 0;
+}
+```
+4. cloud_viewer可视化pcd中的点云(pcl_view.cpp)
+```cpp
+#include <iostream>
+#include <ros/ros.h>
+#include <pcl/visualization/cloud_viewer.h>
+#include <sensor_msgs/PointCloud2.h>
+#include <pcl_conversions/pcl_conversions.h>
+ 
+class cloudHandler
+{
+public:
+    cloudHandler()
+    : viewer("Cloud Viewer")
+    {
+     pcl::PointCloud<pcl::PointXYZ> cloud;
+     pcl::io::loadPCDFile ("0.pcd", cloud);
+     viewer.showCloud(cloud.makeShared());
+     viewer_timer = nh.createTimer(ros::Duration(0.1), &cloudHandler::timerCB, this);
+    }
+ 
+    void timerCB(const ros::TimerEvent&)
+    {
+        if (viewer.wasStopped())
+        {
+            ros::shutdown();
+        }
+    }
+ 
+protected:
+    ros::NodeHandle nh;
+    pcl::visualization::CloudViewer viewer;
+    ros::Timer viewer_timer;
+};
+ 
+main (int argc, char **argv)
+{
+    ros::init (argc, argv, "pcl_filter");
+    cloudHandler handler;
+    ros::spin();
+    return 0;
+}
+```
+5. 随机生成10000个三维点，然后赋值给点云
+```cpp
+#include <iostream>
+//点云需要的头文件
+#include <pcl/point_types.h>
+#include <pcl/io/ply_io.h>
+#include <pcl/visualization/pcl_visualizer.h>
+using namespace std;
+//随机生成了10000个三维点，然后赋值给一片点云，并且完成显示
+void drawPointCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, string titleName)
+{
+    pcl::visualization::PCLVisualizer viewer (titleName);
+    int v (0);
+
+    viewer.createViewPort (0.0, 0.0, 1.0, 1.0, v);
+
+    viewer.addCoordinateSystem(0.5);
+
+    float bckgr_gray_level = 0.0;  // Black
+    float txt_gray_lvl = 1.0 - bckgr_gray_level;
+
+    pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> cloud_in_color_h (cloud, (int) 255 * txt_gray_lvl, (int) 255 * txt_gray_lvl, (int) 255 * txt_gray_lvl);
+    viewer.addPointCloud (cloud, cloud_in_color_h, "cloud_in_v1", v);
+
+    viewer.addText (titleName, 10, 15, 16, txt_gray_lvl, txt_gray_lvl, txt_gray_lvl, "icp_info_1", v);
+
+    viewer.setBackgroundColor (bckgr_gray_level, bckgr_gray_level, bckgr_gray_level, v);
+
+    viewer.setCameraPosition (-3.68332, 2.94092, 5.71266, 0.289847, 0.921947, -0.256907, 0);
+    viewer.setSize (1280, 1024);
+
+    while (!viewer.wasStopped())
+    {
+        viewer.spinOnce();
+    }
+}
+
+pcl::PointCloud<pcl::PointXYZ>::Ptr readPointCloud_camera(int width, int height, vector<int> x, vector<int> y, vector<int> z)
+{
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+      
+    cloud->width = width;
+    cloud->height = height;
+    cloud->points.resize(width*height);
+
+    for (int i = 0 ; i < width*height; i++)
+    {
+        cloud->points[i].x = x[i];
+        cloud->points[i].y = y[i];
+        cloud->points[i].z = z[i];
+    }
+    return cloud;  
+}
+
+int main(int argc, char** argv)
+{
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
+
+    vector<int> x, y, z;
+    for (int i = 0 ; i < 10000; i ++)
+    {      
+        x.push_back(i);
+        y.push_back(i + 2);
+        z.push_back(i+10);
+    }
+    cloud = readPointCloud_camera(100, 100, x, y, z);
+
+    drawPointCloud(cloud, "user defined pointcloud");
+
+	return 1;
 }
 ```

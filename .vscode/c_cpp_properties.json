@@ -6,12 +6,15 @@
                 "/opt/ros/noetic/include",
                 "/usr/include",
                 "${workspaceFolder}/**",
+                "/usr/local/share/**",
                 "${workspaceFolder}/devel/include",
-                "/usr/include/pcl-1.8",
+                "/usr/local/include/opencv4/**",
+                "/usr/local/lib/**",
+                "/usr/local/include/sophus",
                 "/usr/include/eigen3",
-                "/usr/include/x86_64-linux-gnu/qt5/QtWidgets",
-                "/usr/include/x86_64-linux-gnu/qt5",
-                "/usr/include/x86_64-linux-gnu/qt5/QtCore"
+                "/usr/include/pcl-1.10",
+                "/usr/local/include",
+                "/usr/include/vtk-7.1"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",
@@ -23,4 +26,7 @@
     "version": 4
   }
   
+  
+
+
   

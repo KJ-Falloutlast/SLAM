@@ -3972,5 +3972,105 @@ controllers: {
 4. launch
 ```xml
 <launch>
-    
+    <param name = "robot_description" command = "$(find xacro)/xacro $(find gazebo_robot)/urdf/car_asm.xacro"/>
+    <include file = "$(find gazebo_ros)/launch/empty_world.launch"/>
+    <node pkg = "gazebo_ros" type = "spawn_model" name = "spawn_model" args = "-urdf -model mycar -param robot_description"/>
 </launch>
+```
+## 5-6.URDF仿真环境搭建
+### 1.机器人运动控制以及里程计信息显示
+[参考网址](http://gazebosim.org/tutorials?tut=ros_gzplugins)
+**安装键盘控制节点:sudo apt-get install ros-ROS的版本号-teleop-twist-keyboard**
+
+1. ros_control
+   1. 简介:是一组软件包，它包含了控制器接口，控制器管理器，传输和硬件接口。
+   2. 运动控制的实现流程
+      1. 为joint添加传动装置和控制器
+```cpp
+<robot name="my_car_move" xmlns:xacro="http://wiki.ros.org/xacro">
+
+    <!-- 传动实现:用于连接控制器与关节 -->
+    <xacro:macro name="joint_trans" params="joint_name">
+        <!-- Transmission is important to link the joints and the controller -->
+        <transmission name="${joint_name}_trans">
+            <type>transmission_interface/SimpleTransmission</type>
+            <joint name="${joint_name}">
+                <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+            </joint>
+            <actuator name="${joint_name}_motor">
+                <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+                <mechanicalReduction>1</mechanicalReduction>
+            </actuator>
+        </transmission>
+    </xacro:macro>
+
+    <!-- 每一个驱动轮都需要配置传动装置 -->
+    <xacro:joint_trans joint_name="left_wheel2base_link" />
+    <xacro:joint_trans joint_name="right_wheel2base_link" />
+
+    <!-- 控制器 -->
+    <gazebo>
+        <plugin name="differential_drive_controller" filename="libgazebo_ros_diff_drive.so">
+            <rosDebugLevel>Debug</rosDebugLevel>
+            <publishWheelTF>true</publishWheelTF>
+            <robotNamespace>/</robotNamespace>
+            <publishTf>1</publishTf>
+            <publishWheelJointState>true</publishWheelJointState>
+            <alwaysOn>true</alwaysOn>
+            <updateRate>100.0</updateRate>
+            <legacyMode>true</legacyMode>
+            <leftJoint>left_wheel2base_link</leftJoint> <!-- 左轮 -->
+            <rightJoint>right_wheel2base_link</rightJoint> <!-- 右轮 -->
+            <wheelSeparation>${base_link_radius * 2}</wheelSeparation> <!-- 车轮间距 -->
+            <wheelDiameter>${wheel_radius * 2}</wheelDiameter> <!-- 车轮直径 -->
+            <broadcastTF>1</broadcastTF>
+            <wheelTorque>30</wheelTorque>
+            <wheelAcceleration>1.8</wheelAcceleration>
+            <commandTopic>cmd_vel</commandTopic> <!-- 运动控制话题 -->
+            <odometryFrame>odom</odometryFrame> 
+            <odometryTopic>odom</odometryTopic> <!-- 里程计话题 -->
+            <robotBaseFrame>base_footprint</robotBaseFrame> <!-- 根坐标系 -->
+        </plugin>
+    </gazebo>
+
+</robot>
+```
+   1. xacro文件集成:将上述xacro文件集成进入总的机器人模型文件
+```cpp
+<!-- 组合小车底盘与摄像头 -->
+<robot name="my_car_camera" xmlns:xacro="http://wiki.ros.org/xacro">
+    <xacro:include filename="my_head.urdf.xacro" />
+    <xacro:include filename="my_base.urdf.xacro" />
+    <xacro:include filename="my_camera.urdf.xacro" />
+    <xacro:include filename="my_laser.urdf.xacro" />
+    <xacro:include filename="move.urdf.xacro" />
+</robot>
+```
+   3. 启动gazebo并控制机器人运动
+```cpp
+<launch>
+
+    <!-- 将 Urdf 文件的内容加载到参数服务器 -->
+    <param name="robot_description" command="$(find xacro)/xacro $(find demo02_urdf_gazebo)/urdf/xacro/my_base_camera_laser.urdf.xacro" />
+    <!-- 启动 gazebo -->
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="world_name" value="$(find demo02_urdf_gazebo)/worlds/hello.world" />
+    </include>
+
+    <!-- 在 gazebo 中显示机器人模型 -->
+    <node pkg="gazebo_ros" type="spawn_model" name="model" args="-urdf -model mycar -param robot_description"  />
+</launch>
+```
+3. 在RVIZ查看里程计信息
+   1. 启动rviz
+```cpp
+<launch>
+    <!-- 启动 rviz -->
+    <node pkg="rviz" type="rviz" name="rviz" />
+
+    <!-- 关节以及机器人状态发布节点 -->
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+
+</launch>
+```
