@@ -4036,7 +4036,7 @@ controllers: {
 </robot>
 ```
    1. xacro文件集成:将上述xacro文件集成进入总的机器人模型文件
-```cpp
+```xml
 <!-- 组合小车底盘与摄像头 -->
 <robot name="my_car_camera" xmlns:xacro="http://wiki.ros.org/xacro">
     <xacro:include filename="my_head.urdf.xacro" />
@@ -4047,7 +4047,7 @@ controllers: {
 </robot>
 ```
    3. 启动gazebo并控制机器人运动
-```cpp
+```xml
 <launch>
 
     <!-- 将 Urdf 文件的内容加载到参数服务器 -->
@@ -4055,6 +4055,7 @@ controllers: {
     <!-- 启动 gazebo -->
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
         <arg name="world_name" value="$(find demo02_urdf_gazebo)/worlds/hello.world" />
+        <!--此处是arg而非args -->
     </include>
 
     <!-- 在 gazebo 中显示机器人模型 -->
@@ -4063,7 +4064,8 @@ controllers: {
 ```
 3. 在RVIZ查看里程计信息
    1. 启动rviz
-```cpp
+      1. demo02_env.launch(**机器人gazebo环境**)
+```xml
 <launch>
     <!-- 启动 rviz -->
     <node pkg="rviz" type="rviz" name="rviz" />
@@ -4073,4 +4075,141 @@ controllers: {
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
 
 </launch>
+```
+      2. demo03_sensor.launch(**rviz环境**)
+```xml
+<launch>
+    <!-- <param name="robot_description" command="$(find xacro)/xacro $(find gazebo_robot01)/urdf/car_asm01.xacro" /> -->
+    <!-- 加载仿真环境的时候已经加载了robot_description,所以可以删掉 -->
+    
+    <!-- 2.启动 rivz -->
+    <node pkg="rviz" type="rviz" name="rviz" args="-d $(find gazebo_robot01)/config/show_mycar.rviz" />
+
+    <!-- 3.启动机器人状态和关节状态发布节点 -->
+    <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" />
+    <node pkg="joint_state_publisher" type="joint_state_publisher" name="joint_state_publisher" />
+    <!-- 5.启动gazebo -->
+    <include file = "$(find gazebo_ros)/launch/empty_world.launch"/>
+    <node pkg = "gazebo_ros" type = "spawn_model" name = "model" args = "-urdf -model mycar02 -param robot_description"/>
+</launch>
+```
+   1. 控制机器人运动:rosrun teleop_twist_keyboard teleop_twist_keyboard.py
+   2. 控制方向:
+      1. ikjl:前停左右
+      2. u,o:左转弯，右转弯
+      3. qwe:加速，加线速度，加角速度;zxc:减速，减线速，减角速度
+```cpp
+Moving around:
+   u    i    o
+   j    k    l
+   m    ,    .
+
+For Holonomic mode (strafing), hold down the shift key:
+---------------------------
+   U    I    O
+   J    K    L
+   M    <    >
+
+t : up (+z)
+b : down (-z)
+
+anything else : stop
+
+q/z : increase/decrease max speeds by 10%
+w/x : increase/decrease only linear speed by 10%
+e/c : increase/decrease only angular speed by 10%
+```
+4. 在gazebo和rviz中查看雷达消息
+   1. laser.xacro
+```xml
+<robot name="my_sensors" xmlns:xacro="http://wiki.ros.org/xacro">
+
+  <!-- 雷达 -->
+  <gazebo reference="laser"><!--设定雷达的参考系，必须要和先前的car_laser01的laser连杆相同-->
+    <sensor type="ray" name="rplidar">
+      <pose>0 0 0 0 0 0</pose>
+      <visualize>true</visualize>
+      <update_rate>5.5</update_rate>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>360</samples>
+            <resolution>1</resolution>
+            <min_angle>-3</min_angle>
+            <max_angle>3</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.10</min>
+          <max>30.0</max>
+          <resolution>0.01</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.01</stddev>
+        </noise>
+      </ray>
+      <plugin name="gazebo_rplidar" filename="libgazebo_ros_laser.so">
+        <!-- 发布的话题是topicName中的scan -->
+        <topicName>/scan</topicName>
+        <!-- 这个laser是和car_laser中的laser同名 -->
+        <frameName>laser</frameName>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+</robot>
+```
+   2. 查看数据
+      1. 启动gazebo,可以直接看到雷达射线
+      2. 启动rviz,添加LaserScan->Topic:/scan
+
+5. 在gazebo和rviz中查看摄像头消息
+   1. 步骤
+      1. 首先开始add摄像头
+      2. 其次再添加摄像头的topic
+```xml
+<robot name="my_sensors" xmlns:xacro="http://wiki.ros.org/xacro">
+  <!-- 被引用的link为camera -->
+  <gazebo reference="camera">
+    <!-- 类型设置为 camara -->
+    <sensor type="camera" name="camera_node">
+      <update_rate>30.0</update_rate> <!-- 更新频率 -->
+      <!-- 摄像头基本信息设置 -->
+      <camera name="head">
+        <horizontal_fov>1.3962634</horizontal_fov>
+        <image>
+          <width>1280</width>
+          <height>720</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.02</near>
+          <far>300</far>
+        </clip>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.007</stddev>
+        </noise>
+      </camera>
+      <!-- 核心插件 -->
+      <plugin name="gazebo_camera" filename="libgazebo_ros_camera.so">
+        <alwaysOn>true</alwaysOn>
+        <updateRate>0.0</updateRate>
+        <cameraName>/camera</cameraName>
+        <imageTopicName>image_raw</imageTopicName>
+        <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+        <frameName>camera</frameName>
+        <hackBaseline>0.07</hackBaseline>
+        <distortionK1>0.0</distortionK1>
+        <distortionK2>0.0</distortionK2>
+        <distortionK3>0.0</distortionK3>
+        <distortionT1>0.0</distortionT1>
+        <distortionT2>0.0</distortionT2>
+      </plugin>
+    </sensor>
+  </gazebo>
+</robot>
 ```

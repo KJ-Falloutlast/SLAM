@@ -1728,3 +1728,123 @@ int main( int argc, char** argv )
 前面3个参数是xyz的平移，后面4个是q = (w, x, y, z),每个相机的外参
 */
 ```
+## 3-2.点云基础使用
+1. cmake
+```cmake
+cmake_minimum_required( VERSION 2.8 )
+project( joinMap )
+
+set( CMAKE_BUILD_TYPE Release )
+set( CMAKE_CXX_FLAGS "-std=c++11 -O3" )
+
+# opencv 
+find_package( OpenCV REQUIRED )
+include_directories( ${OpenCV_INCLUDE_DIRS} )
+
+# eigen 
+include_directories( "/usr/include/eigen3/" )
+
+# pcl 
+find_package( PCL REQUIRED COMPONENT common io )
+find_package( PCL 1.8 REQUIRED)#解决版本问题
+include_directories( ${PCL_INCLUDE_DIRS} )
+add_definitions( ${PCL_DEFINITIONS} )
+
+# add_executable( joinMap joinMap.cpp )
+# target_link_libraries( joinMap ${OpenCV_LIBS} ${PCL_LIBRARIES} )
+
+# add_executable( jointMap01 jointMap01.cpp )
+# target_link_libraries( jointMap01 ${OpenCV_LIBS} ${PCL_LIBRARIES}  )
+add_executable( pcl_use01 pcl_use01.cpp )
+target_link_libraries( pcl_use01 ${OpenCV_LIBS} ${PCL_LIBRARIES}   )
+```
+2. 基本操作
+```cpp
+#include <pcl/io/io.h>//必须包含的头文件
+#include <pcl/point_types.h>//必须包含的头文件
+#include <pcl/io/pcd_io.h>//读取点云
+#include <pcl/visualization/cloud_viewer.h>//显示点云文件
+#include <boost/thread/thread.hpp>//for formating strings
+#include <iostream>
+#include <string>
+using namespace std;
+//1.定义点云
+void test01(){
+    //1.定义点云对象
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloudPtr(new pcl::PointCloud<pcl::PointXYZ>);//生成一个点云指针
+    // pcl::PointCloud<pcl::PointXYZ>& cloud = *cloudPtr;//两者等价，表示cloud是*cloud_ptr的解引用的引用
+    pcl::PointCloud<pcl::PointXYZ> cloud;//两者等价，表示cloud是*cloud_ptr的解引用的引用,
+    //2.初始化点云数据pcd文件头
+
+    cloud.width = 30720;//指定了点云集在宽度方向有多少点
+    /*
+    1.(u, v)  = (f*x/z, f*y/z)
+    2.height:指定了点云集在高的方向上有多少点,这个高有2个意思
+    1.制定了点云中1行有多少点，如果是有组织的点云集合的话
+    2.如果是无组织的点云集合，这个数据被设置为1
+    */
+    cloud.height = 1;
+    cloud.is_dense = false;
+    cloud.points.resize(cloud.width * cloud.height);//点云的数量
+    pcl::PointXYZRGB color_point;
+    for (size_t i = 0; i < cloud.points.size(); i++){
+        //size_t是一种记录大小的数据类型
+        cloud.points[i].x = color_point.x;
+        cloud.points[i].y = color_point.y;
+        cloud.points[i].z = color_point.z;
+    }
+    //2.保存点云对象
+    pcl::io::savePCDFileBinary("map01.pcd", cloud);//第一个是文件路径，第二个是点云
+    if (pcl::io::savePCDFile<pcl::PointXYZ>("map01.pcd", cloud) == -1){
+        cerr << "can't save the cloud file" << endl;
+
+    }
+    //3.读取点云对象
+    string pcd_path = "/home/kim-james/ROS_Space/SLAM_ws/slam_test/ch4/joinMap/build/map01.pcd";
+    if (pcl::io::loadPCDFile<pcl::PointXYZ>(pcd_path, cloud) == -1){
+        cerr << "can't load point cloud file" << endl;
+    
+    }
+    cout << "loaded: " << cloud.width * cloud.height << " points" << endl;
+    cout << "loaded: " << cloud.size() << " points" << endl;
+    cout << "field = " << pcl::getFieldsList(cloud) << endl;
+    
+    //4.显示点云
+    //可视化结果,显示的对象必须是点云指针
+	pcl::visualization::CloudViewer viewer("Simple Cloud Viewer");
+	viewer.showCloud(cloudPtr);
+	while (!viewer.wasStopped())
+	{
+ 
+	}
+}
+int main(){
+    test01();
+}
+
+
+/*
+指定了点云集在高的方向上有多少点,这个高有2个意思
+1.制定了点云中1列有多少点，如果是有组织的点云集合的话
+2.如果是无组织的点云集合，这个数据被设置为1
+3.eg:
+    cloud.width = 640; // Image-like organized structure, with 480 rows and 640 columns, 
+    cloud.height = 480; // thus 640*480=307200 points total in the dataset
+    cloud.width = 307200;
+    cloud.height = 1; // unorganized point cloud dataset with 307200 points
+4.pcl::points<pcl::PointCloud::points>
+eg:
+    pcl::PointCloud<pcl::PointXYZ> cloud;
+    vector<pcl::PointXYZ> data = cloud.points;
+    以上类型是等同的
+5.pcl::PointCloud::is_dense>:指定points中数据是否都是有限的
+6.等价关系
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloudPtr
+    pcl::PointCloud<pcl::PointXYZ> cloud
+    cloudPtr = &cloud
+7.访问和size:
+    cloud.points[i].x
+    cloudPtr->points[i].x
+*/
+```
+

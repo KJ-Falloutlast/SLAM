@@ -421,7 +421,7 @@ int main(void)
 	return 0;
 }
 /*
-[1, 3, 1, 3, 1, 3, 1, 3;
+[1, 3, 1, 3, 1, 3, 1, 3;0   
  1, 3, 1, 3, 1, 3, 1, 3;
  1, 3, 1, 3, 1, 3, 1, 3;
  1, 3, 1, 3, 1, 3, 1, 3]
@@ -472,7 +472,7 @@ pcl::PointCloud<pcl::PointXYZRGBA>
 */
 ```
    2. 转换
-      1. pcl::PointCloud<pcl::PointXYZ> cloud;(点云对象)
+      1. pcl::PointCloud<pcl::PointXYZ> cloud;(点云对
       2. pcl::PointCloud<pcl::PointXYZ>::ptr cloudPtr;(点云指针)
       3. pcl::PointXYZ overlap(点)
       4. >cloud = * cloudPtr; cloudPtr = cloud.makeshared()
