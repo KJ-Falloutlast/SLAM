@@ -77,7 +77,7 @@ for (i = 1; i <= n; i++){//运行n次
 #include<ctime>
 using namespace std;
 
-long long fac(int n)
+long long fac(int n)//factorial
 {
     if(n<0)
         return -1;
