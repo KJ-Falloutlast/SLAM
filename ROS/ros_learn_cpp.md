@@ -4213,3 +4213,108 @@ e/c : increase/decrease only angular speed by 10%
   </gazebo>
 </robot>
 ```
+6. 在gazebo和rviz中查看深度相机
+   1. kinect.xacro
+```xml
+<robot name="my_sensors" xmlns:xacro="http://wiki.ros.org/xacro">
+    <gazebo reference="support">  
+      <sensor type="depth" name="camera">
+        <always_on>true</always_on>
+          <!-- 是否总是打开 -->
+        <update_rate>20.0</update_rate>
+          <!-- 更新频率 -->
+        <camera>
+          <horizontal_fov>${60.0*PI/180.0}</horizontal_fov>
+          <image>
+            <format>R8G8B8</format>
+            <width>640</width>
+            <height>480</height>
+            <!-- 分辨率 -->
+          </image>
+          <clip>
+            <near>0.05</near>
+            <!-- 最近距离 -->
+            <far>8.0</far>
+            <!-- 最远距离 -->
+          </clip>
+        </camera>
+        <plugin name="kinect_camera_controller" filename="libgazebo_ros_openni_kinect.so">
+          <cameraName>camera</cameraName>
+          <!-- cameraName为一个命名空间 -->
+          <alwaysOn>true</alwaysOn>
+          <updateRate>10</updateRate>
+          <imageTopicName>rgb/image_raw</imageTopicName>
+          <!-- 采集一般图像 -->
+          <depthImageTopicName>depth/image_raw</depthImageTopicName>
+          <pointCloudTopicName>depth/points</pointCloudTopicName>
+          <cameraInfoTopicName>rgb/camera_info</cameraInfoTopicName>
+          <depthImageCameraInfoTopicName>depth/camera_info</depthImageCameraInfoTopicName>
+          <frameName>support_depth</frameName>
+         <!-- 修改为support_depth，来完成父级坐标系support_link到子级坐标系 support_depth的转化-->
+          <baseline>0.1</baseline>
+          <distortion_k1>0.0</distortion_k1>
+          <distortion_k2>0.0</distortion_k2>
+          <distortion_k3>0.0</distortion_k3>
+          <distortion_t1>0.0</distortion_t1>
+          <distortion_t2>0.0</distortion_t2>
+          <pointCloudCutoff>0.4</pointCloudCutoff>
+        </plugin>
+      </sensor>
+    </gazebo>
+
+</robot>
+```
+   2. kinect信息仿真 
+      1. 问题：在kinect中图像数据和点云数据使用了2套坐标系统，且2套坐标系统的系统位姿不一致
+      2. 解决
+```xml
+<!-- 1. 在插件中为kinect设置参考系，修改配置文件， -->
+<frameName>support_depth</frameName>
+
+
+<!-- 2.发布新设置的坐标系到kinect连杆的坐标变换关系，在launch中添加 -->
+
+<launch>
+    <!-- <param name="robot_description" command="$(find xacro)/xacro $(find gazebo_robot01)/urdf/car_asm01.xacro" /> -->
+    <!-- 加载仿真环境的时候已经加载了robot_description,所以可以删掉 -->
+    
+    <!-- 1.添加点云坐标系到连杆坐标系的变换 -->
+    <node pkg="tf2_ros" type="static_transform_publisher" name="static_transform_publisher" args="0 0 0 -1.57 0 -1.57 /support /support_depth" />
+        <!-- 偏移量 欧拉角(yzx = (-1.57, 0 -1.57)) 父级坐标系 子级坐标系 -->
+    <!-- 2.启动 rivz -->
+    <node pkg="rviz" type="rviz" name="rviz" args="-d $(find gazebo_robot01)/config/show_mycar.rviz" />
+
+    <!-- 3.启动机器人状态和关节状态发布节点 -->
+    <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" />
+    <node pkg="joint_state_publisher" type="joint_state_publisher" name="joint_state_publisher" />
+    <!-- 5.启动gazebo -->
+    <include file = "$(find gazebo_ros)/launch/empty_world.launch"/>
+    <node pkg = "gazebo_ros" type = "spawn_model" name = "model" args = "-urdf -model mycar02 -param robot_description"/>
+</launch>
+```
+
+# 6.机器人导航
+## 6-1.概述
+1. 概念
+   1. 导航模块是由多个功能包组成的，称之为导航功能包集，官方介绍如下：**一个2维导航堆栈，它接收来组里程计，传感器流和目标姿态的信息，并输出到移动底盘的安全速度命令**
+   2. 导航就是机器人自主从A->B
+2. 作用
+   1. 开发者不需要关注于导航算法，等偏底层的实现，这些实现已经由更专业的开发人员所管理和维护
+   2. 对于一般开发者，ROS的导航包优势如下
+      1. 安全
+      2. 功能全面
+      3. 高效
+### 1.导航模块简介
+![导航模块](../pictures/导航模块.png)
+1. 全局地图
+   1. SLAM:实时定位和建图
+   2. 自身定位:**确定自身在地图的位置**
+      1. amcl：为ROS中提供的定位功能包，(adaptiveMonteCarloLocalization）,用于实现2D移动机器人的概率定位系统，它实现了自适应的蒙特卡洛定位方法，该方法使用粒子过滤器根据已知地图跟踪机器人的姿态
+   3. 路径规划
+      1. 概念:机器人从A->B过程中，机器人需要根据目标位置计算全局运动路线， 并且在运动过程中，还需要实时调整路线，到达目标点的过程。ROS中提供了**move_base**来实现路径规划
+      2. 组成
+         1. 全局路径规划(global_planner):由给定的目标点和全局地图实现总体的路径规划，使用Dijkstra 或 A* 算法进行全局路径规划，计算最优路线，作为全局路线
+         2. 局部路径规划(local_planner)实际导航过程中，机器人可能无法按照给定的全局最优路线运行，比如:机器人在运行的过程中，随时可能出现一定的障碍物，本地规划就是使用一定的算法(Dynamic Window Approaches)来实现障碍物的规避
+         3. 总结**全局规划侧重于全局，本地规划侧重于当前**
+   4. 运动控制:控制速度和方向
+   5. 环境感知:摄像头，雷达，编码器..
