@@ -1,56 +1,26 @@
 #include <iostream>
-#include <vector>
-#include <cmath>
+#include <string>
 using namespace std;
-int mySum01(int n){
-	int sum = 0;
-	for (int i = 1; i <= n; i++){
-		sum += pow(-1, n);
-	}
-	return sum;
+
+template<class T>
+void myPrint(T a, T b){
+	cout << "函数模板调用" << endl;
 }
 
-int mySum02(int n){
-	int sum = 0;
-	if (n % 2 == 0){
-		return 1;
-	}
-	else{
-		return -1;
-	}
+template<class T>
+void myPrint(T a, T b, T c){//T可以接收任何对象
+	cout << "函数模板重载" << endl;
 }
 
-int fac(int n){
-	if (n < 1){
-		return 0;
-	}
-	else if(n == 0 || n == 1){
-		return 1;
-	}
-	else{
-		return n * fac(n-1);
-	}	
+void myPrint(int a, int b){
+	cout << "普通函数调用" << endl;
 }
 
-int fab01(int n){//此处不能用vector，要用数组
-	int v[n];
-	v[0] = 1;
-	v[1] = 1;
-	for (int i = 2; i <= n; i++){
-		v[i] = v[i-1] + v[i-2];
-	}
-	return v[n];
+void test(){
+	int abc[8];
+	int bcd[8];
+	myPrint(abc, bcd);
 }
-int fab02(int n){
-	if (n == 0 || n == 1){
-		return 1;
-	}
-	else{
-		return fab02(n-1) + fab02(n-2);
-	}	
-}
-
 int main(){
-	cout << fab01(5) << endl;//以0作为索引的第一个值
-	cout << fab02(5) << endl;
+	test();
 }

@@ -708,7 +708,11 @@ ls -l | grep python
    1. [方法1](https://blog.csdn.net/chentianting/article/details/85089403)
    2. 
 
-
+## 23.处理归档问题
+1. 问题描述
+   1. *dpkg: 处理归档 /tmp/apt-dpkg-install-os4jXB/0-wine1.6-amd64_1%3a1.6.2-0ubuntu4_amd64.deb (--unpack)时出错*
+2. 解决方案:
+   1. sudo dpkg -i --force-overwrite /var/cache/apt/archives/*.deb
 
 
 

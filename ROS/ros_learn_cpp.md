@@ -1679,6 +1679,55 @@ roslaunch 命令不能保证按照 node 的声明顺序来启动节点(节点的
 roslaunch hello.launch xxx:=值
    3. 命名规则：按照大驼峰命名法，例如：Ros_Learning-------Pub_Sub_demo01.cpp
 
+### 2-9.总结
+1. <launch>
+   1. <group>:共享一个命名空间或者封闭的元素组
+      1. <group ns = "namespace" clear_params = "true | false"/>
+      2. 参数
+         1. ns(optional):分配该组节点到制定的命名空间
+         2. clear_params(optional):启动前删除命名空间的所有参数
+      3. 功能:共享一个命名空间或者映射的封闭元素组，将设置应用到一组节点中，*类似launch，可以有任何其他标签*
+   2. <node>启动节点 
+      1. 格式：<node pkg = "package_name" type = "executable_name" name = "node_name"/>
+      2. 参数
+         1. pkg,type,name分别是节点的功能包，节点可执行文件名，节点运行时的名称
+         2. output(optional):stdout/stderr发送的位置，有screen和log 2个选项
+         3. args(optional):传递到节点的参数
+         4. respawn(optional):如果节点退出，是否自动重启
+         5. respawn_delay(optinal):和respawn组合使用，如果重启，在重启之前等待的时间
+         6. required(optional):如果节点杀死，是否杀死全部的roslaunch
+         7. ns(optional):指定在哪个命名空间下开启节点
+         8. clear_params(optional):启动前，删除节点私有命名空间的所有参数
+         9. machine(optional):启动节点的指定机器
+         10. cwd(optional):节点的工作目录的位置
+   3. <param>:设置ros系统中运行的参数，储存在参数服务器中
+      1. 格式:<param name = "output_frame" value = "odom"/>
+      2. name:参数名称；value:参数值
+   4. <rosparam>:加载参数文件中的多个参数
+      1. 格式:<rosparam name = "param.yaml" command = "load" ns = "params"/>
+   5. <arg>:launch文件内部的局部参数
+      1. 格式:<arg name = "arg-name" default = "arg-value"/>
+      2. name:参数名称；default:参数值
+      3. 调用
+```xml
+<include file = "included.launch">
+    <arg name = "hoge" value = "fuga"/>
+</include>
+<!-- 调用方法 -->
+<node pkg = "package-name" type = "executable" name = "node-name" args = "$(arg arg-name)$"/>
+<!-- $(xxx)$：将xxx的变量解引用出来 -->
+<param name = "output_frame" value = "$(arg arg-name)$"/>
+```
+   6. <remap>:声明同一个名称的映射
+      1. 格式:<>
+   7. <machine>
+   8. <include>:类似于include
+      1. 格式: $ <include file = "$(dirname)/others.launch"/>$
+   9.  <env>
+   10. <test>
+       1. 格式:<test test-name= “test_1_2" pkg="mypkg" type ="test_1_2.py" args ="testl test2" />
+       2. test-name:测试节点名称；无respawn,output, machine属性 ，**其余部分和<node>类似**
+</launch>
 
 ## 3.ROS工作空间覆盖
 ### 3-1.问题：
@@ -4318,3 +4367,151 @@ e/c : increase/decrease only angular speed by 10%
          3. 总结**全局规划侧重于全局，本地规划侧重于当前**
    4. 运动控制:控制速度和方向
    5. 环境感知:摄像头，雷达，编码器..
+
+### 2.定位方式
+1. 里程计定位
+   1. 实时收集机器人的速度信息并发布机器人坐标系与父级参考系的相对关系
+2. 传感器定位
+   1. 通过传感器收集外界环境信息通过匹配计算并发布机器人坐标系与父级参考系的相对关系
+3. 方式比较
+   1. 里程计定位
+      1. 优点：信息是连续的，没有离散的跳跃
+      2. 缺点：里程计存在累计误差，不利于长距离或长时间定位
+   2. 传感器定位
+      1. 优点：更精准
+      2. 缺点：传感器定位会出现跳变，且传感器定位在标志物少的情况下，其定位精度会大打折扣。
+      3. 两种方式可结合使用
+4. 坐标系变换
+   1. 机器人坐标系一般使用根坐标系(base_link or base_footprint),里程计定位时，父级坐标系为*odom*，传感器定位时，父级坐标系为*Map*。
+   2. 当2者结合使用时，map和odom都是机器人模型根坐标系的父级，这是不符合坐标变换的*单继承*原则的，所以，一般会将转换关系设为:map->doom->base_link or base_footprint
+
+## 6-2.机器人导航
+1. 涉及的内容
+   1. SLAM建图
+   2. 地图服务
+   3. 机器人定位
+   4. 路径规划
+   5. 探索式的SLAM建图
+2. 导航实现
+   1. 安装 gmapping 包(用于构建地图):sudo apt install ros-<ROS版本>-gmapping
+   2. 安装地图服务包(用于保存与读取地图):sudo apt install ros-<ROS版本>-map-server
+   3. 安装 navigation 包(用于定位以及路径规划):sudo apt install ros-<ROS版本>-navigation
+3. 功能包
+   1. *gmapping map_server amcl move_base*
+### 1.SLAM建图
+1. gmapping节点说明
+   1. 订阅的Topic
+      1. tf(tf/Message)
+         1. 用于雷达，底盘，里程计之间的坐标变换消息
+      2. scan(sensor_msgs/LaserScan)
+         1. Slam所需的雷达消息
+   2. 发布的Topic
+      1. map_metadata(nav_msgs/MapMetaData)
+         1. 地图元数据，包括地图的宽度，高度，分辨率，该消息会固定更新
+      2. map(nav_msgs/OccupancyGrid)
+         1. 地图的栅格数据，一般会在Rviz中以图形化的方式显示
+      3. ~entropy(std_msgs/Float64)
+         1. 机器人姿态分布熵估计(值越大，不确定性越大)
+   3. 服务
+      1. dynamic_map(nav_msgs/GetMap)
+         1. 用于获取地图数据
+   4. 参数
+      1. base_frame(string, default,"base_link")，*机器人基坐标系*
+      2. ~map_frame(string, default:"map"),地图坐标系。
+      3. odom_frame(string, default:"odom"),*里程计坐标系。*
+      4. map_update_interval(float, default: 5.0),*地图更新频率，根据指定的值设计更新间隔。*
+      5. maxUrange(float, default: 80.0),*激光探测的最大可用范围(超出此阈值，被截断)。*
+      6. maxRange(float),*激光探测的最大范围。*
+   5.*所需坐标变换*
+      1. laser->base_link
+         1. 由robot_state_publisher或者static_transform_publisher发布
+      2. base_link->odom
+         1. 由里程计节点发布
+   6. 发布的坐标变换
+      1. map->odom: *地图到里程计坐标系的转换*
+
+2. gmapping使用
+   1. gmapping节点相关launch文件
+```xml
+<launch>
+<param name="use_sim_time" value="true"/>
+    <node pkg="gmapping" type="slam_gmapping" name="slam_gmapping" output="screen">
+      <remap from="scan" to="scan"/>
+      <param name="base_frame" value="base_footprint"/><!--底盘坐标系-->
+      <param name="odom_frame" value="odom"/> <!--里程计坐标系-->
+      <param name="map_update_interval" value="5.0"/>
+      <param name="maxUrange" value="16.0"/>
+      <param name="sigma" value="0.05"/>
+      <param name="kernelSize" value="1"/>
+      <param name="lstep" value="0.05"/>
+      <param name="astep" value="0.05"/>
+      <param name="iterations" value="5"/>
+      <param name="lsigma" value="0.075"/>
+      <param name="ogain" value="3.0"/>
+      <param name="lskip" value="0"/>
+      <param name="srr" value="0.1"/>
+      <param name="srt" value="0.2"/>
+      <param name="str" value="0.1"/>
+      <param name="stt" value="0.2"/>
+      <param name="linearUpdate" value="1.0"/>
+      <param name="angularUpdate" value="0.5"/>
+      <param name="temporalUpdate" value="3.0"/>
+      <param name="resampleThreshold" value="0.5"/>
+      <param name="particles" value="30"/>
+      <param name="xmin" value="-50.0"/>
+      <param name="ymin" value="-50.0"/>
+      <param name="xmax" value="50.0"/>
+      <param name="ymax" value="50.0"/>
+      <param name="delta" value="0.05"/>
+      <param name="llsamplerange" value="0.01"/>
+      <param name="llsamplestep" value="0.01"/>
+      <param name="lasamplerange" value="0.005"/>
+      <param name="lasamplestep" value="0.005"/>
+    </node>
+
+    <node pkg="joint_state_publisher" name="joint_state_publisher" type="joint_state_publisher" />
+    <node pkg="robot_state_publisher" name="robot_state_publisher" type="robot_state_publisher" />
+
+    <node pkg="rviz" type="rviz" name="rviz" />
+    <!-- 可以保存 rviz 配置并后期直接使用-->
+    <!--
+    <node pkg="rviz" type="rviz" name="rviz" args="-d $(find my_nav_sum)/rviz/gmapping.rviz"/>
+    -->
+</launch>
+```
+   2. 执行
+      1. 启动gazebo机器人仿真环境
+      2. 启动地图launch文件
+      3. 启动键盘控制节点
+      4. 在rviz中添加组件，绘制栅格地图
+
+
+### 2.mapserver
+1. 保存节点
+   1. launch
+```xml
+<launch>
+    <arg name="filename" value="$(find mycar_nav)/map/nav" />
+    <node name="map_save" pkg="map_server" type="map_saver" args="-f $(arg filename)" />
+</launch>
+<!-- 其中mymap是地图的保存路径以及保存的文件名称 -->
+```
+   2. 测试
+      1. 启动仿真环境，键盘控制节点，SLAM节点
+      2. 用键盘控制机器人运动和绘图
+      3. 将上述地图保存
+      4. 结果：在指定路径下会生成2个文件，xxx.pgm, xxx.yaml
+   3. xxx.pgm是一张图片，可以直接查看
+   4. xxx.yam保存的是地图的元数据信息，用于描述图片
+
+```yaml
+image: /home/rosmelodic/ws02_nav/src/
+#image
+mycar_nav/map/nav.pgm
+resolution: 0.050000
+origin: [-50.000000, -50.000000, 0.000000]
+negate: 0
+occupied_thresh: 0.65
+free_thresh: 0.196
+```
+2.

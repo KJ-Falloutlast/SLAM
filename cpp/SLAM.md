@@ -1860,46 +1860,44 @@ eg:
 ### 2.demo
 1. 例1
 ```cpp
-#include<iostream>
-#include<ceres/ceres.h>
-
+#include <ceres/ceres.h>
+#include <iostream>
 using namespace std;
 using namespace ceres;
-
-//第一部分：构建代价函数，重载（）符号，仿函数的小技巧
-struct CostFunctor {
-   template <typename T>
-   bool operator()(const T* const x, T* residual) const {
-     residual[0] = T(10.0) - x[0];
-     return true;
-   }
+//1.创建代价函数
+class CostFunctor{//这里必须要用functor而非function
+public:
+    template <typename T>//里面传递的是地址
+    bool operator() (const T *const x, T *residual) const{
+        //这里必须要加const,表示该成员函数内的数据不能被修改
+        residual[0] = T(10) - x[0];//T(10)表示将10转为T的类型
+        return true;
+    }
 };
-
-//主函数
-int main(int argc, char** argv) {
-  google::InitGoogleLogging(argv[0]);
-
-  // 寻优参数x的初始值，为5
-  double initial_x = 5.0;
-  double x = initial_x;
-
-  // 第二部分：构建寻优问题
-Problem problem;
-  CostFunction* cost_function =
-      new AutoDiffCostFunction<CostFunctor, 1, 1>(new CostFunctor); //使用自动求导，将之前的代价函数结构体传入，第一个1是输出维度，即残差的维度，第二个1是输入维度，即待寻优参数x的维度。
-  problem.AddResidualBlock(cost_function, NULL, &x); //向问题中添加误差项，本问题比较简单，添加一个就行。
-
-  //第三部分： 配置并运行求解器
-  Solver::Options options;
-  options.linear_solver_type = ceres::DENSE_QR; //配置增量方程的解法
-  options.minimizer_progress_to_stdout = true;//输出到cout
-  Solver::Summary summary;//优化信息
-  Solve(options, &problem, &summary);//求解!!!
-
-  std::cout << summary.BriefReport() << "\n";//输出优化的简要信息
-//最终结果
-  std::cout << "x : " << initial_x
-            << " -> " << x << "\n";
-  return 0;
+// (1)加了const的成员函数可以被非const和const对象调用
+// (2)不加const的成员函数只能被非const对象调用
+int main(){
+    //2.创建寻优问题
+    //2-1.寻优的的初始值
+    double initial_x = 5.0;
+    double x = initial_x;
+    //2-2.构建问题
+    Problem problem;
+    CostFunction *cost_function = new AutoDiffCostFunction<CostFunctor, 1, 1>(new CostFunctor);
+    //2-3.添加误差项
+    problem.AddResidualBlock(cost_function, NULL, &x);
+    //3.配置求解器
+    //3-1.创建1个options
+    Solver::Options options;
+    options.linear_solver_type = ceres::DENSE_QR;//线性求解器类型
+    options.minimizer_progress_to_stdout = true;//是否输出到cout
+    //3-2.创建summary
+    Solver::Summary summary;
+    //4.求解
+    Solve(options, &problem, &summary);
+    
+    //5.输出结果
+    cout << summary.BriefReport() << endl;//输出优化的报告
+    cout << "x = " << initial_x << " -> " << x << endl;//输出优化的结果   
 }
 ```
