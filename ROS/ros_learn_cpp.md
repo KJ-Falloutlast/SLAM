@@ -4435,6 +4435,7 @@ e/c : increase/decrease only angular speed by 10%
 ```xml
 <launch>
 <param name="use_sim_time" value="true"/>
+    <!-- use_sim_time = true说明使用的是仿真时间而非walltime -->
     <node pkg="gmapping" type="slam_gmapping" name="slam_gmapping" output="screen">
       <remap from="scan" to="scan"/>
       <param name="base_frame" value="base_footprint"/><!--底盘坐标系-->

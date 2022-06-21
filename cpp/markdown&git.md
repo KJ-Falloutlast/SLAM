@@ -273,6 +273,21 @@ markdown
         * $\left$和 $\right$使符大小与邻近的公式相适应
           * $(\frac{x}{y})$
           * $\left(\frac{x}{y}\right)$
+4. 颜色的设置
+<font face="黑体">我是黑体字</font>
+<font face="微软雅黑">我是微软雅黑</font>
+<font face="STCAIYUN">我是华文彩云</font>
+<font color=red>我是红色</font>
+<font color=#008000>我是绿色</font>
+<font color=Blue>我是蓝色</font>
+<font size=5>我是尺寸</font>
+<font face="黑体" color=green size=3>我是黑体，绿色，尺寸为5</font>
+
+
+5. $\sum_{i=0}^{i = N}\frac{x_i}{x_i + {x_i}^2} = \frac{4}{7}$
+6. $\int_0^{x^2}{y^2}dxdy$
+
+
 
 ## git 学习
 1. github令牌：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
