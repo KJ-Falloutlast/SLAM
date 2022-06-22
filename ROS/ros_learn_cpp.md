@@ -1719,7 +1719,7 @@ roslaunch hello.launch xxx:=值
 <param name = "output_frame" value = "$(arg arg-name)$"/>
 ```
    6. <remap>:声明同一个名称的映射
-      1. 格式:<>
+      1. <remap from = "turtlebot/cmd_vel" to = "/cmd_vel"> (from原命名，to映射之后的命名)
    7. <machine>
    8. <include>:类似于include
       1. 格式: $ <include file = "$(dirname)/others.launch"/>$
@@ -4495,7 +4495,9 @@ e/c : increase/decrease only angular speed by 10%
     <arg name="filename" value="$(find mycar_nav)/map/nav" />
     <node name="map_save" pkg="map_server" type="map_saver" args="-f $(arg filename)" />
 </launch>
-<!-- 其中mymap是地图的保存路径以及保存的文件名称 -->
+
+<!-- 其中mymap是地图的保存路径以及保存的文件名称,注意，一定要设置map文件夹，否则无法保存pmg和yaml文件到相应的位置 -->
+
 ```
    2. 测试
       1. 启动仿真环境，键盘控制节点，SLAM节点
@@ -4504,7 +4506,9 @@ e/c : increase/decrease only angular speed by 10%
       4. 结果：在指定路径下会生成2个文件，xxx.pgm, xxx.yaml
    3. xxx.pgm是一张图片，可以直接查看
    4. xxx.yam保存的是地图的元数据信息，用于描述图片
-
+   5. 保存时要注意
+      1. 路径要存在
+      2. rviz和gazebo都要打开后启动save结点才能保存成功
 ```yaml
 image: /home/rosmelodic/ws02_nav/src/
 #image
@@ -4515,4 +4519,144 @@ negate: 0
 occupied_thresh: 0.65
 free_thresh: 0.196
 ```
-2.
+
+2. 读取节点
+
+```xml
+<launch>
+    <!-- 设置地图的配置文件 -->
+    <arg name="map" default="nav.yaml" />
+    <!-- 运行地图服务器，并且加载设置的地图-->
+    <node name="map_server" pkg="map_server" type="map_server" args="$(find mycar_nav)/map/$(arg map)"/>
+</launch>
+```
+3. nav.yaml详解
+```yaml
+# 1.图片路径，可以是绝对路径也可以是相对路径
+image: /home/kim-james/ROS_Space/catkin_ws_cpp/src/nav_demo/map/nav.pgm
+# 2.分辨率(单位: m/像素)、地图刻度尺单位
+resolution: 0.050000
+# 3.地图位姿
+# 地图的右下角相对于rviz中原点位姿(原点的坐标系符合右手定则:X轴在前，Y轴在右,Z轴在上)
+#(x，y，偏航）偏航为逆时针旋转（偏航= 0表示无旋转）
+origin: [-50.000000, -50.000000, 0.000000]
+# 4.取反：是否应该颠倒白色/黑色自由/占用的语义
+negate: 0
+
+#地图的障碍物判断
+#最终显示结果:白色是可通行区域，黑色是障碍物，蓝灰是位置区域
+#判断规则:
+#1.地图中的每个像素都有取值[0.255],白色:255,黑色:0,像素值设为x
+#2.根据像素值计算一个比例:p = (255-x)/255,白色:0,黑色:1,灰色是介于0到1的值
+#3.判断是否是障碍物:p > occupied_thresh就是障碍物,p < occupied_thresh就是无障碍物，可以自由通行
+
+
+# 5.占用阈值：占用概率大于此阈值的像素被视为完全占用
+occupied_thresh: 0.65
+# 6.空闲阈值：占用率小于此阈值的像素被视为完全空闲
+free_thresh: 0.196
+```
+
+### 3.定位
+#### 3-1.相关节点说明
+**AMCL(adaptive Monte Carlo Localization)**
+1. 订阅的topic
+   1. scan(sensor_msgs/LaserScan)
+      1. 激光雷达数据(感知周边的信息)
+   2. tf(tf/tfMessage)
+      1. 坐标变换信息 (**利用坐标变换将感知的相对于雷达的消息转换为机器人本体消息**)
+   3. initialpose(geometry_msgs/PoseWithCovarianceStamped)
+      1. 用来初始化粒子滤波器的均值和协方差
+   4. map(nav_msgs/OccupancyGrid)
+      1. 获取地图数据
+2. 发布的topic
+   1. amcl_pose(geometry_msgs/PosewithCovarianceStamped)
+      1. 机器人在地图中的位姿估计
+   2. particlecloud(geometry_msgs/PoseArray)
+      1. *位姿估计集合*，rviz中可以被PoseArray订阅然后图形化显示机器人位姿估计的集合,tf(tf/tfMessage)
+      2. 发布从odom到map的转换
+3. 服务
+   1. global_localization(std_srvs/Empty)
+      1. 初始化全局定位的服务。
+   2. request_nomotion_update(std_srvs/Empty
+      1. 手动执行更新和发布更新的粒子的服务。
+   3. set_map(nav_msgs/SetMap)
+      1. 手动设置新地图和姿态的服务。
+4. 调用的服务
+   1. static_map(nav_msgs/GetMap)
+      1. 调用此服务获取地图数据
+5. 参数  
+   1. ~*odom_model_type*(string, default:"diff)
+      1. 里程计模型选择: "diff","omni","diff-corrected","omni-corrected" (diff *差速*、*omni* 全向轮)
+   2. ~*odom_frame_id*(string, default:"odom")
+      1. 里程计坐标系。
+   3. ~*base_frame_id*(string, default:"base_link") **最好使用base_footprint**
+      1. *机器人极坐标系*。
+   4. ~*global_frame_id*(string, default:"map")
+    地图坐标系。
+
+6. 坐标变换
+   1. 里程计定位：只是通过里程计数据实现/odom_frame和/base_frame之间的坐标转换
+   2. amcl定位:可以提供/map_frame, /odom_frame和/base_frame之间的坐标变换
+  
+#### 3-2.amcl使用
+1. roscd amcl && cd examples
+2. gedit amcl_diff.launch
+```xml
+<launch>
+    <node pkg="amcl" type="amcl" name="amcl" output="screen">
+        <!-- Publish scans from best pose at a max of 10 Hz -->
+        <param name="odom_model_type" value="diff"/><!-- 里程计模式为差分 -->
+        <param name="odom_alpha5" value="0.1"/>
+        <param name="transform_tolerance" value="0.2" />
+        <param name="gui_publish_rate" value="10.0"/>
+        <param name="laser_max_beams" value="30"/>
+        <param name="min_particles" value="500"/>
+        <param name="max_particles" value="5000"/>
+        <param name="kld_err" value="0.05"/>
+        <param name="kld_z" value="0.99"/>
+        <param name="odom_alpha1" value="0.2"/>
+        <param name="odom_alpha2" value="0.2"/>
+        <!-- translation std dev, m -->
+        <param name="odom_alpha3" value="0.8"/>
+        <param name="odom_alpha4" value="0.2"/>
+        <param name="laser_z_hit" value="0.5"/>
+        <param name="laser_z_short" value="0.05"/>
+        <param name="laser_z_max" value="0.05"/>
+        <param name="laser_z_rand" value="0.5"/>
+        <param name="laser_sigma_hit" value="0.2"/>
+        <param name="laser_lambda_short" value="0.1"/>
+        <param name="laser_lambda_short" value="0.1"/>
+        <param name="laser_model_type" value="likelihood_field"/>
+        <!-- <param name="laser_model_type" value="beam"/> -->
+        <param name="laser_likelihood_max_dist" value="2.0"/>
+        <param name="update_min_d" value="0.2"/>
+        <param name="update_min_a" value="0.5"/>
+
+        <param name="odom_frame_id" value="odom"/><!-- 里程计坐标系 -->
+        <param name="base_frame_id" value="base_footprint"/><!-- 添加机器人基坐标系 -->
+        <param name="global_frame_id" value="map"/><!-- 添加地图坐标系 -->
+
+        <param name="resample_interval" value="1"/>
+        <param name="transform_tolerance" value="0.1"/>
+        <param name="recovery_alpha_slow" value="0.0"/>
+        <param name="recovery_alpha_fast" value="0.0"/>
+    </node>
+</launch>
+```
+3. test_amcl(**主要用关于启动amcl节点**)
+```xml
+<!-- 测试文件 -->
+<launch>
+    <!-- 1.启动rviz -->
+    <node pkg="joint_state_publisher" name="joint_state_publisher" type="joint_state_publisher" />
+    <node pkg="robot_state_publisher" name="robot_state_publisher" type="robot_state_publisher" />
+    <node pkg="rviz" type="rviz" name="rviz" />
+    <!-- 2.启动地图服务 -->
+    <include file = "$(find nav_demo)/launch/nav03_map_server.launch"/>
+    <!-- 3.amcl文件 -->
+    <include file = "$(find nav_demo)/launch/nav04_amcl.launch"/>
+</launch>
+```
+4. 启动gazebo环境，然后打开test_amcl节点和键盘控制节点
+5. 进入rviz中启动poseArray

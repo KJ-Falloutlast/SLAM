@@ -1894,8 +1894,8 @@ int main(int argc, char** argv) {
     Problem problem;
     CostFunction* cost_function =
      //注意：costFunctor是前面定义的f(x)=10-x。
-     //使用自动求导，将之前的代价函数结构体传入，第一个1是待测参量的维数，第二个1是每个待测参量的size
-     // 比如有两个参量。第一个为m，大小9；第二个c，大小为3。那么就是<CostFunctor, 2, 9，3>
+     //使用自动求导，将之前的代价函数结构体传入，第一个是残差的维度为1， 后面的是待优化参数的维度,
+     // 比如残差的维度是1，有2个待优化参数。第一个为m，大小9；第二个c，大小为3。那么就是<CostFunctor, 2, 9，3>
             new AutoDiffCostFunction<CostFunctor, 1, 1>(new CostFunctor); 
     problem.AddResidualBlock(cost_function, NULL, &x); //向问题中添加误差项，本问题比较简单，添加一个就行。
  
@@ -1913,6 +1913,12 @@ int main(int argc, char** argv) {
               << " -> " << x << "\n";
     return 0;
 }
+/*
+class ProjectionTwoFrameOneCamFactor : public ceres::SizedCostFunction<2, 7, 7, 7, 1, 1>
+该继承的类说明残差的维度是2，输入的第一个待优化参数的维度是7，
+第二个待优化参数的维度是7，第三个待优化参数的维度是7，
+第四个待优化参数的维度是1，第五个待优化参数的维度是1。
+*/
 ```
 2. 例2
 ```cpp
@@ -1973,6 +1979,7 @@ int main ( int argc, char** argv )
             abc                 // 待估计参数
         );
     }
+    //new ceres::AutoDiffCostFunction<CURVE_FITTING_COST, 1, 3>,当CURVE_FITTING_COST出入进problem时，相当于计算了100次residual[0]
 
     // 配置求解器
     ceres::Solver::Options options;     // 这里有很多配置项可以填
@@ -1991,6 +1998,11 @@ int main ( int argc, char** argv )
 
     return 0;
 }
+
+/*
+实际上此问题的核心是:通过构造函数F(x,y)输入100个(x,y)，通过计算100个点的residual[0] = y - exp(ax**2 + b*x + c),
+计算出当R = r1**2 + r2**2 + ... r100**2(其中ri = ri(a,b,c))最小时的(a,b,c)
+*/ 
 ```
 3. 例3
 ```cpp

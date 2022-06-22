@@ -359,8 +359,95 @@ void QuickDemo::mat_creation_demo(Mat &image){
 ```
 ### 3.图像的读写操作
 ```cpp
+// pixel：像素
+void QuickDemo::pixel_visit_demo(Mat &image){
+    int w = image.cols;
+    int h = image.rows;
+    int dims = image.channels();//dims是维度也是通道数
+    //1.通过数组
+    // for (int row = 0; row < h; row++){
+    //     for (int col = 0; col < w; col++){
+    //         if (dims == 1){//灰度图像channels = 1
+    //             int pv = image.at<uchar>(row, col);
+    //             image.at<uchar>(row, col) = 255- pv;
+    //             /*
+    //             1.at<uchar>:将uchar类型的转换为int类型               
+    //             2.usigned char:为有符号8位数，-128-127
+    //               char:无符号8位数，0-255
+    //             */
+    //         }
+    //         if (dims == 3){//彩色图像channels = 2
+    //             Vec3b bgr = image.at<Vec3b>(row, col);//一次性获取了3个值
+    //             //Vec3b是一个数组
+    //             image.at<Vec3b>(row, col)[0] = 255 - bgr[0];
+    //             image.at<Vec3b>(row, col)[1] = 255 - bgr[1];
+    //             image.at<Vec3b>(row, col)[2] = 255 - bgr[2];
+    //         }
+    //     }
+    // }
 
+
+    //2.通过指针访问
+    for (int row = 0; row < h; row++){
+        uchar *current_row = image.ptr<uchar>(row);//当前行的指针 
+        for (int col = 0; col < w; col++){
+            if (dims == 1){//灰度图像channels = 1
+                int pv = *current_row;
+                *current_row++ = 255 - pv;
+            }
+            if (dims == 3){//彩色图像channels = 3
+                *current_row++ = 255 - *current_row;
+                *current_row++ = 255 - *current_row;
+                *current_row++ = 255 - *current_row;
+            }//指针可以实现快速遍历
+        }
+    }
+    imshow("像素读写演示", image);
+
+}
 ```
+### 4.图像的加减乘除
+```cpp
+void QuickDemo::operators_demo(Mat &image){
+    Mat dst1, dst2, dst3, dst4;
+	Mat m = Mat::zeros(image.size(), image.type());
+	m = Scalar(5, 5, 5);
+
+	//等同于下面的加法算法
+	/*
+	int w = image.cols;
+	int h = image.rows;
+	int dims = image.channels();
+	for (int row = 0; row < h; row++) {
+		for (int col = 0; col < w; col++) {
+			Vec3b p1 = image.at<Vec3b>(row, col);
+			Vec3b p2 = m.at<Vec3b>(row, col);
+			dst.at<Vec3b>(row, col)[0] = saturate_cast<uchar>(p1[0] + p2[0]);
+			//通过saturate_cast<uchar>进行类型转换
+            dst.at<Vec3b>(row, col)[1] = saturate_cast<uchar>(p1[1] + p2[1]);
+			dst.at<Vec3b>(row, col)[2] = saturate_cast<uchar>(p1[2] + p2[2]);
+		}
+	}
+	*/
+	add(image, m, dst1);// image + m = dst1
+	subtract(image, m, dst2);// image - m
+	multiply(image, m, dst3);// image * m
+	divide(image, m, dst4);// image / m
+	imshow("加法操作", dst1);
+	imshow("减法操作", dst2);
+	imshow("乘法操作", dst3);
+	imshow("除法操作", dst4);
+}
+```
+### 5.图像的亮度和对比度调整
+
+
+
+
+
+
+
+
 
 ## 1-5.补充知识
 ### 1.scalar
