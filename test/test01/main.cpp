@@ -1,26 +1,28 @@
 #include <iostream>
-#include <string>
+#include <queue>
+#include <vector>
+#include <numeric>
 using namespace std;
 
-template<class T>
-void myPrint(T a, T b){
-	cout << "函数模板调用" << endl;
-}
-
-template<class T>
-void myPrint(T a, T b, T c){//T可以接收任何对象
-	cout << "函数模板重载" << endl;
-}
-
-void myPrint(int a, int b){
-	cout << "普通函数调用" << endl;
-}
-
-void test(){
-	int abc[8];
-	int bcd[8];
-	myPrint(abc, bcd);
-}
+class KthLargest {
+public:
+    priority_queue<int, vector<int>, greater<int>> q;
+    int k;
+    KthLargest(int k, vector<int>& nums) {
+        this->k = k;
+        for (auto& x: nums) {
+            add(x);
+        }
+    }
+    
+    int add(int val) {
+        q.push(val);
+        if (q.size() > k) {
+            q.pop();
+        }
+        return q.top();
+    }
+};
 int main(){
-	test();
+	
 }
