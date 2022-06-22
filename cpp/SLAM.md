@@ -1860,45 +1860,58 @@ eg:
 ### 2.demo
 1. 例1
 ```cpp
-#include <ceres/ceres.h>
 #include <iostream>
+#include <ceres/ceres.h>
+ 
 using namespace std;
 using namespace ceres;
-//1.创建代价函数
-class CostFunctor{//这里必须要用functor而非function
-public:
-    template <typename T>//里面传递的是地址
-    bool operator() (const T *const x, T *residual) const{
-        //这里必须要加const,表示该成员函数内的数据不能被修改
-        residual[0] = T(10) - x[0];//T(10)表示将10转为T的类型
+ 
+//第一部分：构建代价函数 -- 这个是我们自己构造，可能还有很多残差，都可以按类写一个代价函数
+struct CostFunctor {
+    template <typename T>
+   //operators是一种模板方法，其假定所的输入输出都变为T的格式
+  //其中x为带估算的参数，residual是残差
+    bool operator()(const T* const x, T* residual) const {
+        residual[0] = T(10.0) - x[0]; //这里的T[10.0]，可以将10 转换位所需的T格式，如double，Jet等
         return true;
     }
 };
-// (1)加了const的成员函数可以被非const和const对象调用
-// (2)不加const的成员函数只能被非const对象调用
-int main(){
-    //2.创建寻优问题
-    //2-1.寻优的的初始值
+ 
+ 
+ 
+ 
+//主函数
+int main(int argc, char** argv) {
+    google::InitGoogleLogging(argv[0]);
+ 
+    // 寻优参数x的初始值，为5
     double initial_x = 5.0;
     double x = initial_x;
-    //2-2.构建问题
+ 
+ 
+    // 第二部分：构建寻优问题
+    // 设置好的残差计算的公式，使用auto-differentiation选项去获得导数（雅克比）.
     Problem problem;
-    CostFunction *cost_function = new AutoDiffCostFunction<CostFunctor, 1, 1>(new CostFunctor);
-    //2-3.添加误差项
-    problem.AddResidualBlock(cost_function, NULL, &x);
-    //3.配置求解器
-    //3-1.创建1个options
+    CostFunction* cost_function =
+     //注意：costFunctor是前面定义的f(x)=10-x。
+     //使用自动求导，将之前的代价函数结构体传入，第一个1是待测参量的维数，第二个1是每个待测参量的size
+     // 比如有两个参量。第一个为m，大小9；第二个c，大小为3。那么就是<CostFunctor, 2, 9，3>
+            new AutoDiffCostFunction<CostFunctor, 1, 1>(new CostFunctor); 
+    problem.AddResidualBlock(cost_function, NULL, &x); //向问题中添加误差项，本问题比较简单，添加一个就行。
+ 
+ 
+    //第三部分： 配置并运行求解器
     Solver::Options options;
-    options.linear_solver_type = ceres::DENSE_QR;//线性求解器类型
-    options.minimizer_progress_to_stdout = true;//是否输出到cout
-    //3-2.创建summary
-    Solver::Summary summary;
-    //4.求解
-    Solve(options, &problem, &summary);
-    
-    //5.输出结果
-    cout << summary.BriefReport() << endl;//输出优化的报告
-    cout << "x = " << initial_x << " -> " << x << endl;//输出优化的结果   
+    options.linear_solver_type = ceres::DENSE_QR; //使用得是稠密的QR分解方式
+    options.minimizer_progress_to_stdout = true;//输出到cout
+    Solver::Summary summary;//优化信息
+    Solve(options, &problem, &summary);//求解!!!
+ 
+    std::cout << summary.BriefReport() << "\n";//输出优化的简要信息
+    //最终结果
+    std::cout << "x : " << initial_x
+              << " -> " << x << "\n";
+    return 0;
 }
 ```
 2. 例2
