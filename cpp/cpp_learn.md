@@ -1711,7 +1711,7 @@ int main(){
   swap02(&a, &b);//传入a, b变量的地址，*p来显示指针值；地址传递可以修改实参的值
   cout << "a = " << a << endl;
   cout << "b = " << b << endl;
-  swap03(a, b);//地址传递不可以修改实参的值
+  swap03(a, b);//引用传递可以修改实参的值
   cout << "a = " << a << endl;
   cout << "b = " << b << endl;
 }   
@@ -13631,132 +13631,30 @@ int main()
 (2)不加const的成员函数只能被非const对象调用
 */
 ```
-
-
-
-
-
-
-
-# 1.算法复杂度
-## 1-1.时间复杂度
-### 1. 定义
-   1. 输入数据大小为N时，算法运行所花费的时间
-   2. 注意
-      1. 统计的是算法的**计算操作数量**，而非**运行的时间**。计算操作数量和运行时间成正相关关系，并不相等
-      2. 体现的是计算操作随着大小N变化时的情况。假设算法运行总共需要1,or 100次操作，那么这两种情况下O(1);需要**N次操作，100N次操作**，则时间复杂度为O(N)
-### 2. 符号表示
-   1. 复杂度有,**最差，平均，最佳**这三种情况，分别使用O, $\Theta$ , $\Omega$。看下例子
-   2. 题目：
-      1.  输入长度为 NNN 的整数数组 nums ，判断此数组中是否有数字 777 ，若有则返回 true ，否则返回 flase 。
-      2.  解题算法： 线性查找，即遍历整个数组，遇到 7，则返回 true 。
+## 12.malloc函数
 ```cpp
-#include<iostream>
-#include<string>
-#include <vector>
-using namespace std;
-
-bool findSeven(vector<int>& nums) {
-    for (int num : nums) {//当nums中无7时，循环N次，故为O(N)
-        if (num == 7)
-            return true;
-    }
-    return false;
-}
-
-int main(){
-	vector<int> v = {1, 2, 3, 4};
-	findSeven(v);
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+ 
+int main()
+{
+   char *str;
+ 
+   /* 最初的内存分配 */
+   str = (char *) malloc(15);//给str分配
+   strcpy(str, "runoob");//将"runoob"赋值给str
+   printf("String = %s,  Address = %u\n", str, str);
+ 
+   /* 重新分配内存 */
+   str = (char *) realloc(str, 25);
+   strcat(str, ".com");
+   printf("String = %s,  Address = %u\n", str, str);
+ 
+   free(str);
+   //释放内存
+ 
+   return(0);
 }
 ```
-   3. 最佳情况: $\Omega(1)$: nums = [7, a, b, c, ...], 即当数组首个数字为7时，无论nums有多少元素，线性查找的循环次数为1；
-   4. 最差情况: O(N):nums = [a, b, c, ...],且nums中所有数字都不为7，此时线性查找会遍历整个数组，循环N次,故此时是时间复杂读为O(N)
-   5. 平均情况$\theta$: 需要考虑输入数据的分布情况，计算所有数据情况下的平均时间复杂度，例如本题，需要考虑素数组长度，数组元素的取值范围。**O是最常见的复杂度渐进符号，以下都使用O**
-### 3. 常见种类
-![O](../pictures/leecode_时间复杂度.png)
 
-$O(1)<O(logN)<O(N)<O(NlogN)<O(N2)<O(2N)<O(N!)$
-
-*对于以下所有示例，设输入数据大小为 N ，计算操作数量为 count 。图中每个「蓝色方块」代表一个单元计算操作。*
-1. O(1)
-   1. 例子1
-```cpp
-int algorithm(int N) {
-    int a = 1;
-    int b = 2;
-    int x = a * b + N;
-    return 1;
-}
-//运行次数与N大小成常数关系，即不随着输入数据大小N的变化而变化
-```
-   2. 例子2
-```cpp
-int algorithm(int N) {
-    int count = 0;
-    int a = 10000;
-    for (int i = 0; i < a; i++) {
-        count++;//最多操作数量为10000次，故为O(1)
-    }
-    return count;
-}
-```
-2. O(N)
-   1. 例1
-```cpp
-int algorithm(int N) {
-    int count = 0;
-    for (int i = 0; i < N; i++)
-        count++;
-    return count;
-}
-//循环运行次数与N大小线性关系，时间复杂度为O(N)
-```
-   2. 例2
-```cpp
-int algorithm(int N) {
-    int count = 0;
-    int a = 10000;
-    for (int i = 0; i < N; i++) {
-        for (int j = 0; j < a; j++) {
-            count++;
-        }
-    }
-    return count;
-}
-//虽然是2层循环，但是第二层与N大小无关，所以整体仍与N线性关系
-```
-
-3. $O(N^2)$
-   1. 例1
-```cpp
-int algorithm(int N) {
-    int count = 0;
-    for (int i = 0; i < N; i++) {
-        for (int j = 0; j < N; j++) {
-            count++;
-        }
-    }
-    return count;
-}
-//两次循环相互独立，都与N成线性关系，所以总体与N成平方关系，时间复杂度为O(N^2)
-```
-   1. 例2
-以「冒泡排序」为例，其包含两层独立循环：
- 第一层复杂度为 O(N) ；
- 第二层平均循环次数为 N/2 ，复杂度为 O(N) ，推导过程如下：
-**O(N/2) = O(1/2)O(N) = O(1)O(N) = O(N)
-```cpp
-vector<int> bubbleSort(vector<int>& nums) {
-    int N = nums.size();
-    for (int i = 0; i < N - 1; i++) {
-        for (int j = 0; j < N - 1 - i; j++) {
-            if (nums[j] > nums[j + 1]) {
-                swap(nums[j], nums[j + 1]);
-            }
-        }
-    }
-    return nums;
-}
-
-
-```

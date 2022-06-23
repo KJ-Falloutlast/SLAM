@@ -428,8 +428,43 @@ for (i = 0; i < n; i++)
    1. 在非空线性表中，有且仅有1个开始结点a1，它没有直接前趋，而仅有一个直接后继a2
    2. 在非空线性表中，有且仅有1个终端结点an，它没有直接后继，而仅有一个直接前趋an-1
    3. 其余的内部节点ai(2<=i<=n-1)都有且仅有1个直接前趋ai-1和1个直接后继ai+1
+4. 顺序存储结构存在的问题
+   1. 存储空间分配不灵活
+   2. 运算发的空间复杂度高
 
 ## 2-2.案例
 1. 案例1
 2. 案例2
 ![线性表02](../pictures/2-1-线性表01.png)
+![线性表03](../pictures/2-1-线性表02.png)
+
+![链表](../pictures/2-2-03链表.png)
+## 2-3.补充
+```cpp
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+ 
+int main()
+{
+   char *str;
+ 
+   /* 最初的内存分配 */
+   str = (char *) malloc(15);
+   //(char*)表示将强制转换，将其转换为char类型的指针
+   strcpy(str, "runoob");//将"runoob"赋值给str
+   printf("String = %s,  Address = %u\n", str, str);
+ 
+   /* 重新分配内存 */
+   str = (char *) realloc(str, 25);
+   strcat(str, ".com");
+   printf("String = %s,  Address = %u\n", str, str);
+ 
+   free(str);
+ 
+   return(0);
+}
+```
+
+## 2-4.线性表的顺序存储表示
+

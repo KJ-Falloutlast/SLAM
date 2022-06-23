@@ -464,7 +464,12 @@ W: 目标 DEP-11-icons-hidpi (multiverse/dep11/icons-64x64@2.tar) 在
       1. cd /etc/apt/sources.list.d
       2. 找到错误提示的网址:http://ppa.launchpad.net/fcitx-team/nightly/ubuntu bionic Release
       3. 删除文件:sudo rm fcitx-team-ubuntu-nightly-bionic.list和xxx.list.save
-
+5. 没有realese文件
+   1. 描述:**E: 仓库 “http://ppa.launchpad.net/bzindovic/suitesparse-bugfix-1319687/ubuntu bionic Release” 没有 Release 文件**
+   2. 解决:
+      1. cd /etc/apt/sources.list.d
+      2. sudo mv 要更改的文件.list 要更改的文件.list.bak
+      3. sudo apt update
 ## 8. 用法：update-alternatives [<选项> ...] <命令>
 ```cpp
     命令：

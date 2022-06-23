@@ -2000,9 +2000,15 @@ int main ( int argc, char** argv )
 }
 
 /*
-实际上此问题的核心是:通过构造函数F(x,y)输入100个(x,y)，通过计算100个点的residual[0] = y - exp(ax**2 + b*x + c),
+1.实际上此问题的核心是:通过构造函数F(x,y)输入100个(x,y)，通过计算100个点的residual[0] = y - exp(ax**2 + b*x + c),
 计算出当R = r1**2 + r2**2 + ... r100**2(其中ri = ri(a,b,c))最小时的(a,b,c)
-*/ 
+
+2.const int * const a < = > const int *a
+3.*统一放在类型名的后面,例如int *a = int* a; const int* const a  <= const int* a
+4.residual前面不能限定const,因为每个点的residual是不一样的
+5.AddResidualBlock中数组不能传递&abc，但是非数组可以传递&a
+*/
+
 ```
 3. 例3
 ```cpp

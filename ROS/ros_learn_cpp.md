@@ -4660,3 +4660,178 @@ free_thresh: 0.196
 ```
 4. 启动gazebo环境，然后打开test_amcl节点和键盘控制节点
 5. 进入rviz中启动poseArray
+
+
+
+### 4.路径规划
+#### 1.move_base节点
+1. move_base动作
+   1. 动作订阅
+      1. move_base/goal(move_base_msgs/MoveBaseActionGoal)**move_base的运动规划目标**
+      2. move_base/cancel(actionlib_msgs/GoalID):**取消目标**
+   2. 动作发布
+      1. move_base/feedback(move_base_msgs/MoveBaseActionFeedback):**反馈连续的信息，包含机器人底盘坐标**
+      2. move_base/status(actionlib_msgs/GoalStatusArray):**发送到move_base的目标状态消息**
+      3. move_base/result(move_base_msgs/MoveBaseActionResult):**操作结果**
+   3. 订阅的topic
+      1. move_base_simple/goal(geometry/PoseStamped):运动规划目标(与action相比，没有连续反馈，无法追踪机器人执行状态)
+      2. 发布的topic
+         1. cmd_vel(geometry_msgs/Twist):输出到机器人底盘的运动控制消息
+   4. 服务 
+      1. *~make_plan*(nav_msgs/GetPlan)
+         1. 请求该服务，可以获取给定目标的规划路径，但是并不执行该路径规划。  
+      2. ~clear_unknown_space(std_srvs/Empty)
+         1. 允许用户直接清除机器人周围的未知空间。
+      3. *~clear_costmaps(std_srvs/Empty)*
+         1. 允许清除代价地图中的障碍物，可能会导致机器人与障碍物碰撞，请慎用。
+#### 2.move_base和代价地图
+1. 概念
+   1. 导航是依赖于地图的，ROS中的地图是一张图片，这张图片有w,h,分辨率，在图片中使用灰度值来表示障碍物存在的概率，但是slam中的地图在导航中是不能直接使用的，因为
+      1. slam构建的地图是静态地图，但是导航中，障碍物的信息是可变的，所需要在导航中实时获取障碍物消息
+      2. 在靠近障碍物边缘时，虽然此处是空闲区域，但是机器人在进入该区域后可能由于其他的因素，比如:惯性，不规则形状的机器人转弯可能会发生碰撞，所以在地图障碍物边缘设置警戒区，静止机器人进入
+2. 组成
+   1. 全局代价地图(global_costmap) + 本地代价地图(local_costmap),前者用于*全局路径规划*，后者用于*本地路径规划*
+   2. 层级   
+      1. Static Map Layer:静态地图层，*SLAM构架的静态地图*
+      2. Obstacle Map Layer:障碍地图层，传感器感知的*障碍物信息*
+      3. Inflation Layer:膨胀层，在以上两层地图上进行膨胀，*以避免机器人的外壳会装上障碍物*,**相当于在地图的障碍物的附近蒙上了一层阴影，让机器人在经过障碍物时有安全距离**
+      4. Other Layers:自定义costmap，*根据业务设置的地图数据*
+   3. ![碰撞算法](../pictures/碰撞算法.jpg)
+      1. 致命障碍:栅格值为254，此时障碍物与机器人中心重叠，必然发生碰撞；
+      2. 内切障碍:栅格值为253，此时障碍物处于机器人的内切圆内，必然发生碰撞；
+      3. 外切障碍:栅格值为[128,252]，此时障碍物处于其机器人的外切圆内，处于碰撞临界，不一定发生碰撞；
+      4. 非自由空间:栅格值为(0,127]，此时机器人处于障碍物附近，属于危险警戒区，进入此区域，将来可能会发生碰撞；
+      5. 自由区域:栅格值为0，此处机器人可以自由通过
+      6. 未知区域:栅格值为255，还没探明是否有障碍物。
+      7. **碰撞空间的设置可以参考非自由空间**
+
+#### 3.move_base使用
+
+1. nav05_path.launch
+```xml
+<launch>
+    <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen" clear_params="true">
+    <!-- clear_params = 在节点执行之前，把所有的参数清除;respawn = 节点关闭后不会重启  -->
+        <rosparam file="$(find nav_demo)/param/costmap_common_params.yaml" command="load" ns="global_costmap" />
+        <!-- 全局代价地图的通用参数 -->
+        <rosparam file="$(find nav_demo)/param/costmap_common_params.yaml" command="load" ns="local_costmap" />
+        <!-- 本地代价地图的通用参数 -->
+        <rosparam file="$(find nav_demo)/param/local_costmap_params.yaml" command="load" />
+        <!-- 局部代价地图参数 -->
+        <rosparam file="$(find nav_demo)/param/global_costmap_params.yaml" command="load" />
+        <!-- 全局代价地图参数 -->
+        <rosparam file="$(find nav_demo)/param/base_local_planner_params.yaml" command="load" />
+        <!-- 底盘控制参数 -->
+    </node>
+</launch>
+```
+2. nav06_test.launch
+```xml
+<!-- 集成导航相关的launch文件 -->
+<launch>
+    <!-- 地图服务 -->
+    <include file = "$(find nav_demo)/launch/nav03_map_server.launch"/>
+    <!-- amcl -->
+    <include file = "$(find nav_demo)/launch/nav04_amcl.launch"/>
+    <!-- move_base -->
+    <include file = "$(find nav_demo)/launch/nav05_path.launch"/>
+    <!-- rviz -->
+    <node pkg="joint_state_publisher" name="joint_state_publisher" type="joint_state_publisher" />
+    <node pkg="robot_state_publisher" name="robot_state_publisher" type="robot_state_publisher" />
+    <node pkg="rviz" type="rviz" name="rviz" />
+</launch>
+```
+3. base_local_planner.yaml
+```yaml
+TrajectoryPlannerROS:
+# Robot Configuration Parameters
+  max_vel_x: 0.5 # X 方向最大速度
+  min_vel_x: 0.1 # X 方向最小速速
+
+  max_vel_theta:  1.0 # 
+  min_vel_theta: -1.0
+  min_in_place_vel_theta: 1.0
+
+  acc_lim_x: 1.0 # X 加速限制
+  acc_lim_y: 0.0 # Y 加速限制
+  acc_lim_theta: 0.6 # 角速度加速限制
+
+# Goal Tolerance Parameters，目标公差
+  xy_goal_tolerance: 0.10
+  yaw_goal_tolerance: 0.05
+
+# Differential-drive robot configuration
+# 是否是全向移动机器人
+  holonomic_robot: false
+
+# Forward Simulation Parameters，前进模拟参数
+  sim_time: 0.8
+  vx_samples: 18
+  vtheta_samples: 20
+  sim_granularity: 0.05
+```
+4. costmap_common_params.yaml
+```yaml
+#机器人几何参，如果机器人是圆形，设置 robot_radius,如果是其他形状设置 footprint
+robot_radius: 0.12 #圆形
+# footprint: [[-0.12, -0.12], [-0.12, 0.12], [0.12, 0.12], [0.12, -0.12]] #其他形状
+
+obstacle_range: 3.0 # 用于障碍物探测，比如: 值为 3.0，意味着检测到距离小于 3 米的障碍物时，就会引入代价地图
+raytrace_range: 3.5 # 用于清除障碍物，比如：值为 3.5，意味着清除代价地图中 3.5 米以外的障碍物
+
+
+#膨胀半径，扩展在碰撞区域以外的代价区域，使得机器人规划路径避开障碍物
+inflation_radius: 0.2
+#代价比例系数，越大则代价值越小
+cost_scaling_factor: 3.0
+
+#地图类型
+map_type: costmap
+#导航包所需要的传感器
+observation_sources: scan
+#对传感器的坐标系和数据进行配置。这个也会用于代价地图添加和清除障碍物。例如，你可以用激光雷达传感器用于在代价地图添加障碍物，再添加kinect用于导航和清除障碍物。
+scan: {sensor_frame: laser, data_type: LaserScan, topic: scan, marking: true, clearing: true}
+#根据自己的雷达的名字来命名
+```
+5. global_costmap_params.yaml
+```yaml
+global_costmap:
+  global_frame: map #地图坐标系
+  robot_base_frame: base_footprint #机器人坐标系
+  # 以此实现坐标变换
+
+  update_frequency: 1.0 #代价地图更新频率
+  publish_frequency: 1.0 #代价地图的发布频率
+  transform_tolerance: 0.5 #等待坐标变换发布信息的超时时间
+
+  static_map: true # 是否使用一个地图或者地图服务器来初始化全局代价地图，如果不使用静态地图，这个参数为false.
+```
+6. local_costmap_params
+```yaml
+local_costmap:
+  global_frame: odom #里程计坐标系
+  robot_base_frame: base_footprint #机器人坐标系
+
+  update_frequency: 10.0 #代价地图更新频率
+  publish_frequency: 10.0 #代价地图的发布频率
+  transform_tolerance: 0.5 #等待坐标变换发布信息的超时时间
+
+  static_map: false  #不需要静态地图，可以提升导航效果
+  rolling_window: true #是否使用动态窗口，默认为false，在静态的全局地图中，地图不会变化
+  width: 3 # 局部地图宽度 单位是 m
+  height: 3 # 局部地图高度 单位是 m
+  resolution: 0.05 # 局部地图分辨率 单位是 m，一般与静态地图分辨率保持一致
+```
+7. 步骤
+   1. 启动gazebo仿真环境
+   2. 启动nav06_test.launch环境
+   3. 在rviz中完成配置
+      1. Robotmodel
+      2. Map
+      3. PoseArray
+      4. LaserScan
+      5. Odometry
+      6. Map_globol
+      7. Map_local
+      8. Path_global
+      9. Path_local
