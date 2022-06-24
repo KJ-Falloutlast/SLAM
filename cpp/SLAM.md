@@ -2259,3 +2259,349 @@ int main(){
 ## 4-2.g2o库的使用
 ### 1.相关基础概念
 1. g2o提供的顶点
+
+### 2.案例
+1. demo01
+```cpp
+#include <iostream>
+#include <g2o/core/base_vertex.h>
+#include <g2o/core/base_unary_edge.h>
+#include <g2o/core/block_solver.h>
+#include <g2o/core/optimization_algorithm_levenberg.h>
+#include <g2o/core/optimization_algorithm_gauss_newton.h>
+#include <g2o/core/optimization_algorithm_dogleg.h>
+#include <g2o/solvers/dense/linear_solver_dense.h>
+#include <Eigen/Core>
+#include <opencv2/core/core.hpp>
+#include <cmath>
+#include <chrono>
+using namespace std; 
+
+// 曲线模型的顶点，模板参数：优化变量维度和数据类型
+class CurveFittingVertex: public g2o::BaseVertex<3, Eigen::Vector3d>
+{
+public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+    virtual void setToOriginImpl() // 重置
+    {
+        _estimate << 0,0,0;
+    }
+    
+    virtual void oplusImpl( const double* update ) // 更新
+    {
+        _estimate += Eigen::Vector3d(update);
+    }
+    // 存盘和读盘：留空
+    virtual bool read( istream& in ) {}
+    virtual bool write( ostream& out ) const {}
+};
+
+// 误差模型 模板参数：观测值维度，类型，连接顶点类型
+class CurveFittingEdge: public g2o::BaseUnaryEdge<1,double,CurveFittingVertex>
+{
+public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+    CurveFittingEdge( double x ): BaseUnaryEdge(), _x(x) {}
+    // 计算曲线模型误差
+    void computeError()
+    {
+        const CurveFittingVertex* v = static_cast<const CurveFittingVertex*> (_vertices[0]);
+        const Eigen::Vector3d abc = v->estimate();
+        _error(0,0) = _measurement - std::exp( abc(0,0)*_x*_x + abc(1,0)*_x + abc(2,0) ) ;
+    }
+    virtual bool read( istream& in ) {}
+    virtual bool write( ostream& out ) const {}
+public:
+    double _x;  // x 值， y 值为 _measurement
+};
+
+int main( int argc, char** argv )
+{
+    double a=1.0, b=2.0, c=1.0;         // 真实参数值
+    int N=100;                          // 数据点
+    double w_sigma=1.0;                 // 噪声Sigma值
+    cv::RNG rng;                        // OpenCV随机数产生器
+    double abc[3] = {0,0,0};            // abc参数的估计值
+
+    vector<double> x_data, y_data;      // 数据
+    
+    cout<<"generating data: "<<endl;
+    for ( int i=0; i<N; i++ )
+    {
+        double x = i/100.0;
+        x_data.push_back ( x );
+        y_data.push_back (
+            exp ( a*x*x + b*x + c ) + rng.gaussian ( w_sigma )
+        );
+        cout<<x_data[i]<<" "<<y_data[i]<<endl;
+    }
+    
+    // 构建图优化，先设定g2o
+    typedef g2o::BlockSolver< g2o::BlockSolverTraits<3,1> > Block;  // 每个误差项优化变量维度为3，误差值维度为1
+    Block::LinearSolverType* linearSolver = new g2o::LinearSolverDense<Block::PoseMatrixType>(); // 线性方程求解器
+    Block* solver_ptr = new Block( linearSolver );      // 矩阵块求解器
+    // 梯度下降方法，从GN, LM, DogLeg 中选
+    g2o::OptimizationAlgorithmLevenberg* solver = new g2o::OptimizationAlgorithmLevenberg( solver_ptr );
+    // g2o::OptimizationAlgorithmGaussNewton* solver = new g2o::OptimizationAlgorithmGaussNewton( solver_ptr );
+    // g2o::OptimizationAlgorithmDogleg* solver = new g2o::OptimizationAlgorithmDogleg( solver_ptr );
+    g2o::SparseOptimizer optimizer;     // 图模型
+    optimizer.setAlgorithm( solver );   // 设置求解器
+    optimizer.setVerbose( true );       // 打开调试输出
+    
+    // 往图中增加顶点
+    CurveFittingVertex* v = new CurveFittingVertex();
+    v->setEstimate( Eigen::Vector3d(0,0,0) );
+    v->setId(0);
+    optimizer.addVertex( v );
+    
+    // 往图中增加边
+    for ( int i=0; i<N; i++ )
+    {
+        CurveFittingEdge* edge = new CurveFittingEdge( x_data[i] );
+        edge->setId(i);
+        edge->setVertex( 0, v );                // 设置连接的顶点
+        edge->setMeasurement( y_data[i] );      // 观测数值
+        edge->setInformation( Eigen::Matrix<double,1,1>::Identity()*1/(w_sigma*w_sigma) ); // 信息矩阵：协方差矩阵之逆
+        optimizer.addEdge( edge );
+    }
+    
+    // 执行优化
+    cout<<"start optimization"<<endl;
+    chrono::steady_clock::time_point t1 = chrono::steady_clock::now();
+    optimizer.initializeOptimization();
+    optimizer.optimize(100);
+    chrono::steady_clock::time_point t2 = chrono::steady_clock::now();
+    chrono::duration<double> time_used = chrono::duration_cast<chrono::duration<double>>( t2-t1 );
+    cout<<"solve time cost = "<<time_used.count()<<" seconds. "<<endl;
+    
+    // 输出优化值
+    Eigen::Vector3d abc_estimate = v->estimate();
+    cout<<"estimated model: "<<abc_estimate.transpose()<<endl;
+    
+    return 0;
+}
+```
+
+2. demo02
+```cpp
+/**
+ * BA Example
+ * Author: Xiang Gao
+ * Date: 2016.3
+ * Email: gaoxiang12@mails.tsinghua.edu.cn
+ *
+ * 在这个程序中，我们读取两张图像，进行特征匹配。然后根据匹配得到的特征，计算相机运动以及特征点的位置。这是一个典型的Bundle Adjustment，我们用g2o进行优化。
+ */
+// for std
+#include <iostream>
+// for opencv
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/features2d/features2d.hpp>
+#include <boost/concept_check.hpp>
+// for g2o
+#include <g2o/core/sparse_optimizer.h>
+#include <g2o/core/block_solver.h>
+#include <g2o/core/robust_kernel.h>
+#include <g2o/core/robust_kernel_impl.h>
+#include <g2o/core/optimization_algorithm_levenberg.h>
+#include <g2o/solvers/csparse/linear_solver_csparse.h>
+#include <g2o/types/slam3d/se3quat.h>
+#include <g2o/types/sba/types_six_dof_expmap.h>
+
+
+using namespace std;
+
+// 寻找两个图像中的对应点，像素坐标系
+// 输入：img1, img2 两张图像
+// 输出：points1, points2, 两组对应的2D点
+int findCorrespondingPoints( const cv::Mat& img1, const cv::Mat& img2, vector<cv::Point2f>& points1, vector<cv::Point2f>& points2 );
+
+double cx = 325.5;
+double cy = 253.5;
+double fx = 518.0;
+double fy = 519.0;
+
+int main( int argc, char** argv )
+{
+    cv::Mat img1 = cv::imread("/home/smz/learning_ref/slambook2-master/ch7/1.png", CV_LOAD_IMAGE_COLOR);
+    cv::Mat img2 = cv::imread("/home/smz/learning_ref/slambook2-master/ch7/2.png", CV_LOAD_IMAGE_COLOR);
+    // 找到对应点
+    vector<cv::Point2f> pts1, pts2;
+    if ( findCorrespondingPoints( img1, img2, pts1, pts2 ) == false )
+    {
+        cout<<"匹配点不够！"<<endl;
+        return 0;
+    }
+    cout<<"找到了"<<pts1.size()<<"组对应特征点。"<<endl;
+    // 构造g2o中的图
+    // 先构造求解器
+    g2o::SparseOptimizer    optimizer;
+
+
+    typedef g2o::BlockSolver<g2o::BlockSolverTraits<6, 3>> BlockSolverType;  
+    typedef g2o::LinearSolverCSparse<BlockSolverType::PoseMatrixType> LinearSolverType; // 线性求解器类型
+    auto algorithm = new g2o::OptimizationAlgorithmLevenberg(g2o::make_unique<BlockSolverType>(g2o::make_unique<LinearSolverType>()));
+
+    optimizer.setAlgorithm( algorithm );
+    optimizer.setVerbose( false );
+
+    // 添加节点
+    // 两个位姿节点
+    for ( int i=0; i<2; i++ )
+    {
+        g2o::VertexSE3Expmap* v = new g2o::VertexSE3Expmap();
+        v->setId(i);
+        if ( i == 0)
+            v->setFixed( true ); // 第一个点固定为零
+        // 预设值为单位Pose，因为我们不知道任何信息
+        v->setEstimate( g2o::SE3Quat() );
+        optimizer.addVertex( v );
+    }
+    // 很多个特征点的节点
+    // 以第一帧为准
+    for ( size_t i=0; i<pts1.size(); i++ )
+    {
+        g2o::VertexSBAPointXYZ* v = new g2o::VertexSBAPointXYZ();
+        v->setId( 2 + i );
+        // 由于深度不知道，只能把深度设置为1了
+        double z = 1;
+        double x = ( pts1[i].x - cx ) * z / fx;
+        double y = ( pts1[i].y - cy ) * z / fy;
+        v->setMarginalized(true);
+        v->setEstimate( Eigen::Vector3d(x,y,z) );
+        optimizer.addVertex( v );
+    }
+
+    // 准备相机参数
+    g2o::CameraParameters* camera = new g2o::CameraParameters( fx, Eigen::Vector2d(cx, cy), 0 );
+    camera->setId(0);
+    optimizer.addParameter( camera );
+
+    // 准备边
+    // 第一帧
+    vector<g2o::EdgeProjectXYZ2UV*> edges;
+    for ( size_t i=0; i<pts1.size(); i++ )
+    {
+        g2o::EdgeProjectXYZ2UV*  edge = new g2o::EdgeProjectXYZ2UV();
+        edge->setVertex( 0, dynamic_cast<g2o::VertexSBAPointXYZ*>   (optimizer.vertex(i+2)) );
+        edge->setVertex( 1, dynamic_cast<g2o::VertexSE3Expmap*>     (optimizer.vertex(0)) );
+        edge->setMeasurement( Eigen::Vector2d(pts1[i].x, pts1[i].y ) );
+        edge->setInformation( Eigen::Matrix2d::Identity() );
+        edge->setParameterId(0, 0);
+        // 核函数
+        edge->setRobustKernel( new g2o::RobustKernelHuber() );
+        optimizer.addEdge( edge );
+        edges.push_back(edge);
+    }
+    // 第二帧
+    for ( size_t i=0; i<pts2.size(); i++ )
+    {
+        g2o::EdgeProjectXYZ2UV*  edge = new g2o::EdgeProjectXYZ2UV();
+        edge->setVertex( 0, dynamic_cast<g2o::VertexSBAPointXYZ*>   (optimizer.vertex(i+2)) );
+        edge->setVertex( 1, dynamic_cast<g2o::VertexSE3Expmap*>     (optimizer.vertex(1)) );
+        edge->setMeasurement( Eigen::Vector2d(pts2[i].x, pts2[i].y ) );
+        edge->setInformation( Eigen::Matrix2d::Identity() );
+        edge->setParameterId(0,0);
+        // 核函数
+        edge->setRobustKernel( new g2o::RobustKernelHuber() );
+        optimizer.addEdge( edge );
+        edges.push_back(edge);
+    }
+
+    cout<<"开始优化"<<endl;
+    optimizer.setVerbose(true);
+    optimizer.initializeOptimization();
+    optimizer.optimize(10);
+    cout<<"优化完毕"<<endl;
+
+    //我们比较关心两帧之间的变换矩阵
+    g2o::VertexSE3Expmap* v = dynamic_cast<g2o::VertexSE3Expmap*>( optimizer.vertex(1) );
+    Eigen::Isometry3d pose = v->estimate();
+    cout<<"Pose="<<endl<<pose.matrix()<<endl;
+
+    // 以及所有特征点的位置
+    for ( size_t i=0; i<pts1.size(); i++ )
+    {
+        g2o::VertexSBAPointXYZ* v = dynamic_cast<g2o::VertexSBAPointXYZ*> (optimizer.vertex(i+2));
+        cout<<"vertex id "<<i+2<<", pos = ";
+        Eigen::Vector3d pos = v->estimate();
+        cout<<pos(0)<<","<<pos(1)<<","<<pos(2)<<endl;
+    }
+
+    // 估计inlier的个数
+    int inliers = 0;
+    for ( auto e:edges )
+    {
+        e->computeError();
+        // chi2 就是 error*\Omega*error, 如果这个数很大，说明此边的值与其他边很不相符
+        if ( e->chi2() > 1 )
+        {
+            cout<<"error = "<<e->chi2()<<endl;
+        }
+        else
+        {
+            inliers++;
+        }
+    }
+
+    cout<<"inliers in total points: "<<inliers<<"/"<<pts1.size()+pts2.size()<<endl;
+    optimizer.save("ba.g2o");
+    return 0;
+}
+
+
+int     findCorrespondingPoints( const cv::Mat& img1, const cv::Mat& img2, vector<cv::Point2f>& points1, vector<cv::Point2f>& points2 )
+{
+    cv::Mat descriptors_1, descriptors_2;
+    // used in OpenCV3
+    cv::Ptr<cv::FeatureDetector> detector = cv::ORB::create();
+    cv::Ptr<cv::DescriptorExtractor> descriptor = cv::ORB::create();
+    cv::Ptr<cv::DescriptorMatcher> matcher = cv::DescriptorMatcher::create("BruteForce-Hamming");
+    //-- 第一步:检测 Oriented FAST 角点位置
+    std::vector<cv::KeyPoint> keypoints_1;
+    std::vector<cv::KeyPoint> keypoints_2;
+    detector->detect(img1, keypoints_1);
+    detector->detect(img2, keypoints_2);
+
+    //-- 第二步:根据角点位置计算 BRIEF 描述子
+    descriptor->compute(img1, keypoints_1, descriptors_1);
+    descriptor->compute(img2, keypoints_2, descriptors_2);
+
+    //-- 第三步:对两幅图像中的BRIEF描述子进行匹配，使用 Hamming 距离
+    std::vector<cv::DMatch> match;
+    // BFMatcher matcher ( NORM_HAMMING );
+    matcher->match(descriptors_1, descriptors_2, match);
+
+    //-- 第四步:匹配点对筛选
+    double min_dist = 10000, max_dist = 0;
+
+    //找出所有匹配之间的最小距离和最大距离, 即是最相似的和最不相似的两组点之间的距离
+    for (int i = 0; i < descriptors_1.rows; i++) {
+        double dist = match[i].distance;
+        if (dist < min_dist) min_dist = dist;
+        if (dist > max_dist) max_dist = dist;
+    }
+
+    printf("-- Max dist : %f \n", max_dist);
+    printf("-- Min dist : %f \n", min_dist);
+    std::vector<cv::DMatch> matches;
+    //当描述子之间的距离大于两倍的最小距离时,即认为匹配有误.但有时候最小距离会非常小,设置一个经验值30作为下限.
+    for (int i = 0; i < descriptors_1.rows; i++) {
+        if (match[i].distance <= cv::max(2 * min_dist, 30.0)) {
+        matches.push_back(match[i]);
+        }
+    }
+
+    if (matches.size() <= 20) //匹配点太少
+        return false;
+
+    for ( auto m:matches )
+    {
+        points1.push_back( keypoints_1[m.queryIdx].pt );
+        points2.push_back( keypoints_2[m.trainIdx].pt );
+    }
+
+    return true;
+}
+```
