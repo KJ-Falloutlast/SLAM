@@ -4586,13 +4586,7 @@ free_thresh: 0.196
    1. static_map(nav_msgs/GetMap)
       1. 调用此服务获取地图数据
 5. 参数  
-   1. ~*odom_model_type*(string, default:"diff)
-      1. 里程计模型选择: "diff","omni","diff-corrected","omni-corrected" (diff *差速*、*omni* 全向轮)
-   2. ~*odom_frame_id*(string, default:"odom")
-      1. 里程计坐标系。
-   3. ~*base_frame_id*(string, default:"base_link") **最好使用base_footprint**
-      1. *机器人极坐标系*。
-   4. ~*global_frame_id*(string, default:"map")
+                         default:"map")
     地图坐标系。
 
 6. 坐标变换
@@ -4744,83 +4738,99 @@ free_thresh: 0.196
 3. base_local_planner.yaml
 ```yaml
 TrajectoryPlannerROS:
-# Robot Configuration Parameters
+# 1.Robot Configuration Parameters
   max_vel_x: 0.5 # X 方向最大速度
-  min_vel_x: 0.1 # X 方向最小速速
+  min_vel_x: 0.1 # X 方向最小速速(机器人只有在x方向有速度)
 
-  max_vel_theta:  1.0 # 
-  min_vel_theta: -1.0
-  min_in_place_vel_theta: 1.0
+  max_vel_theta:  1.0 #最大角速度
+  min_vel_theta: -1.0 #最小角速度
+  min_in_place_vel_theta: 1.0 #原地旋转的最小角速度
 
   acc_lim_x: 1.0 # X 加速限制
-  acc_lim_y: 0.0 # Y 加速限制
-  acc_lim_theta: 0.6 # 角速度加速限制
+  acc_lim_y: 0.0 # Y 加速限制，Y上没有加速度，设为0
+  acc_lim_theta: 0.6 # 角速度加速限制，0.6rad/s
 
-# Goal Tolerance Parameters，目标公差
-  xy_goal_tolerance: 0.10
-  yaw_goal_tolerance: 0.05
+# 2.Goal Tolerance Parameters，目标公差
+  xy_goal_tolerance: 0.10 #坐标的公差，目标和实际在xy方向上的公差分别不大于0.1m
+  yaw_goal_tolerance: 0.05 #朝向的公差,目标和实际在偏航角的公差大于0.05rad
 
-# Differential-drive robot configuration
+# 3.Differential-drive robot configuration
 # 是否是全向移动机器人
   holonomic_robot: false
 
-# Forward Simulation Parameters，前进模拟参数
-  sim_time: 0.8
-  vx_samples: 18
+# 4.Forward Simulation Parameters，前进模拟参数
+  sim_time: 0.8 #若想要本地路径规划更贴合全局路径规划，sim_time可以设置长一点
+  vx_samples: 18 #
   vtheta_samples: 20
   sim_granularity: 0.05
+
 ```
 4. costmap_common_params.yaml
 ```yaml
-#机器人几何参，如果机器人是圆形，设置 robot_radius,如果是其他形状设置 footprint
-robot_radius: 0.12 #圆形
-# footprint: [[-0.12, -0.12], [-0.12, 0.12], [0.12, 0.12], [0.12, -0.12]] #其他形状
+#1.机器人几何参，如果机器人是圆形，设置 robot_radius,如果是其他形状设置 footprint
+##1-1.robot_radius:若机器人是圆形，则考虑robot_radius，但是它的尺寸要比机器人的实际尺寸要大一些
+robot_radius: 0.12 
 
+# 1-2.其他形状:这4个参数代表机器人的4个顶点，作为机器人的实际大小
+#footprint: [[-0.12, -0.12], [-0.12, 0.12], [0.12, 0.12], [0.12, -0.12]] #其他形状
+
+#2.清除障碍物
 obstacle_range: 3.0 # 用于障碍物探测，比如: 值为 3.0，意味着检测到距离小于 3 米的障碍物时，就会引入代价地图
 raytrace_range: 3.5 # 用于清除障碍物，比如：值为 3.5，意味着清除代价地图中 3.5 米以外的障碍物
 
 
-#膨胀半径，扩展在碰撞区域以外的代价区域，使得机器人规划路径避开障碍物
-inflation_radius: 0.2
+#3.膨胀半径，扩展在碰撞区域以外的代价区域，使得机器人规划路径避开障碍物，这个对本地地图和全局地图都会生效
+inflation_radius: 0.1 #表示在碰撞区域外的膨胀出来的区域
 #代价比例系数，越大则代价值越小
 cost_scaling_factor: 3.0
 
-#地图类型
-map_type: costmap
-#导航包所需要的传感器
+#4.地图类型
+map_type: costmap #代价地图类型的地图
+#5.导航包所需要的传感器，用于获得导航的数据，其数据可以从激光雷达获取，也可从深度相机获取
 observation_sources: scan
 #对传感器的坐标系和数据进行配置。这个也会用于代价地图添加和清除障碍物。例如，你可以用激光雷达传感器用于在代价地图添加障碍物，再添加kinect用于导航和清除障碍物。
 scan: {sensor_frame: laser, data_type: LaserScan, topic: scan, marking: true, clearing: true}
-#根据自己的雷达的名字来命名
+##sensor_frame:参考自己设置的laser; data_type:数据类型为LaserScan; topic:表示雷达发布的消息类型为scan;
+##marking表示是否用激光雷达对障碍物进行标记和清除
 ```
 5. global_costmap_params.yaml
 ```yaml
+#声明参数服务器的命名空间
 global_costmap:
   global_frame: map #地图坐标系
-  robot_base_frame: base_footprint #机器人坐标系
+  robot_base_frame: base_footprint #机器人基坐标系
   # 以此实现坐标变换
 
   update_frequency: 1.0 #代价地图更新频率
   publish_frequency: 1.0 #代价地图的发布频率
-  transform_tolerance: 0.5 #等待坐标变换发布信息的超时时间
+  transform_tolerance: 0.5 #等待坐标变换发布信息的超时时间。参与坐标转换的2个坐标系的最大时间差不能超过0.5秒，一旦超过0.5秒就会产生错误
 
   static_map: true # 是否使用一个地图或者地图服务器来初始化全局代价地图，如果不使用静态地图，这个参数为false.
+  #全局代价地图需要静态地图
 ```
 6. local_costmap_params
 ```yaml
+#声明参数服务器的命名空间为局部代价地图
 local_costmap:
+  #1.局部代价地图的全局参考坐标系
   global_frame: odom #里程计坐标系
+  #2.局部代价地图的机器人参考坐标系
   robot_base_frame: base_footprint #机器人坐标系
 
-  update_frequency: 10.0 #代价地图更新频率
+  #3.代价地图的更新频率
+  update_frequency: 10.0 #代价地图更新频率，因为本地代价地图要实时引入周围的障碍物，所以发布频率要高一些
   publish_frequency: 10.0 #代价地图的发布频率
   transform_tolerance: 0.5 #等待坐标变换发布信息的超时时间
 
+  #4.是否需要静态地图
   static_map: false  #不需要静态地图，可以提升导航效果
   rolling_window: true #是否使用动态窗口，默认为false，在静态的全局地图中，地图不会变化
+ 
+  #5.局部代价地图的尺寸
   width: 3 # 局部地图宽度 单位是 m
   height: 3 # 局部地图高度 单位是 m
   resolution: 0.05 # 局部地图分辨率 单位是 m，一般与静态地图分辨率保持一致
+
 ```
 7. 步骤
    1. 启动gazebo仿真环境
@@ -4835,3 +4845,26 @@ local_costmap:
       7. Map_local
       8. Path_global
       9. Path_local
+
+#### 4.move_base使用技巧
+1. 全局路径规划和和本地路径规划虽然设置的参数一致的，但是二者路径规划和避障的职能不同，可以采用不同的参数设置策略
+   1. 全局代价地图可以将膨胀半径和障碍物系数设置偏大
+   2. 本地代价地图可以将膨胀半径和障碍物系数设置偏小一些。
+   3. *这样，在全局路径规划时，规划的路径会尽量远离障碍物。而本地路径规划时，机器人即使偏离全局路径，也会和障碍物之间保持更大的自由空间，从而避免了*假死**
+
+### 5.导航与slam建图
+1. 问题 
+   1. 之前导航实现时，是通过map_server包的map_server节点来发布地图信息的，如果不先通过SLAM建图，那么如何发布地图信息呢?slam建图过程中本身就会实时发布地图信息，所以无需使用map_server,SLAM已经发不了话题为/map的地图消息了，且导航需要定位模块，SLAM本身是可以实现定位的。*过程为:*
+      1. 用launch集成SLAM和move_base相关节点
+      2. 执行launch文件并测试
+2. 编写launch文件
+```xml
+<launch>
+    <!-- 启动SLAM节点 -->
+    <include file="$(find mycar_nav)/launch/slam.launch" />
+    <!-- 运行move_base节点 -->
+    <include file="$(find mycar_nav)/launch/path.launch" />
+    <!-- 运行rviz -->
+    <node pkg="rviz" type="rviz" name="rviz" args="-d $(find mycar_nav)/rviz/nav.rviz" />
+</launch>
+```

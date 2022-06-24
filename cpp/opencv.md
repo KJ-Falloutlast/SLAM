@@ -9,8 +9,16 @@
    3. 注意：opencv支持jpg,png,tiff等常见文件
 2. cv::namedWindos:功能是创建一个opencv窗口，由opencv自动创建和销毁
 3. cv::cvtColor
+   1. 把图像从一个彩色空间转换到另一个色彩空间，有3个参数
+   2. 第一个参数表示源图像，第2个参数表示色彩空间转换后的图像，第2个参数表示源和目标色彩空间,如COLOR_BGR2HLS,COLOR_BGR2GRAY的等
+   3. 例如:**cvtColor(image, gray_image, COLOR_BGR2GRAY);**
+4. cv::imwrite
+   1. 保存图像文件到指定目录路径
+   2. 只有8位，16位的PNG，jpg,Tiff文格式而且是单通道或者3通道的BGR图像才能通过这种方式保存
+   3. 保存png格式的时候可以保存透明通道的图片
+   4. 可以指定压缩参数
 
-4. cmake
+5. cmake
 ```cmake
 cmake_minimum_required( VERSION 2.8 )
 project( imageBasics )
@@ -441,7 +449,45 @@ void QuickDemo::operators_demo(Mat &image){
 ```
 ### 5.图像的亮度和对比度调整
 
+```cpp
+static void on_lightness(int b, void* userdata) {
+	Mat image = *((Mat*)userdata);
+	Mat dst = Mat::zeros(image.size(), image.type());
+	Mat m = Mat::zeros(image.size(), image.type());
+	addWeighted(image, 1.0, m, 0, b, dst);
+	imshow("亮度对比操作", dst);
+}
 
+static void on_contrast(int b, void* userdata) {
+	Mat image = *((Mat*)userdata);
+	Mat dst = Mat::zeros(image.size(), image.type());
+	Mat m = Mat::zeros(image.size(), image.type());
+	double contrast = b / 100.0;
+	addWeighted(image, contrast, m, 0.0, 0, dst);
+	imshow("", dst);
+}
+
+void QuickDemo::tracking_bar_demo(Mat &image) {
+	namedWindow("亮度与对比度操作", WINDOW_AUTOSIZE);
+	int lightness = 50;
+	int max_value = 100;
+	int contrast_value = 100;
+	createTrackbar("Value Bar:", "亮度与对比度调整", &lightness, max_value, on_lightness, (void*) (&image));
+    //将image的引用&image转换成void类型的指针
+	createTrackbar("Contrast Bar:", "亮度与对比度调整", &contrast_value, 200, on_contrast, (void*)(&image));
+	on_lightness(50, &image);
+    /*
+    1.createTrackbar的参数:
+        1.滑动空间名称
+        2.滑动空间用于依附的图像窗口的名称
+        3.初始化阈值
+        4.滑动控件的刻度范围
+        5.回调函数
+    void (CV_CDECL *TrackbarCallback)(int pos, void* userdata);
+    2. 形式
+    */
+}
+```
 
 
 

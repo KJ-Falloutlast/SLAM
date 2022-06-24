@@ -1628,6 +1628,35 @@ void DrawTrajectory(vector<Sophus::SE3> poses_est, vector<Sophus::SE3> poses_gd)
 这3条不能少
 */
 ```
+1. 概念：同一空间参考系下表达目标空间分布和目标表面特性的海量点集合，是在获取物体表面每个采样点的空间坐标后得到的点的集合，称为点云(Point Cloud)
+2. 数据类型
+   1. 类型
+```cpp
+//1.
+pcl::PointCloud<pcl::PointXYZ>
+//PointXY成员:float x, y, z表达了xyz3d的信息，可以通过points[i].data[0] or points[i].x访问点x的坐标值
+pcl::PointCloud<pcl::PointXYZI>
+//PointXYZI成员:float x, y, z, intensity;表示XYZ信息加上强度信息的类型
+pcl::PointCloud<pcl::PointXYZRGB>
+//PointCloudRGB成员:float x, y, z; 表示xyz信息加上rgb信息，rgb存储为一个float
+pcl::PointCloud<pcl::PointXYZRGBA>
+/*PointXYZRGBA成员: float x, y, z, unit32_t rgba;
+表示XYZ信息加上RGBA信息，RGBA用32bit的int型存储的
+*/
+```
+   2. 转换
+      1. pcl::PointCloud<pcl::PointXYZ> cloud;(点云对
+      2. pcl::PointCloud<pcl::PointXYZ>::ptr cloudPtr;(点云指针)
+      3. pcl::PointXYZ overlap(点)
+      4. >cloud = * cloudPtr; cloudPtr = cloud.makeshared()
+      5. 访问单个点:
+         1. cloud.points[i].x;
+         2. cloudPtr->points[i].x;
+         3. overlap.x;
+      6. 获取点数
+         1. sizeof(overlap);
+         2. cloud.size();
+         3. cloudPtr->size();
 3. 案例
    1. [运行失败解决](https://www.it610.com/article/1280327715483828224.htm)
 ```cpp
@@ -1847,6 +1876,7 @@ eg:
     cloudPtr->points[i].x
 */
 ```
+
 # 4.第5讲
 ## 4-1.ceres库的使用
 ### 1.步骤
@@ -2226,3 +2256,6 @@ int main(){
 
 }
 ```
+## 4-2.g2o库的使用
+### 1.相关基础概念
+1. g2o提供的顶点
