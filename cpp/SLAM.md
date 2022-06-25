@@ -1590,7 +1590,285 @@ void DrawTrajectory(vector<Sophus::SE3> poses_est, vector<Sophus::SE3> poses_gd)
 }
 ```
 # 3.第4讲
-## 3-1.点云
+## 3-1.点云的基本概念
+1. 概念：同一空间参考系下表达目标空间分布和目标表面特性的海量点集合，是在获取物体表面每个采样点的空间坐标后得到的点的集合，称为点云(Point Cloud)
+2. 数据类型
+   1. 类型
+```cpp
+//1.
+pcl::PointCloud<pcl::PointXYZ>
+//PointXY成员:float x, y, z表达了xyz3d的信息，可以通过points[i].data[0] or points[i].x访问点x的坐标值
+pcl::PointCloud<pcl::PointXYZI>
+//PointXYZI成员:float x, y, z, intensity;表示XYZ信息加上强度信息的类型
+pcl::PointCloud<pcl::PointXYZRGB>
+//PointCloudRGB成员:float x, y, z; 表示xyz信息加上rgb信息，rgb存储为一个float
+pcl::PointCloud<pcl::PointXYZRGBA>
+/*PointXYZRGBA成员: float x, y, z, unit32_t rgba;
+表示XYZ信息加上RGBA信息，RGBA用32bit的int型存储的
+*/
+```
+   2. 转换
+      1. pcl::PointCloud<pcl::PointXYZ> cloud;(点云对
+      2. pcl::PointCloud<pcl::PointXYZ>::ptr cloudPtr;(点云指针)
+      3. pcl::PointXYZ overlap(点)
+      4. >cloud = * cloudPtr; cloudPtr = cloud.makeshared()
+      5. 访问单个点:
+         1. cloud.points[i].x;
+         2. cloudPtr->points[i].x;
+         3. overlap.x;
+      6. 获取点数
+         1. sizeof(overlap);
+         2. cloud.size();
+         3. cloudPtr->size();
+## 3-2.代码实例
+1. 创建点云数据(pcl_create.cpp)
+```cpp
+#include <ros/ros.h>
+#include <pcl/point_cloud.h>
+#include <pcl_conversions/pcl_conversions.h>
+#include <sensor_msgs/PointCloud2.h>
+ 
+main (int argc, char **argv)
+{
+    ros::init (argc, argv, "pcl_create");
+ 
+    ros::NodeHandle nh;
+    ros::Publisher pcl_pub = nh.advertise<sensor_msgs::PointCloud2> ("pcl_output", 1);
+    pcl::PointCloud<pcl::PointXYZ> cloud;
+    sensor_msgs::PointCloud2 output;
+ 
+    // Fill in the cloud data
+    cloud.width  = 100;
+    cloud.height = 1;
+    cloud.points.resize(cloud.width * cloud.height);
+ 
+    for (size_t i = 0; i < cloud.points.size (); ++i)
+    {
+        cloud.points[i].x = 1024 * rand () / (RAND_MAX + 1.0f);
+        cloud.points[i].y = 1024 * rand () / (RAND_MAX + 1.0f);
+        cloud.points[i].z = 1024 * rand () / (RAND_MAX + 1.0f);
+    }
+ 
+    //Convert the cloud to ROS message
+    pcl::toROSMsg(cloud, output);
+    output.header.frame_id = "odom";
+ 
+    ros::Rate loop_rate(1);
+    while (ros::ok())
+    {
+        pcl_pub.publish(output);
+        ros::spinOnce();
+        loop_rate.sleep();
+    }
+ 
+    return 0;
+}
+```
+```cmake
+cmake_minimum_required(VERSION 2.8.3)
+project(chapter10_tutorials)
+find_package(catkin REQUIRED COMPONENTS
+  pcl_conversions
+  pcl_ros
+  roscpp
+  sensor_msgs
+  rospy
+)
+ 
+find_package(PCL REQUIRED)
+catkin_package()
+ 
+include_directories(
+  ${catkin_INCLUDE_DIRS}
+  ${PCL_INCLUDE_DIRS}
+)
+ 
+link_directories(${PCL_LIBRARY_DIRS})
+ 
+ 
+add_executable(pcl_create src/pcl_create.cpp)
+target_link_libraries(pcl_create ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+
+add_executable(pcl_read src/pcl_read.cpp)
+add_executable(pcl_write src/pcl_write.cpp)
+ 
+target_link_libraries(pcl_read ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+target_link_libraries(pcl_write ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+```
+2. 加载点云数据(pcl_read.cpp)
+```cpp
+#include <ros/ros.h>
+#include <pcl/point_cloud.h>
+#include <pcl_conversions/pcl_conversions.h>
+#include <sensor_msgs/PointCloud2.h>
+#include <pcl/io/pcd_io.h>
+ 
+main(int argc, char **argv)
+{
+    ros::init (argc, argv, "pcl_read");
+ 
+    ros::NodeHandle nh;
+    ros::Publisher pcl_pub = nh.advertise<sensor_msgs::PointCloud2> ("pcl_output", 1);
+ 
+    sensor_msgs::PointCloud2 output;
+    pcl::PointCloud<pcl::PointXYZ> cloud;
+ 
+    pcl::io::loadPCDFile ("test_pcd.pcd", cloud);
+ 
+    pcl::toROSMsg(cloud, output);
+    output.header.frame_id = "odom";
+ 
+    ros::Rate loop_rate(1);
+    while (ros::ok())
+    {
+        pcl_pub.publish(output);
+        ros::spinOnce();
+        loop_rate.sleep();
+    }
+ 
+    return 0;
+}
+```
+3. 保存点云数据(pcl_write.cpp)
+```cpp
+#include <ros/ros.h>
+#include <pcl/point_cloud.h>
+#include <pcl_conversions/pcl_conversions.h>
+#include <sensor_msgs/PointCloud2.h>
+#include <pcl/io/pcd_io.h>
+ 
+void cloudCB(const sensor_msgs::PointCloud2 &input)
+{
+    pcl::PointCloud<pcl::PointXYZ> cloud;
+    pcl::fromROSMsg(input, cloud);
+    pcl::io::savePCDFileASCII ("write_pcd_test.pcd", cloud);
+}
+ 
+main (int argc, char **argv)
+{
+    ros::init (argc, argv, "pcl_write");
+    ros::NodeHandle nh;
+    ros::Subscriber bat_sub = nh.subscribe("pcl_output", 10, cloudCB);
+    ros::spin();
+ 
+    return 0;
+}
+```
+4. cloud_viewer可视化pcd中的点云(pcl_view.cpp)
+```cpp
+#include <iostream>
+#include <ros/ros.h>
+#include <pcl/visualization/cloud_viewer.h>
+#include <sensor_msgs/PointCloud2.h>
+#include <pcl_conversions/pcl_conversions.h>
+ 
+class cloudHandler
+{
+public:
+    cloudHandler()
+    : viewer("Cloud Viewer")
+    {
+     pcl::PointCloud<pcl::PointXYZ> cloud;
+     pcl::io::loadPCDFile ("0.pcd", cloud);
+     viewer.showCloud(cloud.makeShared());
+     viewer_timer = nh.createTimer(ros::Duration(0.1), &cloudHandler::timerCB, this);
+    }
+ 
+    void timerCB(const ros::TimerEvent&)
+    {
+        if (viewer.wasStopped())
+        {
+            ros::shutdown();
+        }
+    }
+ 
+protected:
+    ros::NodeHandle nh;
+    pcl::visualization::CloudViewer viewer;
+    ros::Timer viewer_timer;
+};
+ 
+main (int argc, char **argv)
+{
+    ros::init (argc, argv, "pcl_filter");
+    cloudHandler handler;
+    ros::spin();
+    return 0;
+}
+```
+5. 随机生成10000个三维点，然后赋值给点云
+```cpp
+#include <iostream>
+//点云需要的头文件
+#include <pcl/point_types.h>
+#include <pcl/io/ply_io.h>
+#include <pcl/visualization/pcl_visualizer.h>
+using namespace std;
+//随机生成了10000个三维点，然后赋值给一片点云，并且完成显示
+void drawPointCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, string titleName)
+{
+    pcl::visualization::PCLVisualizer viewer (titleName);
+    int v (0);
+
+    viewer.createViewPort (0.0, 0.0, 1.0, 1.0, v);
+
+    viewer.addCoordinateSystem(0.5);
+
+    float bckgr_gray_level = 0.0;  // Black
+    float txt_gray_lvl = 1.0 - bckgr_gray_level;
+
+    pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> cloud_in_color_h (cloud, (int) 255 * txt_gray_lvl, (int) 255 * txt_gray_lvl, (int) 255 * txt_gray_lvl);
+    viewer.addPointCloud (cloud, cloud_in_color_h, "cloud_in_v1", v);
+
+    viewer.addText (titleName, 10, 15, 16, txt_gray_lvl, txt_gray_lvl, txt_gray_lvl, "icp_info_1", v);
+
+    viewer.setBackgroundColor (bckgr_gray_level, bckgr_gray_level, bckgr_gray_level, v);
+
+    viewer.setCameraPosition (-3.68332, 2.94092, 5.71266, 0.289847, 0.921947, -0.256907, 0);
+    viewer.setSize (1280, 1024);
+
+    while (!viewer.wasStopped())
+    {
+        viewer.spinOnce();
+    }
+}
+
+pcl::PointCloud<pcl::PointXYZ>::Ptr readPointCloud_camera(int width, int height, vector<int> x, vector<int> y, vector<int> z)
+{
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+      
+    cloud->width = width;
+    cloud->height = height;
+    cloud->points.resize(width*height);
+
+    for (int i = 0 ; i < width*height; i++)
+    {
+        cloud->points[i].x = x[i];
+        cloud->points[i].y = y[i];
+        cloud->points[i].z = z[i];
+    }
+    return cloud;  
+}
+
+int main(int argc, char** argv)
+{
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
+
+    vector<int> x, y, z;
+    for (int i = 0 ; i < 10000; i ++)
+    {      
+        x.push_back(i);
+        y.push_back(i + 2);
+        z.push_back(i+10);
+    }
+    cloud = readPointCloud_camera(100, 100, x, y, z);
+
+    drawPointCloud(cloud, "user defined pointcloud");
+
+	return 1;
+}
+```
+## 3-3.代码实例2
 1. [安装链接](https://blog.csdn.net/abcbeifeng/article/details/123935675)
 2. c_cpp_properties.json
 ```json
@@ -2258,7 +2536,70 @@ int main(){
 ```
 ## 4-2.g2o库的使用
 ### 1.相关基础概念
-1. g2o提供的顶点
+1. 问题描述: $y = exp(ax^2 + bx + c)+w$,其中a,b,c为待估计的参数，w为噪声，在程序中利用模型生成x,y的数据，在给数据添加服务从高斯分布的噪声，之后用ceres优化求解
+2. g2o基本类
+   1. 基本模板点和边
+      1. Base Vertex:点
+      2. BaseUnaryEdge:边
+      3. BaseBinaryEdge:边
+      4. BaseMultiEdge:边
+   2. g2o已经定义好的边和点
+      1. 相机位姿节点:g2o::VectesSE3Expmap,来自<g2o/types/sba/types_six_dof_expmap.h>
+      2. 特征点空间坐标点:g2o::VertexSBAPointXYZ,来自<g2o/types/sba/types_sba.h>
+      3. 重投影误差:g2o::EdgeProjectXYZ2UV,来自<g2o/types/sba/types_six_dof_expmap.h>
+3. 代码实例讲解
+   1.  定义顶点
+```cpp
+//曲线模型的顶点，模板参数：优化变量维度和数据类型
+class CurFittingVertex : public g2o::BaseVertes<3, Eigen::Vecter3d>{
+public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+    //重置, Impl是接口的意思
+    virtual void setToOriginImpl() override {
+        _estimate << 0, 0, 0;
+    }
+    //更新
+    virtual void oplusImpl(const double *update) override {
+        _estimate += Eigen::Vector3d(update);
+    }
+    //存盘和度盘:留空
+    virtual bool read(istream &in){
+    }
+    virtual bool write(ostream &out)const{
+
+    }
+};
+```
+       1. BaseVertex为g2o的基本节点类，需要继承从重写他内部的函数从而形成我们想要的新顶点
+       2. class CurveFittingVertex : public g2o::BaseVertex<3, Eigen::Vector3d>创建自己的节点
+          1. 3代表优化参数的维度为3， 优化参数的类型为Eigen::Vector3d
+       3. *virtual void setToOriginImpl()：设置初始值*
+          1. 给待估计的节点设置初始值，本例中将节点设置为(0, 0, 0)
+       4. virtual void oplusImpl(const double *update):设置更新方式，采用相加的方式更新 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ### 2.案例
 1. demo01

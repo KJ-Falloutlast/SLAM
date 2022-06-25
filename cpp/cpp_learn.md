@@ -13657,4 +13657,176 @@ int main()
    return(0);
 }
 ```
+## 13.override关键字
+### 13-1.虚函数
+1. 概述
+   1.  override从字面上来看是*覆盖*的意思，实际上它是覆盖了一个方法并且对其重写，从而达到不同的目的
+   2.  我们在c++开发中，最熟悉的是对接口方法的实现，在接口中一般只是对方法进行了声明，而我们在实现时，就需要实现接口声明的所有方法,还有一个典型应用是在继承中也可能会在子类覆盖父类的方法
+   3. *公有继承包含2个部分，1是接口，2是实现*
+```cpp
+class Person{
+public:
+    virtual void Eat() const = 0;    // 1) 纯虚函数
+    virtual void Say(const std::string& msg);  // 2) 普通虚函数
+    int Name() const;  // 3) 非虚函数
+};
+ 
+class Student: public Person{ ... };
+class Teahcer: public Person{ ... }; 
 
+//1.纯虚函数：纯虚函数是继承基类成员函数的接口，必须在派生类中重写该函数的实现
+Person *s1 = new Student;
+s1->Eat();
+Person *t1 = new Ellipse;
+t1->Eat();
+//若想调用基类的Eat(),须加上::
+s1->Person::Eat();
+```
+2. 纯虚函数
+   1. 纯虚函数是继承基类成员函数的接口，必须在派生类中重写该函数的实现
+```cpp
+Person *s1 = new Student;
+s1->Eat();
+Person *t1 = new Ellipse;
+t1->Eat();
+//若想调用基类的Eat(),须加上::
+s1->Person::Eat();
+```
+3. 普通虚函数
+   1. 普通虚函数，对应在基类中定义一个缺省的实现，表示继承的是基类成员的接口和缺省的实现，由派生类自行选择是否重写该函数
+   2. 实际上，允许普通虚函数同时继承接口和缺省实现是危险的。如下，CarA和CarB是Car的2中类型，且2者的运行方式完全相同
+```cpp
+class Car{
+    public:
+        virtual void Run(const Car& destination);
+};
+class CarA: public Car{};
+class CarB: public Car{};
+class CarC: public Car{
+    ///no fly funcition is declared
+}
+Car *pa = new CarC;
+pa->Run(Beijing);
+```
+    3. 这是典型的面向对象设计，2个类共享1个特性Run,则Run可在基类中实现， 并由2个派生类继承。现在增加新的飞机型号CarC,其飞行方式和CarA, CarB并不相同，假如不小心忘记在CarC中重写新的fly(),则调用CarC中的Run,就是调用Car::Run, 但是CarC的运行方式和缺省并不相同。*所以说普通虚函数同时继承接口和缺省实现是危险的，最好是基类中实现缺省，只有在派生类中要求是才提供缺省行为*
+4. 解决方案
+   1. 方法1：纯虚函数+缺省实现,因为是纯虚函数，所以只要接口被继承，其缺省的实不会被继承。派生类要想使用该缺省的实现，必须显示的调用
+   2. 虚函数语法
+**virtual 返回值 函数名 (参数列表) = 0;**
+当类中有了纯虚函数,这个类为抽象类
+   3. 特点
+      1. 无法实例化对象
+      2. 子类必须重写父类的(抽象类)纯虚函数,否则也属于抽象类
+
+```cpp
+class Car{
+    public:
+        virtual void Run(const Run& destination) = 0;
+};
+void Car::Run(const Airport& destination){
+    ///纯虚函数
+}
+class CarA: public Car{
+    public:
+        virtual void Run(const Car& destination){
+            Car::Run(destination);
+        }
+}
+class CarC: public Car{
+public:
+    virtual void Run(const Car& destination);
+};
+ 
+void CarC::Run(const Car& destination)
+{
+    // code for Run a CarC Car to the given destination
+}
+//这样即使不小心忘记重写Run()， 也不会调用Car的缺省
+
+```
+
+   1. 非虚成员函数无virtual关键字，表示派生类不但继承了接口，而且继承了一个强制实现，则在派生类中，无序重新定义继承自基类的成员函数
+   2. 使用指针调用Name(), 则都是调用的Person::Name()
+```cpp
+Student s1; // s1 is an object of type Student
+ 
+Person *p= &s1; // get pointer to s1
+p->Name(); // call Name() through pointer
+ 
+Student *s= &s1; // get pointer to s1
+s->Name(); // call Name() through pointer
+
+//派生类中重新定义了继承自基类的成员函数Name
+class Student : public Person{
+public:
+    int Name() const; // hides Person::Name
+};
+ 
+p->Name(); // calls Person::Name()
+s->Name(); // calls Student::Name()
+
+```
+
+### 13-2.重写
+1. 问题：在程序中加上override,可以避免派生类中忘记重写虚函数的问题
+```cpp
+class Base{
+public: 
+    virtual void fun1()const;
+    virtual void fun2(int x);
+    virtual void fun1()&;
+    void fun4() const;//is not declared virtual in Base
+};
+class Derived: public Base{
+public:
+    virtual void fun1();//declared const in Base, but not in Derived
+    virtual void fun2(unsigned int x);//takes an int in Base, but an unsigned int in Derived
+    virtual void fun3() &&;//is lvalue-qualified in Base,but rvalue-qualified in Drived
+    void fun4() const;
+//&为左值引用，&&为右值引用
+}
+```
+2. 解决:在派生类中，重写(override)继承自基类成员函数的实现时，要满足如下条件
+   1. *一虚*：基类中，成员函数声明为*虚拟*的 (virtual)
+   2. *二容*：基类和派生类中，成员函数的*返回类型*和异常规格 (exception specification) 必须兼容
+   3. *四同*：基类和派生类中，*成员函数名*、*形参类型*、*常量属性* (constness) 和 *引用限定符* (reference qualifier) 必须完全相同
+  如此多的限制条件，导致了虚函数重写如上述代码，极容易因为一个不小心而出错 
+3. override关键子，可以显示的在派生类中声明，哪些成员函数需要被重写，如果没被重写，则编译器会报错
+```cpp
+class Base{
+public: 
+    virtual void fun1()const = 0;
+    virtual void fun2(int x) = 0;
+    virtual void fun3()& = 0;
+    void fun4() const = 0;//is not declared virtual in Base
+};
+
+class Derived: public Base{
+public:
+    virtual void fun1() override;
+    virtual void fun2(unsigned int x) override;
+    virtual void fun3()&& override;
+    virtual void fun4() const override;
+};
+
+class Derived: public Base{
+public:
+    virtual void fun1()const override;//adding "virtual" is OK, but not neccessary
+    virtual void fun2(int x) override;
+    void fun3() & override;
+    void fun4() const override;
+}
+```
+4. 注意
+   1. 公有继承
+      1. 纯虚函数      => 继承的是：接口 (interface)
+      2. 普通虚函数   => 继承的是：接口 + 缺省实现 (default implementation)
+      3. 非虚成员函数 =>继承的是：接口 + 强制实现 
+   2. 不要重新定义1个继承自基类的非虚函数
+   3. 在声明需要重写的函数后，加关键子
+   4. *使用注意*
+      1. 覆盖的方法的标志必须要和被覆盖的方法的标志完全匹配，才能达到覆盖的效果
+      2. 覆盖方法的返回值必须和被覆盖的方法的返回一致
+      3. 覆盖方法所抛出的异常必须和被覆盖方法所抛出的异常一致，或者是其子类
+      4. 被覆盖的方法不能为private,否则在其子类中只是新定义了一个方法， 没有覆盖
+   5. **作用**：*override是让编译器检查你是否重写虚函数啦，没有的话 编译阶段提示一下。*

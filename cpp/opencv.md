@@ -12,29 +12,15 @@
    1. 把图像从一个彩色空间转换到另一个色彩空间，有3个参数
    2. 第一个参数表示源图像，第2个参数表示色彩空间转换后的图像，第2个参数表示源和目标色彩空间,如COLOR_BGR2HLS,COLOR_BGR2GRAY的等
    3. 例如:**cvtColor(image, gray_image, COLOR_BGR2GRAY);**
+   4. COLOR_BGR2GRAY = 6彩色到灰度
+   5. COLOR_GRAY2BGR = 8灰度到彩色
+   6. COLOR_BGR2HSV = 40BGR到HSV
+   7. COLOR_HSV2BGR = 54HSV到BGR
 4. cv::imwrite
    1. 保存图像文件到指定目录路径
    2. 只有8位，16位的PNG，jpg,Tiff文格式而且是单通道或者3通道的BGR图像才能通过这种方式保存
    3. 保存png格式的时候可以保存透明通道的图片
    4. 可以指定压缩参数
-
-5. cmake
-```cmake
-cmake_minimum_required( VERSION 2.8 )
-project( imageBasics )
-
-# 添加c++ 11标准支持
-set( CMAKE_CXX_FLAGS "-std=c++11" )
-
-# 寻找OpenCV库
-find_package( OpenCV REQUIRED )
-# 添加头文件
-include_directories( ${OpenCV_INCLUDE_DIRS} )
-
-add_executable( demo01 demo01.cpp )
-# 链接OpenCV库
-target_link_libraries( demo01 ${OpenCV_LIBS} )
-```
 5. 案例
 ```cpp
 #include <opencv2/opencv.hpp>
@@ -42,41 +28,33 @@ target_link_libraries( demo01 ${OpenCV_LIBS} )
 #include <math.h>
 #include <opencv2/highgui/highgui_c.h>//主要解决CV_WINDOW_AUTOSIZE问题
 using namespace cv;
-
-int main(int argc, char** argv) {
-	//1.创建图像
-    Mat src;
-    //2.读取图像
-	src = imread("/home/kim-james/ROS_Space/opencv_ws/opencv_tutorial_data/images/22.jpg");
-	if (!src.data) {
-		printf("could not load image...\n");
-		return -1;
-	}
-    //3.制定窗口参数,CV_WINDOW_NORMAL是只图像大小可以改变
-	namedWindow("input image", CV_WINDOW_NORMAL);
-    //4.显示图片
-	imshow("input image", src);
-    //转换后的图片
-    Mat output_image;
-    namedWindow("output windows", CV_WINDOW_NORMAL);
-    cvtColor(src, output_image, CV_BGR2GRAY);
-    //将BGR图像转换为灰度图像
-    imshow("output windows", output_image);
-    //5.保存图片
-    imwrite("./", output_image);
-    //6.设置等待时间
-    waitKey(0);//0就是不自动退出，为k则等待k秒
+using namespace std;
+int main(){
+    //1.加载图像
+    Mat src = imread("/home/kim-james/ROS_Space/opencv_ws/opencv_tutorial_data/images/63_12_map.png");
+    if (src.empty()){
+        cout << "could not load image"<< endl;
+    }
+    namedWindow("opencv setup demo", CV_WINDOW_AUTOSIZE);//不要加CV
+    imshow("opencv setup demo", src);
+    //2.修改图像
+    Mat outputImage;
+    cvtColor(src, outputImage, CV_BGR2HLS);//把src通过CV_BGR2HLS转换成outputImage 
+    namedWindow("output windows", CV_WINDOW_AUTOSIZE);
+    imshow("output windows", src);
+    
+    //3.保存图像
+    imwrite("/home/kim-james/ROS_Space/opencv_ws/ch2/picture/demo01.png", outputImage);
+    //imwrite后要接xxxx.png
+    waitKey(0);//无限等待
+    return 0;
 }
 ```
-## 1-2.转换图像
-1. cvtColor
-   1. COLOR_BGR2GRAY = 6彩色到灰度
-   2. COLOR_GRAY2BGR = 8灰度到彩色
-   3. COLOR_BGR2HSV = 40BGR到HSV
-   4. COLOR_HSV2BGR = 54HSV到BGR
-2. imwrite
-   1. 参数1是保存路径
-   2. 参数2是图像内存对象
+## 1-2.图像的掩膜操作
+
+
+
+
 
 ## 1-3.opencv基础
 1. Mat基本结构
@@ -569,299 +547,4 @@ int main(void)
  1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0;
  1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0]
 */
-```
-### 2.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# 2.点云处理
-## 2-1.点云的基本概念
-1. 概念：同一空间参考系下表达目标空间分布和目标表面特性的海量点集合，是在获取物体表面每个采样点的空间坐标后得到的点的集合，称为点云(Point Cloud)
-2. 数据类型
-   1. 类型
-```cpp
-//1.
-pcl::PointCloud<pcl::PointXYZ>
-//PointXY成员:float x, y, z表达了xyz3d的信息，可以通过points[i].data[0] or points[i].x访问点x的坐标值
-pcl::PointCloud<pcl::PointXYZI>
-//PointXYZI成员:float x, y, z, intensity;表示XYZ信息加上强度信息的类型
-pcl::PointCloud<pcl::PointXYZRGB>
-//PointCloudRGB成员:float x, y, z; 表示xyz信息加上rgb信息，rgb存储为一个float
-pcl::PointCloud<pcl::PointXYZRGBA>
-/*PointXYZRGBA成员: float x, y, z, unit32_t rgba;
-表示XYZ信息加上RGBA信息，RGBA用32bit的int型存储的
-*/
-```
-   2. 转换
-      1. pcl::PointCloud<pcl::PointXYZ> cloud;(点云对
-      2. pcl::PointCloud<pcl::PointXYZ>::ptr cloudPtr;(点云指针)
-      3. pcl::PointXYZ overlap(点)
-      4. >cloud = * cloudPtr; cloudPtr = cloud.makeshared()
-      5. 访问单个点:
-         1. cloud.points[i].x;
-         2. cloudPtr->points[i].x;
-         3. overlap.x;
-      6. 获取点数
-         1. sizeof(overlap);
-         2. cloud.size();
-         3. cloudPtr->size();
-## 2-2.代码实例
-1. 创建点云数据(pcl_create.cpp)
-```cpp
-#include <ros/ros.h>
-#include <pcl/point_cloud.h>
-#include <pcl_conversions/pcl_conversions.h>
-#include <sensor_msgs/PointCloud2.h>
- 
-main (int argc, char **argv)
-{
-    ros::init (argc, argv, "pcl_create");
- 
-    ros::NodeHandle nh;
-    ros::Publisher pcl_pub = nh.advertise<sensor_msgs::PointCloud2> ("pcl_output", 1);
-    pcl::PointCloud<pcl::PointXYZ> cloud;
-    sensor_msgs::PointCloud2 output;
- 
-    // Fill in the cloud data
-    cloud.width  = 100;
-    cloud.height = 1;
-    cloud.points.resize(cloud.width * cloud.height);
- 
-    for (size_t i = 0; i < cloud.points.size (); ++i)
-    {
-        cloud.points[i].x = 1024 * rand () / (RAND_MAX + 1.0f);
-        cloud.points[i].y = 1024 * rand () / (RAND_MAX + 1.0f);
-        cloud.points[i].z = 1024 * rand () / (RAND_MAX + 1.0f);
-    }
- 
-    //Convert the cloud to ROS message
-    pcl::toROSMsg(cloud, output);
-    output.header.frame_id = "odom";
- 
-    ros::Rate loop_rate(1);
-    while (ros::ok())
-    {
-        pcl_pub.publish(output);
-        ros::spinOnce();
-        loop_rate.sleep();
-    }
- 
-    return 0;
-}
-```
-```cmake
-cmake_minimum_required(VERSION 2.8.3)
-project(chapter10_tutorials)
-find_package(catkin REQUIRED COMPONENTS
-  pcl_conversions
-  pcl_ros
-  roscpp
-  sensor_msgs
-  rospy
-)
- 
-find_package(PCL REQUIRED)
-catkin_package()
- 
-include_directories(
-  ${catkin_INCLUDE_DIRS}
-  ${PCL_INCLUDE_DIRS}
-)
- 
-link_directories(${PCL_LIBRARY_DIRS})
- 
- 
-add_executable(pcl_create src/pcl_create.cpp)
-target_link_libraries(pcl_create ${catkin_LIBRARIES} ${PCL_LIBRARIES})
-
-add_executable(pcl_read src/pcl_read.cpp)
-add_executable(pcl_write src/pcl_write.cpp)
- 
-target_link_libraries(pcl_read ${catkin_LIBRARIES} ${PCL_LIBRARIES})
-target_link_libraries(pcl_write ${catkin_LIBRARIES} ${PCL_LIBRARIES})
-```
-2. 加载点云数据(pcl_read.cpp)
-```cpp
-#include <ros/ros.h>
-#include <pcl/point_cloud.h>
-#include <pcl_conversions/pcl_conversions.h>
-#include <sensor_msgs/PointCloud2.h>
-#include <pcl/io/pcd_io.h>
- 
-main(int argc, char **argv)
-{
-    ros::init (argc, argv, "pcl_read");
- 
-    ros::NodeHandle nh;
-    ros::Publisher pcl_pub = nh.advertise<sensor_msgs::PointCloud2> ("pcl_output", 1);
- 
-    sensor_msgs::PointCloud2 output;
-    pcl::PointCloud<pcl::PointXYZ> cloud;
- 
-    pcl::io::loadPCDFile ("test_pcd.pcd", cloud);
- 
-    pcl::toROSMsg(cloud, output);
-    output.header.frame_id = "odom";
- 
-    ros::Rate loop_rate(1);
-    while (ros::ok())
-    {
-        pcl_pub.publish(output);
-        ros::spinOnce();
-        loop_rate.sleep();
-    }
- 
-    return 0;
-}
-```
-3. 保存点云数据(pcl_write.cpp)
-```cpp
-#include <ros/ros.h>
-#include <pcl/point_cloud.h>
-#include <pcl_conversions/pcl_conversions.h>
-#include <sensor_msgs/PointCloud2.h>
-#include <pcl/io/pcd_io.h>
- 
-void cloudCB(const sensor_msgs::PointCloud2 &input)
-{
-    pcl::PointCloud<pcl::PointXYZ> cloud;
-    pcl::fromROSMsg(input, cloud);
-    pcl::io::savePCDFileASCII ("write_pcd_test.pcd", cloud);
-}
- 
-main (int argc, char **argv)
-{
-    ros::init (argc, argv, "pcl_write");
-    ros::NodeHandle nh;
-    ros::Subscriber bat_sub = nh.subscribe("pcl_output", 10, cloudCB);
-    ros::spin();
- 
-    return 0;
-}
-```
-4. cloud_viewer可视化pcd中的点云(pcl_view.cpp)
-```cpp
-#include <iostream>
-#include <ros/ros.h>
-#include <pcl/visualization/cloud_viewer.h>
-#include <sensor_msgs/PointCloud2.h>
-#include <pcl_conversions/pcl_conversions.h>
- 
-class cloudHandler
-{
-public:
-    cloudHandler()
-    : viewer("Cloud Viewer")
-    {
-     pcl::PointCloud<pcl::PointXYZ> cloud;
-     pcl::io::loadPCDFile ("0.pcd", cloud);
-     viewer.showCloud(cloud.makeShared());
-     viewer_timer = nh.createTimer(ros::Duration(0.1), &cloudHandler::timerCB, this);
-    }
- 
-    void timerCB(const ros::TimerEvent&)
-    {
-        if (viewer.wasStopped())
-        {
-            ros::shutdown();
-        }
-    }
- 
-protected:
-    ros::NodeHandle nh;
-    pcl::visualization::CloudViewer viewer;
-    ros::Timer viewer_timer;
-};
- 
-main (int argc, char **argv)
-{
-    ros::init (argc, argv, "pcl_filter");
-    cloudHandler handler;
-    ros::spin();
-    return 0;
-}
-```
-5. 随机生成10000个三维点，然后赋值给点云
-```cpp
-#include <iostream>
-//点云需要的头文件
-#include <pcl/point_types.h>
-#include <pcl/io/ply_io.h>
-#include <pcl/visualization/pcl_visualizer.h>
-using namespace std;
-//随机生成了10000个三维点，然后赋值给一片点云，并且完成显示
-void drawPointCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, string titleName)
-{
-    pcl::visualization::PCLVisualizer viewer (titleName);
-    int v (0);
-
-    viewer.createViewPort (0.0, 0.0, 1.0, 1.0, v);
-
-    viewer.addCoordinateSystem(0.5);
-
-    float bckgr_gray_level = 0.0;  // Black
-    float txt_gray_lvl = 1.0 - bckgr_gray_level;
-
-    pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> cloud_in_color_h (cloud, (int) 255 * txt_gray_lvl, (int) 255 * txt_gray_lvl, (int) 255 * txt_gray_lvl);
-    viewer.addPointCloud (cloud, cloud_in_color_h, "cloud_in_v1", v);
-
-    viewer.addText (titleName, 10, 15, 16, txt_gray_lvl, txt_gray_lvl, txt_gray_lvl, "icp_info_1", v);
-
-    viewer.setBackgroundColor (bckgr_gray_level, bckgr_gray_level, bckgr_gray_level, v);
-
-    viewer.setCameraPosition (-3.68332, 2.94092, 5.71266, 0.289847, 0.921947, -0.256907, 0);
-    viewer.setSize (1280, 1024);
-
-    while (!viewer.wasStopped())
-    {
-        viewer.spinOnce();
-    }
-}
-
-pcl::PointCloud<pcl::PointXYZ>::Ptr readPointCloud_camera(int width, int height, vector<int> x, vector<int> y, vector<int> z)
-{
-    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
-      
-    cloud->width = width;
-    cloud->height = height;
-    cloud->points.resize(width*height);
-
-    for (int i = 0 ; i < width*height; i++)
-    {
-        cloud->points[i].x = x[i];
-        cloud->points[i].y = y[i];
-        cloud->points[i].z = z[i];
-    }
-    return cloud;  
-}
-
-int main(int argc, char** argv)
-{
-    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
-
-    vector<int> x, y, z;
-    for (int i = 0 ; i < 10000; i ++)
-    {      
-        x.push_back(i);
-        y.push_back(i + 2);
-        z.push_back(i+10);
-    }
-    cloud = readPointCloud_camera(100, 100, x, y, z);
-
-    drawPointCloud(cloud, "user defined pointcloud");
-
-	return 1;
-}
 ```

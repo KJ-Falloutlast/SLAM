@@ -539,6 +539,10 @@ int main(){
 1. 定义：用*顺序存储的方式实现线性表顺序存储。把**逻辑**上相邻的元素存储在物理位置上也相邻的存储结构上，元素之间的关系由存储单元的邻接关系来体现
 2. 内存中：设线性表的第1个元素的存放位置是LOC(L),LOC是location的缩写
 3. 顺序表的实现:静态分配
+
+
+4. 案例
+   1. demo01
 ```cpp
 #define MaxSize 10//定义最大长度
 typedef struct{
@@ -554,3 +558,8 @@ a4
 a5
 //给各个数据元素分配连续的存储空间，大小为MaxSize*sizeof(ElemType)
 */
+```
+   2. demo02
+```cpp
+#include <stdio.h>
+#define 

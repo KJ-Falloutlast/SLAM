@@ -1,22 +1,32 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
- 
-int main()
+#include <iostream>
+using namespace std;
+class testoverride
 {
-   char *str;
- 
-   /* 最初的内存分配 */
-   str = (char *) malloc(15);
-   strcpy(str, "runoob");//将"runoob"赋值给str
-   printf("String = %s,  Address = %u\n", str, str);
- 
-   /* 重新分配内存 */
-   str = (char *) realloc(str, 25);
-   strcat(str, ".com");
-   printf("String = %s,  Address = %u\n", str, str);
- 
-   free(str);
- 
-   return(0);
-}
+public:
+    testoverride(void);
+    ~testoverride(void);
+    virtual void show() const = 0;
+    virtual int infor() = 0;
+    virtual void test() = 0;
+    virtual int spell() = 0;
+};
+
+class B: public testoverride
+{
+public:
+   virtual void show();     //1
+   virtual void infor();    //2
+   virtual void vmendd();   //3
+   virtual void test(int x);//4
+   virtual void splle();    //5 
+};
+
+class C: public testoverride
+{
+public:
+    virtual void show() override;
+    virtual void infor() override;   
+    virtual void vmendd() override;
+    virtual void test(int x) override;
+    virtual void splle() override;
+};

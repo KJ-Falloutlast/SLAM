@@ -908,6 +908,7 @@ https://raw.githubusercontent.com/ssrsub/ssr/master/V2Ray
 https://suo.yt/ZKjZa7R
 https://suo.yt/uXoibyeJ
 https://suo.yt/dsXxAuV(**稳定**)
+https://suo.yt/sKW1OHL(**新节点**)
 ## 5. wine的相关问题：
 1. 未安装windows应用
  $ sudo apt-get update
