@@ -739,7 +739,10 @@ int main(){
 
 ### 2.顺序表的插入和删除
 1. ListInsert(&L, i, e)插入:在表L的第i个位置上插入指定元素e **由于顺序表的逻辑结构是连续的,所以顺序表在某个位置的插入和删除必定会导致后面元素的后移和前移**
+2. ListDelete(&L, i, &e)删除:删除表L中第i个元素，并用e返回删除元素的值.
 ![顺序表的插入](../pictures/2-2-1顺序表的插入.png)
+![顺序表的删除](../pictures/2-2-1顺序表的删除.png)
+![顺序表的插入删除总结](../pictures/2-2-3%E9%A1%BA%E5%BA%8F%E8%A1%A8%E7%9A%84%E6%8F%92%E5%85%A5%E5%92%8C%E5%88%A0%E9%99%A4%E6%80%BB%E7%BB%93.png)
 
 ```cpp
 #define MaxSize 10//定义最大长度
@@ -747,17 +750,69 @@ typedef struct{
    int data[MaxSize];//用静态的"数组"存储数据元素
    int length;//顺序表的当前长度
 }SqList;//顺序表的类型定义
-void ListInsert(SqList &L, int i, int e){
-   for (int j = L.length; j>=i; j--){
-      L.data[j] = L.data[j-1];
-   }
-   L.data[i-1] = e;//在位置i处放入e
-   L.length++;//长度加1
+//1.插入法
+//1-1.插入法1
+// void ListInsert(SqList &L, int i, int e){
+//    for (int j = L.length; j>=i; j--){
+//       L.data[j] = L.data[j-1];
+//    }
+//    L.data[i-1] = e;//在位置i处放入e
+//    L.length++;//长度加1
+// }
+//1-2.插入法2
+bool ListInsert(SeqList &L, int i, int e){
+    if (i < 1 || i > L.length + 1)//判断i的范围是否有效
+        return false;
+    if (L.length >= MaxSize)//当前储存空间已满，不能插入
+        return false;
+    for (int j = L.length; j >= i; j--){//将第i个元素以及以后的元素后移
+        L.data[j] = L.data[j-1];//分析最深层次循环语句的执行次数与问题规模n的关系
+    }
+    L.data[i-1] = e;//在i处放入e
+    L.length++;//长度+1
+    return true;
 }
+/*
+分析下插入操作的时间复杂度:
+问题规模 n = L.length(表长)
+1.最好情况:新元素插入到表尾，不需要移动元素,i = n+1, 循环0次，最好时间复杂度 = O(1)
+2.最坏情况:新元素插入到表头，需要将原有的n个元素全部向后移动
+3.平均情况:假设新元素插入到任何一个位置的概率相同，即i = 1, 2, 3,....., length+1的概率是 p = 1/(n+1), i = 1, 循环n次；i = 2, 循环n-1次;i = 3，循环(n -2)次,...,i = n+1时，循环0次，所以平均循环次数 = np + 
+(n-1)p + (n-2)p +....+1.p = n(n+1)/2 * 1/(n+1) = n/2， 平均空间复杂度 = O(n)
+*/
+//2.插入法
+bool ListDelete(SqList &L, int i, int &e){//将e带回来
+   if (i < 1 || i > L.length){//判断i的范围是否有效
+      return false;
+   }
+   e = L.data[i-1]; //将被删除的元素给e
+   for (int j = i; j < L.length; j++){//将第i个位置的元素前
+      L.data[j-1] = L.data[j];//先移动前面的元素，后移动后面的元素
+   }
+   L.length--;//表长减1
+   return true;
+}
+/*
+分析下删除操作的时间复杂度:
+问题规模 n = L.length(表长)
+1.最好情况:删除表尾元素，不需要移动元素,i = n, 循环0次，最好时间复杂度 = O(1)
+2.最坏情况:删除表头元素，需要将后续的n-1个元素全部向前移动, i = 1, 循环n-1次;最坏时间复杂度为 = O(n)
+3.平均情况:假设新元素插入到任何一个位置的概率相同，即i = 1, 2, 3,....., length的概率是 p = 1/n, i = 1, 循环n-1次；i = 2, 循环n-2次;i = 3，循环(n -3)次,...,i = n时，循环0次，所以平均循环次数 = (n-1)p + (n-2)p +....+1.p = n(n-1)/2n = (n-1)/2， 平均空间复杂度 = O(n)
+*/
+
 int main(){
    SqList L;//声明一个顺序表
-   InitList(L);//初始化顺序表
-   //....插入几个元素
+  sf (ListDelete(L, 3, 3)){
+      printf("已删除第3个元素,删除元素值为 = %d\n", e);
+   }
+   else{
+      printf("位序i不合法，删除失败");
+   }
    ListInsert(L, 3, 3);
    return 0;
 }
+/*总结
+1.插入操作和删除操作的区别在于，插入是把后面的元素往后移，再赋值L.data[i-1] = e;删除是先提取元素e = L.data[i-1],然后在把前面的元素往前移
+2.Insert(5, 3),则移动3次，Delete(5, 3),则移动2次，所以总的来说,Insert(len, i),移动len-i+1次，Delete(len, i),移动len-i次 
+*/
+```
