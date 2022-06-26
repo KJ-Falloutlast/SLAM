@@ -559,7 +559,205 @@ a5
 //给各个数据元素分配连续的存储空间，大小为MaxSize*sizeof(ElemType)
 */
 ```
-   2. demo02
+![顺序表](../pictures/2-1顺序表demo01.png)
+![顺序表02](../pictures/2-1顺序表demo02.png)
+   2. demo02(顺序表的静态分配)
 ```cpp
 #include <stdio.h>
-#define 
+#define MaxSize 10 //定义最大长度
+typedef struct{
+   int data[MaxSize];//用静态的"数组"存放数据元素
+   int length;//顺序表的当前长度
+}SqList;//顺序表的类型定义
+//1.方法1
+//基本操作-初始化一个顺序表
+void InitList(SqList &L){
+   for (int i = 0; i < MaxSize; i++){
+      L.data[i] = 0;//将所有的数据元素设置为默认初始值
+   }
+   L.length = 0;//顺序表初始长度为0
+}
+//2.方法2
+void InitList(SqList &L){
+   L.length = 0;//顺序表初始长度为0
+}
+int main(){
+   SqList L;//SequenceList
+   InitList(L);
+   //尝试违规打印整个数组
+   //不能使用i < MaxSize这种结构，否则会导致数组越界,应该要用i<L.length
+   return 0;
+}
+
+```
+```cpp
+#include <stdio.h>
+#include <iostream>
+using namespace std;
+#define MaxSize 10 //定义最大长度
+typedef struct{
+   int data[MaxSize];//用静态的"数组"存放数据元素
+   int length;//顺序表的当前长度
+}SqList;//顺序表的类型定义
+//基本操作-初始化一个顺序表
+void InitList(SqList &L){
+//    for (int i = 0; i < MaxSize; i++){
+//       L.data[i] = 0;//将所有的数据元素设置为默认初始值
+//    }
+   L.length = 0;//顺序表初始长度为0
+}
+int main(){
+   SqList L;//SequenceList
+   InitList(L);
+   //若是i < L.length,则不会打印,若是i < MaxSize,由于没有在data中设置初始值,所以data[i]中的数可能为任意的脏数据
+   for (int i = 0; i < L.length; i++){
+      printf("data[%d] = %d\n", i, L.data[i]);
+   }
+   /*
+   注意点:
+   1.要初始化数组元素
+   2.打印数组元素要用i < MaxSize而不是i < L.length
+   3.静态分配
+   #define MaxSize 10 //定义最大长度
+   typedef struct{
+      int data[MaxSize];//用静态的"数组"存放数据元素
+      int length;//顺序表的当前长度
+   }SqList;//顺序表的类型定义
+   4.静态分配的问题:
+      4-1.静态分配一旦分配完成就不可更改
+      4-2.但是如果刚开始就分配一个很大的空间例如data[10000], 就会造成内存浪费
+   */
+   return 0;
+}
+```
+   3. demo03(顺序表的动态分配)
+      1. 动态申请和释放内存:malloc, free函数
+         1. L.data = (ElemType*)malloc(sizeof(ElemType)*InitSize);
+         2. 含义:
+            1. malloc返回1个指针,需要强制转型为你定义的数据元素类型的指针,malloc是返回data这一整片元素区域头地址
+            2. 比如说:int *data; L.data = (int *)malloc(sizeof(int) * InitSize);
+            3. 在c++中,就是new, delete关键字
+      2. 顺序表的特点
+         1. 随机访问:可以在O(1)时间内找到第i个元素
+         2. 存储密度高,每个节点只存储数据元素
+         3. 拓展容量不方便(即便采用动态方式,拓展长度的时间复杂度也比较高)
+```cpp
+#define InitSize 10 //顺序表的初始长度
+typedef struct{
+   ElemType *data; //指示动态分配数组的指针
+   int MaxSize;    //顺序表的最大容量
+   int length; //顺序表的当前长度
+}SqList;//顺序表的类型定义
+/*
+1.动态申请和释放内存
+malloc, free函数
+L.data = (ElemType*)malloc(sizeof(ElemType)*InitSize);
+2.含义:
+   2-1.malloc返回1个指针,需要强制转型为你定义的数据元素类型的指针,malloc是返回data这一整片元素区域头地址
+   2-2.比如说:int *data; L.data = (int *)malloc(sizeof(int) * InitSize);
+   2-3.在c++中,就是new, delete关键字
+*/
+```
+![动态分配01](../pictures/2-1-2顺序表的动态分配.png)
+![动态分配02](../pictures/2-2-02%E9%A1%BA%E5%BA%8F%E8%A1%A8%E5%8A%A8%E6%80%81%E5%88%86%E9%85%8D.png)
+
+```cpp
+#include <stdlib.h>
+#define InitSize 10 //默认最大长度
+typedef struct{
+   int *data;//指示动态分配数组的指针
+   int MaxSize;//顺序表的最大容量
+   int length;//顺序表的当前长度
+}SeqList;
+void InitList(SeqList &L){
+   //用malloc申请一片连续的存储空间
+   L.data = (int *)malloc(InitSize * sizeof(int));
+   L.length = 0;
+   L.MaxSize = InitSize;
+}
+void IncreaseSize(SeqList &L, int len){
+   int *p = L.data;
+   L.data = (int *)malloc((L.MaxSize + len) * sizeof(int));
+   for (int i = 0; i < L.length; i++){
+      L.data[i] = p[i];//将数据复制到新区域
+   }
+   L.MaxSize = L.MaxSize + len;//顺序表最大长度增加len
+   free(p);//释放原来的内存空间
+/*
+1. MaxSize指的是最大的容量,但是length是装了多少值,  length <= MaxSize  
+2.malloc是申请1整片指向data[0]地址的空间
+3.*p = &data[0], p[0] = data[0];
+*/
+}
+```
+改进版
+```cpp
+#include <iostream>
+using namespace std;
+#define InitSize 10
+class SeqList{
+    public:
+        int length;
+        int MaxSize;
+        int *data;
+};
+void InitList(SeqList &L){
+    L.data = new int(InitSize * sizeof(int));
+    L.MaxSize = InitSize;
+    L.length = 5;
+}
+
+void IncreaseList(SeqList &L, int len){
+    int *p = L.data;
+    L.data = new int((InitSize + len) * sizeof(int));
+    for (int i = 0; i < L.length; i++){
+        L.data[i] = p[i];
+    }
+    L.MaxSize = L.MaxSize + len;
+    delete p;
+}
+void InsertList(SeqList &L){
+    for (int i = 0; i < L.length; i++){
+        L.data[i] = i;
+    }
+}
+void PrintList(SeqList &L){
+    for (int i = 0; i < L.length; i++){
+        cout << L.data[i] << endl;
+    }
+}
+int main(){
+    SeqList L;
+    InitList(L);
+    InsertList(L);
+    IncreaseList(L, 5);
+    PrintList(L);
+}
+```
+![顺序表小节](../pictures/2-1-3总结.png)
+
+
+### 2.顺序表的插入和删除
+1. ListInsert(&L, i, e)插入:在表L的第i个位置上插入指定元素e **由于顺序表的逻辑结构是连续的,所以顺序表在某个位置的插入和删除必定会导致后面元素的后移和前移**
+![顺序表的插入](../pictures/2-2-1顺序表的插入.png)
+
+```cpp
+#define MaxSize 10//定义最大长度
+typedef struct{
+   int data[MaxSize];//用静态的"数组"存储数据元素
+   int length;//顺序表的当前长度
+}SqList;//顺序表的类型定义
+void ListInsert(SqList &L, int i, int e){
+   for (int j = L.length; j>=i; j--){
+      L.data[j] = L.data[j-1];
+   }
+   L.data[i-1] = e;//在位置i处放入e
+   L.length++;//长度加1
+}
+int main(){
+   SqList L;//声明一个顺序表
+   InitList(L);//初始化顺序表
+   //....插入几个元素
+   ListInsert(L, 3, 3);
+   return 0;
+}

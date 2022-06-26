@@ -51,8 +51,19 @@ int main(){
 }
 ```
 ## 1-2.图像的掩膜操作
-
-
+![图像的掩膜操作](../pictures/图像的掩膜操作.png图像的)
+1. 获取图像像素指针
+   1. CV_Assert(myImage.depth() == CV_8U);
+   2. Mat.ptr<uchar>(int i = 0)获取像素矩阵的指针，索引i表示第几行，从0开始计数
+   3. 获得当前行的指针:const uchar* current = myImage.ptr<uchar>(row);
+   4. 获取当前像素点P(row, col)的像素值p(row, col) = current[col],所以为const uchar* current = myImage.ptr<uchar>(row)[col];
+2. 像素范围处理satuate_cast<uchar>
+   1. saturate_cast<uchar>(-100):返回0
+   2. saturate_cast<uchar>(288):返回255
+   3. saturate_cast<uchar>(100):返回100
+   4. 这个函数的功能是确保RGB值在范围0-225之间
+3. 矩阵的掩膜操作
+   1. $ I(i,j)=5∗I(i,j)−[I(i−1,j)+I(i+1,j)+I(i,j−1)+I(i,j+1)]$
 
 
 

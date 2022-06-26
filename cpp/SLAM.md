@@ -2017,6 +2017,9 @@ int main( int argc, char** argv )
                 p.b = color.data[ v*color.step+u*color.channels() ];
                 p.g = color.data[ v*color.step+u*color.channels()+1 ];
                 p.r = color.data[ v*color.step+u*color.channels()+2 ];
+                // p.b = color.at<cv::Vec3b>(v, u)[0];                
+                // p.g = color.at<cv::Vec3b>(v, u)[1];                
+                // p.r = color.at<cv::Vec3b>(v, u)[2];
                 pointCloud->points.push_back( p );
             }
     }
@@ -2577,9 +2580,248 @@ public:
           1. 给待估计的节点设置初始值，本例中将节点设置为(0, 0, 0)
        4. virtual void oplusImpl(const double *update):设置更新方式，采用相加的方式更新 
 
+   2. 定义边
+      1. class CurveFittingEdge:public g2o::BaseUnaryEdge<1, double, CurveFittingVertex>, 因为只有一个节点，所以继承1元边。边代表的误差是$fi = ei = yi -exp(axi^2 + bx_i + c)$,所以维度为1，节点是CurveFittingVertex
+      2. 设置误差
+```cpp
+virtual void computeError() override{
+    //override的目的是为了显式地在派生类中声明，哪成员函数需要被重写，如果没有被重写，就会报错，所以加了override后，即使不小心漏写了虚函数重写的某个苛刻条件，可以通过编译器的报错快速修正
+    //1.定义节点
+     const CurFittingVertex *v = static_cast<const CurveFitttingVertex *>(_vertices[0]);
+     //2.提取节点当前值
+     const Eigen::Vector3d abc = v->estimate();
+     //3.误差
+     _error(0, 0) = _measurement - std::exp(abc(0, 0) * _x * _x + abc(1, 0) * _x + abc(2, 0));
+     /*
+     1._vertices[0]对应的是class CurveFittingEdge : public g2o::BaseUnaryEdge<1, double, CurveFittingVertex> 所绑定的第1个顶点CurveFittingVertex, fi = ei = yi - exp(axi^2 + bxi + c)
+     2.abc为优化参数x = [a, b, c]T
+    */
+}
+```
+   3. 计算雅克比
+```cpp
+virtual void linearizeOplus()override{
+    const CurveFittingVectex *v = static_cast<const CurveFittingVertex *>(_vertices[0]);
+    const Eigen::Vector3d abc = v->estimate();
+    double y = exp(abc[0] * _x * _x + abc[1] * _x + abc[2]);
+    _jacobianOplusXi[0] = -_x * _x * y;
+    _jacobianOplusXi[1] = -_x * y;
+    _jacobianOplusXi[2] = -_y;
+} 
+```
+   4. 构建图
+```cpp
+//1.求解器
+auto solver = new g2o::OptimizationAlgorithmGaussNewton(g2o::make_unique<BlockSolverType>(g2o::make_unique<LinearSolverType>()));
+/*
+1-1.typedef g2o::BlockSolver<g2o::BlockSolverTraits<3,1>> BlockSolverType;(每个误差项优化变量维度是3， 误差值维度为1)
+1-2.typedef g2o::LinearSolverDense<BlockSolverType::PoseMatrixType> LinearSolverType;(线性求解器类型) 
+1-3.GN：g2o::OptimizationAlgorithmGaussNewton
+*/
+g2o::SparseOptimizer optimizer;//图模型
+optimizer.setAlgorithm(solver);//设置求解器
+optimizer.setVerbose(true);//打开调试输出
+//2.往图中增加顶点
+CurveFittingVertex *v = new CurveFittingVertex();
+v->setEstimate(Eigen::Vector3d(ae, be, ce));
+v->setId(0);
+optimizer.addVertex(v);
+//3.增加边
+for (int i = 0; i < N; i++){
+    CurveFittingEdge *edge = new CurveFittingEdge(x_data[i]);
+    edge->setId(i);
+    edge->setVertex(0, v);
+    edge->setMeasurement(y_data[i]);
+    edge->setInformation(Eigen::Matrix<double, 1, 1>::Identity * 1/(w_sigma * w_sigma));//信息矩阵，协方差矩阵之逆
+    optimizer.addEdge(edge);//增加边
+}
+```
+```cpp
+// 执行优化
+ cout << "start optimization" << endl;
+ chrono::steady_clock::time_point t1 = chrono::steady_clock::now();
+ 
+ optimizer.initializeOptimization();
+ optimizer.optimize(10);
+ 
+ chrono::steady_clock::time_point t2 = chrono::steady_clock::now();
+ chrono::duration<double> time_used = chrono::duration_cast<chrono::duration<double>>(t2 - t1);
+ cout << "solve time cost = " << time_used.count() << " seconds. " << endl;
+
+ // 输出优化值
+ Eigen::Vector3d abc_estimate = v->estimate();
+ cout << "estimated model: " << abc_estimate.transpose() << endl;
+
+ return 0;
+```
 
 
 
+
+
+```cpp
+// 误差模型 模板参数：观测值维度，类型，连接顶点类型
+class CurveFittingEdge : public g2o::BaseUnaryEdge<1, double, CurveFittingVertex> {
+public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+ 
+  CurveFittingEdge(double x) : BaseUnaryEdge(), _x(x) {}
+ 
+  // 计算曲线模型误差
+  virtual void computeError() override {
+    const CurveFittingVertex *v = static_cast<const CurveFittingVertex *> (_vertices[0]);
+    const Eigen::Vector3d abc = v->estimate();
+    _error(0, 0) = _measurement - std::exp(abc(0, 0) * _x * _x + abc(1, 0) * _x + abc(2, 0));
+  }
+ 
+  // 计算雅可比矩阵
+  virtual void linearizeOplus() override {
+    const CurveFittingVertex *v = static_cast<const CurveFittingVertex *> (_vertices[0]);
+    const Eigen::Vector3d abc = v->estimate();
+    double y = exp(abc[0] * _x * _x + abc[1] * _x + abc[2]);
+    _jacobianOplusXi[0] = -_x * _x * y;
+    _jacobianOplusXi[1] = -_x * y;
+    _jacobianOplusXi[2] = -y;
+  }
+ 
+  virtual bool read(istream &in) {}
+ 
+  virtual bool write(ostream &out) const {}
+ 
+public:
+  double _x;  // x 值， y 值为 _measurement
+};
+
+```
+### 2.利用高斯牛顿法和g2o进行曲线拟合
+[高斯牛顿法](https://blog.csdn.net/CGJustDoIT/article/details/108005962?spm=1001.2101.3001.6650.2&utm_medium=distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromBaidu~HighlightScore-2.queryctrv2&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromBaidu~HighlightScore-2.queryctrv2&utm_relevant_index=5#t13)
+```cpp
+#include <iostream>
+#include <chrono>
+#include <opencv2/opencv.hpp>
+#include <Eigen/Core>
+#include <Eigen/Dense>
+
+#include <pcl/point_types.h>
+#include <pcl/io/pcd_io.h>
+#include <pcl/filters/voxel_grid.h>
+#include <pcl/visualization/pcl_visualizer.h>
+#include <pcl/filters/statistical_outlier_removal.h>
+#include <pcl/visualization/pcl_plotter.h>
+
+using namespace std;
+using namespace Eigen;
+using namespace pcl;
+int main(int argc, char **argv)
+{
+  double ar = 1.0, br = 2.0, cr = 1.0;  // 真实参数值
+  double ae = 2.0, be = -1.0, ce = 5.0; // 估计参数值
+  int N = 100;                          // 数据点
+  double w_sigma = 1.0;                 // 噪声Sigma值
+  double inv_sigma = 1.0 / w_sigma;
+  cv::RNG rng; // OpenCV随机数产生器
+
+  // 定义点云使用的格式：这里用的是XYZRGB
+  typedef pcl::PointXYZRGB PointT;
+  typedef pcl::PointCloud<PointT> PointCloud;
+
+  pcl::PointCloud<PointT>::Ptr cloud(new pcl::PointCloud<PointT>);
+
+  vector<double> x_data, y_data; // 数据
+  for (int i = 0; i < N; i++)
+  {
+    double x = i / 100.0;
+    x_data.push_back(x);
+    y_data.push_back(exp(ar * x * x + br * x + cr) + rng.gaussian(w_sigma * w_sigma));
+
+    PointT p;
+    p.x = x;
+    p.y = exp(ar * x * x + br * x + cr) + rng.gaussian(w_sigma * w_sigma);
+    p.z = 1;
+
+    cloud->points.push_back(p);
+  }
+
+  // 开始Gauss-Newton迭代
+  int iterations = 100;          // 迭代次数
+  double cost = 0, lastCost = 0; // 本次迭代的cost和上一次迭代的cost
+
+  chrono::steady_clock::time_point t1 = chrono::steady_clock::now();
+  for (int iter = 0; iter < iterations; iter++)
+  {
+
+    Matrix3d H = Matrix3d::Zero(); // Hessian = J^T W^{-1} J in Gauss-Newton
+    Vector3d b = Vector3d::Zero(); // bias
+    cost = 0;
+
+    for (int i = 0; i < N; i++)
+    {
+      double xi = x_data[i], yi = y_data[i]; // 第i个数据点
+      double error = yi - exp(ae * xi * xi + be * xi + ce);
+      Vector3d J;                                         // 雅可比矩阵
+      J[0] = -xi * xi * exp(ae * xi * xi + be * xi + ce); // de/da
+      J[1] = -xi * exp(ae * xi * xi + be * xi + ce);      // de/db
+      J[2] = -exp(ae * xi * xi + be * xi + ce);           // de/dc
+
+      H += inv_sigma * inv_sigma * J * J.transpose();
+      b += -inv_sigma * inv_sigma * error * J;
+
+      cost += error * error;
+    }
+
+    // 求解线性方程 Hx=b
+    Vector3d dx = H.ldlt().solve(b);
+    if (isnan(dx[0]))
+    {
+      cout << "result is nan!" << endl;
+      break;
+    }
+
+    if (iter > 0 && cost >= lastCost)
+    {
+      cout << "cost: " << cost << ">= last cost: " << lastCost << ", break." << endl;
+      break;
+    }
+
+    ae += dx[0];
+    be += dx[1];
+    ce += dx[2];
+
+    lastCost = cost;
+
+    cout << "total cost: " << cost << ", \t\tupdate: " << dx.transpose() << "\t\testimated params: " << ae << "," << be << "," << ce << endl;
+  }
+
+  chrono::steady_clock::time_point t2 = chrono::steady_clock::now();
+  chrono::duration<double> time_used = chrono::duration_cast<chrono::duration<double>>(t2 - t1);
+  cout << "solve time cost = " << time_used.count() << " seconds. " << endl;
+
+  cout << "estimated abc = " << ae << ", " << be << ", " << ce << endl;
+
+  visualization::PCLPlotter *plot_(new visualization::PCLPlotter("curve fitting by gaussNewton"));
+  plot_->setBackgroundColor(1, 1, 1);
+  plot_->setTitle("curve fitting by gaussNewton");
+  plot_->setXTitle("Elevation");
+  plot_->setYTitle("Point number");
+
+  vector<double> y_estimate_data; // 数据
+  vector<double> y_truth_date;    // 数据
+  for (int i = 0; i < x_data.size(); i++)
+  {
+    double xi = x_data[i]; // 第i个数据点
+    double yi = exp(ae * xi * xi + be * xi + ce);
+    y_estimate_data.push_back(yi);
+    y_truth_date.push_back(exp(ar * xi * xi + br * xi + cr));
+  }
+  plot_->addPlotData(x_data, y_truth_date, "truth-line", vtkChart::LINE); //X,Y均为double型的向量
+
+  plot_->addPlotData(x_data, y_estimate_data, "estimate-line", vtkChart::LINE); //X,Y均为double型的向量
+
+  plot_->addPlotData(x_data, y_data, "rander-point", vtkChart::POINTS); //X,Y均为double型的向量
+  plot_->plot();                                                        //绘制曲线
+  return 0;
+}
+```
 
 
 
@@ -2892,7 +3134,7 @@ int main( int argc, char** argv )
 }
 
 
-int     findCorrespondingPoints( const cv::Mat& img1, const cv::Mat& img2, vector<cv::Point2f>& points1, vector<cv::Point2f>& points2 )
+int findCorrespondingPoints( const cv::Mat& img1, const cv::Mat& img2, vector<cv::Point2f>& points1, vector<cv::Point2f>& points2 )
 {
     cv::Mat descriptors_1, descriptors_2;
     // used in OpenCV3
