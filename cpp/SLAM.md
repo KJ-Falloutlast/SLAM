@@ -2701,10 +2701,7 @@ public:
 #include <opencv2/opencv.hpp>
 #include <Eigen/Core>
 #include <Eigen/Dense>
-
-#include <pcl/point_types.h>
-#include <pcl/io/pcd_io.h>
-#include <pcl/filters/voxel_grid.h>
+//以下是显示相关的库
 #include <pcl/visualization/pcl_visualizer.h>
 #include <pcl/filters/statistical_outlier_removal.h>
 #include <pcl/visualization/pcl_plotter.h>
@@ -2714,18 +2711,13 @@ using namespace Eigen;
 using namespace pcl;
 int main(int argc, char **argv)
 {
+  //1.初始化值
   double ar = 1.0, br = 2.0, cr = 1.0;  // 真实参数值
   double ae = 2.0, be = -1.0, ce = 5.0; // 估计参数值
   int N = 100;                          // 数据点
   double w_sigma = 1.0;                 // 噪声Sigma值
   double inv_sigma = 1.0 / w_sigma;
   cv::RNG rng; // OpenCV随机数产生器
-
-  // 定义点云使用的格式：这里用的是XYZRGB
-  typedef pcl::PointXYZRGB PointT;
-  typedef pcl::PointCloud<PointT> PointCloud;
-
-  pcl::PointCloud<PointT>::Ptr cloud(new pcl::PointCloud<PointT>);
 
   vector<double> x_data, y_data; // 数据
   for (int i = 0; i < N; i++)
@@ -2734,91 +2726,69 @@ int main(int argc, char **argv)
     x_data.push_back(x);
     y_data.push_back(exp(ar * x * x + br * x + cr) + rng.gaussian(w_sigma * w_sigma));
 
-    PointT p;
-    p.x = x;
-    p.y = exp(ar * x * x + br * x + cr) + rng.gaussian(w_sigma * w_sigma);
-    p.z = 1;
 
-    cloud->points.push_back(p);
   }
-
-  // 开始Gauss-Newton迭代
+  // 2.开始Gauss-Newton迭代
+  //2-1.迭代
   int iterations = 100;          // 迭代次数
-  double cost = 0, lastCost = 0; // 本次迭代的cost和上一次迭代的cost
 
-  chrono::steady_clock::time_point t1 = chrono::steady_clock::now();
   for (int iter = 0; iter < iterations; iter++)
   {
 
     Matrix3d H = Matrix3d::Zero(); // Hessian = J^T W^{-1} J in Gauss-Newton
     Vector3d b = Vector3d::Zero(); // bias
-    cost = 0;
 
     for (int i = 0; i < N; i++)
     {
       double xi = x_data[i], yi = y_data[i]; // 第i个数据点
-      double error = yi - exp(ae * xi * xi + be * xi + ce);
+      double error = yi - exp(ae * xi * xi + be * xi + ce);//error = e = yr - ye(实际值-估计值)
       Vector3d J;                                         // 雅可比矩阵
       J[0] = -xi * xi * exp(ae * xi * xi + be * xi + ce); // de/da
       J[1] = -xi * exp(ae * xi * xi + be * xi + ce);      // de/db
       J[2] = -exp(ae * xi * xi + be * xi + ce);           // de/dc
 
-      H += inv_sigma * inv_sigma * J * J.transpose();
+      H += inv_sigma * inv_sigma * J * J.transpose();//sum(sigma ^2 * Ji * Ji^T) * Xk = -Ji * (sigma^2)-1 * ei 
       b += -inv_sigma * inv_sigma * error * J;
 
-      cost += error * error;
     }
 
-    // 求解线性方程 Hx=b
+    //2-2.求解线性方程 Hx=b
     Vector3d dx = H.ldlt().solve(b);
-    if (isnan(dx[0]))
-    {
-      cout << "result is nan!" << endl;
-      break;
-    }
-
-    if (iter > 0 && cost >= lastCost)
-    {
-      cout << "cost: " << cost << ">= last cost: " << lastCost << ", break." << endl;
-      break;
-    }
+    //每迭代一次，求解100个 dx = [a, b, c],xe = (ae, be, ce) + dx。所以当迭代100次的时候，就求解了100次dx,同时也加了100次dx  
 
     ae += dx[0];
     be += dx[1];
     ce += dx[2];
 
-    lastCost = cost;
 
-    cout << "total cost: " << cost << ", \t\tupdate: " << dx.transpose() << "\t\testimated params: " << ae << "," << be << "," << ce << endl;
-  }
+    cout  << "\t\tupdate: " << dx.transpose() << "\t\testimated params: " << ae << "," << be << "," << ce << endl;//100次迭代中每次update的值
+}
 
-  chrono::steady_clock::time_point t2 = chrono::steady_clock::now();
-  chrono::duration<double> time_used = chrono::duration_cast<chrono::duration<double>>(t2 - t1);
-  cout << "solve time cost = " << time_used.count() << " seconds. " << endl;
 
-  cout << "estimated abc = " << ae << ", " << be << ", " << ce << endl;
+  cout << "estimated abc = " << ae << ", " << be << ", " << ce << endl;//100次迭代完后得到的最终值
 
-  visualization::PCLPlotter *plot_(new visualization::PCLPlotter("curve fitting by gaussNewton"));
-  plot_->setBackgroundColor(1, 1, 1);
-  plot_->setTitle("curve fitting by gaussNewton");
-  plot_->setXTitle("Elevation");
-  plot_->setYTitle("Point number");
+  visualization::PCLPlotter *plot_(new visualization::PCLPlotter("curve fitting by gaussNewton"));//这是一个构造函数
+  plot_->setBackgroundColor(1, 1, 1);//背景颜色
+  plot_->setTitle("curve fitting by gaussNewton");//标题名
+  plot_->setXTitle("Elevation");//增加
+  plot_->setYTitle("Point number");//点的数量
 
   vector<double> y_estimate_data; // 数据
-  vector<double> y_truth_date;    // 数据
+  vector<double> y_truth_data;    // 数据
   for (int i = 0; i < x_data.size(); i++)
   {
-    double xi = x_data[i]; // 第i个数据点
-    double yi = exp(ae * xi * xi + be * xi + ce);
+    double xi = x_data[i]; // 第i个数据点,由于for代表了一个作用域，所以此时每次都要xi = data[i]
+    double yi = exp(ae * xi * xi + be * xi + ce);//此时的ae, be, ce是迭代了100次后的ae, be,ce, 然后将迭代100次的这3个值作为最终的估计值
     y_estimate_data.push_back(yi);
-    y_truth_date.push_back(exp(ar * xi * xi + br * xi + cr));
+    y_truth_data.push_back(exp(ar * xi * xi + br * xi + cr));//(ar, br ,cr)是真实值
   }
-  plot_->addPlotData(x_data, y_truth_date, "truth-line", vtkChart::LINE); //X,Y均为double型的向量
-
+  plot_->addPlotData(x_data, y_truth_data, "truth-line", vtkChart::LINE); //X,Y均为double型的向量
+  //参数1:输入vec, 参数2:输出vec, 参数3:data名称, 参数4:输出图形类型(参数1，2类型必须保持一致)
   plot_->addPlotData(x_data, y_estimate_data, "estimate-line", vtkChart::LINE); //X,Y均为double型的向量
 
   plot_->addPlotData(x_data, y_data, "rander-point", vtkChart::POINTS); //X,Y均为double型的向量
-  plot_->plot();                                                        //绘制曲线
+  plot_->plot();
+  //画图                                                        //绘制曲线
   return 0;
 }
 ```

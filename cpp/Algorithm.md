@@ -816,3 +816,220 @@ int main(){
 2.Insert(5, 3),则移动3次，Delete(5, 3),则移动2次，所以总的来说,Insert(len, i),移动len-i+1次，Delete(len, i),移动len-i次 
 */
 ```
+### 3.顺序表的查找
+![顺序表的按位查找](../pictures/2-2-2顺序表的按位查找.png)
+![顺序表的按位查找总结](../pictures/2-2-2顺序表的查找总结.png)
+1. GetElem(L, i):按位查找。获取L中的第i个元素的值
+```cpp
+//1.静态分配
+#define MaxSize 10//定义最大长度
+typedef struct{
+   ElemType data[MaxSize];
+   int length;
+}SqList;
+ElemType GetElem(SqList L,int i){
+   return L.data[i-1];
+}
+//2.动态分配
+#define InitSize 10//顺序表的初始长度
+typedef struct{
+   ElemType *data;//指示冬天分配数组的指针
+   int MaxSize;//顺序表的最大容量
+   int length;//顺序表的当前长度
+}SeqList;//顺序表的类型定义
+ElemType GetElem(SeqList L, int i){
+   return L.data[i-1];//如果1个ElemType占6B,即sizeof(ElemType) = 6, 指针data指向的地址为2000
+}
+/*
+1.由于顺序表的各个元素在内存中连续存放，因此可以找到根据起始地址和数据元素大小立即找到第i个元素，
+这就是"随机存取"特性, 所以知道一个线性表的起始地址和每个数据的大小，就可以知道找到任意一个元素的位置
+2.按位查找的时间复杂度:O(1):随机
+*/
+
+```
+
+2. LocateElem(L, e):按值查找。在表L中查找具有给定关键值的元素。
+```cpp
+//1.比较常规类型
+#define InitSize 10 //顺序表的初始长度
+typedef struct{
+   ElemType *data;//定义1个动态分配数组的指针
+   int MaxSize;//顺序表的最大容量
+   int length;//顺序表的当前长度
+} SeqList;//顺序表的类型定义(动态分配方式)
+//在顺序表中查找第1个元素值为e的元素，并返回其位序
+int LocateElem(SeqList L, ElemType e){
+   for(int i = 0;  i < L.length; i++){
+      if (L.data[i] == e){//基本数据类型:int, char, double, float等可以直接用==比较
+         return i+1;//数组下标为i的元素值为e, 并返回其位序i+1
+      }
+   }
+}
+int main(){
+   LocateElem(L, 9);//
+}
+//2.比较结构体
+typedef struct{
+   int num;
+   int people;
+} Customer;
+void test(){
+   Customer a, b;
+   a.num = 1;
+   b.num = 1;
+   a.people = 1;
+   b.people = 1;
+   //1-1.错误做法
+   // if (a == b){
+   //    cout << "相等" << endl;
+   // }
+   // else{
+   //    cout << "不相等" << endl;
+   // }
+   //1-2.正确做法
+   bool isCustomerEqual(Customer a, Customer b){
+      if (a.num == b.num && a.people == b.people){
+         return true;
+      }
+      else{
+         return false;
+      }
+   }
+}
+/*
+按值查找的时间复杂度
+1.最好情况:目标在表头，循环1次，最好时间复杂度 = O(1)
+1.最好情况:目标在表尾，循环n次，最坏时间复杂度 = O(n)
+1.最好情况:假设目标元素出现在任何1个位置的概率相同 p = 1/n,目标元素在第1位，循环1次;在第2位，循环2次;...;在第n次，循环n次，平均循环次数 = 1*1/n + 2*1/n +...+n*1/n = (n+1)/2
+*/
+```
+## 2-3.链表
+### 1.单链表
+1. 定义单链表
+![单链表](../pictures/2-3-1单链表的定义.png)
+![单链表的代码实现](../pictures/2-3-2单链表代码实现.png)
+![单链表带头结点](../pictures/2-3-2单链表带头结点.png)
+```cpp
+//1.定义方法1
+typedef struct LNode{//LNode为结点,LinearNode
+   ElemType data;//数据域，定义单链表节点类型
+   struct LNode *next;//指针域，每个节点存放一个数据元素
+}LNode, *LinkList;
+// struct LNode *p = (struct LNode *)malloc(sizeof(struct LNode));
+
+//2.定义方法2(方法1和方法2实际上是等价的)
+struct LNode{//定义单链表节点类型
+   ElemType data;//每个节点存放1个数据元素
+   struct LNode *next;//指针指向下一个结点
+};
+typedef struct LNode LNode;
+typedef struct LNode *LinkList;//用LinkList表示这是一个指向LNode的指针
+//所以要表示一个单链表时，只需要声明一个头指针L,指向单链表的第一个结点
+
+LNode *L;//声明1个指向单链表第1个结点的指针
+// LinkList L;声明一个指向单链表第1个结点的指针，这种表示方法和上面等价
+
+//3.定义方法3
+class LNode{
+   int data;//数据域，定义单链表节点类型
+   LNode *next;//指针域，每个节点存放一个数据元素
+};
+
+typedef LNode LNode;
+typedef LNode *LinkList;
+
+
+LNode * GetElem(LinkList L, int i){//此处等价于LNode *L
+   int j = 1;
+   LNode *p = L->next;
+   if (i==0){
+      return L;
+   }
+   if (i < 1){
+      return NULL;
+   }
+   while (p != NULL & j < i){
+      p = p->next;
+      j++;
+   }
+   return p;
+}
+/*
+LNode*:强调返回的是一个结点
+LinkList:强调这是一个单链表
+*/
+```
+2. 初始化单链表
+```cpp
+//***********不带头结点的情况***************//
+typedef struct LNode{//定义单链表结点类型
+   ElemType data;//每个结点存放一个数据元素
+   struct LNode *next;//指针指向下一个结点
+}LNode, *LinkList;
+//初始化1个空的单链表
+bool InitList(LinkList &L){//加入引用传递的意思是改变原来L而非它的复制品
+   L = NULL;//空表，暂时还没有任何结点，置空防止产生脏数据
+   return true;
+}
+bool Empty(LinkList L){
+   if(L == NULL)
+      return (L==NULL);
+}
+void test(){
+   LinkList L;//声明1个指向单链表的指针
+   //初始化1个单链表
+   InitList(L);
+}
+```
+```cpp
+//****************带头结点的情况**************//
+typedef struct LNode{
+   ElemType data;
+   struct LNode *next;//用next指针指向LNode对象
+}LNode, *LinkList;
+/*
+以上等价于
+struct LNode{
+   ElemType data;
+   struct LNode *next;
+}
+typedef LNode LNode
+typedef LNode *LinkList
+*/
+//初始化1个单链表
+//例如，int *p, p为指针对象, &p为指针的地址，*p为指针的值(将p解引用，指向它所指的对象)
+bool InitList(LinkList &L){
+   L = (LNode *)malloc(sizeof(LNode));//分配1个头结点，把malloc返回的地址赋给L
+   if (L == NULL)
+      return false;//内存不足分配失败
+   L->next =  NULL;//头结点之后暂时还没有结点
+   return true;
+}
+bool Empty(ListList L){
+   if (L->next == NULL)
+      return true;
+   else
+      return false;
+}
+void test(){
+   LinkList L;//声明一个指向单链表的指针
+   InitList(L);
+}
+/*
+带头结点和不带头结点的区别
+1.不带头结点，写代码更麻烦，对第一个数据点和后续数据结点的处理需要用不同的代码逻辑，
+对空表和非空表的处理需要用不同的代码逻辑
+*/
+```
+![单链表总结](../pictures/2-3-3%E5%8D%95%E9%93%BE%E8%A1%A8%E6%80%BB%E7%BB%93.png)
+
+3. *总结*
+   1. 单链表
+      1. 用链式存储实现了"线性结构"(逻辑结构)
+      2. 1个结点存储1个数据元素
+      3. 各个结点间的先后关系用指针表示
+   2. 用代码定义单链表
+   3. 两种实现:
+      1. 不带头结点:空表判断:L==NULL,写代码不方便
+      2. 带头结点:空表判断:L->next == NULL,写代码方便
+   4. 其余注意点:LinkList = LNode*
