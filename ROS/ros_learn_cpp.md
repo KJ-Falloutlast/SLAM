@@ -4868,3 +4868,89 @@ local_costmap:
     <node pkg="rviz" type="rviz" name="rviz" args="-d $(find mycar_nav)/rviz/nav.rviz" />
 </launch>
 ```
+
+
+### 5.路径相关消息
+1. 地图相关消息
+   1. nav_msgs/MapMetaData:地图元数据，包括地图的宽度，高度，分辨率
+   2. nav_msgs/OccupancyGrid:地图的栅格数据，一般会在rviz中以图形化方式显示
+   3. 显示方法 
+      1. 启动nav06_test.launch文件(该文件集成了所有的导航实现)
+      2. rostopic echo /map >> map01.yaml
+      3. rostopic echo /move_base/local_costmap/costmap >> map01.yaml
+```yaml
+#调用rosmsg info nav_msgs/MapMetaData
+time map_load_time
+float32 resolution #地图分辨率
+uint32 width #地图宽度
+uint32 height #地图高度
+geometry_msgs/Pose origin #地图位姿数据
+  geometry_msgs/Point position #位置
+    float64 x
+    float64 y
+    float64 z
+  geometry_msgs/Quaternion orientation #姿态
+    float64 x
+    float64 y
+    float64 z
+    float64 w
+```
+```yaml
+#调用rosmsg info nav_msgs/OccupancyGrid，显示消息如下
+std_msgs/Header header
+  uint32 seq
+  time stamp
+  string frame_id
+#--- 地图元数据
+nav_msgs/MapMetaData info
+  time map_load_time
+  float32 resolution
+  uint32 width
+  uint32 height
+  geometry_msgs/Pose origin
+    geometry_msgs/Point position
+      float64 x
+      float64 y
+      float64 z
+    geometry_msgs/Quaternion orientation
+      float64 x
+      float64 y
+      float64 z
+      float64 w
+#--- 地图内容数据，数组长度 = width * height
+int8[] data
+```
+2. 里程计
+```yaml
+# 利用rostopic echo /odom 来查看节点相关信息
+std_msgs/Header header
+  uint32 seq
+  time stamp
+  string frame_id #父级坐标系
+string child_frame_id #子级坐标系
+geometry_msgs/PoseWithCovariance pose
+  geometry_msgs/Pose pose #里程计位姿
+    geometry_msgs/Point position #位置
+      float64 x
+      float64 y
+      float64 z
+    geometry_msgs/Quaternion orientation #姿态
+      float64 x
+      float64 y
+      float64 z
+      float64 w
+  float64[36] covariance
+geometry_msgs/TwistWithCovariance twist
+  geometry_msgs/Twist twist #速度
+    geometry_msgs/Vector3 linear #线速度
+      float64 x
+      float64 y
+      float64 z
+    geometry_msgs/Vector3 angular #角速度
+      float64 x
+      float64 y
+      float64 z    
+  # 协方差矩阵
+  float64[36] covariance
+```
+3. 坐标变换

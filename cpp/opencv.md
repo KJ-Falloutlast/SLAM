@@ -1,4 +1,4 @@
-# 1.opencv和点云处理基础
+# 1.opencv基础
 ## 1-1.加载修改和保存图像
 1. imread
    1. 功能：加载图像文件，使得图像文件成为一个mat对象，其中第一个参数为图像文件名称
@@ -64,6 +64,64 @@ int main(){
    4. 这个函数的功能是确保RGB值在范围0-225之间
 3. 矩阵的掩膜操作
    1. $ I(i,j)=5∗I(i,j)−[I(i−1,j)+I(i+1,j)+I(i,j−1)+I(i,j+1)]$
+4. 函数调用filter2D功能
+   1. 定义掩膜: Mat kernel = (Mat_<char>(3, 3) << 0, -1, 0, -1, 5, -1, 0, -1, 0);
+   2. filter2D(src, dst, src.depth(), kernel);其中src和dst是Mat,src.depth表示位图深度，有32， 24， 8
+```cpp
+#include <opencv2/opencv.hpp>
+#include <iostream>
+#include <math.h>
+#include <opencv2/highgui/highgui.hpp>//主要解决CV_WINDOW_AUTOSIZE问题
+using namespace cv;
+using namespace std;
+
+void sharpen(Mat &image)
+{
+	int rows = image.rows;
+	int cols = image.cols;
+	int channels = image.channels();//获取原图像通道数
+	Mat dst;
+	dst.create(image.size(),image.type());//创建一个和原图像大小和类型相同的输出对象
+    //方法1.
+	for (int i = 1; i < rows-1; i++)//由于像素的操作需要涉及到上下左右四个像素，所以边缘像素无法操作，所以就减去第一行和最后一行
+	{
+		const uchar* previous = image.ptr<const uchar>(i - 1);//上一行
+		const uchar* current = image.ptr<const uchar>(i);//当前行
+		const uchar* next = image.ptr<const uchar>(i + 1);//下一行
+		uchar* output = dst.ptr<uchar>(i);//输出行
+		for (int j = channels; j < (cols-1)*channels; j++)
+		{
+		    //锐化算子
+			output[j] = saturate_cast<uchar>(5 * current[j] - current[j - channels] - current[j + channels] - previous[j] - next[j]); 
+		}//指针可指向行，也可指向单个元素、
+	}
+    //方法2.
+    // Mat kernel = (Mat_<char>(3, 3) << 0, -1, 0, -1, 5, -1, 0, -1, 0);
+	// filter2D(image, dst, image.depth(), kernel);
+    namedWindow("output picture", WINDOW_FREERATIO);
+	imshow("output picture", dst);
+}
+int main()
+{
+	Mat image;
+	Mat dst1;
+	image = imread("/home/kim-james/ROS_Space/opencv_ws/source/images/lena.png");
+	namedWindow("input picture", WINDOW_FREERATIO);
+	imshow("input picture", image);
+	
+	sharpen(image);
+	waitKey(0);
+	return 0;
+
+}
+
+```
+## 1-3.Mat
+
+
+
+
+
 
 
 

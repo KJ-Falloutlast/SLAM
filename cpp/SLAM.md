@@ -2694,6 +2694,7 @@ public:
 
 ```
 ### 2.利用高斯牛顿法和g2o进行曲线拟合
+#### 2-1.利用高斯牛顿法来进行曲线拟合
 [高斯牛顿法](https://blog.csdn.net/CGJustDoIT/article/details/108005962?spm=1001.2101.3001.6650.2&utm_medium=distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromBaidu~HighlightScore-2.queryctrv2&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromBaidu~HighlightScore-2.queryctrv2&utm_relevant_index=5#t13)
 ```cpp
 #include <iostream>
@@ -2792,6 +2793,240 @@ int main(int argc, char **argv)
   return 0;
 }
 ```
+
+#### 2-2.利用g2o进行曲线拟合
+1. g2o求解步骤:
+   1. 定义顶点和边
+   2. 构建图
+   3. 选择优化算法
+   4. 调用g2o进行优化，返回结果
+2. 定义顶点(初始值为setToOriginImpl, 以及状态量的更新方式oplusImpl)
+```cpp
+//****************g2o中定义的3大类***************//
+/*
+VetexSE3Expmap,表是李代数的位姿；顶点
+VetexSBAPointXYZ,空间点的位置；顶点
+EdgeProjectXYZ2UV,表示投影方程的边；边
+*/
+
+
+
+//1.定义顶点
+class CurveFittingVertex:public g2o::BaseVertex<3, Eigen::Vector3d>
+//定义曲线拟合顶点；继承基础顶点类;3表示顶点的待优化变量为3维;数据类型为Eign::Vector3d
+//2.数据对齐
+EIGEN_MAKE_ALIGEND_OPERATOR_NEW
+//表示数据对齐，固定格式;类成员变量如果固定大小对象需要加上此句;而对于动态变量(例如Eigen::VectorXd)会动态分配内存，因此会自动地进行内存对齐
+//3.设置顶点初始估计值
+setToOriginImpl()
+//设置顶点初始估计值，估计值变量为_estimate;或是重置状态值;重载内置函数
+//4.重载状态更新方式
+oplusImpl(const double *update)
+/*重载状态量更新方式;_estimate += Eigen::Vector3d(update),
+这里为3维向量相加;在slam中则为:更新小量乘以估计值，左乘更新*/
+virtual void oplusImpl(const double *update_){
+    Eigen::Map<const Vector6d> update(update_);
+    setEstimate(SE3Quat::exp(update) * estimate());
+}
+//5.读写操作
+bool read(istream &is);
+bool read(istream &os) const;
+//6.汇总
+/*
+//顶点 // 曲线模型的顶点，模板参数：优化变量维度和数据类型
+class CurveFittingVertex : public g2o::BaseVertex<3, Eigen::Vector3d>
+{
+public:
+  // 类成员变量如果是固定大小对象需要加上 EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  // 而对于动态变量(例如Eigen::VectorXd)会动态分配内存，因此会自动地进行内存对齐
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  // 重置
+  virtual void setToOriginImpl() override
+  {
+    _estimate << 0, 0, 0;
+  }
+
+  // 更新
+  virtual void oplusImpl(const double *update) override
+  {
+    _estimate += Eigen::Vector3d(update);
+  }
+
+  // 存盘和读盘：留空
+  virtual bool read(istream &in) {}
+
+  virtual bool write(ostream &out) const {}
+};
+*/
+```
+2. 定义边(初始值为setToOriginImpl, 以及状态量的更新方式oplusImpl)
+```cpp
+//1.定义边
+class CurveFittingEdge:public g2o::BaseUnaryEdge<1, double, CurveFittingVectex>
+/*
+1.1表示观测值是1维的，也就说误差项是1维的，因为误差项也就是理论值 - 实际观测值，
+当然和观测值的维度一样;数据类型为double
+2.CurveFitting表示边连接的顶点的数据类型;因为是一元边，所以只有1个顶点类型
+*/
+//2.
+CurveFittingEdge(double x): BaseUnaryEdge(), _x(x){}
+//边的构造函数，给类成员变量_x赋值；给每条边对象存储一个_x的值
+
+//3.
+computerError()
+/*
+1.描述error的计算过程，即观测的值，减去计算出的值(实际观测值减去理论计算值)
+2._measurement为测量值变量;因为误差是1维的，赋值时是
+_error(0, 0);
+3.const CurveFittingVertex *v = static_cast<const CurveFittingVertex*>(_vertices[0]);
+_vertices[0]对应class CurveFittingEdge:public g2o::BaseUnaryEdge<1, double, CurveFittingVertex>中绑定的第一个顶点CurveFittingVertex;
+4.在main()中，edge->setVertex(0, v); 表示第一个参数为0，表示将此边连接到了CurveFittingVertex类型的节点上，本问题只有一个顶点v,  后面就只接了v;
+*/
+//5.
+linearizeOplus()
+/*
+1.书写雅克比矩阵，每个误差项对状态变量的导数
+，对于本问题雅克比矩阵的维数是1x3,ei为实际测量值-理论计算值
+2.如果绑定了2个顶点，在linearizeOplus()则需要写清楚分别对于两个顶点的偏导数。第一个为_jacobianOplusXi,
+第二个是_jacobianOplusXj
+*/
+```
+```cpp
+//边 //误差模型 模板参数：观测值维度，类型，连接顶点类型
+class CurveFittingEdge : public g2o::BaseUnaryEdge<1, double, CurveFittingVertex>
+{
+public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+  CurveFittingEdge(double x) : BaseUnaryEdge(), _x(x) {}
+
+  // 计算曲线模型误差
+  virtual void computeError() override
+  {
+    const CurveFittingVertex *v = static_cast<const CurveFittingVertex *>(_vertices[0]);
+    const Eigen::Vector3d abc = v->estimate();
+    _error(0, 0) = _measurement - std::exp(abc(0, 0) * _x * _x + abc(1, 0) * _x + abc(2, 0));
+  }
+
+  // 计算雅可比矩阵
+  virtual void linearizeOplus() override
+  {
+    const CurveFittingVertex *v = static_cast<const CurveFittingVertex *>(_vertices[0]);
+    const Eigen::Vector3d abc = v->estimate();
+    double y = exp(abc[0] * _x * _x + abc[1] * _x + abc[2]);
+    _jacobianOplusXi[0] = -_x * _x * y;
+    _jacobianOplusXi[1] = -_x * y;
+    _jacobianOplusXi[2] = -y;
+  }
+
+  virtual bool read(istream &in) {}
+
+  virtual bool write(ostream &out) const {}
+
+public:
+  double _x; // x 值， y 值为 _measurement
+};
+```
+
+3. main()-生成观测数据
+```cpp
+int main(int argc, char **argv)
+{
+		  double ar = 1.0, br = 2.0, cr = 1.0;  // 真实参数值
+		  double ae = 2.0, be = -1.0, ce = 5.0; // 估计参数值
+		  int N = 100;                          // 数据点
+		  double w_sigma = 1.0;                 // 噪声Sigma值
+		  double inv_sigma = 1.0 / w_sigma;
+		  cv::RNG rng; // OpenCV随机数产生器
+		
+		  vector<double> x_data, y_data; // 数据
+		  for (int i = 0; i < N; i++)
+		  {
+		    double x = i / 100.0;
+		    x_data.push_back(x);
+		    y_data.push_back(exp(ar * x * x + br * x + cr) + rng.gaussian(w_sigma * w_sigma));
+		  }
+
+```
+4. 构建图
+   1. solver求解器
+      1. >typedef g2o::BlockSolver<g2o::BlockSolverTraits<3, 1>> BlockSolverType; (表示每个误差项优化变量维度为3， 误差值维度为1)
+      2. >typedef g2o::LinearSolverDense<BlockSolverType::PoseMatrixType>LinearSolverType;//线性求解器类型
+      3. >g2o::OptimizationAlgorithmGaussNewton;//GN
+   2. 图模型
+      1. >g2o::SparseOptimizer optimizer;//图模型
+      2. 往图中增加顶点 
+```cpp
+CurveFittingVertex *v = new CurveFittingVertex();
+v->setEstimate(Eigen::Vector3d(ae, be, ce));
+v->setId(0);
+optimizer.addVertex(x);//添加顶点
+```
+      3. 往图中增加边
+```cpp
+for (int i = 0; i < N; i++){
+    CurveFittingEdge *edge = new CurveFittingEdge(x_data[i]);
+    edge->setId(i);
+    edge->setVertex(0, v);//设置连接的顶点
+    edge->setMeasurement(y_data[i]);//观测数值
+    edge->setInformation(Eigen::Matrix<double, 1, 1>::Identity() * 1 / (w_sigma * w_sigma));//信息矩阵，协方差矩阵之逆
+    
+} 
+```
+```cpp
+//构建图优化，先设定g2o
+typedef g2o::BlockSolver<g2o::BlockSolverTraits<3, 1>> BlockSolverType; //每个误差项的优化变量维度是3， 误差值维度为1
+typedef g2o::LinearSolverDense<BlockSolverType::PoseMatrixType> LinearSolverType;//线性求解器类型
+//梯度下降法，可以从GN, LM, DogLeg中选
+auto solver = new g2o::OptimizationAlgorithmGaussNewton(g2o::make_unique<BlockSolverType>(g2o::make_unique<LinearSolverType>()));
+g2o::SparseOptimizer optimizer;//图模型
+optimizer.setAlgorithm(solver);//设置求解器
+optimizer.setVerbose(true);//打开调试输出
+//往图中增加顶点
+CurveFittingVertex *v = new CurveFittingVertex();
+v->setEstimate(Eigen::vector3d(ae, be, ce));
+v->setId(0);
+optimizer.addVertex(v);
+//往图中增加边
+for (int i = 0; i < N; i++){
+    CurveFittingEdge *edge = new CurveFittingEdge(x_data[i]);
+    edge->setId(i);
+    edge->setVertex(0, v);//设置连接的顶点
+    edge->setMeasurement(y_data[i]);//观测数值
+    edge->setInformation(Eigen::Matrix<double, 1, 1>::Identity * 1 / (w_sigma * w_sigma));//协方差矩阵之逆
+
+}
+```
+5. 执行优化结果和结果输出
+   1. 初始化优化器，设置迭代次数
+      1. >optimizer.initializeOptimization();
+      2. >optimizer.optimize(10);
+   2. 优化结果
+      1. Eigen::Vector3d abc_estimate = v->estimate();
+      2. Eigen::Vector3d维数为3x1的矩阵
+```cpp
+		// 执行优化
+		  cout << "start optimization" << endl;
+		  chrono::steady_clock::time_point t1 = chrono::steady_clock::now();
+		  
+		  optimizer.initializeOptimization();
+		  optimizer.optimize(10);
+		  
+		  chrono::steady_clock::time_point t2 = chrono::steady_clock::now();
+		  chrono::duration<double> time_used = chrono::duration_cast<chrono::duration<double>>(t2 - t1);
+		  cout << "solve time cost = " << time_used.count() << " seconds. " << endl;
+		
+		  // 输出优化值
+		  Eigen::Vector3d abc_estimate = v->estimate();
+		  cout << "estimated model: " << abc_estimate.transpose() << endl;
+		
+		  return 0;
+}
+```
+
+
+
+
 
 
 

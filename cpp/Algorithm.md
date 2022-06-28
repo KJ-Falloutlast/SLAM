@@ -905,6 +905,7 @@ void test(){
 ```
 ## 2-3.链表
 ### 1.单链表
+#### 1.单链表的定义
 1. 定义单链表
 ![单链表](../pictures/2-3-1单链表的定义.png)
 ![单链表的代码实现](../pictures/2-3-2单链表代码实现.png)
@@ -1033,3 +1034,93 @@ void test(){
       1. 不带头结点:空表判断:L==NULL,写代码不方便
       2. 带头结点:空表判断:L->next == NULL,写代码方便
    4. 其余注意点:LinkList = LNode*
+
+#### 2.单链表的插入和删除
+
+![单链表](../pictures/2-3-3单链表的插入.png)
+![不带头结点的单链表](../pictures/2-3-4不带头结点的插入.png)
+1. ListInsert(&L, i, e):插入操作，在表L中的第i个位置上插入指定元素e
+```cpp
+typedef struct LNode{
+   ElemType data;
+   struct LNode *next;
+}LNode, *LinkList;
+//1.带头结点的插入
+bool ListInsert(LinkList &L, int i, ElemType e){
+   if (i < 1){
+      return false;
+   }
+   LNode *p;//指针p指向当前扫描的结点
+   int j = 0;//当前p指向的是第几个结点
+   p = L;//L指向头结点，头结点是第0个结点(不存数据)
+   while (p != NULL && j < i-1){ //循环找到第i-1个结点
+      p = p->next;
+      j++;
+   }
+   if (p == NULL)//i值不合法
+      return false;
+   LNode *s = (LNode *)malloc(sizeof(LNode));
+   s->data = e;
+   s->next = p->next;
+   p->next = s;//将结点s连接到p之后
+   return true;
+}  
+//2.不带头结点的插入
+bool ListInsert(LinkList &L, int i, ElemType e){
+   if (i < 1){
+      return false;
+   }
+
+   if (i == 1){
+      LNode *s = (LNode *)malloc(sizeof(LNode));
+      s->data = e;
+      s->next = L;
+      L = s;//头指针指向新结点
+      return false;
+   }
+   LNode *p;//指针p指向当前扫描的结点
+   int j = 1;//直接指向1
+   p = L;//L指向头结点，头结点是第0个结点(不存数据)
+   while (p != NULL && j < i-1){ //循环找到第i-1个结点
+      p = p->next;
+      j++;
+   }
+   if (p == NULL)//i值不合法
+      return false;
+   LNode *s = (LNode *)malloc(sizeof(LNode));
+   s->data = e;
+   s->next = p->next;
+   p->next = s;//将结点s连接到p之后
+   return true;
+}  
+//不带头结点的代码更不方便，所以推荐用带头结点，之后的题目中用带头结点的逻辑实现
+
+//3.后插操作
+bool InsertNextNode(LNode *p, ElemType e){
+   if (p == NULL)
+      return false;
+   LNode *s = (LNode *)malloc(sizeof(LNode));
+   if (s == NULL)
+      return false;
+   s->data = e;//用结点s保存数据元素e
+   s->next = p->next;
+   p->next = s;//将结点s连接到p之后
+   return true;
+}
+//4.前插操作:在p结点之前插入元素e
+bool InsertPriorNode(LNode *p, ElemType e){
+   if (p == NULL)
+      return false;
+   LNode *s = (LNode *)malloc(sizeof(LNode));
+   if (s == NULL)
+      return false;
+   s->next = p->next;
+   p->next = s;
+   s->data = e;
+   p->data = e;
+   return true;
+}
+```
+
+2. 后插操作:
+![不带头结点的单链表](../pictures/2-3-5结点的后插操作.png)
