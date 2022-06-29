@@ -902,13 +902,26 @@ proxy_off
       3. 127.0.0.1 7891*socks*
       4. 127.0.0.1 *忽略主机*
    6. 常用节点
-https://suo.yt/151bpdM(失效了)
+https://suo.yt/151bpdM(**优先**)
 https://suo.yt/1LxmMPA(gg)
 https://raw.githubusercontent.com/ssrsub/ssr/master/V2Ray
 https://suo.yt/ZKjZa7R
 https://suo.yt/uXoibyeJ
 https://suo.yt/dsXxAuV(**稳定**)
 https://suo.yt/sKW1OHL(**新节点**)
+
+2. *出现问题解决方案*
+   1. sudo rm /etc/systemd/system/clash.service
+   2. 删除掉.zshrc的自启动配置，*此时clash的节点执行位置就是在~/.config/clash/config.yaml*文件中
+   3. 利用导出的yaml文件覆盖~/.config/clash/config.yaml(或者如果发现在执行clash后不能够直接导致节点变化，就直接修改在~/.config/clash/config.yaml)
+   4. 修改网络代理至手动(**此步骤一定不能少**)
+      1. 127.0.0.1 7890*http*
+      2. 127.0.0.1 7890*https*
+      3. 127.0.0.1 7891*socks*
+      4. 127.0.0.1 *忽略主机*
+   5. 恢复至开机自启动
+
+
 ## 5. wine的相关问题：
 1. 未安装windows应用
  $ sudo apt-get update

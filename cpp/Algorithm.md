@@ -1115,12 +1115,75 @@ bool InsertPriorNode(LNode *p, ElemType e){
    if (s == NULL)
       return false;
    s->next = p->next;
+   p->next = s;//新节点s连接到p之后
+   s->data = e;//将p中元素复制到s中
+   p->data = e;//p中元素覆盖为e
+   return true;
+}
+/*
+1.王道书的版本
+bool InsertPriorNode(LNode *p, LNode *s){
+   if (p == NULL || s == NULL){
+      return false;
+   }
+   s->next = p->next;
    p->next = s;
-   s->data = e;
-   p->data = e;
+   ElemType temp = p->data;
+   p->data = s->data;
+   s->data = temp;
+   return true;
+}
+*/
+
+
+//5.按位序删除(带头结点)
+//ListDelete(&L, i, &e):删除操作，删除表L中第i个位置的元素，并用e返回删除元素的值
+bool ListDelete(LinkList &L, int i, ElemType &e){
+   if (i < 1)
+      return false;
+   LNode *p;//指针p指向当前扫描到的节点
+   int j = 0;//当前p指向的是第几个节点
+   p = L;//L指向头结点，头结点是第0个节点
+   while (p !== NULL && j < i-1){//循环找到第i-1个节点p
+      p = p->next;
+      j++;
+   }
+   if (p == NULL)//i值不合法
+      return false;
+   if (p->next == NULL)//第i-1个节点后已经没有其他节点
+      return false;
+   LNode *q = p->next;
+   e = q->data;
+   p->next = q->next;
+   free(q);
+   return true;
+}
+
+//5.指定节点的删除(带头结点)
+bool DeleteNode(LNode *p){
+   if (p == NULL){
+      return false;
+   }
+   LNode *q = p->next;//令q指向*p的后继节点
+   p->data = p->next->data;//和后继节点交换数据域
+   p->next = q->next;//间*q节点从链中断开
+   free(q);
    return true;
 }
 ```
 
 2. 后插操作:
 ![不带头结点的单链表](../pictures/2-3-5结点的后插操作.png)
+3. 删除操作:
+![节点删除](../pictures/2-3-6链表删除操作.png)
+
+4. 总结
+   1. 插入
+      1. 按位序插入
+         1. 带头结点
+         2. 不带头结点
+      2. 指定结点后插操作
+      3. 指定结点的前插操作
+   2. 删除
+      1. 按位序删除
+      2. 指定结点删除   

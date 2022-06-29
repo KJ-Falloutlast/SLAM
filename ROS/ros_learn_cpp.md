@@ -4954,3 +4954,185 @@ geometry_msgs/TwistWithCovariance twist
   float64[36] covariance
 ```
 3. 坐标变换
+
+```yaml
+# 坐标变换消息是: tf/tfMessage,调用rosmsg info tf/tfMessage显示相关消息如下
+geometry_msgs/TransformStamped[] transforms #包含了多个坐标系相对关系数据的数组
+  std_msgs/Header header
+    uint32 seq
+    time stamp
+    string frame_id
+  string child_frame_id
+  geometry_msgs/Transform transform
+    geometry_msgs/Vector3 translation
+      float64 x
+      float64 y
+      float64 z
+    geometry_msgs/Quaternion rotation #欧拉角相关的四元数
+      float64 x
+      float64 y
+      float64 z
+      float64 w
+```
+
+4. 定位
+```yaml
+# 定位相关消息是geometry_msgs/PoseArray，调用rosmsg info geometry_msgs/PoseArray
+# 最终看到的效果是出现在机器人周围的很多小箭头
+std_msgs/Header header
+  uint32 seq
+  time stamp
+  string frame_id
+geometry_msgs/Pose[] poses #预估的点位姿组成的数组
+  geometry_msgs/Point position
+    float64 x
+    float64 y
+    float64 z
+  geometry_msgs/Quaternion orientation
+    float64 x
+    float64 y
+    float64 z
+    float64 w
+```
+5. 导航目标点与路径规划
+```yaml
+# 1.目标点的相关消息是move_base_msgs/MoveBaseActionGoal,调用rosmsg info move_base_msgs/MoveBaseActionGoal,可以显示消息内容如下
+std_msgs/Header header
+  uint32 seq
+  time stamp
+  string frame_id
+actionlib_msgs/GoalID goal_id
+  time stamp
+  string id
+move_base_msgs/MoveBaseGoal goal 
+  geometry_msgs/PoseStamped target_pose
+    std_msgs/Header header
+      uint32 seq
+      time stamp
+      string frame_id
+    geometry_msgs/Pose pose #目标点位姿
+      geometry_msgs/Point position #目标点坐标
+        float64 x
+        float64 y
+        float64 z
+      geometry_msgs/Quaternion orientation #四元数
+        float64 x
+        float64 y
+        float64 z
+        float64 w
+#2.路径规划相关消息是nav_msgs/Path,调用rosmsg info nav_msgs/Path，显示消息如下
+std_msgs/Header header
+  uint32 seq
+  time stamp
+  string frame_id
+geometry_msgs/PoseStamped[] poses #由一系列点组成的数组
+  std_msgs/Header header
+    uint32 seq
+    time stamp
+    string frame_id
+  geometry_msgs/Pose pose
+    geometry_msgs/Point position
+      float64 x
+      float64 y
+      float64 z
+    geometry_msgs/Quaternion orientation
+      float64 x
+      float64 y
+      float64 z
+      float64 w
+
+```
+5. 导航之激光雷达
+```yaml
+# 调用rosmsg info sensor_msgs/LaserScan
+# 即调用:rostopic echo /scan >> scan.txt
+std_msgs/Header header
+  uint32 seq
+  time stamp
+  string frame_id
+float32 angle_min #起始扫描角度(rad)
+float32 angle_max #终止扫描角度(rad)
+float32 angle_increment #测量值之间的角距离(rad)
+float32 time_increment #测量间隔时间(s)
+float32 scan_time #扫描间隔时间(s)
+float32 range_min #最小有效距离值(m)
+float32 range_max #最大有效距离值(m)
+float32[] ranges #一个周期的扫描数据,比如说一个周期扫描400个点，那么ranges中就存放了400个点
+float32[] intensities #扫描强度数据，如果设备不支持强度数据，该数组为空;扫描强度是指扫描到各个不同物体后反射的反射强度，例如一束激光从一个墙，和一扇窗户反射，那么他们的反射强度是不一样的
+
+```
+例如
+```yaml
+header: 
+  seq: 6353
+  stamp: 
+    secs: 2292
+    nsecs:  93000000
+  frame_id: "laser"
+angle_min: -3.0 #最小扫描角
+angle_max: 3.0 #最大扫描角
+angle_increment: 0.016713092103600502
+time_increment: 0.0
+scan_time: 0.0
+range_min: 0.10000000149011612 #最小扫描距离
+range_max: 30.0 #最大扫描距离
+ranges: [1, 2, 3, 4] # 第i个事件扫描到离障碍物的距离
+intensities: [0, 0, 0] #这个激光雷达不支持强度数据，所以为0
+```
+6. 导航之
+   1. 深度相机相关的消息有:
+      1. sensor_msgs/Image:对应一般的图像数据
+      2. sensor_msgs/CompressedImage:对应压缩后的图像数据
+      3. sensor_msgs/PointCloud:对应是点云数据
+```yaml
+# 1.rosmsg info sensor_msgs/Image:
+std_msgs/Header header
+  uint32 seq
+  time stamp
+  string frame_id
+uint32 height #高度
+uint32 width  #宽度
+string encoding #编码格式:RGB、YUV等
+uint8 is_bigendian #图像大小端存储模式
+uint32 step #一行图像数据的字节数，作为步进参数
+uint8[] data #图像数据，长度等于 step * height
+
+# 2.rosmsg info sensor_msgs/CompressedImage
+std_msgs/Header header
+  uint32 seq
+  time stamp
+  string frame_id
+string format #压缩编码格式(jpeg、png、bmp)
+uint8[] data #压缩后的数据
+
+# 3.rosmsg info sensor_msgs/PointCloud2
+std_msgs/Header header
+  uint32 seq
+  time stamp
+  string frame_id
+uint32 height #高度
+uint32 width  #宽度
+sensor_msgs/PointField[] fields #每个点的数据类型
+  uint8 INT8=1
+  uint8 UINT8=2
+  uint8 INT16=3
+  uint8 UINT16=4
+  uint8 INT32=5
+  uint8 UINT32=6
+  uint8 FLOAT32=7
+  uint8 FLOAT64=8
+  string name
+  uint32 offset
+  uint8 datatype
+  uint32 count
+bool is_bigendian #图像大小端存储模式
+uint32 point_step #单点的数据字节步长
+uint32 row_step   #一行数据的字节步长
+uint8[] data      #存储点云的数组，总长度为 row_step * height
+bool is_dense     #是否有无效点
+```
+
+
+
+
+
