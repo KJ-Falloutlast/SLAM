@@ -197,6 +197,9 @@ cmakelists:project(model02)
    2. 内存越界
    3. 试图把一个整数按照字符串的方式输出
 
+
+
+
 # 2.linux学习问题
 
 
@@ -719,6 +722,12 @@ ls -l | grep python
 2. 解决方案:
    1. sudo dpkg -i --force-overwrite /var/cache/apt/archives/*.deb
 
+## 24.ubuntu的启动回话失败问题
+1. >进入tty模式:ctrl + alt + f5,退出tty模式,ctrl + alt + PrtSrc
+2. >sudo apt install ubuntu-session
+3. >选择gdm3(若此时启动后左边菜单栏消失，则选择执行4和5)
+4. >sudo apt-get install ubuntu-gnome-desktop
+5. >sudo reboot
 
 
 # 3.c++学习问题
@@ -923,10 +932,18 @@ https://suo.yt/sKW1OHL(**新节点**)
 
 
 ## 5. wine的相关问题：
-1. 未安装windows应用
- $ sudo apt-get update
- $ sudo apt-get install wine
- $ sudo apt-get install winetricks ##直接运行winetricks来运行程序
+1. 安装步骤
+   1. >sudo dpkg --add-architecture i386 
+   2. >wget -nc https://dl.winehq.org/wine-builds/winehq.key
+
+   3. >sudo mv winehq.key /usr/share/keyrings/winehq-archive.key
+
+   4. >wget -nc https://dl.winehq.org/wine-builds/ubuntu/dists/focal/winehq-focal.sources
+
+   5. >sudo mv winehq-focal.sources /etc/apt/sources.list.d/
+   6. >sudo apt update
+   7. >sudo apt install --install-recommends winehq-stable
+   8. >
 
 2. wine新版 wine-5.12 微信、QQ 等软件输入框无法输入的问题解决办法
  winetricks riched20
@@ -935,16 +952,56 @@ https://suo.yt/sKW1OHL(**新节点**)
  .qq和微信文件的安装路径：/home/kim/.wine/drive_c/Program Files (x86)/Tencent
                                                                                                                                                                                            
 3. 问题:
- . 描述：You are using a 64-bit WINEPREFIX. Note that many verbs only install 32-bit versions of packages. 
+   1. *问题1*：You are using a 64-bit WINEPREFIX. Note that many verbs only install 32-bit versions of packages. 
  If you encounter problems, please retest in a clean 32-bit WINEPREFIX
   before reporting a bug.
- . 解决方案：winetricks riched20
+     1. *解决方案*：winetricks riched20
+  
+  2. **问题2**: winehq-stable : 依赖: wine-stable (= 7.0.0.0~focal-1)
+     1. 解决方案:
+        1. [wine的依赖问题1](https://blog.csdn.net/hiwangnan/article/details/104768266/)
+        2. [安装wine6.0](https://ubuntuhandbook.org/index.php/2021/06/wine-stable-6-0-1-released-how-to-install-it-in-ubuntu/)
+        3. [配置方案](https://blog.csdn.net/qq_36428171/article/details/81209475?spm=1001.2101.3001.6650.10&utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7Edefault-10-81209475-blog-106038424.pc_relevant_multi_platform_whitelistv1&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7Edefault-10-81209475-blog-106038424.pc_relevant_multi_platform_whitelistv1&utm_relevant_index=15)
+     2. 具体步骤
+        1. >sudo apt install aptitude
+        2. >sudo aptitude install openssh-server
+        3. >sudo aptitude install winehq-stable(选择解决问题的方案)
+        4. >sudo apt install winehq-stable
+        5. >sudo aptitude install winehq-stable
+        6. >sudo apt install <aptitude中缺失的软件包>
+        7. >sudo apt install --install-recommends winehq-stable
+        8. >cp W2KSP4_EN.EXE ~/.cache/winetricks/win2ksp4/     //如果win2ksp4文件夹不存在,请自行添加
+        9. >cp InstMsiW.exe ~/.cache/winetricks/msls31/        //如果msls31文件夹不存在,请自行添加
+        10. 安装配置文件(**这些配置文件将会被安装到~/.cache/winetricks**)
+            1. >winetricks corefonts colorprofile
+            2. >winetricks fontfix fontsmooth-gray fontsmooth-rgb fontsmooth-bgr
+            3. >winetricks gdiplus
+            4. >winetricks d3dx9
+            5. >winetricks riched20 riched30
+            6. >winetricks mfc40 mfc42
+            7. >winetricks vcrun6 vb6run vcrun2003 vcrun2005 vcrun2008
+            8. >winetricks msxml3 msxml4 msxml6
+
+  3. 问题3:
+     1. >问题:E: 有几个软件包无法下载，要不运行 apt-get update 或者加上 --fix-missing 的选项再试试？
+     2. >解决方案:sudo apt install winetricks --fix-missing
+     3. >问题:Please install zenity if you want a graphical interface
+     4. >解决方案:sudo apt install zenity
+  4. 问题4：*桌面图标无法启动的问题*
+     1. 解决方法:右键:允许启动
+
+
+
+
 4. winetricks配置方案
    1. sudo apt install winetricks
    2. winetricks **colorprofile corefonts d3dx9 fontfix fontsmooth-gray fontsmooth-rgb fontsmooth-bgr *gdiplus mfc40 mfc42 msxml3 msxml4 msxml6* riched20 riched30 tahoma urlmon vb6run vcrun6 vcrun2003 vcrun2005 vcrun2008 ie6 allfonts**(*直接安装相关依赖就行*)
 ```sh
 winetricks colorprofile corefonts d3dx9 fontfix fontsmooth-gray fontsmooth-rgb fontsmooth-bgr gdiplus mfc40 mfc42 msxml3 msxml4 msxml6 riched20 riched30 tahoma urlmon vb6run vcrun6 vcrun2003 vcrun2005 vcrun2008 ie6 allfonts
 ```
+5. 安装方法
+![wineQQ的安装方法](https://blog.csdn.net/qq_36428171/article/details/81209475?spm=1001.2101.3001.6650.10&utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7Edefault-10-81209475-blog-106038424.pc_relevant_multi_platform_whitelistv1&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7ECTRLIST%7Edefault-10-81209475-blog-106038424.pc_relevant_multi_platform_whitelistv1&utm_relevant_index=15)
+![官网安装步骤](https://wiki.winehq.org/Debian)
   
 ## 6. 删除在linux的垃圾图标
 看/usr/share/applications下是否有xxx.desktop，若有就直接删除
@@ -963,6 +1020,10 @@ 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
    1. step1:sudo add-apt-repository --remove ppa:/chris-lea/node.js(按照出错的文件名来写)
    2. step2:sudo apt update
 3. 若迁移系统后，源发生问题，则直接复制原来/etc/apt文件到新的系统中，sudo apt update若有错误，则按照2的方法改进
+4. 问题如果真的无法解决，可以直接把原来的ubuntu的源覆盖至/etc/apt/apt/sources.list中(或者直接修改到/etc/apt/sources.list)
+5. 将无用的软件源全部删除:
+   1. >cd /etc/apt/sources.list.d   #这个目录里面会保存添加的源 .list文件，把没有用的删掉就可以了。
+
 
 
 ## 10. 关于网站和学习细节的问题

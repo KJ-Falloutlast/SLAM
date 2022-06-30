@@ -116,7 +116,28 @@ int main()
 }
 
 ```
-## 1-3.Mat
+## 1-3.Mat对象构造和常用方法
+1. 构造方法
+   1. Mat()
+   2. Mat(int rows, int cols, int type)
+   3. Mat(Size size, int type)
+   4. Mat(int rows, int cols, int type, const Scalar &s)
+   5. Mat(Size size, int type, const Scalar &s)
+   6. Mat(int ndims, const int *sizes, int type)
+   7. Mat(int ndims, const int *sizes, int type, const Scalar &s) 
+2. 常用方法
+   1. void copyTo(Mat mat);
+   2. void convertTo(Mat dst, int type);
+   3. Mat clone();
+   4. int channels();
+   5. int depth();
+   6. bool empty();
+   7. uchar *ptr(i = 0);
+
+
+
+
+
 
 
 
