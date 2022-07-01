@@ -3413,3 +3413,468 @@ int findCorrespondingPoints( const cv::Mat& img1, const cv::Mat& img2, vector<cv
     return true;
 }
 ```
+
+
+3. demo03
+```cpp
+#include <Eigen/Core>
+#include <Eigen/StdVector>
+#include <Eigen/Geometry>
+#include <iostream>
+
+#include <g2o/stuff/sampler.h>
+#include <g2o/stuff/command_args.h>
+#include <g2o/core/sparse_optimizer.h>
+#include <g2o/core/block_solver.h>
+#include <g2o/core/solver.h>
+#include <g2o/core/optimization_algorithm_levenberg.h>
+#include <g2o/core/optimization_algorithm_gauss_newton.h>
+#include <g2o/core/base_vertex.h>
+#include <g2o/core/base_unary_edge.h>
+#include <g2o/solvers/csparse/linear_solver_csparse.h>
+
+
+using namespace std;
+
+double errorOfSolution(int numPoints, Eigen::Vector2d* points, const Eigen::Vector3d& circle)
+{
+  Eigen::Vector2d center = circle.head<2>();//取得头2个元素
+  double radius = circle(2);//d
+  double error = 0.;
+  for (int i = 0; i < numPoints; ++i) {
+    double d = (points[i] - center).norm() - radius;
+    error += d*d;
+  }
+  return error;
+}
+
+/**
+ * \brief a circle located at x,y with radius r
+ */
+class VertexCircle : public g2o::BaseVertex<3, Eigen::Vector3d>
+{
+  public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
+    VertexCircle()
+    {
+    }
+
+    virtual bool read(std::istream& /*is*/)
+    {
+      cerr << __PRETTY_FUNCTION__ << " not implemented yet" << endl;
+      return false;
+    }
+
+    virtual bool write(std::ostream& /*os*/) const
+    {
+      cerr << __PRETTY_FUNCTION__ << " not implemented yet" << endl;
+      return false;
+    }
+
+    virtual void setToOriginImpl()
+    {
+      cerr << __PRETTY_FUNCTION__ << " not implemented yet" << endl;
+    }
+
+    virtual void oplusImpl(const double* update)
+    {
+      Eigen::Vector3d::ConstMapType v(update);
+      _estimate += v;
+    }
+};
+
+/**
+ * \brief measurement for a point on the circle
+ *
+ * Here the measurement is the point which is on the circle.
+ * The error function computes the distance of the point to
+ * the center minus the radius of the circle.
+ */
+class EdgePointOnCircle : public g2o::BaseUnaryEdge<1, Eigen::Vector2d, VertexCircle>
+{
+  public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+    EdgePointOnCircle()
+    {
+    }
+    virtual bool read(std::istream& /*is*/)
+    {
+      cerr << __PRETTY_FUNCTION__ << " not implemented yet" << endl;
+      return false;
+    }
+    virtual bool write(std::ostream& /*os*/) const
+    {
+      cerr << __PRETTY_FUNCTION__ << " not implemented yet" << endl;
+      return false;
+    }
+
+    void computeError()
+    {
+      const VertexCircle* circle = static_cast<const VertexCircle*>(vertex(0));
+
+      const Eigen::Vector2d& center = circle->estimate().head<2>();
+      const double& radius = circle->estimate()(2);
+
+      _error(0) = (measurement() - center).norm() - radius;//误差项
+    }
+};
+
+/*
+1. 对vertex(0)的理解
+1-1.vertex
+class G2O_CORE_API Vertex : public HyperGraphElement {
+        public:
+          //! creates a vertex having an ID specified by the argument
+          explicit Vertex(int id=InvalidId);
+          virtual ~Vertex();
+          //! returns the id
+          int id() const {return _id;}
+        protected:
+          int _id;
+          EdgeSet _edges;
+      };
+
+*/
+
+int main(int argc, char** argv)
+{
+  int numPoints;
+  int maxIterations;
+  bool verbose;
+  std::vector<int> gaugeList;
+  g2o::CommandArgs arg;
+  arg.param("numPoints", numPoints, 100, "number of points sampled from the circle");
+  arg.param("i", maxIterations, 10, "perform n iterations");
+  arg.param("v", verbose, false, "verbose output of the optimization process");
+
+  arg.parseArgs(argc, argv);
+
+  // generate random data
+  Eigen::Vector2d center(4, 2);
+  double radius = 2.;
+  Eigen::Vector2d* points = new Eigen::Vector2d[numPoints];
+  for (int i = 0; i < numPoints; ++i) {
+    double r = g2o::Sampler::uniformRand(radius-0.1, radius+0.1);
+    double angle = g2o::Sampler::uniformRand(0., 2. * M_PI);
+    points[i].x() = center.x() + r * cos(angle);
+    points[i].y() = center.y() + r * sin(angle);
+  }
+
+  // some handy typedefs
+  typedef g2o::BlockSolver< g2o::BlockSolverTraits<Eigen::Dynamic, Eigen::Dynamic> >  MyBlockSolver;
+  typedef g2o::LinearSolverCSparse<MyBlockSolver::PoseMatrixType> MyLinearSolver;
+
+  // setup the solver
+  g2o::SparseOptimizer optimizer;
+  optimizer.setVerbose(false);
+  MyLinearSolver* linearSolver = new MyLinearSolver();
+  MyBlockSolver* solver_ptr = new MyBlockSolver(linearSolver);
+  g2o::OptimizationAlgorithmLevenberg* solver = new g2o::OptimizationAlgorithmLevenberg(solver_ptr);
+  //g2o::OptimizationAlgorithmGaussNewton* solver = new g2o::OptimizationAlgorithmGaussNewton(solver_ptr);
+  optimizer.setAlgorithm(solver);
+
+  // build the optimization problem given the points
+  // 1. add the circle vertex
+  VertexCircle* circle = new VertexCircle();
+  circle->setId(0);
+  circle->setEstimate(Eigen::Vector3d(3,3,3)); // some initial value for the circle
+  optimizer.addVertex(circle);
+  // 2. add the points we measured
+  for (int i = 0; i < numPoints; ++i) {
+    EdgePointOnCircle* e = new EdgePointOnCircle;
+    e->setInformation(Eigen::Matrix<double, 1, 1>::Identity());
+    e->setVertex(0, circle);
+    e->setMeasurement(points[i]);
+    optimizer.addEdge(e);
+  }
+
+  // perform the optimization
+  optimizer.initializeOptimization();
+  optimizer.setVerbose(verbose);
+  optimizer.optimize(maxIterations);
+
+  if (verbose)
+    cout << endl;
+
+  // print out the result
+  cout << "Iterative least squares solution" << endl;
+  cout << "center of the circle " << circle->estimate().head<2>().transpose() << endl;
+  cout << "radius of the cirlce " << circle->estimate()(2) << endl;
+  cout << "error " << errorOfSolution(numPoints, points, circle->estimate()) << endl;
+  cout << endl;
+
+  // solve by linear least squares
+  // Let (a, b) be the center of the circle and r the radius of the circle.
+  // For a point (x, y) on the circle we have:
+  // (x - a)^2 + (y - b)^2 = r^2
+  // This leads to
+  // (-2x -2y 1)^T * (a b c) = -x^2 - y^2   (1)
+  // where c = a^2 + b^2 - r^2.
+  // Since we have a bunch of points, we accumulate Eqn (1) in a matrix and
+  // compute the normal equation to obtain a solution for (a b c).
+  // Afterwards the radius r is recovered.
+  Eigen::MatrixXd A(numPoints, 3);
+  Eigen::VectorXd b(numPoints);
+  for (int i = 0; i < numPoints; ++i) {
+    A(i, 0) = -2*points[i].x();
+    A(i, 1) = -2*points[i].y();
+    A(i, 2) = 1;
+    b(i) = -pow(points[i].x(), 2) - pow(points[i].y(), 2);
+  }
+  Eigen::Vector3d solution = (A.transpose()*A).ldlt().solve(A.transpose() * b);
+  // calculate the radius of the circle given the solution so far
+  solution(2) = sqrt(pow(solution(0), 2) + pow(solution(1), 2) - solution(2));
+  cout << "Linear least squares solution" << endl;
+  cout << "center of the circle " << solution.head<2>().transpose() << endl;
+  cout << "radius of the cirlce " << solution(2) << endl;
+  cout << "error " << errorOfSolution(numPoints, points, solution) << endl;
+
+  // clean up
+  delete[] points;
+
+  return 0;
+}
+```
+4. demo04
+```cpp
+#include <iostream>
+#include <g2o/core/base_vertex.h>
+#include <g2o/core/base_unary_edge.h>
+#include <g2o/core/base_binary_edge.h>
+#include <g2o/core/block_solver.h>
+#include <g2o/core/optimization_algorithm_levenberg.h>
+#include <g2o/core/optimization_algorithm_gauss_newton.h>
+#include <g2o/core/optimization_algorithm_dogleg.h>
+#include <g2o/solvers/dense/linear_solver_dense.h>
+#include <Eigen/Eigen>
+#include <opencv2/opencv.hpp>
+#include <cmath>
+#include <chrono>
+
+using namespace std;
+//Vertex:顶点， Edge:边
+//parma1:优化参数维度，param2:优化参数类型。若为vector3d，则为3, Eigen::Vector3d
+class MyVertex: public g2o::BaseVertex<1, double>//定义顶点个数为1，即待优化参数维度为1，类型为double
+{
+    //1.设置顶点
+public:
+    //以下参数和函数直接照抄就行
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+    //2.设置初始值(估计值)
+    virtual void setToOriginImpl()
+    {
+        _estimate = 0.0;
+    }
+    //3.设置更新方式
+    virtual void oplusImpl(const double* update)
+    {
+        _estimate += (*update);                
+    }
+    //4.读取和写入
+    virtual bool read(istream & in) {}
+    virtual bool write(ostream & out) const {}
+};
+
+/*
+定义一个1元边:
+param1:1是误差维度(边的维度),由于误差维度为double 1,所以前2个参数为1, double
+param2:double是误差类型(边的类型)
+param3:MyVertex是顶点
+param4:MyVertex是顶点
+(由于有2个顶点，所以用的是2元边，若是1元边的话，就用Unary)
+*/
+class MyEdge: public g2o::BaseBinaryEdge < 1, double, MyVertex, MyVertex>
+{   //1.设置边
+public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+    //2.设置误差
+    void computeError()
+    {
+        const MyVertex * v1= static_cast<const MyVertex*>(_vertices[0]);
+        //_vertices[1]表示第1个顶点，所以此行表示将第1个顶点转换为MyVertex*类型，并用v1接收
+        const MyVertex * v2 = static_cast<const MyVertex*>(_vertices[1]);
+        //_vertices[1]表示第2顶点，所以此行表示将第2个顶点转换为MyVertex*类型，并用v2接收
+        _error(0,0) = _measurement - (v2->estimate() - v1->estimate());
+    }
+    virtual bool read(istream & in) {}
+    virtual bool write(ostream & out) const {}
+        /*
+        1.static_cast
+        static_cast<type_id>(expression)表示将expression转换为type_id类型，例如
+        int i;
+        float f = 144.4f;
+        i = static_cast<int>(f);把f转换为int类型
+        
+        2._vertices
+        2-1.要点1
+        2-1-1. 由于:
+        typedef std::vector<Vertex*> VertexContainer;
+        VertexContainer _vertices;
+        2-1-2.所以,_vertices是装顶点的vector,所以VertexContainer是Vertex*类型的vector
+        2-1-3.下面是对Vertex的定义
+        
+        class G2O_CORE_API Vertex : public HyperGraphElement {
+            public:
+            //! creates a vertex having an ID specified by the argument
+            explicit Vertex(int id=InvalidId);
+            virtual ~Vertex();
+            //! returns the id
+            int id() const {return _id;}
+        virtual void setId( int newId) { _id=newId; }
+            //! returns the set of hyper-edges that are leaving/entering in this vertex
+            const EdgeSet& edges() const {return _edges;}
+            //! returns the set of hyper-edges that are leaving/entering in this vertex
+            EdgeSet& edges() {return _edges;}
+            virtual HyperGraphElementType elementType() const { return HGET_VERTEX;}
+            protected:
+            int _id;
+            EdgeSet _edges;
+        };
+
+
+        3._error(0, 0)详解
+        typedef Eigen::Matrix<double, D, 1, Eigen::ColMajor> ErrorVector;
+        ErrorVector _error;所以_error是一个Dx1的列向量,也相当于是一个Dx1的矩阵；eigen一般是列优先，若为Eigen::RowMajor，则是行优先
+        所以_error(0, 0)相当于是在Dx1矩阵中的第(0, 0)元素
+        
+        4._estimate
+            4-1._estimate的定义
+            typedef T EstimateType
+            EstimateType _estimate(是一个模板参数)
+            
+            4-2.estimate()的函数定义
+            const EstimateType& estimate() const { 
+            return _estimate;
+            }
+        5. _measurement
+            template <int D, typename E>
+            typedef E Measurement;
+            Measurement _measurement;
+        6. 总结
+            1._vertices -> vector<Vertex*> VetexContainer
+            2._estimate -> T(任意类型);estimate()->return _estimate;
+            3._measurement-> T(任意类型)
+            4._error->Eigen::Matrix<double, D, 1>  (Dx1的向量, _error(0, 0)代表第1个元素)
+            5.边代表的误差是: _error(0, 0) = _measurement - std::exp(abc(0, 0) * _x * _x + abc(1, 0) * _x + abc(2, 0));
+            所以_error(0, 0) = _measurement - _estimate(边的measurement-顶点的estimate)
+                5-1.Vector3d v(1, 2, 3); v(0, 0) = v[0] = 1;(二者形式上等价)
+                5-2._vectices(vector<Vertex*>), _error(VectorNd), _measurement(T), _estimate(T)
+        */
+        
+};
+ 
+int main()
+{
+    //1.设置求解器
+    //添加3个边
+
+
+    typedef g2o::BlockSolver<g2o::BlockSolverTraits<1,1>> Block;
+    // std::unique_ptr<Block::LinearSolverType> linearSolver( new g2o::LinearSolverDense<Block::PoseMatrixType>());
+    // std::unique_ptr<Block> solver_ptr ( new Block(std::move(linearSolver)));
+
+    g2o::SparseOptimizer optimizer;
+    Block::LinearSolverType * linearSolver;
+    linearSolver = new g2o::LinearSolverDense<Block::PoseMatrixType>();
+    Block * solver_ptr = new Block(linearSolver);
+    
+    g2o::OptimizationAlgorithmLevenberg * solver = new g2o::OptimizationAlgorithmLevenberg(solver_ptr);
+    optimizer.setAlgorithm(solver);
+    optimizer.setVerbose(true);
+
+    //2.设置顶点
+    //2-1.设置顶点指针
+    MyVertex *v1 = new MyVertex;
+    //2-2.设置顶点的ID = 0,以后的顶点ID依次递增,id = 0
+    v1->setId(0);
+    //2-3.设置初始值(_estimate = 0)
+    //顶点的初始值，即被优化变量的初始值 = 0， 若被优化变量类型为Vector3d, 则setEstimate(V(1, 2, 3)
+    v1->setEstimate(0);
+    //2-4.顶点是否固定
+    v1->setFixed(true);//顶点是否要固定，如果true，就不能优化,如果false,就可以优化
+    //2-5.添加顶点
+    //return addVertex(v, 0),
+    optimizer.addVertex(v1);//将顶点添加到optimizer中，然后后期通过v1->estimate()获取优化后结果
+
+    MyVertex *v2 = new MyVertex;
+    v2->setId(1);
+    v2->setEstimate(1);
+    v2->setFixed(false);//优化变量
+    optimizer.addVertex(v2);
+
+    MyVertex *v3 = new MyVertex;
+    v3->setId(2);
+    v3->setEstimate(23);
+    v3->setFixed(false);//非优化变量
+    optimizer.addVertex(v3);
+
+    //3.设置边
+    //3-1.定义边指针
+    MyEdge * e1 = new MyEdge;
+    MyEdge * e2 = new MyEdge;
+    MyEdge * e3 = new MyEdge;
+    //3-2.定义边的参数(边描述了顶点和误差的关系)
+    e1->setId(1);//设置边ID
+    e1->setVertex(0, v1);//设置顶点,意思为_vertices[0] = v1;
+    e1->setVertex(1,v2);//_vertices[1] = v2;
+    e1->setMeasurement(1);//_measurement = 1
+    e1->setInformation(Eigen::Matrix<double,1,1>::Identity());
+    //设置信息矩阵，信息矩阵是一个DxD的矩阵，信息矩阵是协方差矩阵之逆
+    //将v1, v2连接在一起    
+/*
+**********************顶点参数************************
+    1.setEstimate()
+    void setEstimate(const EstimateType& et) { 
+        _estimate = et; 
+        updateCache();
+    }
+    2.setId()
+    virtual void setId(int id) {_id = id;}
+    
+    3.addVertex()
+    virtual bool addVertex(HyperGraph::Vertex* v) { return addVertex(v, 0);}
+--------------------------------
+    1.setVertex()
+    void setVertex(size_t i, Vertex* v) { 
+        assert(i < _vertices.size() && "index out of bounds");
+        _vertices[i]=v;
+    }
+    
+    2.setMeasurement()
+    virtual void setMeasurement(const Measurement& m) {
+        _measurement = m;
+    }
+    3.setInformation()
+    typedef Eigen::Matrix<double, D, D, Eigen::ColMajor> InformationType;
+    void setInformation(const InformationType& information) {
+         _information = information;
+         }
+    */
+
+
+
+    e2->setId(2);
+    e2->setVertex(0, v2);//0,1只不过是顶点的编号而已,_vertices[0] = v2
+    e2->setVertex(1, v3);
+    e2->setMeasurement(1.0);
+    e2->setInformation(Eigen::Matrix<double,1,1>::Identity());
+    //连接v2, v3
+
+    e3->setId(3);
+    e3->setVertex(0, v3);
+    e3->setVertex(1, v1);
+    e3->setMeasurement(-1.8);
+    e3->setInformation(Eigen::Matrix<double,1,1>::Identity());
+    //连接v3, v1
+    optimizer.addEdge(e1);//添加边
+    optimizer.addEdge(e2);
+    optimizer.addEdge(e3);
+
+    cout << "start optimization" << endl;
+    optimizer.initializeOptimization();
+    optimizer.optimize(10);
+    cout << v1->estimate() << ' ' << v2->estimate() << ' ' << v3->estimate() << endl;
+    return 0;
+
+}
+```
