@@ -1223,5 +1223,67 @@ LNode * GetElem(LinkList L, int i){
    return p;
 }
 //2.按值查找
+LNode * LocateElem(LinkList L, ElemType e){
+   LNode *p = L->next;
+   while (p != NULL && p->data != e){
+      p = p->next;
+   }
+   return p;
+}
+//求表长
+int length(LinkList L){
+   int len = 0;//统计表长
+   LNode *p = L;
+   while (p->next != NULL){
+      p = p->next;
+      len++;
+   }
+   return len;
+}
+```
+
+#### 4.单链表的尾插法和头插法
+![头插法](../pictures/2-3-7单链表的头插法.png)
+![尾插法1](../pictures/2-3-7单链表的尾插法.png)
+![尾插法2](../pictures/2-3-7%E5%8D%95%E9%93%BE%E8%A1%A8%E5%B0%BE%E6%8F%92%E6%B3%952.png)
+1. 理论
+```cpp
+//1.尾插法建立单链表
+//1-1.方法1
+bool ListInsert(LinkList &L, int i, ElemType e){
+   if (i < 1)
+      return false;
+   LNode *p;//指针p指向当前扫描到的节点
+   int j = 0;
+   p = L;//L指向头结点，头结点是第0个节点(不存数据)
+   while (p != NULL && j < i-1){
+      p = p->next;
+      j++;
+   }
+   if (p == NULL)
+      return false;
+   LNode *s = (LNode *)malloc(sizeof(LNode));
+   s->data = e;
+   s->next = p->next;
+   p->next = s;//将结点s连到p之后
+   return true;//插入成功
+}
+//1-2.方法2
+LinkList List_TailInsert(LinkList &L){
+   int x;
+   L = (LinkList)malloc(sizeof(LNode));//初始化空表
+   LNode *s, *s = L;//r为表尾指针
+   scanf("%d", &x);
+   while (x! == 9999){
+      s = (LNode *)malloc(sizeof(LNode));//申请一片新的内存空间
+      s->data = x;
+      r->next = s;//前3行在r节点之后插入元素x
+      r = s;//永远保持r指向最后1个节点
+      scanf("%d", &x);
+   }
+   r->next = NULL;//尾结点指针置空
+   return L;
+}
 
 ```
+2. 实践

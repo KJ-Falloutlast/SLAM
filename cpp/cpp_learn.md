@@ -3808,7 +3808,7 @@ class Person{
             cout << "这是析构函数" << endl;
         }
     private:
-        int age;的
+        int age;
 };
 void test01(){
     Person p1;
@@ -3821,8 +3821,8 @@ void test02(){
     Person p4 = Person(10);//有参构造
     Person p5 = Person(p4);//拷贝构造
     //3.隐式法
-    Person p6 = 10;//有参构造,p6 = 10 <=> p6(10)<=> Person(10)
-    Person p7 = p6;//拷贝构造,p7 = p6 <=> p7(p6) <=> Person(p6)
+    Person p6 = 10;//有参构造,p6 = 10 <=> p6(10)<=> p6 = Person(10)
+    Person p7 = p6;//拷贝构造,p7 = p6 <=> p7(p6) <=> p7 = Person(p6)
 }
 
 int main(){
@@ -13830,3 +13830,49 @@ public:
       3. 覆盖方法所抛出的异常必须和被覆盖方法所抛出的异常一致，或者是其子类
       4. 被覆盖的方法不能为private,否则在其子类中只是新定义了一个方法， 没有覆盖
    5. **作用**：*override是让编译器检查你是否重写虚函数啦，没有的话 编译阶段提示一下。*
+
+## 14.explicit
+1. 定义
+   1. 可以阻止不应该允许经过转换构造函数进行的隐式转换的发生，声明为explicit的构造函数不能在隐式转换中使用
+2. 作用
+   1. 构造
+   2. 默认且隐含的类型转换操作符:有的时候写下如a = b,恰好b的类型正好是a单参数构造器的参数类型，这时候编译器就自动调用这个构造器，创建a对象。
+   3. >总结：explicit构造函数是防止隐式转换的
+```cpp
+#include <iostream>
+using namespace std;
+class Test1
+{
+public :
+	Test1(int num):n(num){}
+private:
+	int n;
+};
+class Test2
+{
+public :
+	explicit Test2(int num):n(num){}
+private:
+	int n;
+};
+ 
+int main()
+{
+	Test1 t1 = 12;
+	Test2 t2(13);
+	Test2 t3 = 14;//不能发生隐式转换
+		
+	return 0;
+}
+/*
+ //1.括号法
+ Person p2(10);//有参构造
+ Person p3(p2);//拷贝构造
+ //2.显示法
+ Person p4 = Person(10);//有参构造
+ Person p5 = Person(p4);//拷贝构造
+ //3.隐式法
+ Person p6 = 10;//有参构造,p6 = 10 <=> p6(10)<=> p6 = Person(10)
+ Person p7 = p6;//拷贝构造,p7 = p6 <=> p7(p6) <=> p7 = Person(p6)
+}*/
+```

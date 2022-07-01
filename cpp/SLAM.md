@@ -318,7 +318,17 @@ int main(){
           0, 0, 3;
     m2.inverse();
     cout << "the result = " << m2*vec3d << endl;
-    
+
+/*
+Eigen::Matrix<double, 3, 2, Eigen::RowMajor> M1;
+M1 << 1, 2, 3, 4, 5, 6;
+Eigen::Matrix<double, 3, 2, Eigen::ColMajor> M2;
+M2 << 1, 2, 3, 4, 5, 6;
+cout << M1 << endl;
+cout << M2 << endl;    
+M1和M2结果相同，Eigen中矩阵都是列优先，意思为数的排列方向按照列排列，
+实际上RowMajor和ColMajor所得的结果相同
+*/    
 }
 
 ```
@@ -709,6 +719,14 @@ int main( int argc, char** argv )
     
     return 0;
 }
+/*
+1. 转化: 
+   1. SO3->(log)so3->(hat)so3_hat->(vee)(so3_hat)^vee
+   2. so3->(exp)SO3(se3同理)
+   3. SO3: Sophus::SO3 SO3_R(R), SO3_q(q), SO3_V(V)
+   4. SE3: Sophus::SE3 SE3_R(R, t), SE3_q(q, t) 
+*/ 
+
 ```
 ```cmake
 cmake_minimum_required( VERSION 2.8 )
@@ -1444,7 +1462,7 @@ int main() {
     return 0;
 }
 ```
-## 3-4.计算轨迹误差
+## 3-5.计算轨迹误差
 
 **2阶范数就是向量的模**
 ```cpp
@@ -1589,8 +1607,9 @@ void DrawTrajectory(vector<Sophus::SE3> poses_est, vector<Sophus::SE3> poses_gd)
 
 }
 ```
+
 # 3.第4讲
-## 3-1.点云的基本概念
+## 3-1.点云的基本概 念
 1. 概念：同一空间参考系下表达目标空间分布和目标表面特性的海量点集合，是在获取物体表面每个采样点的空间坐标后得到的点的集合，称为点云(Point Cloud)
 2. 数据类型
    1. 类型
@@ -1869,6 +1888,7 @@ int main(int argc, char** argv)
 }
 ```
 ## 3-3.代码实例2
+*寻找点云路径方法:sudo find / -iname "*pcl*"*
 1. [安装链接](https://blog.csdn.net/abcbeifeng/article/details/123935675)
 2. c_cpp_properties.json
 ```json

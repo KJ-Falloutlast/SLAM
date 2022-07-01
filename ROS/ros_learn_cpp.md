@@ -5042,7 +5042,7 @@ geometry_msgs/PoseStamped[] poses #由一系列点组成的数组
       float64 w
 
 ```
-5. 导航之激光雷达
+6. 导航之激光雷达
 ```yaml
 # 调用rosmsg info sensor_msgs/LaserScan
 # 即调用:rostopic echo /scan >> scan.txt
@@ -5079,7 +5079,7 @@ range_max: 30.0 #最大扫描距离
 ranges: [1, 2, 3, 4] # 第i个事件扫描到离障碍物的距离
 intensities: [0, 0, 0] #这个激光雷达不支持强度数据，所以为0
 ```
-6. 导航之
+6. 导航之深度相机
    1. 深度相机相关的消息有:
       1. sensor_msgs/Image:对应一般的图像数据
       2. sensor_msgs/CompressedImage:对应压缩后的图像数据
@@ -5131,8 +5131,41 @@ uint32 row_step   #一行数据的字节步长
 uint8[] data      #存储点云的数组，总长度为 row_step * height
 bool is_dense     #是否有无效点
 ```
+7. 深度图像转激光数据
+   1. depthimage_to_laserscana简介:它将深度图像和雷达数据的转换原理比较简单，雷达数据是二维的，平面的，深度图像是3维的，只需取深度图的某一层即可
+   2. 参数
+      1. output_frame_id
+      2. ~scan_height(int, default: 1 pixel)
+         1. 设置用于生成激光雷达信息的象素行数。
+      3. ~scan_time(double, default: 1/30.0Hz (0.033s))
+         1. 两次扫描的时间间隔。
+      4. ~range_min(double, default: 0.45m)
+         1. 返回的最小范围。结合range_max使用，只会获取range_min 与 range_max 之间的数据
+      5. ~range_max(double, default: 10.0m)返回的最大范围。结合range_min使用，只会获取 range_min 与 range_max 之间的数据。
+      6. ~output_frame_id(str, default: camera_depth_frame)
+         1. 激光信息的ID
+   3. depthimage_to_laserscan的使用
+```xml
+<launch>
+    <node pkg="depthimage_to_laserscan" type="depthimage_to_laserscan" name="depthimage_to_laserscan">
+        <remap from="image" to="/camera/depth/image_raw" />
+        <param name="output_frame_id" value="camera"  />
+    </node>
+</launch>
+```
+  
+# 7.机器人平台设计
+1. 概述:机器人的系统可以分为
+   1. 传感系统:由内部传感器模块和外部传感器模块组成，获取内部和外部环境中有用的信息
+   2. 控制系统:控制系统的任务是根据机器人的作业指令以及从传感器反馈的信号，输出控制命令
+   3. 驱动系统:负责驱动执行机构，将控制系统下达的命令转换为执行机构所需要信号，相当于人的小脑和神经。驱动系统分为:液压式、气压式、电气式和机械式。电力驱动是目前使用最多的一种驱动方式，其特点是电源取用方便，响应快，驱动力大，信号检测、传递、处理方便，并可以采用多种灵活的控制方式，驱动电机一般采用步进电机或伺服电机。
+   4. 执行机构:类似于人的手和脚，机器人的行走和机械臂
 
-
+2. 本章所需要机器人对应清单:
+   1. 执行机构: 主体使用亚克力板拼装，由两个直流电机带动主动轮以及保持平衡的两个万向轮实现机器人行走，由于执行机构比较简单，不再做单独介绍。
+   2. 驱动系统: 电池、arduino 以及电机驱动模块；
+   3. 控制系统: 树莓派；
+   4. 传感系统: 编码器、单线激光雷达、相机；
 
 
 

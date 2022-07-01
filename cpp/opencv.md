@@ -134,6 +134,65 @@ int main()
    6. bool empty();
    7. uchar *ptr(i = 0);
 
+```cpp
+#include <opencv2/opencv.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <iostream>
+
+using namespace std;
+using namespace cv;
+
+int main(int argc, char** argv) {
+	Mat src = imread("/home/kim-james/ROS_Space/opencv_ws/source/images/lena.png");
+    if (src.empty()){
+        cout << "could not load image..." << endl;
+        return -1;
+    }
+    namedWindow("input", WINDOW_AUTOSIZE);
+    imshow("input", src);
+    //1.方法1.
+    Mat dst;
+    // dst = Mat(src.size(), src.type());
+    // dst = Scalar(127, 0, 255);//bgr为127, 0, 255的图像
+    // namedWindow("output", WINDOW_AUTOSIZE);
+    // imshow("output", dst);
+    // //2.方法2
+    // Mat dst;
+    // src.copyTo(dst);//把src赋值给dst
+    // namedWindow("output", WINDOW_AUTOSIZE);
+    // imshow("output", dst);
+    // //3.方法3
+    cvtColor(src, dst, COLOR_BGR2RGB);//
+    cout << "input image channels = %d\n" << src.channels() << endl;
+    cout << "output image channels = %d\n" << dst.channels() << endl;
+    Mat M(3, 3, CV_8UC3, Scalar(0, 0, 255));
+    cout << "M =" << endl << M << endl;
+    //3通道的3x3的矩阵，所以是3x9的矩阵，每一行是(0, 0, 255)
+    namedWindow("output", WINDOW_AUTOSIZE);
+    imshow("output", dst);
+
+    waitKey(0);
+
+}
+/*
+	Mat M(4,4,CV_32FC2,Scalar(1,3));//一般来说,2通道的mat,Scalar只要写2个数字,3通道及其以上的mat,scalar只要写3个数字
+	cout<<M<<endl;
+    1.创建一个2通道，且每个通道的值都为（1,3），深度为32，4行4列的图像矩阵。CV_32F表示每个元素的值的类型为32位浮点数，C2表示通道数为2，
+    Scalar（1,3）表示对矩阵每个元素都赋值为（1,3），第一个通道中的值都是1，第二个通道中的值都是3.
+    [1, 3, 1, 3, 1, 3, 1, 3;   
+    1, 3, 1, 3, 1, 3, 1, 3;
+    1, 3, 1, 3, 1, 3, 1, 3;
+    1, 3, 1, 3, 1, 3, 1, 3]
+    2.成为矩阵的时候先分配后赋值,比如说是,Mat(4, 4, 8UC3, Scalar(255, 255, 0)),则生成的矩阵为
+    [255 255 0 255 255 0 255 255 0
+     255 255 0 255 255 0 255 255 0
+     255 255 0 255 255 0 255 255 0
+     255 255 0 255 255 0 255 255 0]
+*/
+```
+
+
+
 
 
 

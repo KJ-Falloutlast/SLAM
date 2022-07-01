@@ -1,32 +1,25 @@
 #include <iostream>
 using namespace std;
-class testoverride
+class Test1
 {
-public:
-    testoverride(void);
-    ~testoverride(void);
-    virtual void show() const = 0;
-    virtual int infor() = 0;
-    virtual void test() = 0;
-    virtual int spell() = 0;
+public :
+	Test1(int num):n(num){}
+private:
+	int n;
 };
-
-class B: public testoverride
+class Test2
 {
-public:
-   virtual void show();     //1
-   virtual void infor();    //2
-   virtual void vmendd();   //3
-   virtual void test(int x);//4
-   virtual void splle();    //5 
+public :
+	explicit Test2(int num):n(num){}
+private:
+	int n;
 };
-
-class C: public testoverride
+ 
+int main()
 {
-public:
-    virtual void show() override;
-    virtual void infor() override;   
-    virtual void vmendd() override;
-    virtual void test(int x) override;
-    virtual void splle() override;
-};
+	Test1 t1 = 12;
+	Test2 t2(13);
+	Test2 t3 = 14;
+		
+	return 0;
+}
