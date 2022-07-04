@@ -1248,6 +1248,10 @@ int length(LinkList L){
 ![尾插法2](../pictures/2-3-7%E5%8D%95%E9%93%BE%E8%A1%A8%E5%B0%BE%E6%8F%92%E6%B3%952.png)
 1. 理论
 ```cpp
+typedef struct LNode{
+   ElemType data;
+   struct LNode *next;
+}LNode, *LinkList;
 //1.尾插法建立单链表
 //1-1.方法1
 bool ListInsert(LinkList &L, int i, ElemType e){
@@ -1269,10 +1273,11 @@ bool ListInsert(LinkList &L, int i, ElemType e){
    return true;//插入成功
 }
 //1-2.方法2
-LinkList List_TailInsert(LinkList &L){
+LinkList List_TailInsert(LinkList &L){//尾插法建立单链表
    int x;
    L = (LinkList)malloc(sizeof(LNode));//初始化空表
-   LNode *s, *s = L;//r为表尾指针
+   LNode *s, *r = L;//r为表尾指针
+   L->next = NULL; //初始化为空链表
    scanf("%d", &x);
    while (x! == 9999){
       s = (LNode *)malloc(sizeof(LNode));//申请一片新的内存空间
@@ -1284,6 +1289,113 @@ LinkList List_TailInsert(LinkList &L){
    r->next = NULL;//尾结点指针置空
    return L;
 }
-
+//2.头插法建立单链表
+//2-1.后插操作:在p之前插入元素e
+//demo01
+bool InsertNextNode(LNode *p, ElemType e){
+   if (p == NULL)
+      return false;
+   LNode *s = (LNode *)malloc(sizeof(LNode));
+   if (s == NULL) //内存分配失败
+      return false;
+   s->data = e; //用节点s保存数据元素e
+   s->next = p->next;
+   p->next = s;//将结点s连接到p之后
+   return true;
+}
+//demo02
+LinkList List_HeadInsert(LinkList &L){//逆向建立单链表
+   LNode *s;
+   int x;
+   L = (LinkList)malloc(sizeof(LNode));//创建头结点
+   L->next = NULL;//初始化单链表，如果不初始化，单链表的指针可能会指向其余的地方
+   scanf("%d", &x);//输入节点的额值
+   while (x != 9999){
+      s = (LNode *)malloc(sizeof(LNode));
+      s->data = x;
+      s->next = L->next;
+      L->next = s; //将新结点插入到表中，L为头指针
+   }
+}
+/*
+头插法和尾插法的区别在于，每次插入一个新的元素，头插法是插入到单链表的表头，尾插法是插入到单链表的表尾
+*/
 ```
-2. 实践
+
+### 2.双链表
+![双链表定义](../pictures/2-4-1双链表的定义.png)
+![双链表插入](../pictures/2-4-2双链表的插入.png)
+![双链表删除](../pictures/2-4-3%E5%8F%8C%E9%93%BE%E8%A1%A8%E7%9A%84%E5%88%A0%E9%99%A4.png)
+```cpp
+//1.定义双链表
+typedef struct  DNode{
+   ElemType data;
+   struct DNode *prior, *next;
+}DNode, *DLinkList;
+/*
+DLinkList<=>DNode*,DLinkList强调是一个链表，
+DNode强调是一个节点，一般DLinkList为形参，LNode定义为指针
+*/
+//2.初始化双链表
+bool InitDLinkList(DLinkList &L){
+   L = (DNode *)malloc(sizeof(DNode));//分配
+   if (L == NULL)//内存不足，分配失败
+      return false;
+   L->prior = NULL;//头结点的prior永远指向NULL
+   L->next = NULL;//头结点之后在暂时还没有节点
+   return true;
+}
+
+//3.判断双链表是否为空
+bool Empty(DLinkList L){
+   if (L->next == NULL)
+      return true;
+   else
+      return false;
+}
+
+//3.双链表的插入
+//在p结点之后插入s结点
+bool InsertNextDNode(DNode *p, DNode *s){
+   //将*s插入到结点*p之后
+   if (p == NULL || s == NULL)//非法参数
+      return false;
+   s->next = p->next;
+   if (p->next != NULL)//如果p节点后有后继节点
+      p->next->prior = s;
+   s->prior = p;
+   p->next = s;
+   return true;
+}
+//4.双链表的删除
+//删除p节点的后继节点
+bool DeleteNextDNode(DNode *p){
+   if (p == NULL)
+      return false;
+   DNode *q = p->next;//找到p的后继结点q
+      return false;//p没有后继结点
+   //防止要删除的节点q是双链表的最后一个节点
+   if (q->next != NULL)//q节点不是最后1个节点
+      q->next->prior = p;
+   //要保证p和q->next都不是最后1个结点
+   free(q);//释放结点空间
+   return true;
+   /*等价于
+   p->next = q->next;
+   q->next->prior = p;
+   free(q);
+   */
+}
+void DestroyList(DLinkList &L){
+   //循环释放各个数据结点
+   while (L->next != NULL)
+      DeleteNextDNode(L);
+   free(L);
+   L = NULL;
+}
+void testDLinkList(){
+   //初始化双链表
+   DLinkList L;
+   InitDLinkList(L);
+   //后续代码
+}

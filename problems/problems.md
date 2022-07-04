@@ -729,7 +729,16 @@ ls -l | grep python
 4. >sudo apt-get install ubuntu-gnome-desktop
 5. >sudo reboot
 
-
+## 25.Arduino的配置问题
+1. 步骤
+   1. 安装PlatformIO
+   2. 选择工程路径
+   3. 新建工程
+   4. 选择电路板
+   5. 选择框架
+2. 快捷键
+   1. Ctrl+Alt+U 编译并上传
+   2. Ctrl+Alt+R 进⾏编译验
 # 3.c++学习问题
 
 1. endl的问题:
