@@ -740,7 +740,12 @@ ls -l | grep python
    1. Ctrl+Alt+U 编译并上传
    2. Ctrl+Alt+R 进⾏编译验
 # 3.c++学习问题
-
+## 1.CV_XXX没有declared
+![网址](https://blog.csdn.net/weixin_49353816/article/details/123894843)
+1. >#include <opencv2/imgcodecs/legacy/constants_c.h>//解决‘CV_LOAD_IMAGE_UNCHANGED’没有declared的问题
+2. >CV_FM_8POINT’ was not declared in this scope，将CV_FM_8POINT该为FM_8POINT
+## 2. 
+## 1-5.杂项问题
 1. endl的问题:
 加<<endl后会有一个换行,下次再用cout输出字符时就会在下一行开始输出，
 如果不加，就会跟在当前行的最后输出。

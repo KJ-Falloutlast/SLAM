@@ -13876,3 +13876,30 @@ int main()
  Person p7 = p6;//拷贝构造,p7 = p6 <=> p7(p6) <=> p7 = Person(p6)
 }*/
 ```
+
+
+## 15.结构体定义
+1. 方式1
+```cpp
+//1.线定义结构后说明结构变量
+struct stu{
+    int num;
+    char name[20];
+    int age;
+};
+typedef struct stu boy1, boy2;
+//2.在定义结构体类型的同时说明结构变脸
+typedef struct stu{
+    int num;
+    char name[20];
+    int age;
+}boy1, boy2;
+//3.直接说明结构变量
+typedef struct{
+    int num;
+    char name[20];
+    int age;
+}boy1, boy2;
+/*第3种和第2种的区别在于第3种方法省去了结构体名
+直接给出结构体变量，1，2，3等同*/
+```

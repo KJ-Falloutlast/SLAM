@@ -192,6 +192,63 @@ int main(int argc, char** argv) {
 ```
 
 
+```cpp
+#include <opencv2/opencv.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <iostream>
+
+using namespace std;
+using namespace cv;
+
+int main(int argc, char** argv) {
+	Mat src = imread("/home/kim-james/ROS_Space/opencv_ws/source/images/lena.png");
+    if (src.empty()){
+        cout << "could not load image..." << endl;
+        return -1;
+    }
+    namedWindow("input", WINDOW_AUTOSIZE);
+    imshow("input", src);
+    //1.方法1.
+    Mat dst;
+    dst = Mat(src.size(), src.type());
+    dst = Scalar(127, 0, 255);//bgr为127, 0, 255的图像
+    namedWindow("output", WINDOW_AUTOSIZE);
+    imshow("output", dst);
+    // 2.方法2
+    Mat dst;
+    src.copyTo(dst);//把src赋值给dst
+    namedWindow("output", WINDOW_AUTOSIZE);
+    imshow("output", dst);
+    // 3.方法3
+    cvtColor(src, dst, COLOR_BGR2RGB);//
+    cout << "input image channels = %d\n" << src.channels() << endl;
+    cout << "output image channels = %d\n" << dst.channels() << endl;
+    //4.方法4
+    Mat m1(3, 3, CV_8UC3, Scalar(0, 0, 255)); 
+    Mat m2(3, 3, CV_8UC3, Scalar(127)); 
+    cout << "m1 =" << endl << m1 << endl;
+    cout << "m2 =" << endl << m2 << endl;
+    /*
+    1.3通道的3x3的矩阵，所以是3x9的矩阵，每一行是(0, 0, 255)
+    2.第三个参数是向量表示初始化每个像素值是多少，向量长度和对应通道数一致
+    */
+    //5.方法5
+    Mat m3;
+    m3.create(src.size(), src.type());
+    namedWindow("output", WINDOW_AUTOSIZE);
+    imshow("output", m3);
+    //6.方法6
+    Mat csrc = src;
+    Mat kernel = (Mat_<char>(3, 3) << 0, -1, 0, -1, 5, -1, 0, -1, 0);
+    filter2D(src, csrc, -1, kernel);
+    Mat m4 = Mat::eye(2, 2, CV_8UC1);//2x2的单位8位usignedchar1通道的矩阵
+    cout << "m4 = " << endl << m4 << endl;
+    namedWindow("output", WINDOW_AUTOSIZE);
+    imshow("output", m4);
+    waitKey(0);
+
+}
+```
 
 
 
@@ -205,7 +262,12 @@ int main(int argc, char** argv) {
 
 
 
-## 1-3.opencv基础
+
+
+
+
+
+## 1-10.opencv基础
 1. Mat基本结构
    1. header:头部|数据部分
    2. 赋值，克隆，拷贝

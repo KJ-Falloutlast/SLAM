@@ -1373,6 +1373,7 @@ bool DeleteNextDNode(DNode *p){
    if (p == NULL)
       return false;
    DNode *q = p->next;//找到p的后继结点q
+   if (q == NULL)
       return false;//p没有后继结点
    //防止要删除的节点q是双链表的最后一个节点
    if (q->next != NULL)//q节点不是最后1个节点
@@ -1399,3 +1400,217 @@ void testDLinkList(){
    InitDLinkList(L);
    //后续代码
 }
+```
+### 3.循环单链表
+![循环单链表定义](../pictures/2-5-1循环双链表的定义.png)
+![循环单链表性质](../pictures/2-5-2循环单链表的性质.png)
+1. 循环单链表
+   1. 循环单链表和单链表的区别
+      1. 单链表只能从1个节点出发找到后续的各个节点
+      2. 循环单链表从1个节点出发可以找到其他任何1个节点
+   2. 循环单链表的性质
+      1. 很多时候对链表的操作是在头部或者尾部，单链表只能从表头走到表尾，所以T(n) = O(n),但是循环单链表L若指向表尾，则*T(n) = O(n)*
+```cpp
+typedef struct LNode{
+   ElemType data;
+   LNode *next;
+}LNode, *LinkList;
+//1.初始化1个循环单链表
+bool InitList(LinkList &L){
+   L = (LNode *)malloc(sizeof(LNode));//分配1个头结点
+   if (L == NULL)//内存不足分配失败
+      return false;
+   L->next = L;//头结点next指向头节点
+   return true;
+}
+//2.判断循环单链表是否为空
+bool Empty(LinkList L){
+   if (L->next == L) 
+      return true;
+   else
+      return false;
+}
+//3.判断节点p是否为循环单链表的表尾节点
+bool IsTail(LinkList L, LNode *p){
+   if (p->next = L)
+      return true;
+   else
+      return false;
+}
+```
+2. 循环双链表
+![循环双链表](../pictures/2-5-3%E5%BE%AA%E7%8E%AF%E5%8F%8C%E9%93%BE%E8%A1%A8.png)
+```cpp
+//1.循环双链表的初始化
+typedef struct DNode{
+   ElemType data;
+   DNode *prior, *next;
+}DNode, *DLinkList;
+//2.初始化空的循环双链表
+bool InitDLinkList(DLinkList &L){
+   L = (DNode *)malloc(sizeof(DNode));//分配一个头结点
+   if (L == NULL)//内存不足，分配失败
+      return false;
+   L->prior = L;//头结点的prior指向头结点
+   L->next = L;//头结点的next指向头节点
+   return true
+}
+//3.判断循环双链表是否为空
+bool Empty(DLinkList L){
+   if (L->next == L)
+      return true;
+   else
+      return false;
+}
+//4.判断节点p是否为循环双链表的表尾节点
+bool isTail(DLinkList L, DNode *p){
+   if(p->next == L)
+      return true;
+   else
+      return false;
+}
+//5.双链表的插入
+bool InsertNextDNode(DNode *p, DNode *s){
+   s->next = p->next;//将结点*s插入到节点*p之后
+   p->next->prior = s;
+   s->prior = p;
+   p->next = s;
+}
+bool DeleteDNode(DNode *p){
+   DNode *q = p->next;//定义下一个节点
+   p->next = q->next;
+   q->next->prior = p;
+   free(q);
+   return true;
+}
+void testDLinkList(){
+   //初始化循环双链表
+   DLinkList L;
+   InitDLinkList(L);
+}
+```
+![循环链表总结](../pictures/2-5-4循环链表总结.png)
+
+
+
+### 4.静态链表
+![静态链表](../pictures/2-6-1%E9%9D%99%E6%80%81%E9%93%BE%E8%A1%A8%E5%AE%9A%E4%B9%89.png.png)
+1. 定义
+   1. 单链表:单链表各个结点在内存中星罗棋布，散落天涯
+   2. 静态链表:分配一片连续的内存空间，各个节点集中安置,每个数据元素为4B,每个游标4B(**每个节点公8B**),设起始地址为addr,所以e1的存放地址为addr + 8*2。*右侧区域是存放下一个结点的*数组下标*,也称为**游标**，所以可以通过数组下标找到下一个节点的位置。
+2. 用代码定义1个静态链表
+   1. 定义
+```cpp
+#define MaxSize 10//静态链表的最大长度
+struct Node{
+   ElemType data;//数据
+   int next;//下一个元素的数组游标
+};
+typedef Node SLinkList[MaxSize];
+void testSLinkList(){
+   SLinkList a;//a是一个静态链表，推荐用这种形式
+}
+//等价形式
+// void testSLinkList(){
+//    struct Node a[MaxSize];
+// }
+```
+   2. 实例
+```cpp
+#include "stdio.h"
+#include "stdlib.h"
+#define MaxSize 10 //静态链表的最大长度
+// //1.定义方法1
+// struct Node{
+//    int data;//静态链表结构类型的定义
+//    int next;//游标
+// };
+// typedef Node SLinkList[MaxSize];
+// //2.定义方法2
+// typedef struct{
+//    int data;
+//    int next;
+// }SLinkList[MaxSize];
+
+//3.方式3(推荐用方法3)
+typedef struct Node{
+    int data;
+    int next;
+}SLinkList[MaxSize];
+
+void testSLinkList(){
+   Node x;//struct可以省略
+   printf("sizeX = %d\n", sizeof(x));//sizeX = 8(每个Node是8字节)
+   Node a[MaxSize];
+   printf("sizeA = %d\n", sizeof(a));//sizeA = 80
+   SLinkList b;
+   printf("sizeB = %d\n", sizeof(b));//sizeB = 80
+}
+
+int main(){
+    testSLinkList();
+}
+```
+
+3. 基本操作
+```cpp
+#define MaxSize 10
+//1.定义
+typedef struct{
+   ElemTyoe data;//存储数据元素
+   int next;//下一个元素的数组下标
+}SLinkList[MaxSize];
+//2.查找
+/*
+2-1.找到1个空的节点，存入数据元素 
+2-2.从头结点出发找到位序i-1的节点
+2-3.修改新节点的next
+2-4.修改i-1号结点的next
+*/
+void testSLinkList(){
+   SLinkList a;
+}
+```
+![静态链表总结](../pictures/2-6-2静态链表总结.png)
+
+## 2-4.总结
+![存储结构](../pictures/2-7-1存储结构.png)
+1. 逻辑结构
+   1. 都属于线性表，都是线性结构
+2. 存储结构
+   1. 顺序表
+      1. 优点:支持随机存取，存储密度高(*知道顺序表的起始地址就能找到第i个元素的地址，所以支持随机存取*)
+      2. 缺点:大片连续空间分配不方便，改变容量不方便
+   2. 链表
+      1. 优点:离散的小空间分配方便，改变容量方便(*由于各个节点可以离散地分配在不同的空间中，所以需要空间的时候只需要malloc动态申请就行;由于存储空间不需要连续，所以改变容量也会方便些*)
+      2. 缺点:不可随机存取，存储密度低(*当我们想要找到第i个节点的时候，需要从表头开始找,所以不可随机存取;还需要空间存储指针，所以密度会低一些;*)
+   3. 顺序表是顺序存储结构，而链表是链式存储结构
+
+3. 基本操作(**创，销， 增删改查**) 
+   1. 创:![创](../pictures/2-7-2创造比较.png)
+      1. 顺序表:
+         1. 需要分配大片连续的存储空间，若分配空间太小，则之后不方便拓展容量;若分配空间过大，则浪费内存资源
+         2. 静态分配的容量不可改变;动态分配的容量可以改变，但需要移动大量元素，时间代价高
+      2. 链表
+         1. 只需要分配一个头结点(也可不需要头结点，只需声明一个头指针)，之后方便拓展
+   2. 销:![销](../pictures/2-7-3销毁.png)
+      1. 顺序表
+         1. 静态分配:静态数组(系统自动回收空间)
+         2. 动态分配:动态数组(malloc, free)(需要手动释放空间)
+      2. 链表:依次删除各个节点
+   3. 增加和删除
+      1. 顺序表:
+         1. *插入/删除*元素要将后续元素都*后移/前移*
+         2. 时间复杂度为O(n),时间开销主要来自*移动*元素
+         3. 但是若是数据元素很大的情况下，则移动数据的时间代价很高(*假设有1个数据元素占1MB,移动1个数据元素需要10ms,那么移动n个数据元素要花费10n(ms)*)
+      2. 链表:
+         1. 插入和删除元素只需要修改指针即可
+         2. *时间复杂度为O(n)*,时间开销主要来自*查找*目标元素
+         3. *查找元素的时间代价更低*。如果每往后找一个节点只需要花1us,那么往后找n个节点的时间为n(us),**所以插入和删除的时间效率而言，链表要高得多**
+   4. 查找
+      1. 顺序表:
+         1. 按位查找:O(1),由于有随机存取的特性，所以能快速查找
+         2. 按值查找:O(n)
+      2. 链表
+         1. 按位查找:只能从第一个元素开始
+         2. 按值查找
