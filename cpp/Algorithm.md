@@ -1614,3 +1614,255 @@ void testSLinkList(){
       2. 链表
          1. 按位查找:只能从第一个元素开始
          2. 按值查找
+
+
+# 3.栈，队列和数组
+## 3-1.栈
+1. 定义:*线性表*是具有相同数据类型n(n>=0)个数据元素的有限序列，其中n为表长，当n = 0时，线性表是空表。若用L命名线性表，则其一般表示为L = {a1, a2, ...,ai+1, ..., an };*栈*是只允许在一端进行插入和删除操作的*线性表*。
+2. 术语
+   1. 栈顶:允许插入和删除的一端
+   2. 栈底:不允许插入和删除的一端
+   3. 空栈:无元素的栈:![栈定义](../pictures/3-1-1栈定义.png)
+3. 栈的基本操作
+   1. InitStack(&S):初始化栈,构造一个空栈S, 分配内存空间
+   2. DestroyStack(&L):销毁栈。销毁并释放栈S所占用的内存空间
+   3. Push(&S, x):进栈,若栈S未满，则将x加入是之成为新栈顶。
+   4. Pop(&S, &x):出栈，若栈S非空，则弹出栈底元素，并用x返回
+   5. GetTop(S, &x):读栈顶元素。若栈S非空，则用x返回栈顶元素
+   6. StackEmpty:判断一个栈顶S是否为空。若S为空，则返回true,否则返回false
+4. *栈的常考题型*:![卡特兰数](../pictures/3-1-2栈的出栈顺序.png)
+
+## 3-2.栈的顺序存储实现
+1. 知识总览
+   1. 用顺序存储的方式实现的栈
+   2. 基本操作
+      1. 创(初始化)
+      2. 增(进栈)
+      3. 删(出栈)
+      4. 查(获取栈顶元素)
+      5. 判空，判满
+### 1.定义
+![顺序栈的定义](../pictures/3-2-1顺序栈定义.png)
+![顺序栈的操作](../pictures/3-2-2顺序栈操作.png)
+```cpp
+//方案1
+#define MaxSize 10 //定义栈中元素的最大个数
+//1.定义栈
+typedef struct{
+   ElemType data[MaxSize];//静态数组存放栈中元素
+   int top;//栈顶指针
+}SqStack;//Sq = sequence顺序
+
+//2.初始化栈
+void InitStack(SqStack &S){
+   S.top = -1;//初始化栈顶指针
+} 
+
+//3.判断栈空
+bool StackEmpty(SqStack S){
+   if (S.top == -1)
+      return true;//栈空
+   else
+      return false;//不空
+}
+//4.进栈操作
+bool Push(SqStack &S, ElemType x){
+   if (S.top == MaxSize -1)//栈满报错
+      return false;
+   S.top += 1;//指针加1
+   S.data[S.top] = x;//新元素入栈
+   //以上2句可简化为S.data[++S.top] = x,注意不能是S.data[S.top++],否则是上2句颠倒
+   return true;
+}
+//5.出栈操作
+bool Pop(SqStack &S, ElemType &x){
+   if (S.top == -1)//栈空，报错
+      return false;
+   x = S.data[S.top];//栈顶元素线出栈
+   S.top = S.top - 1;//指针减1
+   //上面2句等价于x = S.data[S.top--];表示先执行S.top,后S.top--
+   return true;
+}
+//6.读栈顶元素
+bool GeTop(SqStack S, ElemType &x){
+   if (S.top == -1)//栈空报错
+      return false;
+   x = S.data[S.top];//x记录栈顶元素
+   return true;
+   //读栈顶元素和出栈操作的唯一区别是x = S.data[S.top]
+}
+/*
+1.当top = -1时，进出栈的区别
+进栈:top+1，后赋值
+出栈:先赋值，top-1
+*/
+void testStack(){
+   SqStack S;//声明一个顺序栈
+   InitStack(S);
+}
+```
+
+```cpp
+//方案2
+#define MaxSize 10 //定义栈中元素的最大个数
+//1.定义栈
+typedef struct{
+   ElemType data[MaxSize];//静态数组存放栈中元素
+   int top;//栈顶指针
+}SqStack;//Sq = sequence顺序
+
+//2.初始化栈
+void InitStack(SqStack &S){
+   S.top = 0;//初始化栈顶指针
+} 
+
+//3.判断栈空
+bool StackEmpty(SqStack S){
+   if (S.top == 0)
+      return true;//栈空
+   else
+      return false;//不空
+}
+//4.进栈操作
+bool Push(SqStack &S, ElemType x){
+   if (S.top == MaxSize - 1)//栈满报错
+      return false;
+   S.data[S.top] = x;//新元素入栈
+   S.top += 1;//指针加1
+   return true;
+
+}
+//5.出栈操作
+bool Pop(SqStack &S, ElemType &x){
+   if (S.top == 0)//栈空，报错
+      return false;
+   S.top = S.top - 1;//因为此时top指向data[MaxSize]
+   x = S.data[S.top];
+   return true;
+}
+//6.读栈顶元素
+bool GeTop(SqStack S, ElemType &x){
+   if (S.top == 0)//栈空报错
+      return false;
+   x = S.data[S.top];//x记录栈顶元素
+   return true;
+   //读栈顶元素和出栈操作的唯一区别是x = S.data[S.top]
+}
+/*
+1.当top = 0时，进出栈的区别
+进栈:先赋值，后top+1
+出栈:先top-1,再拿值
+2.存满时top = MaxSize而非MaxSize-1
+*/
+void testStack(){
+   SqStack S;//声明一个顺序栈
+   InitStack(S);
+}
+```
+### 2.共享栈
+![共享栈](../pictures/3-2-3共享栈.png)
+```cpp
+//demo01
+#define MaxSize 10 //定义栈中元素的最大个数
+//1.定义栈
+typedef struct{
+   ElemType data[MaxSize]; //静态数组存放栈中元素
+   int top0; //0号栈栈顶指针
+   int top1;//1号栈栈顶指针
+}ShStack;
+//2.初始化栈 
+void InitStack(ShStack &S){
+   S.top0 = -1;//初始化栈顶指针
+   S.top1 = MaxSize;
+//判断栈满条件: top0 + 1 = top1
+}
+```
+```cpp
+//demo02
+#include<stdio.h>
+#define MaxSize 10				//定义共享栈中元素的最大个数
+#define ElemType int			
+typedef struct {
+	ElemType data[MaxSize];		//静态数组存放栈中元素
+	int top1;					//1号栈栈顶指针
+	int top2;					//2号栈栈顶指针
+}ShStack;
+/*函数声明*/
+void InitShStack(ShStack& S);				//1.初始化共享栈
+bool Stack1Empty(ShStack S);				//2. 1号栈判空
+bool Stack2Empty(ShStack S);				//2. 2号栈判空
+bool Push1(ShStack& S, ElemType x);			//3. 1号栈入栈
+bool Push2(ShStack& S, ElemType x);			//4. 2号栈入栈
+bool Pop1(ShStack& S, ElemType& x);			//5. 1号栈出栈
+bool Pop2(ShStack& S, ElemType& x);			//6. 2号栈出栈
+bool GetTop1(ShStack S, ElemType& x);		//7. 1号栈读取栈顶元素
+bool GetTop2(ShStack S, ElemType& x);		//8. 2号栈读取栈顶元素
+//1.初始化共享栈
+void InitShStack(ShStack& S) {
+	S.top1 = -1;		//初始化1号栈栈顶指针
+	S.top2 = MaxSize;	//初始化2号栈栈顶指针
+}
+//2. 1号栈判空
+bool Stack1Empty(ShStack S) {
+	return (S.top1 == -1);
+}
+//2. 2号栈判空
+bool Stack2Empty(ShStack S) {
+	return (S.top2 == MaxSize);
+}
+//4. 1号栈入栈操作：新元素入栈(先存再加)
+bool Push1(ShStack& S, ElemType x) {
+	if (S.top1+1 == S.top2)		//栈满，报错
+		return false;
+	S.data[++S.top1] = x;
+	return true;
+}
+//5. 2号栈入栈操作：新元素入栈(先存再加)
+bool Push2(ShStack& S, ElemType x) {
+	if (S.top1 + 1 == S.top2)		//栈满，报错
+		return false;
+	S.data[--S.top2] = x;
+	return true;
+}
+//6. 1号栈出栈操作：栈顶元素出栈
+bool Pop1(ShStack& S, ElemType& x) {
+	if (S.top1 == -1)	//1号栈栈空，报错
+		return false;
+	x = S.data[S.top1--];	
+	return true;
+}
+//7. 2号栈出栈操作：栈顶元素出栈
+bool Pop2(ShStack& S, ElemType& x) {
+	if (S.top2 == MaxSize)	//2号栈栈空，报错
+		return false;	
+	x = S.data[S.top2++];
+	return true;
+}
+//8. 1号栈读取栈顶元素操作
+bool GetTop1(ShStack S, ElemType& x) {
+	if (S.top1 == -1)	//1号栈栈空，报错
+		return false;
+	x = S.data[S.top1];
+	return true;
+}
+//9. 2号栈读取栈顶元素操作
+bool GetTop2(ShStack S, ElemType& x) {
+	if (S.top2 == MaxSize)	//2号栈栈空，报错
+		return false;
+	x = S.data[S.top2];
+	return true;
+}
+```
+![顺序栈总结](../pictures/3-2-4%E9%A1%BA%E5%BA%8F%E6%A0%88%E6%80%BB%E7%BB%93.png)
+
+## 3.用链式存储的方式实现栈
+1. 链栈
+   1. 用链式存储方式实现的栈:**只能在单链表的头节点的后面进行进栈和出栈操作的链表**
+   2. 基本操作
+      1. 创(初始化)
+      2. 增(进栈)
+      3. 删(出栈)
+      4. 查(获取栈顶元素)
+      5. 判空，判满
+
+2. 定义

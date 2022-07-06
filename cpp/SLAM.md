@@ -3859,7 +3859,36 @@ int main()
 ```
 
 # 5.第6讲
+
+## 5-1.特征匹配
+![特征点](../pictures/slam_FAST特征点.jpeg)
 1. 特征匹配
+   1. ORB采用FAST（features from accelerated segment test）算法来检测特征点。FAST核心思想就是找出那些卓尔不群的点，即拿一个点跟它周围的点比较，如果它和其中大部分的点都不一样就可以认为它是一个特征点。
+   2. *步骤*
+      1. 在图像中选取像素 p，假设它的亮度(灰度值：0-255)为 Ip 。
+      2. 设置一个阈值 T (比如 Ip 的 20%)。
+      3. 以像素 p 为中心, 选取半径为 3 的圆上的 16 个像素点。
+      4. 假如选取的圆上，有连续的 N 个点的亮度大于 Ip + T 或小于 Ip − T ，那么像素p可以被认为是特征点 (N 通常取 12，即为 FAST-12。其它常用的 N 取值为 9 和 11,他们分别被称为 FAST-9，FAST-11)
+      5. 循环以上四步，对每一个像素执行相同的操作。 
+   3. 特征点的描述:![描述子](../pictures/slam_描述子.jpeg)
+      1. 定义:ORB采用BRIEF算法来计算一个特征点的描述子。BRIEF算法的核心思想是在关键点P的周围以一定模式选取N个点对，把这N个点对的比较结果组合起来作为描述子。
+      2. 计算特征描述子步骤
+         1. 以关键点P为圆心,以d为半径做圆
+         2. 2.在圆O内某一模式选取N个点对。这里为方便说明，N=4，实际应用中N可以取512，假设当前选取的4个点对如上图所示分别标记为：**p1(A, B),p2(A, B),p3(A, B),p4(A, B)**
+         3. 定义操作:**T(P(A, B)) = 1 (IA > IB) or 0(IA <= IB)**(n个点就有n个描述子)
+         4. 分别对已选取的点对进行T操作，将得到的结果进行组合。假如:
+            1. T(P1(A, B)) = 1;
+            2. T(P2(A, B)) = 0;
+            3. T(P3(A, B)) = 1;
+            4. T(P4(A, B)) = 1;则最终的描述子为1011
+      3. 理想特征点描述子应该具备的属性:![描述子性质](../pictures/slam_描述子性质.jpeg)
+         1. 当以某种理想的方式分别计算上图中红色点的描述子时，应该得出同样的结果。即描述子应该对光照（亮度）不敏感，具备尺度一致性（大小 ），旋转一致性（角度）等,ORB主要解决BRIEF描述子不具备旋转不变性的问题
+         2. 解决方法:回顾一下BRIEF描述子的计算过程：在当前*关键点P周围以一定模式选取N个点对*，组合这N个点对的T操作的结果就为最终的描述子。当我们选取点对的时候，是以当前关键点为原点，以水平方向为X轴，以垂直方向为Y轴建立坐标系。当图片发生旋转时，坐标系不变，同样的取点模式取出来的点却不一样，计算得到的描述子也不一样，这是不符合我们要求的。因此我们需要重新建立坐标系，使新的坐标系可以跟随图片的旋转而旋转。这样我们以相同的取点模式取出来的点将具有一致性。![描述子一致性](../pictures/slam_描述子一致性.jpeg)
+         3. ORB中计算BRIEF描述子时建立的坐标系是以关键点为圆心，以关键点和取点区域的形心的连线为X轴建立2维坐标系。*在图1中*，P为关键点。圆内为取点区域，每个小格子代表一个像素。现在我们把这块圆心区域看做一块木板，木板上每个点的质量等于其对应的像素值。根据积分学的知识我们可以求出这个密度不均匀木板的质心Q。计算公式如下。其中R为圆的半径。![像素重心](../pictures/slam_像素重心.jpeg)
+   4. 特征点的匹配
+      1. 设A：10101011，B：10101010。我们设定一个阈值，比如80%。当A和B的描述子的相似度大于90%时，我们判断A,B是相同的特征点，即这2个点匹配成功。在这个例子中A,B只有最后一位不同，相似度为87.5%，大于80%。则A和B是匹配的。
+      2. 描述子的距离:A = 1100, B = 0011, d = 4(**不同加1，相同为0**)
+
 ```cpp
 #include <iostream>
 #include <opencv2/core/core.hpp>
@@ -3868,64 +3897,54 @@ int main()
 #include <opencv2/imgcodecs/legacy/constants_c.h>//解决‘CV_LOAD_IMAGE_UNCHANGED’没有declared的问题
 using namespace std;
 using namespace cv;
-//特征提取和特征匹配
-int main ( int argc, char** argv )
-{
-    if ( argc != 3 )
-    {
-        cout<<"usage: feature_extraction img1 img2"<<endl;
-        return 1;
-    }
-    //-- 读取图像
-    Mat img_1 = imread ( argv[1], CV_LOAD_IMAGE_COLOR );//读取地址的时候要用../1.png
-    Mat img_2 = imread ( argv[2], CV_LOAD_IMAGE_COLOR );
-
-    //-- 初始化
-    std::vector<KeyPoint> keypoints_1, keypoints_2;
+int main(){
+    //1.读取图像
+    Mat img_1 = imread("/home/kim-james/ROS_Space/opencv_ws/ch2/picture/1.png");
+    Mat img_2 = imread("/home/kim-james/ROS_Space/opencv_ws/ch2/picture/2.png");
+    Mat outimg1;//输出图像
+    //2.初始化
+    //因为有2张照片，所以有2组特征点和描述子
+    //2-1.特征点
+    vector<KeyPoint> keypoints_1, keypoints_2;
+    //2-2.描述子
     Mat descriptors_1, descriptors_2;
-    Ptr<FeatureDetector> detector = ORB::create();//特征提取
-    Ptr<DescriptorExtractor> descriptor = ORB::create();//
-    // Ptr<FeatureDetector> detector = FeatureDetector::create(detector_name);
-    // Ptr<DescriptorExtractor> descriptor = DescriptorExtractor::create(descriptor_name);
-    Ptr<DescriptorMatcher> matcher  = DescriptorMatcher::create ( "BruteForce-Hamming" );
-
-    //-- 第一步:检测 Oriented FAST 角点位置
-    detector->detect ( img_1,keypoints_1 );
-    detector->detect ( img_2,keypoints_2 );
-
-    //-- 第二步:根据角点位置计算 BRIEF 描述子
-    descriptor->compute ( img_1, keypoints_1, descriptors_1 );
-    descriptor->compute ( img_2, keypoints_2, descriptors_2 );
-
-    Mat outimg1;
-    drawKeypoints( img_1, keypoints_1, outimg1, Scalar::all(-1), DrawMatchesFlags::DEFAULT );
-    imshow("ORB特征点",outimg1);
-
-    //-- 第三步:对两幅图像中的BRIEF描述子进行匹配，使用 Hamming 距离
-    vector<DMatch> matches;
-    //BFMatcher matcher ( NORM_HAMMING );
-    matcher->match ( descriptors_1, descriptors_2, matches );
-
-    //-- 第四步:匹配点对筛选
-    double min_dist=10000, max_dist=0;
-
-    //找出所有匹配之间的最小距离和最大距离, 即是最相似的和最不相似的两组点之间的距离
-    for ( int i = 0; i < descriptors_1.rows; i++ )
-    {
-        double dist = matches[i].distance;
-        if ( dist < min_dist ) min_dist = dist;
-        if ( dist > max_dist ) max_dist = dist;
-    }
+    //2-3.定义3指针
+    //特征探测器
+    Ptr<FeatureDetector> detector = ORB::create();
+    //描述提取(FeatureDetector和DescriptorExtractor用于特征检测)
+    Ptr<DescriptorExtractor> descriptor = ORB::create();
+    //特征匹配(DescriptorMatch用于特征匹配)
+    Ptr<DescriptorMatcher> matcher = DescriptorMatcher::create("BruteForce-Hamming");
+    //3.特征提取
+    //3-1.探测Oriented FAST角点位置
+    detector->detect(img_1, keypoints_1);
+    detector->detect(img_2, keypoints_2);
+    //3-2.根据角点位置计算BRIEF描述子
+    descriptor->compute(img_1, keypoints_1, descriptors_1);
+    descriptor->compute(img_1, keypoints_2, descriptors_2);
+      
+    //3-3.画特征点
+    drawKeypoints(img_1, keypoints_1, outimg1, Scalar::all(-1), DrawMatchesFlags::DEFAULT);//画特征点    
+    namedWindow("ORB特征点", WINDOW_FREERATIO);
+    imshow("ORB特征点", outimg1);
+    waitKey(0);
     
-    // 仅供娱乐的写法
-    min_dist = min_element( matches.begin(), matches.end(), [](const DMatch& m1, const DMatch& m2) {return m1.distance<m2.distance;} )->distance;
-    max_dist = max_element( matches.begin(), matches.end(), [](const DMatch& m1, const DMatch& m2) {return m1.distance<m2.distance;} )->distance;
-
-    printf ( "-- Max dist : %f \n", max_dist );
-    printf ( "-- Min dist : %f \n", min_dist );
-
-    //当描述子之间的距离大于两倍的最小距离时,即认为匹配有误.但有时候最小距离会非常小,设置一个经验值30作为下限.
-    std::vector< DMatch > good_matches;
+    //4.特征匹配
+    // 匹配结果放在matches里面,DMatch主要用来储存匹配信息的结构体
+    //4-1.定义特征匹配的容器
+    //matches存放优化前特征点描述子，good_matches存放优化后特征点描述子
+    vector<DMatch> matches, good_matches;
+    Mat img_match, img_goodmatch;//img_match存放的是特征匹配的输出图像
+    matcher->match(descriptors_1, descriptors_2, matches);
+    //4-2.定义距离
+    //4-2-1.初始化距离
+    double min_dist=10000, max_dist=0;
+    for (int i = 0; i < descriptors_1.rows; i++){
+        double dist = matches[i].distance;
+        if (dist < min_dist) min_dist = dist;//超过max和min就返回原来的距离
+        if (dist > max_dist) max_dist = dist;
+    }
+    //4-2-2.优化距离
     for ( int i = 0; i < descriptors_1.rows; i++ )
     {
         if ( matches[i].distance <= max ( 2*min_dist, 30.0 ) )
@@ -3933,20 +3952,19 @@ int main ( int argc, char** argv )
             good_matches.push_back ( matches[i] );
         }
     }
-
-    //-- 第五步:绘制匹配结果
-    Mat img_match;
-    Mat img_goodmatch;
-    drawMatches ( img_1, keypoints_1, img_2, keypoints_2, matches, img_match );
-    drawMatches ( img_1, keypoints_1, img_2, keypoints_2, good_matches, img_goodmatch );
+    //5.绘制匹配结果
+    drawMatches(img_1, keypoints_1, img_2, keypoints_2, matches, img_match);
+    drawMatches(img_1, keypoints_1, img_2, keypoints_2, good_matches, img_goodmatch);
+    namedWindow("所有匹配点对", WINDOW_FREERATIO);
     imshow ( "所有匹配点对", img_match );
+    namedWindow("优化后匹配点对", WINDOW_FREERATIO);
     imshow ( "优化后匹配点对", img_goodmatch );
     waitKey(0);
 
-    return 0;
-}
+}   
+
 ```
-2. pose_estimation_2d2d
+1. pose_estimation_2d2d
 ```cpp
 #include <iostream>
 #include <opencv2/core/core.hpp>
