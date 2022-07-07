@@ -1574,6 +1574,7 @@ void testSLinkList(){
 ![静态链表总结](../pictures/2-6-2静态链表总结.png)
 
 ## 2-4.总结
+### 1.知识点总结
 ![存储结构](../pictures/2-7-1存储结构.png)
 1. 逻辑结构
    1. 都属于线性表，都是线性结构
@@ -1615,7 +1616,1365 @@ void testSLinkList(){
          1. 按位查找:只能从第一个元素开始
          2. 按值查找
 
+### 2.代码总结
+1. 单链表总结
+```cpp
+//链表创建、头插、尾插、删除、翻转、删除相同元素、遍历、判断链表是否为空
+#include<stdio.h>
+#include<stdlib.h>
+#define ElemType int
+typedef struct LNode{//LNode为结点,LinearNode
+   ElemType data;//数据域，定义单链表节点类型
+   struct LNode *next;//指针域，每个节点存放一个数据元素
+}LNode, *LinkList;
 
+//1.得到元素
+LNode * GetElem(LinkList L, int i){//此处等价于LNode *L
+   int j = 1;
+   LNode *p = L->next;
+   if (i==0){
+      return L;
+   }
+   if (i < 1){
+      return NULL;
+   }
+   while (p != NULL & j < i){
+      p = p->next;
+      j++;
+   }
+   return p;
+}
+//2.初始化
+bool InitList(LinkList &L){//加入引用传递的意思是改变原来L而非它的复制品
+   L = NULL;//空表，暂时还没有任何结点，置空防止产生脏数据
+   return true;
+}
+//3.判空
+bool Empty(LinkList L){
+   if(L == NULL)
+      return (L==NULL);
+} 
+//4.插入
+//4-1.带头结点的插入
+bool ListInsert(LinkList &L, int i, ElemType e){
+   if (i < 1){
+      return false;
+   }
+   LNode *p;//指针p指向当前扫描的结点
+   int j = 0;//当前p指向的是第几个结点
+   p = L;//L指向头结点，头结点是第0个结点(不存数据)
+   while (p != NULL && j < i-1){ //循环找到第i-1个结点
+      p = p->next;
+      j++;
+   }
+   if (p == NULL)//i值不合法
+      return false;
+   LNode *s = (LNode *)malloc(sizeof(LNode));
+   s->data = e;
+   s->next = p->next;
+   p->next = s;//将结点s连接到p之后
+   return true;
+}  
+//4-2.不带头结点的插入
+bool ListInsert(LinkList &L, int i, ElemType e){
+   if (i < 1){
+      return false;
+   }
+
+   if (i == 1){
+      LNode *s = (LNode *)malloc(sizeof(LNode));
+      s->data = e;
+      s->next = L;
+      L = s;//头指针指向新结点
+      return false;
+   }
+   LNode *p;//指针p指向当前扫描的结点
+   int j = 1;//直接指向1
+   p = L;//L指向头结点，头结点是第0个结点(不存数据)
+   while (p != NULL && j < i-1){ //循环找到第i-1个结点
+      p = p->next;
+      j++;
+   }
+   if (p == NULL)//i值不合法
+      return false;
+   LNode *s = (LNode *)malloc(sizeof(LNode));
+   s->data = e;
+   s->next = p->next;
+   p->next = s;//将结点s连接到p之后
+   return true;
+}  
+//不带头结点的代码更不方便，所以推荐用带头结点，之后的题目中用带头结点的逻辑实现
+
+//4-3.后插操作
+bool InsertNextNode(LNode *p, ElemType e){
+   if (p == NULL)
+      return false;
+   LNode *s = (LNode *)malloc(sizeof(LNode));
+   if (s == NULL)
+      return false;
+   s->data = e;//用结点s保存数据元素e
+   s->next = p->next;
+   p->next = s;//将结点s连接到p之后
+   return true;
+}
+//4-4.前插操作:在p结点之前插入元素e
+bool InsertPriorNode(LNode *p, ElemType e){
+   if (p == NULL)
+      return false;
+   LNode *s = (LNode *)malloc(sizeof(LNode));
+   if (s == NULL)
+      return false;
+   s->next = p->next;
+   p->next = s;//新节点s连接到p之后
+   s->data = e;//将p中元素复制到s中
+   p->data = e;//p中元素覆盖为e
+   return true;
+}
+//5.删除
+//5-1.按位序删除(带头结点)
+//ListDelete(&L, i, &e):删除操作，删除表L中第i个位置的元素，并用e返回删除元素的值
+bool ListDelete(LinkList &L, int i, ElemType &e){
+   if (i < 1)
+   	return false;
+   LNode *p;//指针p指向当前扫描到的节点
+   int j = 0;//当前p指向的是第几个节点
+   p = L;//L指向头结点，头结点是第0个节点
+   while (p !== NULL && j < i-1){//循环找到第i-1个节点p
+      p = p->next;
+      j++;
+   }
+   if (p == NULL)//i值不合法
+      return false;
+   if (p->next == NULL)//第i-1个节点后已经没有其他节点
+      return false;
+   LNode *q = p->next;
+   e = q->data;
+   p->next = q->next;
+   free(q);
+   return true;
+}
+
+//5-2.指定节点的删除(带头结点)
+bool DeleteNode(LNode *p){
+   if (p == NULL){
+      return false;
+   }
+   LNode *q = p->next;//令q指向*p的后继节点
+   p->data = p->next->data;//和后继节点交换数据域
+   p->next = q->next;//间*q节点从链中断开
+   free(q);
+   return true;
+}
+//6.查找
+//6-1.按位查找
+//方法1
+LNode * GetElem(LinkList L, int i){
+   if (i < 0)
+      return NULL;
+   LNode *p;//指针p指向当前扫描到的结点
+   int j = 0;//当前p指向的是第几个结点
+   p = L;//L指向头结点，头结点是第0个结点(不存数据)
+   while (p != NULL && j < i){
+      p = p->next;
+      j++;
+   }
+   return p;
+}
+//方法2
+LNode * GetElem(LinkList L, int i){
+   int j = 1;
+   LNode *p = L->next;
+   if (i == 0)
+      return L;
+   if (i < 1)
+      return NULL;
+   while (p != NULL && j < i){
+      p = p->next;
+      j++;
+   }
+   return p;
+}
+//6-2.按值查找
+LNode * LocateElem(LinkList L, ElemType e){
+   LNode *p = L->next;
+   while (p != NULL && p->data != e){
+      p = p->next;
+   }
+   return p;
+}
+//7.求表长
+int length(LinkList L){
+   int len = 0;//统计表长
+   LNode *p = L;
+   while (p->next != NULL){
+      p = p->next;
+      len++;
+   }
+   return len;
+}
+
+//7.尾插法建立单链表
+//7-1.方法1
+bool ListInsert(LinkList &L, int i, ElemType e){
+   if (i < 1)
+      return false;
+   LNode *p;//指针p指向当前扫描到的节点
+   int j = 0;
+   p = L;//L指向头结点，头结点是第0个节点(不存数据)
+   while (p != NULL && j < i-1){
+      p = p->next;
+      j++;
+   }
+   if (p == NULL)
+      return false;
+   LNode *s = (LNode *)malloc(sizeof(LNode));
+   s->data = e;
+   s->next = p->next;
+   p->next = s;//将结点s连到p之后
+   return true;//插入成功
+}
+//7-2.方法2
+LinkList List_TailInsert(LinkList &L){//尾插法建立单链表
+   int x;
+   L = (LinkList)malloc(sizeof(LNode));//初始化空表
+   LNode *s, *r = L;//r为表尾指针
+   L->next = NULL; //初始化为空链表
+   scanf("%d", &x);
+   while (x! == 9999){
+      s = (LNode *)malloc(sizeof(LNode));//申请一片新的内存空间
+      s->data = x;
+      r->next = s;//前3行在r节点之后插入元素x
+      r = s;//永远保持r指向最后1个节点
+      scanf("%d", &x);
+   }
+   r->next = NULL;//尾结点指针置空
+   return L;
+}
+//8.头插法建立单链表
+//8-1.后插操作:在p之前插入元素e
+//demo01
+bool InsertNextNode(LNode *p, ElemType e){
+   if (p == NULL)
+      return false;
+   LNode *s = (LNode *)malloc(sizeof(LNode));
+   if (s == NULL) //内存分配失败
+      return false;
+   s->data = e; //用节点s保存数据元素e
+   s->next = p->next;
+   p->next = s;//将结点s连接到p之后
+   return true;
+}
+//demo02
+LinkList List_HeadInsert(LinkList &L){//逆向建立单链表
+   LNode *s;
+   int x;
+   L = (LinkList)malloc(sizeof(LNode));//创建头结点
+   L->next = NULL;//初始化单链表，如果不初始化，单链表的指针可能会指向其余的地方
+   scanf("%d", &x);//输入节点的额值
+   while (x != 9999){
+      s = (LNode *)malloc(sizeof(LNode));
+      s->data = x;
+      s->next = L->next;
+      L->next = s; //将新结点插入到表中，L为头指针
+   }
+}
+```
+```cpp
+//demo01
+//链表创建、头插、尾插、删除、翻转、删除相同元素、遍历、判断链表是否为空
+#include<stdio.h>
+#include<stdlib.h>
+typedef struct Node{
+    int data;
+    struct Node *next;
+}Node;
+
+//1.创建链表
+void createLink(Node *head,int size){
+    Node *rear = head;
+    int i;
+    for(i = 0;i < size;++i){
+        Node *newnode = (Node*)malloc(sizeof(Node));
+        newnode -> next = NULL;
+        scanf("%d",&newnode->data);
+        rear -> next = newnode;
+        rear = newnode;
+    }
+}
+//2.遍历链表
+void travelLink(Node *head){
+    Node *p = head -> next;
+    while(p != NULL){
+        printf("%d\t",p->data);
+        p = p -> next;
+    }
+    putchar('\n');
+}
+//3.头插法
+void insertForward(Node *head,int data){
+    Node *newnode = (Node*)malloc(sizeof(Node));
+    newnode -> next = NULL;
+    newnode -> data = data;
+    newnode -> next = head -> next;
+    head -> next = newnode;
+}
+//4.尾插法
+void insertBack(Node *head,int data){
+    Node *newnode = (Node*)malloc(sizeof(Node));
+    newnode -> next = NULL;
+    newnode -> data = data;
+    Node *p = head;
+    while(p->next != NULL){
+        p = p -> next;
+    }
+    p -> next = newnode;
+    p = newnode;
+}
+//5.删除相同元素
+void deleteSame(Node *head){
+    Node *curr = head -> next;
+    while(curr != NULL){
+        Node *pre = curr;
+        Node *p = curr -> next;
+        while(p != NULL){
+            //若有相同的元素，则删除；否则两个指针继续向下走
+            if(curr->data == p->data){
+                pre -> next = p -> next;
+                free(p);
+                p = pre -> next;
+            }else{
+                pre = pre -> next;
+                p = p -> next;
+            }
+        }
+        curr = curr -> next;
+    }
+}
+//6.翻转链表
+void reverseLink(Node *head){
+    Node *curr;
+    Node *pre = NULL;
+    while(head -> next != NULL){
+        curr = head -> next;
+        head -> next = curr -> next;
+        curr -> next = pre;
+        pre = curr;
+    }
+    head -> next = pre;
+}
+//7.删除链表
+void deleteLink(Node *head){
+    Node *curr;
+    while(head -> next != NULL){
+        curr = head -> next;
+        head -> next = curr -> next;
+        free(curr);
+    }
+}
+//8.判断链表是否为空
+void isEmpty(Node *head){
+    if(head -> next == NULL){
+        printf("链表为空！\n");
+    }else{
+        printf("链表不为空！\n");
+    }
+}
+int main(){
+    //主函数中不能指定一个头指针，应该定义一个头指针指向头结点
+    Node *head = (Node*)malloc(sizeof(Node));
+    head -> next = NULL;
+    createLink(head,10);//创建链表
+    travelLink(head);//遍历链表
+    insertForward(head,100);//头插法
+    insertBack(head,200);//尾插法
+    travelLink(head);//遍历链表
+    deleteSame(head);//删除相同元素
+    travelLink(head);//遍历链表
+    reverseLink(head);//翻转链表元素
+    travelLink(head);//遍历链表
+    deleteLink(head);//删除链表
+    isEmpty(head);//判断链表是否为空
+    return 0;
+}
+
+```
+2. 双链表总结
+```cpp
+#include<stdio.h>
+#include<stdlib.h>
+#include<assert.h>
+#define ElemType int
+typedef struct Node
+{
+	ElemType data;      //数据域
+	struct Node *prior;  //前驱结点指针域
+	struct Node *next;  //后继结点指针域
+}Node, *PNode;
+
+//双链表管理结构
+typedef struct List
+{
+	PNode first; //指向头结点
+	PNode last; //指向尾结点
+	int   size; //保存有效结点个数
+}List;
+Node* _buynode(ElemType x);
+void InitDList(List *list);
+
+void push_back(List *list, ElemType x);
+void push_front(List *list, ElemType x);
+void show_list(List *list);
+
+void pop_back(List *list);
+void pop_front(List *list);
+void insert_val(List *list, ElemType x);
+Node* find(List *list, ElemType key);
+int  length(List *list);
+void delete_val(List *list, ElemType key);
+void sort(List *list);
+void resver(List *list);
+void clear(List *list);
+void destroy(List *list);
+
+//获取结点
+Node* _buynode(ElemType x)
+{
+	//申请结点空间
+	Node *s = (Node *)malloc(sizeof(Node));
+	assert(s != NULL);
+	//为结点添加数据
+	s->data = x;
+	s->next = s->prior = NULL;
+	return s;
+}
+
+//初始化双链表
+void InitDList(List *list)
+{
+	//申请头结点
+	Node *s = (Node *)malloc(sizeof(Node));
+	assert(s != NULL);
+	//初始化时管理结点头指针和尾指针都指向头结点
+	list->first = list->last = s;
+	//头结点的前驱指针域和后继指针域都先赋值为空
+	list->last->next = NULL;
+	list->first->prior = NULL;
+	//此时还没有有效结点
+	list->size = 0;
+}
+
+//尾部插入
+void push_back(List *list, ElemType x)
+{
+	//获取要插入的有效结点
+	Node *s = _buynode(x);
+	//该结点与前驱结点建立连接
+	s->prior = list->last;
+	//前驱结点与该结点建立连接
+	list->last->next = s;
+	//更新管理结点中尾指针域的指向
+	list->last = s;
+	//更新有效结点数
+	list->size++;
+}
+
+//头插
+void push_front(List *list, ElemType x)
+{
+	//获取头插的结点
+	Node *s = _buynode(x);
+	//如果这是第一个有效结点
+	if(list->first == list->last)
+	{
+		//s->prior = list->first;
+		//list->first->next = s;
+		list->last = s;//更改管理结点尾指针指向
+	}
+	else //如果不是第一个有效结点
+	{
+		//设置插入结点的后继指向
+		s->next = list->first->next;
+		//将插入结点设置为下一结点的前驱
+		s->next->prior = s;
+	}
+	//设置插入结点的前驱
+	s->prior = list->first;
+	//将插入结点设置为头结点的后继
+	list->first->next = s;
+	//更新有效结点数
+	list->size++;
+}
+//查看双链表内的所以数据
+void show_list(List *list)
+{
+	//指向第一个有效结点
+	Node *p = list->first->next;
+	while(p != NULL)//将每个有效结点内的数据输出
+	{
+		printf("%d-->",p->data);
+		p = p->next;
+	}
+	printf("Nul.\n");
+}
+//尾删
+void pop_back(List *list)
+{
+	//如果没有有效结点无需删除
+	if(list->size == 0)
+		return;
+	//查找删除结点的前驱结点
+	Node *p = list->first;
+	while(p->next != list->last)
+		p = p->next;
+	//删除结点
+	free(list->last);
+	//更新管理结点的尾指针指向
+	list->last = p;
+	//将尾结点的后继设置为空
+	list->last->next = NULL;
+	//更新有效结点数
+	list->size--;
+}
+
+//头删
+void pop_front(List *list)
+{
+	//如果没有有效结点无需删除
+	if(list->size == 0)
+		return;
+	//指向要删除结点
+	Node *p = list->first->next;
+	//如果这个结点是最后一个有效结点，需要更改管理结点尾指针指向
+	if(list->first->next == list->last)
+	{
+		list->last = list->first;
+		list->last->next = NULL;
+	}
+	else //如果不是最后一个有效结点
+	{
+		//更改下一个结点的前驱指向
+		p->next->prior = list->first;
+		//更改头结点的后继指向
+		list->first->next = p->next;
+	}
+	//是否结点空间
+	free(p);
+	//更新有效结点数
+	list->size--;
+}
+//按值插入（当前双链表已经有序）
+void insert_val(List *list, ElemType x)
+{
+	//查找插入结点的前一结点
+	Node *p = list->first;
+	while(p->next!=NULL && p->next->data<x)
+		p = p->next;
+	//如果这个结点是头结点
+	if(p->next == NULL)
+	{
+		push_back(list,x);//进行尾插
+	}
+	else //如果不是头结点
+	{
+		//获取插入结点
+		Node *s = _buynode(x);
+		//设置插入结点的后继
+		s->next = p->next;
+		//将插入结点设置为下一个结点的前驱
+		s->next->prior = s;
+		//设置插入结点的前驱
+		s->prior = p;
+		//将插入结点设置为上一结点的后继
+		p->next = s;
+		//更改有效结点数
+		list->size++;
+	}
+}
+
+//查找
+Node* find(List *list, ElemType key)
+{
+	//指向第一个有效结点
+	Node *p = list->first->next;
+	//如果没有找到且有效结点还没遍历完就继续下移查找
+	while(p!=NULL && p->data!=key)
+		p = p->next;
+	return p;
+}
+//求有效结点个数
+int  length(List *list)
+{
+	return list->size;
+}
+
+//删除特定值的结点
+void delete_val(List *list, ElemType key)
+{
+	//如果没有有效结点，不进行删除
+	if(list->size == 0)
+		return;
+	//查找要删除结点
+	Node *p = find(list,key);
+	if(p == NULL) //如果没有找到退出
+	{
+		printf("要删除的值不存在.\n");
+		return;
+	}
+
+	if(p == list->last) //如果该结点是尾结点，则进行尾删
+	{
+		list->last = p->prior;
+		list->last->next = NULL;
+	}
+	else //普通位置的结点直接删除
+	{
+		//将要删除结点的上一结点设置为该结点下一结点的前驱
+		p->next->prior = p->prior;
+		//将要删除结点的下一结点设置为该结点上一结点的后继
+		p->prior->next = p->next;
+	}
+	//释放空间
+	free(p);
+	//更新有效结点数
+	list->size--;
+}
+//排序（由小到大排序）
+void sort(List *list)
+{
+	//如果有效结点个数小于等于一个那么就不需要进行排序
+	if(list->size==0 || list->size==1)
+		return;
+	//断开双链表
+	Node *s = list->first->next; //指向前一个双链表（目前只含一个有效结点）
+	Node *q = s->next;//指向第一个结点（含有除第一个有效结点之外的其余有效结点）
+	//此时双链表的管理结点管理第一条双链表，设置尾指针指向
+	list->last = s;
+	list->last->next = NULL;
+
+	//当第二个双链表中还包含有效结点，需要继续取出按序插入第一个双链表中
+	while(q != NULL)
+	{
+		//取出第二个双链表的有效结点
+		s = q;
+		q = q->next;
+
+		//查找插入的位置
+		Node *p = list->first;
+		while(p->next!=NULL && p->next->data<s->data)
+			p = p->next;
+		
+		if(p->next == NULL)//如果插入位置在尾部，进行尾插
+		{
+			//设置插入结点的后继结点为空
+			s->next = NULL;
+			//设置插入结点的前驱结点为之前的尾结点
+			s->prior = list->last;
+			//设置插入结点为之前尾结点的后继结点
+			list->last->next = s;
+			//更新管理结点中尾结点指向
+			list->last = s;
+		}
+		else //如果在中间位置插入
+		{
+			//设置插入结点的后继
+			s->next = p->next;
+			//将插入结点设置为其下一结点的前驱结点
+			s->next->prior = s;
+			//设置插入结点的前驱结点
+			s->prior = p;
+			//将插入结点设置为其上一结点的后继
+			p->next = s;
+		}
+	}
+}
+//逆置双链表
+void resver(List *list)
+{
+	//如果有效结点的个数小等于1，那么无需逆置
+	if(list->size==0 || list->size==1)
+		return;
+	//将双链表拆分
+	Node *p = list->first->next; //指向前一个双链表（目前只含一个有效结点）
+	Node *q = p->next;//指向第一个结点（含有除第一个有效结点之外的其余有效结点）
+	//此时双链表的管理结点管理第一条双链表，设置尾指针指向
+	list->last = p;
+	list->last->next = NULL;
+    //当第二个双链表中还包含有效结点，需要继续取出头插到第一个双链表中
+	while(q != NULL)
+	{
+		//取出第二个双链表的有效结点
+		p = q;
+		q = q->next;
+		//头插到第一个双链表中
+		p->next = list->first->next;
+		p->next->prior = p;
+		p->prior = list->first;
+		list->first->next = p;
+	}
+}
+//清除所有有效结点
+void clear(List *list)
+{
+	//如果没有有效结点无需删除
+	if(list->size == 0)
+		return;
+	//如果有有效结点，不断进行头删，直到删除完成
+	Node *p = list->first->next;
+	while(p != NULL)
+	{
+		//如果删除的这个结点是最后一个有效结点
+		if(p == list->last)
+		{
+			//设置管理结点的尾指针指向
+			list->last = list->first;
+			list->last->next = NULL;
+		}
+		else//头删
+		{
+			//设置删除结点下一结点的前驱为头结点
+			p->next->prior = list->first;
+			//设置头结点的后继为删除结点的下一结点
+			list->first->next = p->next;
+		}
+		//释放内存空间
+		free(p);
+		//获取下一有效结点
+		p = list->first->next;
+	}
+	//更新有效结点数
+	list->size = 0;
+}
+//销毁双链表
+void destroy(List *list)
+{
+	//清除所有有效结点
+	clear(list);
+	//释放头结点
+	free(list->first);
+	//将管理结点的头指针和尾指针设置为空
+	list->first = list->last = NULL;
+}
+
+int main()
+{
+	List mylist;
+	InitDList(&mylist);
+
+	
+	ElemType Item;
+	Node *p = NULL;
+	int select = 1;
+	while(select)
+	{
+		printf("**************************************\n");
+		printf("* [1] push_back      [2] push_front  *\n");
+		printf("* [3] show_list      [4] pop_back    *\n");
+		printf("* [5] pop_front      [6] insert_val  *\n");
+		printf("* [7] find           [8] length      *\n");
+		printf("* [9] delete_val     [10] sort       *\n");
+		printf("* [11] resver        [12] clear      *\n");
+		printf("* [13*] destroy      [0] quit_system *\n");
+		printf("**************************************\n");
+		printf("请选择:>");
+		scanf("%d",&select);
+		if(select == 0)
+			break;
+		switch(select)
+		{
+		case 1:
+			printf("请输入要插入的数据(-1结束):>");
+			while(scanf("%d",&Item),Item != -1)
+			{
+				push_back(&mylist,Item);
+			}
+			break;
+		case 2:
+			printf("请输入要插入的数据(-1结束):>");
+			while(scanf("%d",&Item),Item != -1)
+			{
+				push_front(&mylist,Item);
+			}
+			break;
+		case 3:
+			show_list(&mylist);
+			break;
+		case 4:
+			pop_back(&mylist);
+			break;
+		case 5:
+			pop_front(&mylist);
+			break;
+		case 6:
+			printf("请输入要插入的数据:>");
+			scanf("%d",&Item);
+			insert_val(&mylist,Item);
+			break;
+		case 7:
+			printf("请输入要查找的数据:>");
+			scanf("%d",&Item);
+			p = find(&mylist,Item);
+			if(p == NULL)
+			{
+				printf("要查找的数据在链表中不存在.\n");
+			}
+			break;
+		case 8:
+			printf("单链表的长度为:> %d \n",length(&mylist));
+			break;
+		case 9:
+			printf("请输入要删除的值:>");
+			scanf("%d",&Item);
+			delete_val(&mylist,Item);
+			break;
+		case 10:
+			sort(&mylist);
+			break;
+		case 11:
+			resver(&mylist);
+			break;
+		case 12:
+			clear(&mylist);
+			break;
+		//case 13:
+		//	destroy(&mylist);
+		//	break;
+		default:
+			printf("输入的命令错误,请重新输入.\n");
+			break;
+		}
+	}
+	destroy(&mylist);
+}
+```
+3. 循环双链表总结
+```cpp
+#include<iostream>
+using namespace std;
+template<class T>//结点(类模板)
+class Node
+{
+public:
+    T data;//该结点数据域
+    Node<T> *next;//后继结点指针域
+    Node<T> *prior;//前驱结点指针域
+};
+template<class T>
+class Double_LoopLinkList
+{
+private:
+    Node<T> *head;//头结点
+public:
+    Double_LoopLinkList();//构造函数
+    void CreateList();//创建双循环链表
+    ~Double_LoopLinkList();//析构函数
+    int Length();//求双循环链表的长度
+    bool Get(int index);//得到序号为index的结点元素值
+    bool Locate(T data);//得到第一个元素值为data的结点的序号
+    bool Insert(int index,T data);//在序号index位置插入元素值为data的结点
+    bool Delete(int index);//删除序号为index的结点
+    bool PrintList();//输出双循环链表所有结点的元素值
+    void Exchangedata(int index1,int index2);//进行两结点元素值的交换
+    void ReverseDouble_LoopList(Double_LoopLinkList<T> &L);//实现双循环链表的翻转
+};
+//1.初始化循环单链表
+template<class T>
+Double_LoopLinkList<T>::Double_LoopLinkList()//初始化为空双循环链表
+{
+    head=new Node<T>;
+    head->data=0;
+    head->prior=NULL;
+    head->next=head;
+}
+//2.创建循环双链表
+template<class T>
+void Double_LoopLinkList<T>::CreateList()
+{
+    int length;
+    T data;
+    cout<<"正在创建双循环链表(尾插),请输入你要创建的双循环链表的长度"<<endl;
+    cin>>length;
+    for(int i=0;i<length;i++)
+    {
+        cout<<"请输入第"<<i+1<<"个结点的元素值:";
+        cin>>data;
+        Insert(Length()+1,data);//采用尾插方式进行创建单链表
+    }
+}
+//3.插入节点
+template<class T>
+bool Double_LoopLinkList<T>::Insert(int index,T data)
+{
+    Node<T> *p=head,*s;
+    if(index<=0)
+    {
+        cout<<"插入位置不合法，请输入为正数的插入位置"<<endl;
+        return false;
+    }
+        if(index>Length())//所插位置超出单链表长度时
+        {
+            while(p->next!=head)
+            {
+                p=p->next;
+            }
+            //此时指针p指向终端结点
+            s=new Node<T>;
+            s->data=data;//给予数据
+            p->next=s;//s成为p的后继结点
+            s->prior=p;//p成为s的前驱结点
+            s->next=head;//s成为终端结点,并指向头结点
+            head->prior=s;//s成为头结点的前驱结点
+            //进行双循环链表的插入;
+        }
+            else//所插位置位于链表长度内时
+            {
+
+                for(int i=0;i<index-1;i++)
+            {
+                p=p->next;
+            }
+            //此时指针p指向第index-1个结点
+            s=new Node<T>;
+            s->data=data;
+            s->prior=p;
+            s->next=p->next;
+            p->next->prior=s;
+            p->next=s;
+            //进行双循环链表的插入
+            cout<<"已成功插入结点n(*≧▽≦*)n"<<endl;
+            return true;
+            }
+}
+//4.获取长度
+template<class T>
+int Double_LoopLinkList<T>::Length()
+{
+    Node<T> *p=head;
+    int num=0;//累加器
+    while(p->next!=head)
+    {
+        num++;
+        p=p->next;
+    }
+    return num;
+}
+//5.销毁双向循环链表
+template<class T>
+Double_LoopLinkList<T>::~Double_LoopLinkList()//销毁双循环链表
+{
+    Node<T> *p=head->next;
+    Node<T> *s=NULL;
+    while(p!=head)
+    {
+        s=p;
+        p=p->next;
+        delete s;
+    }
+    delete p;
+    delete head;
+    cout<<"单链表销毁成功╭(╯^╰)╮"<<endl;
+}
+//6.查找循环双向链表
+template<class T>
+bool Double_LoopLinkList<T>::Get(int index)
+{
+    Node<T> *p=head;
+    if(index<=0||index>Length())//超出查找范围
+    {
+        cout<<"结点元素查找不合法"<<endl;
+        return false;
+    }
+    else
+    {
+        for(int i=0;i<index;i++)
+        {
+            p=p->next;
+        }
+    cout<<"查找成功,该结点的元素值为:"<<p->data<<endl;
+    return true;
+    }
+}
+//7.定位循环双向链表
+template<class T>
+bool Double_LoopLinkList<T>::Locate(T data)
+{
+    Node<T> *p=head;
+    int num=0;
+    while(p->next!=head)
+    {
+        num++;
+        p=p->next;
+        if(p->data==data)
+        {
+            cout<<"成功找到该结点,该结点点到的位置为:"<<num<<endl;
+            return true;
+        }
+    }
+    cout<<"该双循环链表中没有该结点"<<endl;
+    return false;
+}
+
+//7.删除循环双向链表
+template<class T>
+bool Double_LoopLinkList<T>::Delete(int index)
+{
+    Node<T> *p=head;
+    if(index<=0||index>Length())
+    {
+        cout<<"删除位置不合法"<<endl;
+    return false;
+    }
+    else if(index==Length())
+    {
+        for(int i=0;i<Length()-1;i++)
+    {
+        p=p->next;
+    }
+    p->next=head;
+    }
+    else
+    {
+        for(int i=0;i<index;i++)
+    {
+        p=p->next;
+    }
+    p->next->prior=p->prior;
+    p->prior->next=p->next;
+    cout<<"成功删除结点"<<index<<endl;
+    return true;
+    }
+}
+//8.打印循环双向链表
+template<class T>
+bool Double_LoopLinkList<T>::PrintList()
+{
+    int i=1;
+    Node<T> *p=head;
+    if(p->next==head)
+    {
+        cout<<"该双循环链表为空链表!"<<endl;
+        return false;
+    }
+    else
+    {
+    while(p->next!=head)
+    {
+        p=p->next;
+        cout<<"第"<<i<<"个结点的元素值为:"<<p->data<<endl;
+        i++;
+    }
+    cout<<"成功输出结点元素值!"<<endl;
+    return true;
+    }
+}
+
+//8.交换循环双向链表的值
+template<class T>
+void Double_LoopLinkList<T>::Exchangedata(int index1,int index2)
+{
+    Node<T> *p=head,*s1,*s2;
+    int Min,Max,data;
+    //定位结点的前后
+    Min=(index1>index2)?index2:index1;
+    Max=(index1>index2)?index1:index2;
+    if(Min>0&&Max<=Length())
+    {
+        for(int i=0;i<Min-1;i++)
+    {
+        p=p->next;
+    }
+    s1=p->next;//此时s1指向index1结点
+    p=head;
+    for(int i=0;i<Max-1;i++)
+    {
+        p=p->next;
+    }
+    s2=p->next;//此时s2指向index2结点
+    //实现数据的交换
+    data=s1->data;
+    s1->data=s2->data;
+    s2->data=data;
+    cout<<"结点元素值交换成功"<<endl;
+    }
+    else
+        cout<<"结点元素值交换失败"<<endl;
+}
+
+//8.Inverse循环双向链表
+template<class T>
+void Double_LoopLinkList<T>::ReverseDouble_LoopList(Double_LoopLinkList<T> &L)
+{
+    Node<T> *p=head;
+    while(p->next!=head)
+    {
+        p=p->next;
+    }
+    cout<<"翻转后的结点元素值分别为:";
+    for(int i=0;i<Length();i++)
+    {
+        cout<<p->data<<" ";
+        p=p->prior;
+    }
+    cout<<endl;
+}
+int main()
+{
+    cout<<"-------------------------------------------------双循环链表操作系统---------------------------------------------------"<<endl;
+    Double_LoopLinkList<int> list;
+    list.CreateList();
+    cout<<"------------------双循环链表已创建成功------------------"<<endl;
+    list.PrintList();
+    cout<<"------------------Insert--------------------"<<endl;
+    list.Insert(3,2);
+    list.PrintList();
+    cout<<"------------------Delete--------------------"<<endl;
+    list.Delete(2);
+    list.PrintList();
+    cout<<"--------------------Get---------------------"<<endl;
+    list.Get(1);
+    cout<<"--------------------Exchange----------------"<<endl;
+    list.Exchangedata(1,2);
+    list.PrintList();
+    cout<<"--------------------Reverse-----------------"<<endl;
+    list.ReverseDouble_LoopList(list);
+    cout<<"-------------------------------------------------已退出双循环链表操作系统-----------------------------------------------"<<endl;
+    return 0;
+}
+```
+4. 循环单链表总结
+```cpp
+#include<iostream>
+ 
+using namespace std;
+ 
+//存储结构 
+typedef struct LNode 
+{
+	int data;
+	struct LNode *next;
+}LNode, *LinkList;
+ 
+//初始化 
+int InitList(LinkList &L) 
+{
+	L = new LNode;
+	L->next = L;       //非循环链表的初始化是头指针的指针域置空 L->next=NULL 
+	
+	return 1;
+}
+ 
+// 判断链表是否为空
+int ListEmpty(LinkList L)
+{
+	if (L->next == L)
+	{
+		return 1;   // 空 
+	}
+	else 
+	{
+		return 0;  // 非空 
+	}
+}
+ 
+// 获取链表长度
+int ListLength(LinkList L) 
+{
+	int length = 0;
+	LNode *p;
+	p = L->next;
+	while (p != L)
+	{                  //当p不是头结点时，链表长度加1 
+		p = p->next;
+		length++;
+	}
+	
+	return length;
+}
+ 
+// 遍历链表
+void TraveList(LinkList L) 
+{
+	LNode *p;
+	p = L->next;
+	
+	printf("遍历链表:\n");
+	while (p != L) 
+	{                             //当p不是头结点时，输出元素值 
+		printf("%d ", p->data);
+		p = p->next;
+	}
+	
+	printf("\n");
+}
+ 
+// 头插法创建单循环链表
+void CreateList1(LinkList &L, int n) 
+{
+	//创建长度为n的单循环链表 
+	L = new LNode;
+	L->next = L;
+	
+	printf("请输入链表元素值:\n");
+	for (int i = n; i > 0; --i)
+	{
+		printf("请输入第%d个元素的值:", i);
+		struct LNode *p;
+		p = new LNode;//生成新结点
+		scanf("%d", &p->data);
+		p->next = L->next;;
+		L->next = p;
+	}
+}
+ 
+// 尾插法创建单循环链表
+void CreateList2(LinkList &L, int n) 
+{
+	L = new LNode;
+	L->next = L;
+	struct LNode *r;
+	r = L;
+	
+	printf("请输入链表元素值:\n");
+	for (int i = 0; i < n; i++) 
+	{
+		printf("请输入第%d个元素的值:", i + 1);
+		LNode *p;
+		p = new LNode;
+		scanf("%d", &p->data);
+		p->next = L;
+		r->next = p;
+		r = p;
+	}
+}
+ 
+//单循环链表的插入操作
+int ListInsert(LinkList &L, int location, int &e) 
+{
+	//在L的location位置插入元素e
+	LNode *p;
+	p = L;
+	int j = 0;
+	
+	while (p->next != L && j < location - 1) 
+	{
+		//注意：由于p初始时指向头结点，所以训话的条件是 p->next!=L 
+		//而不是 p!=L 
+		p = p->next;
+		j++;
+	}
+	if (p == L || j > location - 1) 
+	{
+		return 0;
+	}
+ 
+	LNode *s;
+	s = new LNode;
+	s->data = e;
+	s->next = p->next;
+	p->next = s;
+	
+	return 1;
+}
+ 
+//单循环链表的删除操作
+int ListDelete(LinkList &L, int location, int &e) 
+{
+	//删除L中location位置的元素,并用e返回其值
+	LNode *p;
+	p = L;
+	int j = 0;
+	
+	while (p->next != L && j < location - 1) 
+	{
+		p = p->next;
+		j++;
+	}
+	if (p == L || j > location - 1) 
+	{
+		return 0;
+	}
+	
+	LNode *q;
+	//q = new LNode;
+	q = p->next;
+	p->next = q->next;
+	e = q->data;
+	
+	delete q;
+	
+	return 1;
+}
+ 
+int main() 
+{
+	LinkList L;
+ 
+	if (InitList(L)) 
+	{
+		printf("初始化成功!\n");
+	}
+	else 
+	{
+		printf("初始化失败!\n");
+	}
+ 
+	if (ListEmpty(L)) 
+	{
+		printf("当前链表为空.\n");
+	}
+	else 
+	{
+		printf("链表非空.\n");
+	}
+ 
+	printf("请输入链表长度:");
+	int n;
+	scanf("%d", &n);
+	CreateList2(L, n);
+ 
+	if (ListEmpty(L)) 
+	{
+		printf("当前链表为空.\n");
+	}
+	else 
+	{
+		printf("链表非空.\n");
+	}
+ 
+	printf("当前链表长度是:%d\n", ListLength(L));
+	TraveList(L);
+ 
+	printf("请输入插入位置和值:\n");
+	int location, e;
+	scanf("%d,%d", &location, &e);
+	if (ListInsert(L, location, e)) 
+	{
+		printf("插入成功\n");
+	}
+	else 
+	{
+		printf("插入失败\n");
+	}
+	TraveList(L);
+ 
+	printf("请输入删除元素的位置:\n");
+	int e1, location1;
+	scanf("%d", &location1);
+	if (ListDelete(L, location1, e1)) 
+	{
+		printf("删除成功\n");
+		printf("删除的元素值为:%d\n", e1);
+	}
+	else 
+	{
+		printf("删除失败\n");
+	}
+	TraveList(L);
+ 
+	system("pause");
+ 
+	return 0;
+}
+```
 # 3.栈，队列和数组
 ## 3-1.栈
 1. 定义:*线性表*是具有相同数据类型n(n>=0)个数据元素的有限序列，其中n为表长，当n = 0时，线性表是空表。若用L命名线性表，则其一般表示为L = {a1, a2, ...,ai+1, ..., an };*栈*是只允许在一端进行插入和删除操作的*线性表*。
@@ -1855,7 +3214,7 @@ bool GetTop2(ShStack S, ElemType& x) {
 ```
 ![顺序栈总结](../pictures/3-2-4%E9%A1%BA%E5%BA%8F%E6%A0%88%E6%80%BB%E7%BB%93.png)
 
-## 3.用链式存储的方式实现栈
+## 3-3.用链式存储的方式实现栈
 1. 链栈
    1. 用链式存储方式实现的栈:**只能在单链表的头节点的后面进行进栈和出栈操作的链表**
    2. 基本操作
@@ -1866,3 +3225,174 @@ bool GetTop2(ShStack S, ElemType& x) {
       5. 判空，判满
 
 2. 定义
+```cpp
+#include<assert.h>
+#include<stdio.h>
+#include<stdlib.h>
+typedef struct LNode
+{
+	int data;
+	struct LNode *next;
+}LNode,*Pstack;
+
+//1.初始化栈
+void InitStack(Pstack ps)
+{
+	assert(ps != NULL);
+	ps->next = NULL;
+}
+//2.得到节点
+LNode *GetLNode(int val)
+{
+	LNode *pGet = (LNode *)malloc(sizeof(LNode));
+	assert(pGet != NULL);
+	pGet->next = NULL;
+	pGet->data = val;
+	return pGet;
+}
+
+//3.入栈
+bool Push(Pstack ps,int val)
+{
+	assert(ps != NULL);
+	LNode *pGet = GetLNode(val);
+	pGet->next = ps->next;
+	ps->next = pGet;
+	return true;
+}
+ 
+//4.出栈
+bool Pop(Pstack ps,int *rtv)
+{ 
+	assert(ps != NULL);
+	if (IsEmpty(ps))
+	{
+		return false;
+	}
+	if (rtv != NULL)
+	{
+		*rtv = ps->next->data;
+	}
+	LNode *p = ps->next;
+	ps->next = p->next;
+	free(p);
+	p = NULL;
+	return true;
+}
+ 
+//5.获取顶端元素
+bool GetTop(Pstack ps,int *rtv)
+{
+	assert(ps != NULL);
+	if (IsEmpty(ps))
+	{
+		return false;
+	}
+	if (rtv != NULL)
+	{
+		*rtv = ps->next->data;
+	}
+	return true;
+}
+ 
+//6.判空
+bool IsEmpty(Pstack ps)
+{
+	return ps->next == NULL;
+}
+ 
+//7.销毁
+void Destroy(Pstack ps)
+{
+	assert(ps != NULL);
+	LNode *p = NULL;
+	while (ps->next != NULL)
+	{
+		p = ps->next;
+		ps->next = p->next;
+		free(p);
+	}
+	p = NULL;
+}
+ 
+//8.得到栈长
+int GetLengthStack(Pstack ps)
+{
+	assert(ps != NULL);
+	LNode *p = ps->next;
+	int len = 0;
+	while (p != NULL)
+	{
+		len++;
+		p = p->next;
+	}
+	return len;
+}
+
+//9.打印
+void Show(Pstack ps)
+{
+	LNode *p = ps->next;
+	while (p != NULL)
+	{
+		printf("%d ",p->data);
+		p = p->next;
+	}
+	printf("\n");
+}
+```
+## 3-4.队列
+### 1.定义
+![队列](../pictures/3-4-1队列定义.png)
+1. 定义:只允许在一端插入(入队)，在另一端删除(出队)的*线性表*。*栈*是只允许在一端进行插入或删除的线性表;
+2. 术语和特点:
+   1. 队头:允许删除的一端
+   2. 队尾:允许插入的一端
+   3. 空队列:
+3. 基本操作
+   1. InitQueue(&Q):初始化队列，构造一个空队列
+   2. DestroyQueue(&Q):*销毁*队列。销毁并释放队列Q中所占用的内存空间
+   3. EnQueue(&Q, x):入队，若队列Q为满，将x加入，使之成为新的队尾
+   4. DeQueue(&Q, &x):若队列Q非空,删除队头元素，并用x返回
+   5. GetHead(Q, &x):读队头元素,若队列Q非空，则将对头元素赋值给x
+### 2.队列的顺序实现
+![队列的顺序实现](../pictures/3-4-2队列的顺序实现.png)
+![循环队列](../pictures/3-4-2队列的顺序实现.png)
+```cpp
+#define MaxSize 10 //定义队列中的元素的最大个数
+//1.定义队列
+typedef struct{
+   ElemType data[MaxSize];
+   int front, rear//队头指针和队尾指针
+}SqQueue;
+//2.初始化操作
+void InitQueue(SqQueue &Q){
+   //初始化时，队头队尾指针指向0
+   SqQueue Q;
+   InitQueue(Q);
+   
+}
+//3.判断队列是否为空
+bool QueueEmpty(SqQueue Q){
+   if (Q.rear == Q.front)
+      return true;
+   else
+      return false;
+}
+//4.入队
+bool EnQueue(SqQueue &Q, ElemType x){
+   if ((Q.rear+1) % MaxSize == Q.front)
+      return false;
+   //当rear == MaxSize时，队列并没有存满,所以当队尾指针的下一个位置是队头的时候，队列已满
+   Q.data[Q.rear] = x;//将x插入队尾
+   Q.rear = (Q.rear + 1) % MaxSize//队尾指针后移
+   return true;
+}
+//5.出队
+bool DeQueue(SqQueue &Q, ElemType &x){
+   if (Q.rear == Q.front)
+      return false;
+   x = Q.data[Q.front];
+   Q.front = (Q.front+1) % MaxSize;
+   return true;
+}

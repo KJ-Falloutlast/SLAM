@@ -13903,3 +13903,57 @@ typedef struct{
 /*第3种和第2种的区别在于第3种方法省去了结构体名
 直接给出结构体变量，1，2，3等同*/
 ```
+
+## 16.assert
+
+```cpp
+//demo01
+#include <stdio.h>
+#include <assert.h>
+#include <string.h>
+ 
+void analyze_string( char *string );   // Prototype
+ 
+int main( void )
+{
+   char  test1[] = "abc", *test2 = NULL, test3[] = "";
+ 
+   printf ( "Analyzing string '%s'\n", test1 ); 
+   analyze_string( test1 );
+   printf ( "Analyzing string '%s'\n", test2 ); 
+   analyze_string( test2 );
+   printf ( "Analyzing string '%s'\n", test3 ); 
+   analyze_string( test3 );
+}
+ 
+// Tests a string to see if it is NULL, 
+// empty, or longer than 0 characters.
+void analyze_string( char * string )
+{
+   assert( string != NULL );        // Cannot be NULL
+   assert( *string != '\0' );       // Cannot be empty
+   assert( strlen( string ) > 2 );  // Length must exceed 2
+}
+/*
+
+1.assert的作用是断言, void assert(int expression);
+只有在表达式为假的时候，才会调用abort报警，出错报警后就不会执行到后面的语句
+2.执行结果
+Analyzing string 'abc'
+Analyzing string '(null)'
+demo02: demo02.cpp:25: void analyze_string(char*): Assertion `string != NULL' failed.
+*/
+
+//demo02
+#include <stdio.h>
+#include <assert.h>
+#include <string.h>
+#include <iostream>
+using namespace std;
+int main(){
+    string a = "ab";//若length < 3,则会执行报警
+    assert(a.length() >= 3);
+    cout << "sdfsdf" << endl;
+    
+}
+```

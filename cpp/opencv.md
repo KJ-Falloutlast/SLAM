@@ -135,6 +135,7 @@ int main()
    7. uchar *ptr(i = 0);
 
 ```cpp
+//demo01
 #include <opencv2/opencv.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <iostream>
@@ -193,6 +194,7 @@ int main(int argc, char** argv) {
 
 
 ```cpp
+//demo02
 #include <opencv2/opencv.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <iostream>
@@ -247,6 +249,121 @@ int main(int argc, char** argv) {
     imshow("output", m4);
     waitKey(0);
 
+}
+```
+```cpp
+//输入输出流头文件
+#include <iostream> 
+//头文件  opencv.hpp中包含基本的头文件 （我们采用的OpenCV版本是 2.4.13.6）
+#include <opencv2/opencv.hpp>  
+
+//命名空间，指明在cv下的所有类名、参数名、函数名等能够在不加 cv::下就能够使用
+using namespace cv;
+
+int main() 
+{
+
+	//创建一个Mat类型对象 image (以下出现的"cv::",如果添加了 using namespace cv；就可以省略)
+	cv::Mat srcImage;
+	
+	//通过绝对路径读取一副BGR彩色图像，参数1是图像的绝对路径(注意:路径可采用"\\"或"/" 不能使用windows文件夹路径的"\");
+	srcImage = cv::imread("D:/MyImage.jpg");
+	
+	//先显示image这个图像 参数1是显示窗口名称,参数2是Mat类型的对象;
+	cv::imshow("srcImage", srcImage);
+	
+	//创建一个Mat类型对象 dstImage，
+	//且分配给他一个srcImage.rows行，srcImage.cols列的空间，
+	//数据类型是CV_8UC3，即3通道（C3）8bit的无符号整型（8U，uchar）
+	//且将所有元素内所有通道值置0，Scalar::all(0)，这里修改"0"位置的值可得到你想要的值得矩阵
+	//你也可以使用zeros函数达到全赋值为0效果;
+	//cv::Mat dstImage = cv::Mat::zeros(srcImage.rows, srcImage.cols, CV_8UC3);
+	//当然，因为我们之后要将srcImage给dstImage 所以此处直接使用 cv::Mat dstImage; 即可。
+	cv::Mat dstImage(srcImage.rows,srcImage.cols,CV_8UC3,cv::Scalar::all(0));
+	
+	//将一个Mat A赋值给另一个Mat B，有四种方法
+	//1.构造函数法         Mat A(B);
+	//2.重载运算符法       A = B;
+	//3.复制法            A.copyTo(B);
+	//4.克隆法            B=A.clone();
+
+	//这里需要知道一个Mat类的概念：
+	//Mat 是一个类，由两个数据部分组成：矩阵头（包含矩阵尺寸，存储方法，存储地址等信息）
+	//和一个指向存储所有像素值的矩阵（根据所选存储方法的不同矩阵可以是不同的维数）的指针。
+
+	//方法1、2是浅拷贝（时间短，不安全），只拷贝矩阵头，不拷贝数据部分，A和B共用一块数据，A对元素的操作会影响B ；
+	//方法3、4是深拷贝（时间长，相对安全），拷贝矩阵的所有数据，包括矩阵头，区别在于clone()会给目标矩阵重新分配新地址，
+	//而copyTo()不会,copyTo()只是修改目标矩阵内的元素的值与当前矩阵值相同
+	dstImage = srcImage.clone();
+	
+	//两层循环访问所有元素通道值，并将其中蓝色通道（B）减小一半，绿通道（G）值减小一半，红色通道（R）置255
+	for (size_t i = 0; i < dstImage.rows; i++)
+	{//外层循环行数
+		for (size_t j = 0; j < dstImage.cols; j++)
+		{//内层循环列数
+		
+			// 采用这种直观的方式，这种方法更安全不会有i,j溢出的危险，但是读取速度慢
+			// 例如 图像为640x480分辨率，i，j取482、642改方法将会报错，但使用prt方法则一样会计算，不报错。
+			//dstImage.at<cv::Vec3b>(i, j)[0] *= 0.5;
+			//dstImage.at<cv::Vec3b>(i, j)[1] *= 0.5;
+			//dstImage.at<cv::Vec3b>(i, j)[2] = 255;
+			
+			//ptr OpenCV中使用的智能指针，<>内是图像元素的类型 Vec3b 是一个包含三个uchar类型元素的一维数组
+			//(i)[j][0]分别代表数据的行号、列号、和通道号,如果是单通道则(i)[j]即可，
+			//由于opencv默认读取彩色图像是BGR，则0为蓝色、1为绿、2为红
+			//uchar 能存储0~255的值 都为零则为黑色 都为255则为白色
+			dstImage.ptr<cv::Vec3b>(i)[j][0] *= 0.5;
+			dstImage.ptr<cv::Vec3b>(i)[j][1] *= 0.5;
+			dstImage.ptr<cv::Vec3b>(i)[j][2] = 255;
+		}
+	}
+	
+	//创建一个名为dstImage的窗口用来显示图像，如果显示结束可通cv::destroyWindow("dstImage");进行指定销毁，
+	//也可通过cv::destroyAllWindows();销毁存在的所有窗口。
+	cv::namedWindow("dstImage");
+	
+	//显示结果图到名为dstImage的窗口中
+	cv::imshow("dstImage", dstImage);
+
+	//保存图像到某一地址，参数1.要保存的绝对路径和文件名，参数2.要保存的Mat图像
+	cv::imwrite("D:/dstImage.jpg", dstImage);
+
+	//延迟1ms秒时间等待键盘输入,如果参数为0则一直等待。在imshow之后，
+	//如果没有waitKey语句则不会显示图像,若之后没有waitKey()则显示窗口将在1ms后关闭。
+	cv::waitKey(1);	
+
+	//创建一个矩阵
+	cv::Mat rotationMatrix;
+	
+	//给矩阵赋值，矩阵行列很小时，用这种方法直观、方便
+	rotationMatrix = ( cv::Mat_<double>(3, 3) <<
+						1.0, 2.0, 3.0,
+						0.0, 1.0, 0.0,
+						0.0, 0.0, 1.0);
+						
+	//如果是全零矩阵，可以如下进行初始化 当然 行、列和数据类型自己选择
+	cv::Mat A = cv::Mat::zeros(3, 3, CV_64F);
+	//如果是全一矩阵，可以如下进行初始化 当然 行、列和数据类型自己选择
+	cv::Mat B = cv::Mat::ones(3, 3, CV_64F);
+	//如果是单位矩阵，可以如下进行初始化 当然 行、列和数据类型自己选择
+	cv::Mat C = cv::Mat::eye(3, 3, CV_64F);
+
+	A = B + C; //加法
+	A = B - C; //减法
+	A = B * C; //矩阵乘法  必须满足矩阵相乘的行列数对应规则
+	A = 5 * B; //标量乘法 每个元素扩大5倍
+	A = B.t(); //B转置
+	A = B.inv(); //B逆矩阵
+
+	//以上是最基本的操作，矩阵运算远远不是这几种，Mat包含了几乎所有的操作，用到的时候再查吧
+	
+	//如果包含了c++输入输出流的头文件 #include <iostream> 那么Mat可输出至屏幕通过
+	std::cout<<" A is : "<< A <<std::endl;
+	
+	//一直等待，以显示图像窗口
+	cv::waitKey(0);
+	cv::destroyAllWindows();	
+	return 1;
 }
 ```
 
