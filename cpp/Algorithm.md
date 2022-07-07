@@ -3357,7 +3357,7 @@ void Show(Pstack ps)
    5. GetHead(Q, &x):读队头元素,若队列Q非空，则将对头元素赋值给x
 ### 2.队列的顺序实现
 ![队列的顺序实现](../pictures/3-4-2队列的顺序实现.png)
-![循环队列](../pictures/3-4-2队列的顺序实现.png)
+![循环队列](../pictures/3-4-3%E5%BE%AA%E7%8E%AF%E9%98%9F%E5%88%97.png)
 ```cpp
 #define MaxSize 10 //定义队列中的元素的最大个数
 //1.定义队列
@@ -3395,4 +3395,8 @@ bool DeQueue(SqQueue &Q, ElemType &x){
    x = Q.data[Q.front];
    Q.front = (Q.front+1) % MaxSize;
    return true;
+}
+//6.查
+bool GetHead(SqQueue Q, ELemType &x){
+   if (Q.rear )
 }
