@@ -510,6 +510,7 @@ int main(){
 ```
 ![函数调用栈](../pictures/1-6函数调用栈.png)
 ![空间复杂度](../pictures/1-7%E7%A9%BA%E9%97%B4%E5%A4%8D%E6%9D%82%E5%BA%A6.png)
+### 5.第一章oj
 
 # 2.数据结构的基本概念
 
@@ -3361,7 +3362,7 @@ void Show(Pstack ps)
 ```cpp
 #define MaxSize 10 //定义队列中的元素的最大个数
 //1.定义队列
-typedef struct{
+typedef struct{8
    ElemType data[MaxSize];
    int front, rear//队头指针和队尾指针
 }SqQueue;
