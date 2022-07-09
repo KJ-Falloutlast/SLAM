@@ -1,5 +1,6 @@
 # 1.opencv基础
 ## 1-1.加载修改和保存图像
+![1-1图像基本操作](../pictures/opencv-1-1-图像基本操作.png)
 1. imread
    1. 功能：加载图像文件，使得图像文件成为一个mat对象，其中第一个参数为图像文件名称
    2. 第二参数表示加载的图像是什么文件类型，常见的有3个值
@@ -21,8 +22,23 @@
    2. 只有8位，16位的PNG，jpg,Tiff文格式而且是单通道或者3通道的BGR图像才能通过这种方式保存
    3. 保存png格式的时候可以保存透明通道的图片
    4. 可以指定压缩参数
-5. 案例
+5. 图像类型和结构信息
+   1. CV_8U: 8位无符号字类型
+   2. CV_8S: 8位有符号字类型
+   3. CV_16U: 16位无符号字类型
+   4. CV_16S: 8位有符号字类型
+   5. CV_32S: 32位整形类型
+   6. CV_32F: 8位浮点类型(float)
+   7. CV_64F: 64位浮点类型
+   8. 注意
+      1. U-usigned char, C-channels, S-signed int， F-float
+      2. CV_8U——0~255，205
+      3. CV_8S——0~255，-51
+      4. CV_32S——int型的范围，-842150451
+      5. CV_32F——浮点型的范围，-431602080
+6. 案例
 ```cpp
+//demo01
 #include <opencv2/opencv.hpp>
 #include <iostream>
 #include <math.h>
@@ -50,6 +66,44 @@ int main(){
     return 0;
 }
 ```
+```cpp
+//demo02
+#include <iostream>
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/features2d/features2d.hpp>
+using namespace std;
+using namespace cv;
+int main(){
+    Mat src = imread("/home/kim-james/ROS_Space/opencv_ws/source/images/lena.png", IMREAD_COLOR);
+    if (src.empty()){
+        cout << "couldn't find the file" << endl;
+    }
+    namedWindow("002-demo", WINDOW_AUTOSIZE);
+    imshow("002-demo", src);
+    int width = src.cols;//宽 = 列
+    int height = src.rows;//高 = 行
+    int dim = src.channels();//维 = 通道
+    int d = src.depth();//深度
+    int t = src.type();//类型,该图像是CV_8UC3类型的
+    if (t == CV_8UC3){
+        printf("width:%d, heigh:%d, dim:%d, depth:%d, type:%d\n",
+                width, height, dim, d, t);
+    }
+    waitKey(0);
+    destroyAllWindows();
+
+}
+/**
+ * @brief 
+ * 1.width:512, heigh:512, dim:3, depth:0, type:16
+ * 2.图像类型和结构信息
+ * 3.
+ * 
+ */
+```
+
+
 ## 1-2.图像的掩膜操作
 ![图像的掩膜操作](../pictures/图像的掩膜操作.png图像的)
 1. 获取图像像素指针

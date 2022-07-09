@@ -1,4 +1,5 @@
 # 1.时间复杂度和空间复杂度
+## 1-1.概念
 1. 定义:算法中**基本操作的执行次数**为时间复杂度
 2. 大O渐进表示法
    1. 推导大O表示法:
@@ -7,11 +8,23 @@
       3. 如果最高阶项存在且不是1，则去除与这个项目相乘的常数，得到的就是O阶
    2. 通过上面的计算，Func1执行次数: $F(N) = N^2 + N*2 + 10$,所以实际上我们只需要知道大概的执行次数，那么需要用到大O表示法，所以$T(n) = O(N^2)$
    3. 有的情况下，算法中基本操作重复执行的次数还随着**输入数据集**的不同而不同
-      1. 最坏时间复杂度:最坏情况下，算法的时间复杂度
-      2. 平均时间复杂度:所有可能输入实例在等概率出现的情下，算法的期望运行时间
-      3. 最好时间复杂度:最好情况下， 算法的时间复杂度
-      4. 例如:在长度为N的数组中搜索一个数x,*最好情况*:1次找到，*最坏情况*:N次找到，平均情况:N/2次找到
-      5. 总结：一般来说考虑**最坏时间复杂度**，因为考虑最坏情况下的时间复杂度，可以保证算法的运行时间不会比他更长
+      1. 最坏时间复杂度:最坏情况下，算法的时间6来说考虑**最坏时间复杂度**，因为考虑最坏情况下的时间复杂度，可以保证算法的运行时间不会比他更长
+3. 空间复杂度
+   1. 定义:算法所需存储空间的度量，记作:S(n) = O(f(n)),其中n为问题的规模(大小)
+   2. 算法本身要占据的空间:
+      1. 输入/输出,指令，常数，变量等
+      2. *算法要使用的辅助空间*
+   3. 一般来说只需要关心与空间大小与问题规模相关的变量
+   4. 如何计算
+      1. 普通程序
+      2. 找到所占空间大小和问题规模相关的变量
+      3. 分析所占变量x与问题规模n的关系x = f(n)
+      4. x的数量级O(x)就是算法的空间复杂度S(n)
+      5. 递归程序
+         1. 找到递归调用的深度x与问题规模n的关系:x = f(n)
+         2. x的数量级O(x)就是算法的空间复杂度S(n)
+         3. *注意*:有的算法各层函数所需存储空间不同，分析方法略有区别
+   5. 总结:**时间复杂度不计算时间，计算大概的运算次次数;空间复杂度不计算空间，计算大概定义的变量个数*
 ```cpp
 //demo01
 void Func1(int N){
@@ -125,15 +138,124 @@ int main(){
 long long Factorial(size_t N){
 	if (N == 0 || N == 1)
 		return 1;
-    return Factorial(N-1) * N;
+    return Factorial(N-1) * N;//1次
 }
 int main(){
 	long long a = Factorial(0);
 	cout << a << endl;
 }
 /*
-1.递归算法计算: T(n) = 递归次数 * 每次递归函数的次数
+1.递归算法计算: T(n) = 递归次数 * 每次递归函数的次数，
+所以此例，递归次数 = N(!100则递归了100次)，每次递归函数的次数 = 1，所以为O(N)
 */
+//*****************空间复杂度**********************//
+//demo01
+//计算bubblesort的空间复杂度
+void BubbleSort(int* a, int n){
+    assert(a);
+    for (size_t end = n; end > 0; ++end){
+        int exchange = 0;
+        for (size_t i = 1; i < end; ++i){
+            if (a[i-1] > a[i]){
+                Swap(&a[i-1], &a[i]);
+                exchange = 1;
+            }
+        }
+        if (exchange == 0)
+            break;
+    }
+}
+//a, n, end, exchange, i一共5个，故S(n) = O(1)
+//空间复杂度是计算变量的个数
+
+//demo01
+long long* Fibonacci(size_t n){
+    if (n == 0)
+        return NULL
+    long long* fibArray = (long long*)malloc(n + 1) * sizeof(long long);//开辟了n+1个的空间，所以S(n) = O(n)
+    fibArray[0] = 0;
+    fibArray[1] = 1;
+    for (int i = 2; i <= n; i++){
+        fibArray[i] = fibArray[i-1] + fibArray[i-2];
+    }
+    return fibArray;
+}
+
+//demo02
+long long Factorial(size_t N){
+    return N < 2 ? N : Factorial(N-1) * N;
+}
+//递归了n次，所以为O(n)
 
 ```
+## 1-2.oj
+>方法:画图+思考+笔记
+1. 消失的数字
+   1. 描述:数组nums包含从0到n的所有整数，但其中缺了一个。请编写代码找出那个缺失的整数。你有办法在O(n)时间内完成吗？
+   2. 求解
+```cpp
+class Solution {
+public:
+    int missingNumber(vector<int>& nums) {
+        int n = nums.size();
+        int total = n * (n + 1) / 2;
+        int arrSum = 0;
+        for (int i = 0; i < n; i++) {
+            arrSum += nums[i];
+        }
+        return total - arrSum;
+    }
+};
+//arrSum比total少了消失的一个数字，所以消失的数字为total-arrSum
+```
+2. 消失的数字
+   1. 描述:一个整型数组 nums 里除两个数字之外，其他数字都出现了两次。请写程序找出这两个只出现一次的数字。要求时间复杂度是O(n)，空间复杂度是O(1)。
+   2. 题解
+```cpp
 
+vector<int> singleNumbers(vector<int>& nums) {
+   int ret = 0;
+   for (int n : nums)
+      ret ^= n;
+   int div = 1;
+   while ((div & ret) == 0)
+      div <<= 1;
+   int a = 0, b = 0;
+   for (int n : nums)
+      if (div & n)
+          a ^= n;
+      else
+          b ^= n;
+   return vector<int>{a, b};
+}
+```
+   3. 算法 
+      1. 思路:如果除了一个数字之外，其余数字都出现了2次，那么如何找到出现1次的数字?->进行*异或*操作，对每个操作数的每一位，相同结果为0, 不同结果为1。那么在计算过程中，成对出现的所有数字的所有位会两两抵消为0，最终得到的结果是出现1次的数字
+      2. 那么如何将这一方法扩展到找出2个出现1次的数字？把所有的数字分成2组，使得
+         1. 2个只出现1次的数字在不同的组中
+         2. 相同的数字会被分到相同的组中。那么对这2个组分别进行异或操作，就可以得到答案
+      3. 步骤
+         1. 先对所有数字进行一次异或，得到两个出现一次的数字的异或值。
+         2. 在异或结果中找到任意为1的位
+         3. 根据这一位对所有的数字进行分组。
+         4. 在每个组内进行异或操作，得到两个数字
+```cpp
+class Solution {
+public:
+    vector<int> singleNumbers(vector<int>& nums) {
+        int ret = 0;
+        for (int n : nums)
+            ret ^= n;
+        int div = 1;
+        while ((div & ret) == 0)
+            div <<= 1;
+        int a = 0, b = 0;
+        for (int n : nums)
+            if (div & n)
+                a ^= n;
+            else
+                b ^= n;
+        return vector<int>{a, b};
+    }
+};
+```
