@@ -212,24 +212,73 @@ public:
    1. 描述:一个整型数组 nums 里除两个数字之外，其他数字都出现了两次。请写程序找出这两个只出现一次的数字。要求时间复杂度是O(n)，空间复杂度是O(1)。
    2. 题解
 ```cpp
-
-vector<int> singleNumbers(vector<int>& nums) {
-   int ret = 0;
-   for (int n : nums)
-      ret ^= n;
-   int div = 1;
-   while ((div & ret) == 0)
-      div <<= 1;
-   int a = 0, b = 0;
-   for (int n : nums)
-      if (div & n)
-          a ^= n;
-      else
-          b ^= n;
-   return vector<int>{a, b};
+#include<iostream>
+#include <assert.h>
+#include <vector>
+using namespace std;
+//设nums = [4, 4, 5, 3]
+vector<int> singleNumber(vector<int>& v){
+	int ret = 0;
+    for (int i = 0; i < v.size(); i++){
+        ret ^= v[i];
+    }
+	int m = 0;//假设找到第m位
+	while (m < 32){
+		if(ret & (1<<m))//1左移m位
+			break;
+		else
+			++m;
+	}
+	//分离
+	int x1 = 0, x2 = 0;
+	for (int i = 0; i < v.size(); i++){
+		if (v[i] & (1<<m)){
+			//1左移m位就可以判断第m为为1还是为0，因为此时已经找到3^5中第1为0的位，那么就可以用这个位将3和5分开
+			x1 ^= v[i];
+		}
+		else{
+			x2 ^= v[i];
+		}
+	}
+	// vector<int> v1 = {x1, x2}; 
+    // return v1;//方法2
+    return vector<int>{x1, x2}
+	
+    /**
+	 * @brief 
+	 * 1.数组中所有数异或，那么出现2次的数字都^没了,ret = x1^x2
+	 * 
+	 * 2. 下一步是想办法分离出x1和x2,假设x2 = 5 = 0101, x1 = 3 = 0011, v = [4, 4, 5, 3], 4 = 0100
+	 * 所以
+	 * 	2-1.0101 ^ 0011 = 0110(同0异1 = 6)
+	 * 	2-2.找出ret里面第M位为1的，说明x1和x2的第M位不一样(若是一样的话
+	 * 那么第M位就为0)
+	 * 
+	 * 3.取数组中分离出x1和x2:第M位为1的为1组，第M位为0的为1组
+	 * 最终得到，x1和x2各在一组，其他的数成对出现在1，2组中的某一组
+	 * (由于相同的数^为0，所以他们一定会被分到同一组)
+	 * 	3-1.原理:由于ret不为0，所以在在ret的32位数字中至少有1位为1，
+	 * 所以通过1<<m 来寻找第一个不为0的位，再 与ret，若为true,
+	 * 直接跳出循环
+	 * 	3-2.推导
+	 * def1 = {ret & m |
+ 	 * 	0110 &  0001 = 0000 = false,此时由于第0位为1，所以1需要左移一位得到
+	 * 0010}
+	 * def2 = {ret & m | 0110 & 0010 = true, 此时第1位1， 所此时直接跳出循环}
+	 * 
+	 * 4.分离
+	 * 对v[i] & (1<<m), 此时(1<<m) = 0010,
+	 * sol1: 3 & (1<<m) = (0011) & (0010) = 0010 = true, x1 = 3
+	 * sol2: 5 & (1<<m) = (0101) & (0010) = 0000 = false, x2 = 5
+	 * sol3: 4 & (1<<m) = (0100) & (0010) = 0000 = false, x2 = 5 ^ 4
+	 * sol4: 4 & (1<<m) = (0100) & (0010) = 0000 = false, x2 = 5 ^ 4 ^ 4 = 5(相同的项被分到同一组的时候被异或为0,实际上
+     * 相同的项被分到哪一组都不重要，因为最后他们异或为0)
+	 * res = {g1, g2 | g1 = {3}, g2 = {5}}
+	 */
+	
 }
 ```
-   3. 算法 
+   1. 算法 
       1. 思路:如果除了一个数字之外，其余数字都出现了2次，那么如何找到出现1次的数字?->进行*异或*操作，对每个操作数的每一位，相同结果为0, 不同结果为1。那么在计算过程中，成对出现的所有数字的所有位会两两抵消为0，最终得到的结果是出现1次的数字
       2. 那么如何将这一方法扩展到找出2个出现1次的数字？把所有的数字分成2组，使得
          1. 2个只出现1次的数字在不同的组中
@@ -239,23 +288,3 @@ vector<int> singleNumbers(vector<int>& nums) {
          2. 在异或结果中找到任意为1的位
          3. 根据这一位对所有的数字进行分组。
          4. 在每个组内进行异或操作，得到两个数字
-```cpp
-class Solution {
-public:
-    vector<int> singleNumbers(vector<int>& nums) {
-        int ret = 0;
-        for (int n : nums)
-            ret ^= n;
-        int div = 1;
-        while ((div & ret) == 0)
-            div <<= 1;
-        int a = 0, b = 0;
-        for (int n : nums)
-            if (div & n)
-                a ^= n;
-            else
-                b ^= n;
-        return vector<int>{a, b};
-    }
-};
-```
