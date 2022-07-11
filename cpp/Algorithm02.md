@@ -288,3 +288,143 @@ vector<int> singleNumber(vector<int>& v){
          2. 在异或结果中找到任意为1的位
          3. 根据这一位对所有的数字进行分组。
          4. 在每个组内进行异或操作，得到两个数字
+
+
+# 2.链表和顺序表
+## 2-1.顺序表的增删改查
+1. SqList.h
+```cpp
+#pragma once
+#include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
+using namespace std;
+typedef int SLDataType;
+#define N 5//定义顺序表大小
+
+//静态顺序表设计(固定大小)
+// struct SeqList{
+//     SLDataType a[N];
+//     int size;
+// };
+//动态顺序表设计
+typedef struct SeqList{
+    SLDataType* a;//数据类型指针为a
+    int size;//有效数据个数
+    int capacity;//容量
+}SL;
+//尾插尾删， 头插头删
+void SeqListInit(SL* s);//初始化
+void SeqListPrint(SL* s);//打印
+void SeqListPushBack(SL* ps, SLDataType x);//ps = PointerSeqList
+void SeqListPopBack(SL* ps);
+void SeqListPushFront(SL* ps, SLDataType x);
+void SeqListPopFront(SL* ps);
+void SeqListCheckCapacity(SL* ps);
+// 任意位置的插入删除
+void SeqListInsert(SL* ps, int pos, SLDataType x);
+void SeqListErase(SL* ps, int pos);
+```
+2. SqList.cpp
+```cpp
+#include "../include/SqList.h"
+//1.初始化
+void SeqListInit(SL* s){//传入结构体的地址
+    // 方法1
+    // s.size = 0;
+    // s.a = NULL;
+    // s.capacity = 0;
+    // 方法2
+    SeqListCheckCapacity(&s);
+    s->a = (SLDataType*)malloc(sizeof(SLDataType) * 4);//必须要添加<stdio.h>
+    if (s->a == NULL){
+        cout << "申请内存失败" << endl;
+        exit(-1);
+    }
+    s->size = 0;
+    s->capacity = 10;
+}
+//2.尾插
+void SeqListPushBack(SL* ps, SLDataType x){
+    assert(ps);//结构体指针不能为空,若ps = NULL会报错，中断下面程序的执行
+    ps->a[ps->size] = x;//ps->a[i]指向开辟空间的第i个地址所对应的值
+    ps->size++;    
+}
+//3.尾删
+void SeqListPopBack(SL* ps){
+    assert(ps);
+    // ps->a[ps->size-1] = 0;不会这么做，因为刚好是0就有问题
+    ps->size--;
+}
+
+//4.头插
+void SeqListPushFront(SL* ps, SLDataType x){
+    int end = ps->size - 1;
+    while (end >= 0){
+        ps->a[end + 1] = ps->a[end];
+        end--;
+    }
+    ps->a[0] = x;
+    ps->size++;
+}
+//5.头删
+void SeqListPopFront(SL* ps){
+    assert(ps);
+    int start = 0;
+    while (start < ps->size - 1){
+        ps->a[start] = ps->a[start+1];
+        start++;
+    }
+    ps->size--;
+}
+
+
+//6.检查容量
+void SeqListCheckCapacity(SL* ps){
+    if (ps->size >= ps->capacity){//用的少增加的少，用得多增加得多
+        ps->capacity *= 2;
+        ps->a = (SLDataType*)realloc(ps->a, sizeof(SLDataType) * ps->capacity);//对它进行扩容后就不用担心空间不够的问题
+        //把原来的空间给它再增容到我需要的空间
+        if (ps->a == NULL){
+            cout << "扩容失败\n" << endl;
+            exit(-1);
+        }
+    }
+}
+
+//3.打印
+void SeqListPrint(SL* ps){
+    assert(ps);
+    for (int i = 0; i < ps->size; i++){
+        cout << ps->a[i] << endl;
+    }
+}
+```
+
+3. main.cpp
+```cpp
+#include "../include/SqList.h"
+//测试头插头删
+void TestSeqList1(){
+    SeqList s;//必须要初始化和引用传值，否则SeqList里面全是随机值
+    SeqListInit(&s);//必须初始化，否则出现29046 segmentation fault (core dumped)
+    SeqListPushBack(&s, 1);
+    SeqListPushBack(&s, 2);
+    SeqListPushBack(&s, 3);//不能超过它的最大值
+    SeqListPushBack(&s, 4);
+    SeqListPushBack(&s, 5);
+    SeqListPushBack(&s, 6);
+    
+    SeqListPopBack(&s);
+    SeqListPopBack(&s);
+    
+    SeqListPushFront(&s, -1);
+
+    SeqListPrint(&s);
+}
+int main(){
+    TestSeqList1();
+    return 0;
+}
+```

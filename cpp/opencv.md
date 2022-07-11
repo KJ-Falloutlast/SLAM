@@ -190,45 +190,65 @@ int main()
 
 ```cpp
 //demo01
-#include <opencv2/opencv.hpp>
-#include <opencv2/highgui/highgui.hpp>
 #include <iostream>
-
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/features2d/features2d.hpp>
 using namespace std;
 using namespace cv;
-
-int main(int argc, char** argv) {
-	Mat src = imread("/home/kim-james/ROS_Space/opencv_ws/source/images/lena.png");
+int main(){
+    Mat src = imread("/home/kim-james/ROS_Space/opencv_ws/source/images/lena.png", IMREAD_COLOR);
     if (src.empty()){
-        cout << "could not load image..." << endl;
-        return -1;
+        cout << "couldn't find the file" << endl;
     }
-    namedWindow("input", WINDOW_AUTOSIZE);
-    imshow("input", src);
-    //1.方法1.
-    Mat dst;
-    // dst = Mat(src.size(), src.type());
-    // dst = Scalar(127, 0, 255);//bgr为127, 0, 255的图像
-    // namedWindow("output", WINDOW_AUTOSIZE);
-    // imshow("output", dst);
-    // //2.方法2
-    // Mat dst;
-    // src.copyTo(dst);//把src赋值给dst
-    // namedWindow("output", WINDOW_AUTOSIZE);
-    // imshow("output", dst);
-    // //3.方法3
-    cvtColor(src, dst, COLOR_BGR2RGB);//
-    cout << "input image channels = %d\n" << src.channels() << endl;
-    cout << "output image channels = %d\n" << dst.channels() << endl;
-    Mat M(3, 3, CV_8UC3, Scalar(0, 0, 255));
-    cout << "M =" << endl << M << endl;
-    //3通道的3x3的矩阵，所以是3x9的矩阵，每一行是(0, 0, 255)
-    namedWindow("output", WINDOW_AUTOSIZE);
-    imshow("output", dst);
+    namedWindow("002-demo", WINDOW_AUTOSIZE);
+    imshow("002-demo", src);
+    int width = src.cols;//宽 = 列
+    int height = src.rows;//高 = 行
+    int dim = src.channels();//维 = 通道
+    int d = src.depth();//深度
+    int t = src.type();//类型,该图像是CV_8UC3类型的
+    if (t == CV_8UC3){
+        printf("width:%d, heigh:%d, dim:%d, depth:%d, type:%d\n",
+                width, height, dim, d, t);
+    }
+
+    //1.方法1
+    Mat t1 = Mat(256, 256, CV_8UC3);
+    //参数1是宽， 参数2是高，参数3是3通道8字节的usigned char类型
+    t1 = Scalar(0, 255, 255);//把t1矩阵中的值全部填上值为(0, 0, 255), (a, b, c) = (b, g, r)
+    imshow("t1", t1);
+
+    //2.方法2
+    Mat t2 = Mat(Size(512, 512), CV_8UC3);
+    t1 = Scalar(0, 0, 255);//black
+    imshow("t2", t2);
+
+    //3.方法3
+    Mat t3 = Mat::zeros(Size(256, 256), CV_8UC3);//black
+    // t3 = Scalar(0, 0, 0);
+    //得到的是黑色图像，相当于为t3 = Scalar(0, 0, 0) = Scalar(255, 0, 255);
+    imshow("t3", t3);
+
+    //4.方法4,从图像创建
+    Mat t4 = src;
+    // t4 = Scalar(0, 255, 0);//因为t4 = src,若是t4变得话，t5也会变
+    // 4-1.克隆方法1
+    Mat t5 = src.clone();//将src克隆给t5
+    // 4-2.克隆方法2
+    src.copyTo(t5);//将src克隆给t5
+    t5 = Scalar(0, 255, 0);//因为t5是由src克隆出来的，所以改变t5，不会改变t4和src
+    imshow("t5", t5);
+    imshow("t4", t4);
+
+    // 4-3.克隆方法3
+    Mat t6 = Mat::zeros(src.size(), src.type());
+    imshow("t6", t6);//生成一个和原图大小和类型相同的图，但是这个图是黑色的，没有图像信息
 
     waitKey(0);
-
+    destroyAllWindows();
 }
+
 /*
 	Mat M(4,4,CV_32FC2,Scalar(1,3));//一般来说,2通道的mat,Scalar只要写2个数字,3通道及其以上的mat,scalar只要写3个数字
 	cout<<M<<endl;
@@ -422,17 +442,6 @@ int main()
 ```
 
 ## 1-4图像操作
-
-
-
-
-
-
-
-
-
-
-
 
 
 
