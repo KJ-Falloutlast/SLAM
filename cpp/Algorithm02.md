@@ -428,3 +428,172 @@ int main(){
     return 0;
 }
 ```
+4. 综合
+```cpp
+#include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
+using namespace std;
+typedef int SLDataType;
+typedef struct SeqList{
+	SLDataType* a;
+	int size;
+	int capacity;
+}SL;
+//声明
+void SeqListInit(SL* s);//初始化
+void SeqListPrint(SL* s);//打印
+void SeqListPushBack(SL* s, SLDataType x);
+void SeqListPopBack(SL* s);
+void SeqListPushFront(SL* s, SLDataType x);
+void SeqListPopFront(SL* s);
+//任意位置的插入和删除
+void SeqListInsert(SL* s, int pos, SLDataType x);
+void SeqListErase(SL* s, int pos);
+
+void SeqListCheckCapacity(SL* s);
+void SeqListDestroy(SL* s);
+
+void SeqListInit(SL* s){
+	s->a = (SLDataType*)malloc(sizeof(SLDataType) * 4);
+	if ( s == NULL ){//只要是插入和删除就要考虑空间问题
+		printf("分配空间失败");
+	}
+	s->size = 0;
+	s->capacity = 10;
+}
+
+
+void SeqListCheckCapacity(SL* ps){
+    if (ps->size >= ps->capacity){//用的少增加的少，用得多增加得多
+        ps->capacity *= 2;
+        ps->a = (SLDataType*)realloc(ps->a, sizeof(SLDataType) * ps->capacity);//对它进行扩容后就不用担心空间不够的问题
+        //把原来的空间给它再增容到我需要的空间
+        if (ps->a == NULL){
+            cout << "扩容失败\n" << endl;
+            exit(-1);
+        }
+    }
+}
+
+void SeqListDestroy(SL* ps){
+    free(ps->a);//将指针所指向的空间释放
+    ps->a = NULL;
+    //空间释放后指针仍然指向这个空间，但是这个空间不存在了，所以这个指针是野指针，必须要置空
+    ps->size = ps->capacity = 0;
+    //ps为局部变量，程序执行完后自动销毁，所以无需自行销毁
+}
+
+
+
+void SeqListInsert(SL* s, int pos, SLDataType x){
+	assert(s);
+	assert(pos >= 0 || pos <= s->size);//应该是||而非&&
+	SeqListCheckCapacity(s);
+	int end = s->size - 1;
+	while (end >= pos){
+		s->a[end + 1] = s->a[end];
+		end--; 
+	}
+	s->a[pos] = x;
+	s->size++;
+}
+
+
+void SeqListErase(SL* s, int pos){
+	assert(s);
+	assert(pos >= 0 || pos <= s->size);
+	int start = pos;
+	while (start < s->size - 1){
+		s->a[start] = s->a[start + 1];
+		start++; 
+	}
+	s->size--;
+}
+
+
+void SeqListPushBack(SL* s, SLDataType x){
+	SeqListCheckCapacity(s);
+	// assert(s);
+	// s->a[s->size] = x;
+	// s->size++;
+	SeqListInsert(s, s->size, x);//一定要在s->size作为添加的位置，因为该位置是在最后1个数的后面插入
+}
+
+void SeqListPopBack(SL* s){
+	// assert(s);	
+	// s->size--;
+	SeqListErase(s, s->size-1);
+}
+
+void SeqListPushFront(SL* s, SLDataType x){
+	// assert(s);
+	// int end = s->size - 1;
+	// while (end >= 0){
+	// 	s->a[s->size] = s->a[s->size - 1];
+	// 	end--;
+	// }
+	// s->a[0] = x;
+	// s->size++;
+	SeqListInsert(s, 0, x);
+}
+void SeqListPopFront(SL* s){
+    // assert(ps);
+    // int start = 0;
+    // while (start < ps->size - 1){
+    //     ps->a[start] = ps->a[start+1];
+    //     start++;
+    // }
+    // ps->size--;
+   	SeqListErase(s, 0);
+
+}
+
+
+
+int SeqListFind(SL* s, SLDataType x){
+	for (int i = 0; i < s->size; i++){
+		if (s->a[i] == x){
+			return i;
+		}
+	}
+	return -1;
+}
+
+void SeqListModify(SL* s, int pos, SLDataType x){
+	assert(pos < s->size);
+	s->a[pos] = x;
+}
+
+
+
+void SeqListPrint(SL* s){
+	assert(s);
+	for (int i = 0; i < s->size; i++){
+		cout << s->a[i] << endl;
+	}	
+}
+
+int main(){
+	SL s;//不要*s
+	SeqListInit(&s);
+	SeqListPushBack(&s, 1);
+	SeqListPushBack(&s, 2);
+	SeqListPushBack(&s, 3);
+	SeqListPushFront(&s, 3);
+	SeqListPushFront(&s, 4);
+	// SeqListInsert(&s, 2, 10);
+	SeqListPrint(&s);
+	SeqListDestroy(&s);
+	
+}
+
+/**
+ * @brief:删除和插入的等价
+ * 1.PushBack(&s, x) = Insert(&s, s->size-1, x)
+ * 2.PushFront(&s, x) = Insert(&s, 0, x)
+ * 3.PopFront(&s) = Erase(&s, 0)
+ * 4.PopBack(&s) = Erase(&s, s->size-1)
+ */
+```
