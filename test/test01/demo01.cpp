@@ -11,6 +11,7 @@ typedef struct SeqList{
 	int size;
 	int capacity;
 }SL;
+
 void SeqListCheckCapacity(SL* s){
 	if (s->size >= s->capacity){
 		s->capacity *= 2;
@@ -20,20 +21,24 @@ void SeqListCheckCapacity(SL* s){
 		}
 	}
 }
+
 void SeqListInit(SL* s){
 	SeqListCheckCapacity(s);
 	s->size = 0;
 	s->capacity = 10;
 }
+
 void SeqListPushBack(SL* s, int x){
 	assert(s);
 	s->a[s->size] = x;
 	s->size++;
 }
+
 void SeqListPopBack(SL* s){
 	assert(s);
 	s->size--;
 }
+
 void SeqListPushFront(SL* s, int x){
 	assert(s);
 	int end = s->size - 1;
@@ -44,6 +49,7 @@ void SeqListPushFront(SL* s, int x){
 	s->a[0] = x;
 	s->size++;
 }
+
 void SeqListPopFront(SL* s){
 	assert(s);
 	int start = 0;
@@ -53,6 +59,7 @@ void SeqListPopFront(SL* s){
 	}
 	s->size--;
 }
+
 void SeqListPrint(SL* s){
 	for (int i = 0; i < s->size; i++){
 		cout << s->a[i] << endl;

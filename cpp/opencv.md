@@ -441,12 +441,122 @@ int main()
 }
 ```
 
-## 1-4图像操作
+## 1-4图像的遍历方法
+```cpp
+#include <../include/quickopencv.h>
+#include <opencv2/opencv.hpp>
+#include <map>
+#include <iostream>
+using namespace cv;
+using namespace std;
+//1.使用数组
+void test01(){
+    // 9 % 3 = 0, 3 % 9  = 3;取模运算 = a/b后的余数
+    Mat grayImage(5, 5, CV_8UC1);       //创建一个大小为600x800的单通道灰度图
+    Mat colorImage(3, 3, CV_8UC3);      //创建一个大小为600x800的三通道彩色图
+
+    //1.单通道遍历所有像素并设置像素值
+    for(int i = 0; i < grayImage.rows; ++i)         //遍历行
+        for(int j = 0; j < grayImage.cols; ++j)     //遍历列
+            grayImage.at<uchar>(i, j) = (i + j) % 255;
+
+    //2.3通道遍历所有像素并设置像素值
+    for(int i = 0; i < colorImage.rows; ++i)         //遍历行
+        for(int j = 0; j < colorImage.cols; ++j)     //遍历列
+        {
+            Vec3b pixel;            //定义三通道像素值变量
+            pixel[0] = i % 255;     //Blue
+            pixel[1] = j % 255;     //Green
+            pixel[2] = (i + j) % 255;           //Red
+
+            colorImage.at<Vec3b>(i, j) = pixel;
+        }
+
+    //显示简历图像的结果
+    namedWindow("grayImage", WINDOW_AUTOSIZE);
+    imshow("grayImage", grayImage);
+
+    namedWindow("colorImage", WINDOW_AUTOSIZE);
+    imshow("colorImage", colorImage);
+    cout << "M(grayImage) = \n " <<  grayImage << endl;
+    cout << "M(colorImage) = \n " << colorImage << endl;
+    waitKey(0);
+
+}
+//2.使用迭代器
+void test02(){
+    Mat grayImage(400, 600, CV_8UC1);       //创建一个大小为600x800的单通道灰度图
+    Mat colorImage(400, 600, CV_8UC3);      //创建一个大小为600x800的三通道彩色图
+
+    //1.单通道遍历所有像素并设置像素值
+    MatIterator_<uchar> grayit, grayend;
+    for(grayit = grayImage.begin<uchar>(), grayend = grayImage.end<uchar>(); grayit != grayend; ++grayit)
+        *grayit = rand() % 255;
+
+    //2.3通道遍历所有像素并设置像素值
+    MatIterator_<Vec3b> colorit, colorend;
+    for(colorit = colorImage.begin<Vec3b>(), colorend = colorImage.end<Vec3b>(); colorit != colorend; ++colorit)
+    {
+        (*colorit)[0] = rand() % 255;       //Blue
+        (*colorit)[1] = rand() % 255;       //Green
+        (*colorit)[2] = rand() % 255;       //Red
+    }
 
 
+    //显示简历图像的结果
+    namedWindow("grayImage", WINDOW_AUTOSIZE);
+    imshow("grayImage", grayImage);
+
+    namedWindow("colorImage", WINDOW_AUTOSIZE);
+    imshow("colorImage", colorImage);
+
+    waitKey(0);
+}
+//通过指针遍历
+void test03(){
+    Mat grayImage(5, 5, CV_8UC1);       //创建一个大小为600x800的单通道灰度图
+    Mat colorImage(3, 3, CV_8UC3);      //创建一个大小为600x800的三通道彩色图
+
+    //1.单通道遍历所有像素并设置像素值
+    for(int i = 0; i < grayImage.rows; ++i)
+    {
+        uchar* p = grayImage.ptr<uchar>(i);     //获取第i行第一个像素的指针
+        for(int j = 0; j < grayImage.cols; ++j)
+            p[j] = (i + j) % 255;               //对每个i行的所有像素进行赋值操作
+    }
+
+    //2.3通道遍历所有像素并设置像素值
+
+    for(int i = 0; i < colorImage.rows; ++i)
+    {
+        Vec3b* p = colorImage.ptr<Vec3b>(i);
+        for(int j = 0; j < colorImage.cols; ++j)
+        {
+            p[j][0] = i % 255;      //Blue
+            p[j][1] = j % 255;      //Gree
+            p[j][2] = (i + j) % 255;//Red
+        }
+    }
+
+    //显示简历图像的结果
+    namedWindow("grayImage", WINDOW_AUTOSIZE);
+    imshow("grayImage", grayImage);
+
+    namedWindow("colorImage", WINDOW_AUTOSIZE);
+    imshow("colorImage", colorImage);
+    cout << "M(grayImage) = \n " <<  grayImage << endl;
+    cout << "M(colorImage) = \n " << colorImage << endl;
+    waitKey(0);//waitKey(0)表示用户无限等待
+}
+int main()
+{
+    // test01();
+    // test02();
+    test03();
+}
 
 
-
+```
 
 ## 1-10.opencv基础
 1. Mat基本结构
@@ -602,261 +712,6 @@ int main()
     cout << "M(2, 2) = " << a <<  endl;
     cout << "M(2, 2)[0] = " << b << endl;
 }
-}
-```
-
-## 1-4.案例
-1. quickopencv.h
-```cpp
-#pragma once
-#include <opencv2/opencv.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <iostream>
-using namespace std;
-using namespace cv;
-class QuickDemo{
-    public:
-        void colorSpace_Demo(Mat &image);
-        void mat_creation_demo(Mat &image);
-};
-```
-2. quickopencv.cpp
-```cpp
-#include "../include/quickopencv.h"
-void QuickDemo::colorSpace_Demo(Mat &image){
-    Mat gray, hsv;
-    cvtColor(image, hsv, COLOR_BGR2HSV);//转hsv
-    cvtColor(image, gray, COLOR_BGR2GRAY);//转灰度
-    imshow("HSV", hsv);
-    imshow("灰度", gray);
-    imwrite("/home/kim-james/ROS_Space/opencv_ws/ch1/picture/hsv.png", hsv);
-    //千万不要忘记hsv.png和gray.png
-    imwrite("/home/kim-james/ROS_Space/opencv_ws/ch1/picture/gray.png", gray);
-    /*
-    1.R G B:0-255
-    2.H:0-180,S,V:0-255;H,S是改变颜色的通道，V是改变亮度的通道
-    */
-}
-```
-3. main.cpp
-```cpp
-#include <opencv2/opencv.hpp>
-#include <iostream>
-#include <math.h>
-#include <opencv2/highgui/highgui_c.h>//主要解决CV_WINDOW_AUTOSIZE问题
-#include "../include/quickopencv.h"
-using namespace cv;
-
-int main(int argc, char** argv) {
-	Mat src = imread("/home/kim-james/ROS_Space/opencv_ws/opencv_tutorial_data/images/63_12_map.png");
-    
-    if (src.empty()){
-        return -1;
-    }
-    namedWindow("input", WINDOW_FREERATIO);//任意窗口大小
-    imshow("input", src);//imshow只支持8位的输入
-    QuickDemo qd;
-    qd.colorSpace_Demo(src);
-    qd.mat_creation_demo(src);
-    waitKey(0);
-    destroyAllWindows();
-
-}
-```
-### 1.图像的读取和显示
-2. quickopencv.cpp
-```cpp
-#include "../include/quickopencv.h"
-void QuickDemo::colorSpace_Demo(Mat &image){
-    Mat gray, hsv;
-    cvtColor(image, hsv, COLOR_BGR2HSV);//转hsv
-    cvtColor(image, gray, COLOR_BGR2GRAY);//转灰度
-    imshow("HSV", hsv);
-    imshow("灰度", gray);
-    imwrite("/home/kim-james/ROS_Space/opencv_ws/ch1/picture/hsv.png", hsv);
-    //千万不要忘记hsv.png和gray.png
-    imwrite("/home/kim-james/ROS_Space/opencv_ws/ch1/picture/gray.png", gray);
-    /*
-    1.R G B:0-255
-    2.H:0-180,S,V:0-255;H,S是改变颜色的通道，V是改变亮度的通道
-    */
-}
-```
-### 2.图像的创建和赋值
-```cpp
-void QuickDemo::mat_creation_demo(Mat &image){
-    //第一讲:创建图像基本操作
-    // Mat m1, m2;
-    // m1 = image.clone();
-    // image.copyTo(m2);
-    //创建空白图像
-
-    //第二讲:mat操作
-    //1.mat的赋值
-    //1-1.利用矩阵
-    Mat m3 = Mat::zeros(Size(400, 400), CV_8UC3);
-    
-    //1-2.直接赋值
-    // m3 = 123;//表示把第一个通道变为123;
-
-    //1-3.利用scalar(a, b, c); 默认为:BGR
-    m3 = Scalar(255, 0, 0);//表示把3个通道都变成127
-    /*
-    1.产生8X8的0矩阵，8表示8位，
-    UC表示usigned char,1表示单通道
-    2.如果是3，则是表示3通道的矩阵，所以变成了8X24的矩阵，
-    由于有3个通道，所以列数变成了3x8,故列数为(cols * channels)
-    3.mat支持对任意操作符的重载，所以可以大胆使用
-    4.Size()的大小会改变图像的大小，所以size越大图像就越大
-    */
-
-    cout << m3 << endl;
-    cout << "width = " << m3.cols 
-    << " height = " << m3.rows 
-    << " channels = " << m3.channels() << endl;
-    
-    //2.mat的拷贝操作
-    //2-1.m1 = m2
-    Mat m4;
-    
-    m4 = m3;
-    m4 = Scalar(0, 0, 255);//m4不会被scalar改变
-    //此时m4会随着m3的变化而变化
-
-    // 2-2.m1 = m2.clone()
-    m4 = m3.clone();
-    m4 = Scalar(0, 0, 255);//m4会被scalar改变
-    
-    //2-3.m3.copyTo()
-    m3.copyTo(m4);/m4会被scalar改变
-    //当调用m3的copyTo()和clone()，不会改变m4的值
-    imshow("创建图像m3", m3);
-    imshow("创建图像m4", m4);
-    //m3和m4都变成了黄色
-}
-```
-### 3.图像的读写操作
-```cpp
-// pixel：像素
-void QuickDemo::pixel_visit_demo(Mat &image){
-    int w = image.cols;
-    int h = image.rows;
-    int dims = image.channels();//dims是维度也是通道数
-    //1.通过数组
-    // for (int row = 0; row < h; row++){
-    //     for (int col = 0; col < w; col++){
-    //         if (dims == 1){//灰度图像channels = 1
-    //             int pv = image.at<uchar>(row, col);
-    //             image.at<uchar>(row, col) = 255- pv;
-    //             /*
-    //             1.at<uchar>:将uchar类型的转换为int类型               
-    //             2.usigned char:为有符号8位数，-128-127
-    //               char:无符号8位数，0-255
-    //             */
-    //         }
-    //         if (dims == 3){//彩色图像channels = 2
-    //             Vec3b bgr = image.at<Vec3b>(row, col);//一次性获取了3个值
-    //             //Vec3b是一个数组
-    //             image.at<Vec3b>(row, col)[0] = 255 - bgr[0];
-    //             image.at<Vec3b>(row, col)[1] = 255 - bgr[1];
-    //             image.at<Vec3b>(row, col)[2] = 255 - bgr[2];
-    //         }
-    //     }
-    // }
-
-
-    //2.通过指针访问
-    for (int row = 0; row < h; row++){
-        uchar *current_row = image.ptr<uchar>(row);//当前行的指针 
-        for (int col = 0; col < w; col++){
-            if (dims == 1){//灰度图像channels = 1
-                int pv = *current_row;
-                *current_row++ = 255 - pv;
-            }
-            if (dims == 3){//彩色图像channels = 3
-                *current_row++ = 255 - *current_row;
-                *current_row++ = 255 - *current_row;
-                *current_row++ = 255 - *current_row;
-            }//指针可以实现快速遍历
-        }
-    }
-    imshow("像素读写演示", image);
-
-}
-```
-### 4.图像的加减乘除
-```cpp
-void QuickDemo::operators_demo(Mat &image){
-    Mat dst1, dst2, dst3, dst4;
-	Mat m = Mat::zeros(image.size(), image.type());
-	m = Scalar(5, 5, 5);
-
-	//等同于下面的加法算法
-	/*
-	int w = image.cols;
-	int h = image.rows;
-	int dims = image.channels();
-	for (int row = 0; row < h; row++) {
-		for (int col = 0; col < w; col++) {
-			Vec3b p1 = image.at<Vec3b>(row, col);
-			Vec3b p2 = m.at<Vec3b>(row, col);
-			dst.at<Vec3b>(row, col)[0] = saturate_cast<uchar>(p1[0] + p2[0]);
-			//通过saturate_cast<uchar>进行类型转换
-            dst.at<Vec3b>(row, col)[1] = saturate_cast<uchar>(p1[1] + p2[1]);
-			dst.at<Vec3b>(row, col)[2] = saturate_cast<uchar>(p1[2] + p2[2]);
-		}
-	}
-	*/
-	add(image, m, dst1);// image + m = dst1
-	subtract(image, m, dst2);// image - m
-	multiply(image, m, dst3);// image * m
-	divide(image, m, dst4);// image / m
-	imshow("加法操作", dst1);
-	imshow("减法操作", dst2);
-	imshow("乘法操作", dst3);
-	imshow("除法操作", dst4);
-}
-```
-### 5.图像的亮度和对比度调整
-
-```cpp
-static void on_lightness(int b, void* userdata) {
-	Mat image = *((Mat*)userdata);
-	Mat dst = Mat::zeros(image.size(), image.type());
-	Mat m = Mat::zeros(image.size(), image.type());
-	addWeighted(image, 1.0, m, 0, b, dst);
-	imshow("亮度对比操作", dst);
-}
-
-static void on_contrast(int b, void* userdata) {
-	Mat image = *((Mat*)userdata);
-	Mat dst = Mat::zeros(image.size(), image.type());
-	Mat m = Mat::zeros(image.size(), image.type());
-	double contrast = b / 100.0;
-	addWeighted(image, contrast, m, 0.0, 0, dst);
-	imshow("", dst);
-}
-
-void QuickDemo::tracking_bar_demo(Mat &image) {
-	namedWindow("亮度与对比度操作", WINDOW_AUTOSIZE);
-	int lightness = 50;
-	int max_value = 100;
-	int contrast_value = 100;
-	createTrackbar("Value Bar:", "亮度与对比度调整", &lightness, max_value, on_lightness, (void*) (&image));
-    //将image的引用&image转换成void类型的指针
-	createTrackbar("Contrast Bar:", "亮度与对比度调整", &contrast_value, 200, on_contrast, (void*)(&image));
-	on_lightness(50, &image);
-    /*
-    1.createTrackbar的参数:
-        1.滑动空间名称
-        2.滑动空间用于依附的图像窗口的名称
-        3.初始化阈值
-        4.滑动控件的刻度范围
-        5.回调函数
-    void (CV_CDECL *TrackbarCallback)(int pos, void* userdata);
-    2. 形式
-    */
-}
 ```
 
 
@@ -865,7 +720,8 @@ void QuickDemo::tracking_bar_demo(Mat &image) {
 
 
 
-## 1-5.补充知识
+
+# 2.补充知识
 ### 1.scalar
 1. 例子1
 ```cpp

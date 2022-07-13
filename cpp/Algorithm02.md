@@ -573,7 +573,7 @@ void SeqListPrint(SL* s){
 	for (int i = 0; i < s->size; i++){
 		cout << s->a[i] << endl;
 	}	
-}
+}W
 
 int main(){
 	SL s;//不要*s
@@ -596,4 +596,130 @@ int main(){
  * 3.PopFront(&s) = Erase(&s, 0)
  * 4.PopBack(&s) = Erase(&s, s->size-1)
  */
+```
+## 2-2.顺序表的oj
+1. 移除数组
+   1. 问题描述:给你一个数组 nums 和一个值 val，你需要 原地 移除所有数值等于 *val* 的元素，并返回移除后数组的新长度。不要使用额外的数组空间，你必须仅使用 O(1) 额外空间并 原地 修改输入数组。
+
+```cpp
+#include<iostream>
+#include <assert.h>
+#include <vector>
+using namespace std;
+int removeElement(vector<int>& v, int val){
+	int left = 0;
+	
+	for (int right = 0; right < v.size(); right++){
+		if (v[right] != val){
+			v[left] = v[right];
+			left++;
+		}
+	}
+	return left;
+}
+int main(){
+	vector<int> v = {0, 1, 2, 3, 3, 3};
+	int a = removeElement(v, 3);
+	cout << a << endl;
+}
+/**
+ * @brief:当v[right] = val时，直接跳过left++，此时得到的left
+ * 就是去除val后的长度
+ * 1.当 v[right] != val时，v[left] = v[right]-> left++, right++
+ * 2.当 v[right] = val时， right++, left在原位置不变  
+ * 
+ */
+```
+
+
+2. 删除有序数组中的重复项
+```cpp
+#include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
+#include <vector>
+using namespace std;
+int removeDuplicates(vector<int>& v){
+	int n = v.size();
+	int slow = 1;
+	for (int fast = 1; fast < n; fast++){
+		if (v[fast - 1] != v[fast]){
+			v[slow] = v[fast];
+			slow++;
+		}
+	}
+	return slow;
+}
+
+int main(){
+	vector<int> v = {1, 2, 3, 3, 3};
+	int a = removeDuplicates(v);
+	cout << a << endl;
+}
+/**
+ * @brief
+ * 1.要点:
+ * 	1-1.对于有序数组而言，重复项一定是连在一起
+ * `1-2.fast和slow指针分别为遍历数组要到达的位置，
+ * 下一个不同元素要填入的下标位置
+ * 
+ * 2.执行逻辑
+ * v = [0, 0, 1, 1, 2, 3, 4],所以用fast遍历数组中的每一个值
+ * 若v[fast - 1] != v[fast], 那么v[fast]和之前的元素都不同，所以
+ * 将fast的值赋值给slow, v[slow] = v[fast]
+ * 3.双指针的作用是统计数据，但是对于原来的vector的数据不会更改
+ */
+```
+
+3. 数组形式的整数加法
+   1. 描述:整数的 数组形式  num 是按照从左到右的顺序表示其数字的数组.例如，对于 num = 1321 ，数组形式是 $[1,3,2,1]$ 。给定 num ，整数的 数组形式 ，和整数 k ，返回 整 数 num + k 的 数组形式 。
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+    vector<int> addToArrayForm(vector<int>& num, int k) {
+        vector<int> res;
+        int n = num.size();
+        for (int i = n - 1; i >= 0; --i) {
+            int sum = num[i] + k % 10;//取个位数
+            k /= 10;//去掉个位数
+            if (sum >= 10) {
+				//若每一位相加>=10,那么最后1位加1，sum减10，类似于39 + 25 = 64(个位数相加为14,所以十位+1，个位-10)
+                k++;
+                sum -= 10;
+            }
+            res.push_back(sum);
+        }
+        reverse(res.begin(), res.end());
+        return res;
+    }
+
+/**
+ * @brief 
+ * 1.思路:让我们逐位将数字加在一起。例如计算 123+912123+912，我们从低位到高位依次计算 3+23+2、2+12+1 和 1+91+9。任何时候，若加法的结果大于等于 1010，
+ * 把进位的 11 加入到下一位的计算中，所以最终结果为 10351035。
+ * 2.取得个位，十位数..的方法
+ * 	2-1.个位:num % 10 (num是int类型)
+ * 	2-2.十位:num / 10 % 10 (num / 10后仍然是int类型)
+ * 	2-3.思路：不管取得几位数，想要取得最后1位数，就需要用%10来取余数来获取，
+ * 以123为例，想要获取2， 需要将最后以为去掉，变成12， 然后12的个位数
+ */
+```
+
+4. 合并2个有序数组
+   1. *描述*:给你两个按 非递减顺序 排列的整数数组 nums1 和 nums2，另有两个整数 m 和 n ，分别表示 nums1 和 nums2 中的元素数目。请你 合并 nums2 到 nums1 中，使合并后的数组同样按 非递减顺序 排列。
+   2. 注意：最终，合并后数组不应由函数返回，而是存储在数组 nums1 中。为了应对这种情况，nums1 的初始长度为 m + n，其中前 m 个元素表示应合并的元素，后 n 个元素为 0 ，应忽略。nums2 的长度为 n 。
+```cpp
+class Solution {
+public:
+    void merge(vector<int>& nums1, int m, vector<int>& nums2, int n) {
+        for (int i = 0; i != n; ++i) {
+            nums1[m + i] = nums2[i];
+        }
+        sort(nums1.begin(), nums1.end());
+    }
+};
 ```

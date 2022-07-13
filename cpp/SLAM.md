@@ -4656,7 +4656,7 @@ void bundleAdjustment (
 // #include "extra.h" // used in opencv2 
 using namespace std;
 using namespace cv;
-
+//三角测量
 void find_feature_matches (
     const Mat& img_1, const Mat& img_2,
     std::vector<KeyPoint>& keypoints_1,
@@ -4680,53 +4680,42 @@ void triangulation (
 // 像素坐标转相机归一化坐标
 Point2f pixel2cam( const Point2d& p, const Mat& K );
 
-int main ( int argc, char** argv )
-{
-    if ( argc != 3 )
-    {
-        cout<<"usage: triangulation img1 img2"<<endl;
-        return 1;
-    }
-    //-- 读取图像
-    Mat img_1 = imread ( argv[1], CV_LOAD_IMAGE_COLOR );
-    Mat img_2 = imread ( argv[2], CV_LOAD_IMAGE_COLOR );
-
+int main(){
+    Mat img_1 = imread("/home/kim-james/ROS_Space/SLAM_ws/slam_test/ch6/build/1.png");
+    Mat img_2 = imread("/home/kim-james/ROS_Space/SLAM_ws/slam_test/ch6/build/2.png");
+    Mat K = ( Mat_<double> ( 3,3 ) << 520.9, 0, 325.1, 0, 521.0, 249.7, 0, 0, 1 );
     vector<KeyPoint> keypoints_1, keypoints_2;
     vector<DMatch> matches;
-    find_feature_matches ( img_1, img_2, keypoints_1, keypoints_2, matches );
-    cout<<"一共找到了"<<matches.size() <<"组匹配点"<<endl;
-
-    //-- 估计两张图像间运动
-    Mat R,t;
-    pose_estimation_2d2d ( keypoints_1, keypoints_2, matches, R, t );
-
-    //-- 三角化
-    vector<Point3d> points;
-    triangulation( keypoints_1, keypoints_2, matches, R, t, points );
     
-    //-- 验证三角化点与特征点的重投影关系
-    Mat K = ( Mat_<double> ( 3,3 ) << 520.9, 0, 325.1, 0, 521.0, 249.7, 0, 0, 1 );
-    for ( int i=0; i<matches.size(); i++ )
-    {
-        Point2d pt1_cam = pixel2cam( keypoints_1[ matches[i].queryIdx ].pt, K );
-        Point2d pt1_cam_3d(
-            points[i].x/points[i].z, 
-            points[i].y/points[i].z 
-        );
+    find_feature_matches(img_1, img_2, keypoints_1, keypoints_2, matches);
+    Mat R, t;
+    pose_estimation_2d2d(keypoints_1, keypoints_2, matches, R, t);
+    //三角测量
+    vector<Point3d> points;
+    triangulation(keypoints_1, keypoints_2, matches, R, t, points);
+    for (int i = 0; i < matches.size(); i++){
+        Point2d pts_cam1 = pixel2cam(keypoints_1[matches[i].queryIdx].pt, K);
+        Point2d pts_cam2 = pixel2cam(keypoints_1[matches[i].queryIdx].pt, K);
         
-        cout<<"point in the first camera frame: "<<pt1_cam<<endl;
-        cout<<"point projected from 3D "<<pt1_cam_3d<<", d="<<points[i].z<<endl;
+        Point3d pts3d_cam1(points[i].x, points[i].y, points[i].z);
+        Point2d pts3d_cam1_one(points[i].x / points[i].z, points[i].y / points[i].z);
         
-        // 第二个图
-        Point2f pt2_cam = pixel2cam( keypoints_2[ matches[i].trainIdx ].pt, K );
-        Mat pt2_trans = R*( Mat_<double>(3,1) << points[i].x, points[i].y, points[i].z ) + t;
-        pt2_trans /= pt2_trans.at<double>(2,0);
-        cout<<"point in the second camera frame: "<<pt2_cam<<endl;
-        cout<<"point reprojected from second frame: "<<pt2_trans.t()<<endl;
-        cout<<endl;
+        Mat pts3d_cam2 = R * (Mat_<double>(3, 1)<< points[i].x, points[i].y, points[i].z) + t;
+        Point2d pts3d_cam2_one(pts3d_cam2.at<double>(0, 0)/ pts3d_cam2.at<double>(0, 2),
+                               pts3d_cam2.at<double>(0, 1)/ pts3d_cam2.at<double>(0, 2));
+        
+        cout << "pts_cam1 = " << pts_cam1 << endl;//p在cam1下的坐标(归一化)
+        cout << "pts3d_cam1 = " << pts3d_cam1 << endl;//p在cam1下的3D坐标
+        cout << "pts3d_cam1_one = " << pts3d_cam1_one << endl;//p在cam1下3D坐标的归一化坐标
+        cout << "----------------------------------------" << endl;
+
+        cout << "pts_cam2 = " << pts_cam2 << endl;//p在cam2下的坐标(归一化)
+        cout << "pts3d_cam2 = " << pts3d_cam2 << endl;//p在cam2下的3D坐标
+        cout << "pts3d_cam2_one = " << pts3d_cam2_one << endl;//p在cam2下3D坐标的归一化坐标
+
+    
     }
     
-    return 0;
 }
 
 void find_feature_matches ( const Mat& img_1, const Mat& img_2,
@@ -4832,12 +4821,12 @@ void triangulation (
     Mat T1 = (Mat_<float> (3,4) <<
         1,0,0,0,
         0,1,0,0,
-        0,0,1,0);
+        0,0,1,0);//第一帧的时候世界坐标系和相机坐标系重合
     Mat T2 = (Mat_<float> (3,4) <<
         R.at<double>(0,0), R.at<double>(0,1), R.at<double>(0,2), t.at<double>(0,0),
         R.at<double>(1,0), R.at<double>(1,1), R.at<double>(1,2), t.at<double>(1,0),
         R.at<double>(2,0), R.at<double>(2,1), R.at<double>(2,2), t.at<double>(2,0)
-    );
+    );//第二帧相对于第一帧的T
     
     Mat K = ( Mat_<double> ( 3,3 ) << 520.9, 0, 325.1, 0, 521.0, 249.7, 0, 0, 1 );
     vector<Point2f> pts_1, pts_2;
@@ -4849,8 +4838,8 @@ void triangulation (
     }
     
     Mat pts_4d;
-    cv::triangulatePoints( T1, T2, pts_1, pts_2, pts_4d );
-    
+    cv::triangulatePoints( T1, T2, pts_1, pts_2, pts_4d );//得到的是有N个点的齐次坐标的矩阵,获得的是相机坐标的世界坐标
+   
     // 转换成非齐次坐标
     for ( int i=0; i<pts_4d.cols; i++ )
     {
@@ -4873,4 +4862,48 @@ Point2f pixel2cam ( const Point2d& p, const Mat& K )
         ( p.y - K.at<double>(1,2) ) / K.at<double>(1,1) 
     );
 }
+
+
+
+ /**
+     * @brief
+     * 1.triangulatePoints(projMatr1, projMatr2, projPoints1, projPoints2, points4d) 
+     *  projMatr1 – 3x4 projection matrix of the first camera.(第一个相机的位姿, 一般为单位矩阵)
+     *  projMatr2 – 3x4 projection matrix of the second camera.(第二个相机的相对于第一个相机的位姿，相当于是以图1作为参考得到T = [ R_21 | t_21]_(3x4))
+     *  projPoints1 – 2xN array of feature points in the first image.(第一张图像的特征点的相机坐标的归一化坐标)
+     *  projPoints2 -- 2xN array of feature points in the second image.(第二张图像的特征点的相机坐标的归一化坐标)
+     *  points4D – 4xN array of reconstructed points in homogeneous coordinates.(输出的3d坐标, 是一个4*N矩阵表示的齐次坐标)
+     * (每一列都是一个点的坐标, 因此要将所有的元素除以最后一维的数得到非齐次坐标XYZ(利用三角测量计算的被测量点的世界坐标Pw))
+     * 
+     * 2.注意:triangulatePoints()输出的3D坐标是齐次坐标，共四个维度，因此需要将前三个维度除以第四个维度以得到非齐次坐标xyz。
+     * 这个坐标是在相机坐标系下的坐标，以输入的两个相机位姿所在的坐标系为准。
+     * 
+     * 3.比如说:
+     * pts_1 = [0, 0, 1  ,pts_2 = c[0, 0, 1 
+     *          1, 0, 1]           1, 0, 1]
+     * pts_4d = [0, 0, 0
+     *           0, 1, 0
+     *           0, 1, 0
+     *           1, 1, 2]
+     * 
+     * 4.triangulation是以第一个相机坐标系作为参考系，所以X2 = R21 * x1  + t21(x1为相机坐标的归一化坐标)           
+     * 
+	 * 
+	 * 5.最终结果
+	 * 
+		pts_cam1 = [0.089115, -0.0646833]
+
+		pts3d_cam1 = [0.730228, -0.526017, 8.20269]
+		
+		pts3d_cam1_one = [0.0890229, -0.0641274]
+		----------------------------------------
+		pts_cam2 = [0.089115, -0.0646833]
+		
+		pts3d_cam2 = [0.3928584976825267; -0.3091895396251742, 8.224340015883206]
+		
+		pts3d_cam2_one = [0.0477678, -0.0375945]
+     * 
+     * 
+     */
+
 ```
