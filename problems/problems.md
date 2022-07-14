@@ -739,6 +739,28 @@ ls -l | grep python
 2. 快捷键
    1. Ctrl+Alt+U 编译并上传
    2. Ctrl+Alt+R 进⾏编译验
+
+
+## 26.orbslam2的安装方法
+[安装教程](https://blog.csdn.net/weixin_56566649/article/details/124355140)
+1. *将原来安装opencv和pangolin卸载掉*,主要方法:
+   1. >其他位置->计算机
+   2. >查找:opencv(pangolin也是一样)
+   3. >cd build
+   4. >sudo make uninstall
+   5. >注意千万不能把源文件删除掉
+2. 继续安装orbslam2
+   1. cd ORB_SLAM2
+   2. chmod +x build.sh
+   3. ./build.sh
+   4. mkdir data
+   5. >将下载好的数据集放在data里面
+3. 问题:
+   1. >描述:error while loading shared libraries: libg2o.so: cannot open shared object file: No such file or directory
+   2. >解决方案:将libg2o.so,libDBoW2.so,libORB_SLAM2.so拷贝到/usr/local/lib中
+
+
+
 # 3.c++学习问题
 ## 1.CV_XXX没有declared
 ![网址](https://blog.csdn.net/weixin_49353816/article/details/123894843)

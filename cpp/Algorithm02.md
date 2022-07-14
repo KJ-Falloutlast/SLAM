@@ -633,6 +633,7 @@ int main(){
 
 
 2. 删除有序数组中的重复项
+   1. 返回数组中不含重复项的元素个数
 ```cpp
 #include <iostream>
 #include <stdio.h>
@@ -642,7 +643,7 @@ int main(){
 using namespace std;
 int removeDuplicates(vector<int>& v){
 	int n = v.size();
-	int slow = 1;
+	int slow = 1;//第一个数绝对不是重复项，所以要从第二项开始比
 	for (int fast = 1; fast < n; fast++){
 		if (v[fast - 1] != v[fast]){
 			v[slow] = v[fast];
@@ -680,22 +681,22 @@ int main(){
 #include <vector>
 #include <algorithm>
 using namespace std;
-    vector<int> addToArrayForm(vector<int>& num, int k) {
-        vector<int> res;
-        int n = num.size();
-        for (int i = n - 1; i >= 0; --i) {
-            int sum = num[i] + k % 10;//取个位数
-            k /= 10;//去掉个位数
-            if (sum >= 10) {
-				//若每一位相加>=10,那么最后1位加1，sum减10，类似于39 + 25 = 64(个位数相加为14,所以十位+1，个位-10)
-                k++;
-                sum -= 10;
-            }
-            res.push_back(sum);
-        }
-        reverse(res.begin(), res.end());
-        return res;
-    }
+ vector<int> addToArrayForm(vector<int>& num, int k) {
+     vector<int> res;
+     int n = num.size();
+     for (int i = n - 1; i >= 0; --i) {
+         int sum = num[i] + k % 10;//取个位数
+         k /= 10;//去掉个位数
+         if (sum >= 10) {
+	//若每一位相加>=10,那么最后1位加1，sum减10，类似于39 + 25 = 64(个位数相加为14,所以十位+1，个位-10)
+             k++;
+             sum -= 10;
+         }
+         res.push_back(sum);
+     }
+     reverse(res.begin(), res.end());
+     return res;
+ }
 
 /**
  * @brief 
@@ -722,4 +723,144 @@ public:
         sort(nums1.begin(), nums1.end());
     }
 };
+
+```
+5. 旋转数组
+   1. 描述:给你一个数组，将数组中的元素向右轮转 k 个位置，其中 k 是非负数。
+   2. 实例：
+      1. >输入: nums = [1,2,3,4,5,6,7], k = 3
+      2. >输出: [5,6,7,1,2,3,4]
+      3. >解释:
+         1. >向右轮转 1 步: [7,1,2,3,4,5,6]
+         2. >向右轮转 2 步: [6,7,1,2,3,4,5]
+         3. >向右轮转 3 步: [5,6,7,1,2,3,4]
+
+```cpp
+class Solution {
+public:
+    void rotate(vector<int>& nums, int k) {
+        int n = nums.size();
+        vector<int> newArr(n);
+        for (int i = 0; i < n; ++i) {
+            newArr[(i + k) % n] = nums[i];
+        }
+        nums.assign(newArr.begin(), newArr.end());
+    }
+};
+```
+6. 左移数组
+   1. 描述:将含n个元素的数组左移m位，并输出翻转后的数组
+   2. 求解
+![leecode_1-1](../pictures/leecode_1-1.jpg)
+```cpp
+//demo01
+//1.左移数组
+#include <stdio.h>
+#include <stdlib.h>
+using namespace std;
+#define num 100
+int a[num];
+void Move(int a[num],int n,int m);
+
+int main()
+{
+	int n,m;
+	scanf("%d %d",&n,&m);//输入
+	for(int i=0;i<n;i++)
+	{
+		scanf("%d",&a[i]);
+	}
+	Move(a,n,m);//移动
+	for(int i=0;i<n-1;i++)//输出
+	{
+		printf("%d ",a[i]);
+	}printf("%d",a[n-1]); 
+}
+void Move(int a[num],int n,int m)//循环左移
+{
+	//n为数组元素个数，m为移动数组的个数
+	m=m%n;
+	for(int i=0;i<m;++i)//循环次数
+	{
+		int temp = a[0];
+		for(int j=0;j<n-1;j++)//移动n-1个数
+		{
+			a[j]=a[j+1];    
+		}
+		a[n-1]=temp;
+		//第n个数为开始的数，即a[n-1] = a[0]
+		//由于此时移动过后，将原来的a[0]覆盖掉了，所以需要将a[n-1] = temp而非a[n-1] = a[0]
+	}
+}
+
+/**
+ * @brief 
+ * 1. 要点:Move(v, 5, 2);则对v含5个元素的数组v左移2位
+ * 	1-1.循环2次，第一层循环为移动次数;第二层循环是将数组元素移动一位
+ * 	1-2.第2层循环
+ * 
+ */
+
+
+// 2.实现求最大公因数。前提是a > 0 , b > 0
+//Greatest Common Divisor
+
+int gcd(int a, int b)
+{
+    if(a % b == 0) return a;
+    return gcd(b, a % b);
+
+}
+/**
+ * @brief
+ *  最大公约数的递归：
+ * 1、若a可以整除b，则最大公约数是b
+ * 2、如果1不成立，最大公约数便是b与a%b的最大公约数
+ * 示例：求(140,21)
+ * 140%21 = 14
+ * 21%14 = 7
+ * 14%7 = 0
+ * 返回7
+ * 
+ */
+```
+
+```cpp
+//demo02
+#include<iostream>
+#include<vector>
+using namespace std;
+void moveRight(vector<int>& v, int k){
+	int n = v.size();
+	vector<int> res(n);
+	for (int i = 0; i < n; i++){//是 i < n而非i < n-1
+		res[(i + k) % n] = v[i];
+	}
+	v.assign(res.begin(), res.end());//将新数组拷贝至原数组,顺序不要搞反了
+}
+
+
+void moveLeft(vector<int>& v, int k){
+	int n = v.size();
+	for (int i = 0; i < k; i++){
+		int temp = v[0];
+		for (int j = 1; j < n; j++){
+			v[j - 1] = v[j];
+		}
+		v[n - 1] = temp;
+	}
+}
+
+void printArray(vector<int>& v){
+	for (int i = 0; i < v.size(); i++){
+		cout << v[i] << "  ";
+	}
+	cout << endl;
+}
+
+int main(){
+	vector<int> v = {1, 2, 3, 4};
+	moveRight(v, 3);
+	printArray(v);
+}
 ```

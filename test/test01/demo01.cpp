@@ -2,66 +2,51 @@
 #include <vector>
 #include <cmath>
 #include <assert.h>
-// #include <stdio.h>
-// #include <stdlib.h>
+#include <algorithm>
 using namespace std;
-typedef int SLDataType;
-typedef struct SeqList{
-	SLDataType* a;
-	int size;
-	int capacity;
-}SL;
-
-void SeqListCheckCapacity(SL* s){
-	if (s->size >= s->capacity){
-		s->capacity *= 2;
-		s->a = (SLDataType*)realloc(s->a, sizeof(SLDataType) * s->capacity);
-		if (s->a == NULL){
-			cout << "内存分配失败" << endl;
+//1.移除数组
+int removeNumber(vector<int>& v, int val){
+	int left = 0;
+	for (int right = 0; right < v.size(); right++){
+		if (v[right] != val){
+			v[left] = v[right];
+			left++;
 		}
 	}
+	return left;
 }
-
-void SeqListInit(SL* s){
-	SeqListCheckCapacity(s);
-	s->size = 0;
-	s->capacity = 10;
-}
-
-void SeqListPushBack(SL* s, int x){
-	assert(s);
-	s->a[s->size] = x;
-	s->size++;
-}
-
-void SeqListPopBack(SL* s){
-	assert(s);
-	s->size--;
-}
-
-void SeqListPushFront(SL* s, int x){
-	assert(s);
-	int end = s->size - 1;
-	while (end >= 0){
-		s->a[end + 1] = s->a[end];
-		end--;
+//2.去重
+int removeDuplicates(vector<int>& v, int val){
+	int slow = 1;
+	for (int fast = 1; fast < v.size(); fast++){
+		if (v[fast] != v[fast - 1]){
+			v[slow] = v[fast];
+			slow++;
+		}
 	}
-	s->a[0] = x;
-	s->size++;
+	return slow;
 }
-
-void SeqListPopFront(SL* s){
-	assert(s);
-	int start = 0;
-	while (start < s->size-1){//移动2次就行
-		s->a[start] = s->a[start + 1];
-		start++;		
+//
+vector<int> addToArray(vector<int>& v, int val){
+	vector<int> res;
+	int sum = 0;
+	for (int i = v.size() - 1; i >= 0; i--){
+		sum += v[i] + val % 10;
+		val /= 10;
+		if (sum >= 10){
+			val++;
+			sum -= 10;
+		}
+		res.push_back(sum);
 	}
-	s->size--;
+	reverse(res.begin(), res.end());
+	return res;
 }
 
-void SeqListPrint(SL* s){
-	for (int i = 0; i < s->size; i++){
-		cout << s->a[i] << endl;
+int main(){
+	vector<int> v = {1, 2, 3};
+	vector<int> v1 = addToArray(v, 345);
+	for (int a : v1){
+		cout << a << endl;
 	}
 }
