@@ -1165,3 +1165,133 @@ int main()
 	return 0;
 }
 ```
+
+
+
+4. 综合
+```cpp
+#include<iostream>
+#include<vector>
+using namespace std;
+typedef int SListDataType;
+struct SListNode{
+	SListDataType data;
+	SListNode* next;	
+};
+//1.创建节点
+SListNode* BuySListNode(SListDataType x){
+    SListNode* newNode = (SListNode*)malloc(sizeof(SListNode));
+    if (newNode == NULL){
+        printf("申请节点失败\n");
+        exit(-1);
+    }
+    newNode->data = x;
+    newNode->next = NULL;
+    return newNode;
+}
+//2.打印节点
+void SListPrint(SListNode* phead){//phead = pointerhead
+	SListNode* cur = phead;
+	while (cur != NULL){
+		printf("%d->", cur->data);
+		cur = cur->next;
+	}
+	printf("NULL\n");
+	
+}
+
+void SListPushBack(SListNode** pphead, SListDataType x){
+	//param1:传入的指针，param2:传入的值
+    
+	//找尾
+	//1.先开辟一个节点
+    SListNode* newNode = BuySListNode(x);//申请一个newNode
+	
+	//2.判断节点是否为空
+    if (*pphead == NULL){
+        *pphead = newNode;
+    }
+    else
+    {
+        SListNode* tail = *pphead;//让tail指向头结点
+		//pphead接受的1级指针的地址，那么*pphead就是1级指针的值，即phead
+        while(tail->next != NULL){
+            //空指针的解引用
+            tail = tail->next;
+        }
+		tail->next = newNode;
+    }
+   
+}
+void SListPopBack(SListNode** pphead){
+	//1.空
+	if (*pphead == NULL){//为空
+		return; 
+	}
+	else if((*pphead)->next == NULL){
+		free(*pphead);//把节点直接干掉
+		*pphead = NULL;//*pphead存的是pList的地址,所以*pphead = pList = NULL
+	}
+	else{
+		SListNode* prev = NULL;
+		SListNode* tail = *pphead;
+		while (tail->next != NULL){
+			prev = tail;
+			tail = tail->next;
+		}
+		free(tail);
+		prev->next = NULL;
+	}
+	//2.1个节点
+	//1.1个以上节点
+}
+
+int main(){
+	SListNode* pList = NULL;
+	//*pList = NULL则是这个节点本身地址为NULL,pList->next = NULL,则是他指向的下一个地址为空
+	SListPushBack(&pList, 1);//此处要用2级指针
+	SListPushBack(&pList, 2);
+	SListPushBack(&pList, 3);
+	SListPushBack(&pList, 4);
+	SListPrint(pList);
+
+	/**
+	 * @brief 
+	 * 1. SListPushBack()中传入的是指针，但是SListPushBack中
+	 * 接受的是指针，所以类似于值传递一样:
+	 * void swap(int x, int y)
+	 * swap(a, b)
+	 * 
+	 * 二者等同
+	 * 
+	 * void swap(int* x, int* y)
+	 * swap(a, b) (*a = &c, *b = &d)
+	 * 所以要改变x,y的值，要采用2级指针
+	 * 
+	 * 2.关于双指针的结论：
+		1.若是pptr = &ptr ; ptr = &var---->var = *ptr(一级指针的值) = **pptr(二级指针的值)  
+		2.p,*p,&p的关系：*是寻址符号，&是地址符号，p为变量值，所以*p为p值(地址)的解引用，&p为p的地址,p为值,
+			有多少个*,就解引用多少次,解引用就是对地址进行寻址，  *(&p) = p
+		3.int var, *ptr, **pptr(实际上定义的虽然是**pptr,但是指针变量是*ptr,同理可得ptr)--->  
+		4.int **pptr------>*pptr为指针变量地址，**pptr为指针变量值
+			当满足&var = ptr, &ptr = pptr时候：
+				1.var = *ptr = **pptr(取值）,//重点****
+				2.&var = ptr = *pptr(取址)//把*prt想成对prt的值进行解析，即进行指向
+					示意图
+				var       ptr       pptr 
+			   d1 3000<---d2 d1 <---d3 d2
+		5.分开来看:
+		ptr = &var
+		*ptr = *(&var) = var //ptr指针的值就是var的地址,*ptr是直接对var地址取值
+		pptr = &ptr
+		*pptr = *(&ptr) = ptr = &var
+		**pptr = *(*pptr) = *(&var) = var    
+		注意:每次在p前加入一个*,相当于对p进行 一次取值,
+		6.对于**pptr,当未定义的时候，只能取得,pptr,&pptr,不能取得,*pptr,**pptr
+		若var = 30,*pptr = &var,(pptr = &var是错误的),此时*(*pptr) = *(&var) = 30
+		所以对于**pptr，*pptr = &var,即是保证2次寻址，pptr = &var就是1次寻址了，因为此时
+		*pptr = *(&var) = 30,**pptr就失去了意义    
+		7.指针和数组：int arr[]= {.......},int * ptr = arr<------> ptr = arr <---> ptr[i] = arr[i]        
+	 */
+}
+```
