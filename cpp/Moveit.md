@@ -45,11 +45,14 @@
 **注意在启动rviz后要更换坐标系**
 
 # 2.第2讲
-## 2-1.moveitSetupAssitant
-1. start:导入urdf文件
-2. 碰撞矩阵:generate
-3. virtual_joints:虚拟关节,类似于base_link和world坐标系的关系，若是机器人是固定的，则不需要设置虚拟关节
-4. define planning groups：
+## 2-1.moveitSetupAssitant**配置步骤**
+1. >创建功能包:probot_arm01  (*roscpp tf urdf xacro**)
+2. >catkin_make
+3. >source ./devel/setup.zsh
+4. start:导入urdf文件
+5. 碰撞矩阵:generate
+6. virtual_joints:虚拟关节,类似于base_link和world坐标系的关系，若是机器人是固定的，则不需要设置虚拟关节
+7. define planning groups：
    1. 添加一个规划组
    2. 选择求解器：正解或者逆解
       1. 默认kdl

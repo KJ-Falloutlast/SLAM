@@ -291,7 +291,92 @@ vector<int> singleNumber(vector<int>& v){
 
 
 # 2.链表和顺序表
-## 2-1.顺序表的增删改查
+## 2-1.数组
+```cpp
+#include <iostream>
+using namespace std;
+class Array
+{
+public:
+	//构造函数
+	Array(int size = 10): mCur(0), mCap(size){
+		//设置数组的有效个数mSize和容量mCap
+		mpArr = new int[mCap];//在堆区开辟一个容量为mCap空间
+	}
+	~Array(){
+		delete[] mpArr;
+		mpArr = NULL;//置空，防止野指针出现,也就是防止它指向任意值
+		/**
+		 * @brief 
+		 * 1.把指针指向的堆的内存释放掉了，
+		 * 指针本身还存了堆的内存地址，所以要将mpArr = NULL，
+		 * 防止野指针出现
+		 */
+	}
+public:
+	//末尾增加元素
+	void push_back(int val){
+		if (mCur == mCap){
+			expand(2 * mCap);
+		}
+		mpArr[mCur++] = val;
+		mCur++;
+	}
+	//末尾删除元素
+	void pop_back(){
+		if (mCur == 0) return;//mCur指向最后一个元素的后继
+		mCur--;
+	}
+	//按位置增加元素
+	void insert(int pos, int val){
+		if (pos < 0 || pos > mCur){
+			return;
+		}
+
+		if (mCur == mCap){
+			expand(2 * mCap);
+		}
+	}
+	//按元素删除
+	void erase(int val);
+	//元素查询 
+	int find(int val);
+
+private:
+	//内部数组扩容接口
+	void expand(int size){
+		//1.新开辟一个空间
+		int* p = new int[size];
+		//2.将旧空间拷贝到新空间
+		//由于每个字节大小为sizeof(int), 所以总的大小为sizeof(int) * mCap
+		memcpy(p, mpArr, sizeof(int) * mCap);
+		//3.释放旧空间
+		delete[] mpArr;//将老内存释放掉
+		//4.将成员变量mpArr初始化,指向新内存
+		mpArr = p;
+		//5.将容量直接扩大为size, 但是mCur不变，因为拷贝后元素个数不变
+		mCap = size;
+
+		/**
+		 * @brief 
+		 * 1. expand是内部接口来扩容的，所以要设置为private
+		 * 2. 扩容方法
+		 * 	2-1.在原有的基础上定义一个原来内存大小2倍的内存
+		 * 	2-2.把原来内存中的数据拷贝到新内存上
+		 * 	2-3.将原来的内存释放掉
+		 *  2-4.将所有成员变量重新初始化
+		 */
+		//在原有的方法下定义新的内存，
+	} 
+private:
+	int* mpArr; //指有向可扩容的数组内存, mpArr = memberPointerArr
+	int mCap; //数组的容量, mCap = memberCapacity
+	int mCur; //数组的效元素个数，mCur = memberCurrent
+};
+
+int main(){}
+```
+## 2-2.顺序表的增删改查
 1. SqList.h
 ```cpp
 #pragma once
@@ -597,7 +682,7 @@ int main(){
  * 4.PopBack(&s) = Erase(&s, s->size-1)
  */
 ```
-## 2-2.顺序表的oj
+## 2-3.顺序表的oj
 1. 移除数组
    1. 问题描述:给你一个数组 nums 和一个值 val，你需要 原地 移除所有数值等于 *val* 的元素，并返回移除后数组的新长度。不要使用额外的数组空间，你必须仅使用 O(1) 额外空间并 原地 修改输入数组。
 
@@ -865,7 +950,7 @@ int main(){
 }
 ```
 
-## 2-2.链表的增删改查
+## 2-4.链表的增删改查
 ### 2-2-1.操作
 1. LinkList.h
 ```cpp
@@ -1169,6 +1254,7 @@ int main()
 
 
 4. 综合
+![二级指针](../pictures/Algorithm-1-2.jpg)
 ```cpp
 #include<iostream>
 #include<vector>
