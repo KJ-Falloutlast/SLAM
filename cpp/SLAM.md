@@ -1780,7 +1780,7 @@ main (int argc, char **argv)
 #include <pcl/visualization/cloud_viewer.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <pcl_conversions/pcl_conversions.h>
- 
+
 class cloudHandler
 {
 public:

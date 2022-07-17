@@ -635,6 +635,12 @@ ls -l | grep python
     "version": 4
   }
 ```
+
+2. vscode的扩展安装问题
+   1. [安装方法](https://blog.csdn.net/aixueai/article/details/119536487?spm=1001.2101.3001.6650.5&utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7Edefault-5-119536487-blog-80684376.pc_relevant_sortByAnswer&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7Edefault-5-119536487-blog-80684376.pc_relevant_sortByAnswer&utm_relevant_index=8)
+   2. >若是无法安装，登录[网址](https://marketplace.visualstudio.com/search?term=leetcode&target=VSCode&category=All%20categories&sortBy=Relevance)搜索扩展
+   3. >点击右下角Download Extention, 下载得到.vsix文件
+   4. >回到vscode，选择扩展，点击...,从vsix文件安装
 ## 18.软件问题
 1. amd64 = x64
 
@@ -766,8 +772,14 @@ ls -l | grep python
 ![网址](https://blog.csdn.net/weixin_49353816/article/details/123894843)
 1. >#include <opencv2/imgcodecs/legacy/constants_c.h>//解决‘CV_LOAD_IMAGE_UNCHANGED’没有declared的问题
 2. >CV_FM_8POINT’ was not declared in this scope，将CV_FM_8POINT该为FM_8POINT
-## 2. 
-## 1-5.杂项问题
+
+## 2.windows下cmake的配置方法
+1. 编译方法
+   1. >cmake -G "MinGW Makefiles"
+   2. >mingw32-make.exe all
+
+
+## 3.杂项问题
 1. endl的问题:
 加<<endl后会有一个换行,下次再用cout输出字符时就会在下一行开始输出，
 如果不加，就会跟在当前行的最后输出。
@@ -966,7 +978,11 @@ https://suo.yt/sKW1OHL(**新节点**)
       4. 127.0.0.1 *忽略主机*
    5. 恢复至开机自启动
 
-
+3. windows网络代理的设置
+   1. >自动检测设置->关
+   2. >使用设置脚本->关
+   3. >使用代理服务器->开
+   4. >切换到自动使用节点的位置
 ## 5. wine的相关问题：
 1. 安装步骤
    1. >sudo dpkg --add-architecture i386 
@@ -1064,4 +1080,4 @@ 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
 
 ## 10. 关于网站和学习细节的问题
 1. 将书签分类整理
-2. 在上网时将网站分类打开，不要弄得毫无逻辑
+2. 在上网时将网站分类打开，不要f
