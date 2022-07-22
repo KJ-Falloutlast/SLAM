@@ -1052,3 +1052,8 @@ int main(){
 	 */
 }
 ```
+
+
+gist:bd53270104b5433408a9636a8c6525c0
+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
+I love you
