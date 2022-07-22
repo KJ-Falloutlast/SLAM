@@ -1,3 +1,6 @@
+
+# 1.markdown学习
+
 1.标题使用
     # 一级标题
     ## 二级标题
@@ -289,16 +292,16 @@ markdown
 
 
 
-## git 学习
+# 2.git 学习
 1. github令牌：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
 2. 设置密码：git remote set-url origin https://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@github.com/KJ-Falloutlast/https://github.com/KJ-Falloutlast/SLAM_learn.git
 3. 初始化步骤：
-  * 1. git init 
-  * 2. git add .
-  * 3. git commit -m "注释语句"
-  * 4. git remote add origin https://github.com/KJ-Falloutlast/SLAM.git
-  * 5. git branch -M main
-  * 6. git push -u origin main
+  * >1. git init 
+  * >2. git add .
+  * >3. git commit -m "注释语句"
+  * >4. git remote add origin https://github.com/KJ-Falloutlast/SLAM.git
+  * >5. git branch -M main | git pull origin master   
+  * >6. git push -u origin main | git push -u origin master
   * 上传步骤：
     * git add .
     * git commit -m "xxxx"
