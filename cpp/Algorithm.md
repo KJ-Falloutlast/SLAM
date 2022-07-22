@@ -817,303 +817,108 @@ int main(){
    2. 头节点是地址域为NULL的节点，当新增加一个节点的时候，会把下一个节点的地址写到头节点的地址域中，所以在*单链表的实现上一般会加1个头节点*
 
 ## 2-2.链表的增删改查
-### 2-2-1.操作
-1. LinkList.h
 ```cpp
-#pragma once
-#include <stdio.h>
+#include <iostream>
 #include <stdlib.h>
+#include <time.h>
+using namespace std;
 
-typedef int SLTDataType;
-struct SListNode
+// 节点类型
+struct Node
 {
-	SLTDataType data;
-	struct SListNode* next;
+    Node(int data = 0) :data_(data), next_(nullptr) {}
+    int data_;
+    Node* next_;
 };
-typedef struct SListNode SLTNode;
 
-// 不会改变链表的头指针，传一级指针
-void SListPrint(SLTNode* phead);
-
-// 可能会改变链表的头指针，传二级指针
-void SListPushBack(SLTNode** pphead, SLTDataType x);
-void SListPushFront(SLTNode** pphead, SLTDataType x);
-void SListPopFront(SLTNode** pphead);
-void SListPopBack(SLTNode** pphead);
-
-SLTNode* SListFind(SLTNode* phead, SLTDataType x);
-// 在pos的前面插入x
-void SListInsert(SLTNode** phead, SLTNode* pos, SLTDataType x);
-// 删除pos位置的值
-void SListErase(SLTNode** phead, SLTNode* pos);
-
-// 有些地方也有这样的
-//// 在pos的前面插入x
-//void SListInsert(SLTNode** phead, int i, SLTDataType x);
-//// 删除pos位置的值
-//void SListErase(SLTNode** phead, int i);
-```
-
-
-2. LinkList.cpp
-```cpp
-#include "../include/LinkList.h"
-
-void SListPrint(SLTNode* phead)
+// 单链表代码实现
+class Clink
 {
-	SLTNode* cur = phead;
-	while (cur != NULL)
-	{
-		printf("%d->", cur->data);
-		cur = cur->next;
-	}
-	printf("NULL\n");
-}
+public:
+    Clink()
+    {
+        // 给head_初始化指向头节点
+        head_ = new Node();
+    }
+    ~Clink()
+    {
+        // 节点的释放
+        Node* p = head_;
+        while (p != nullptr)
+        {
+            head_ = head_->next_;
+            delete p;
+            p = head_;
+        }
+        head_ = nullptr;
+    }
 
-SLTNode* BuySListNode(SLTDataType x)
-{
-	SLTNode* newnode = (SLTNode*)malloc(sizeof(SLTNode));
-	newnode->data = x;
-	newnode->next = NULL;
+public:
+   // 1.链表尾插法 O(n)   head_:头节点    tail_:尾节点
+   void InsertTail(int val)
+   {
+      // 先找到当前链表的末尾节点
+      Node* p = head_;
+      while (p->next_ != nullptr)
+      {
+         p = p->next_;
+      }
 
-	return newnode;
-}
+      // 生成新节点
+      Node* node = new Node(val);
+      // 把新节点挂在尾节点的后面
+      p->next_ = node;
+   }
+   // 2.链表的头插法  O(1)
+   void InsertHead(int val)
+   {
+      Node* node = new Node(val);
+      node->next_ = head_->next_;
+      head_->next_ = node;
+   }
+   //3.链表节点的删除
+   void Remove(int val){
+      Node* q = head_;//将q指向头节点，q的意义在于找到p的前驱节点，使得能够q->next = p->next
+      Node* p = head_->next_;//将p指向头节点的后1个节点，p的意义在于遍历节点
+      while (p != NULL){
+         if (p->data_ == val){
+            q->next_ = p->next_;
+            delete p;
+            return;
+         }
+         else{
+            q = p;//q = q->next;
+            p = p->next_;
+         }
+      }
+   }
+   void Show()
+   {
+      Node* p = head_->next_;
+      while (p != nullptr)
+      {
+         cout << p->data_ << " ";
+         p = p->next_;
+      }
+      cout << endl;
+   }
+private:
+    Node* head_; // 指向链表的头节点
+};
 
-void SListPushBack(SLTNode** pphead, SLTDataType x)
-{
-	SLTNode* newnode = BuySListNode(x);
-
-	if (*pphead == NULL)
-	{
-		*pphead = newnode;
-	}
-	else
-	{
-		// ÕÒÎ²½ÚµãµÄÖ¸Õë
-		SLTNode* tail = *pphead;
-		while (tail->next != NULL)
-		{
-			tail = tail->next;
-		}
-
-		// Î²½Úµã£¬Á´½ÓÐÂ½Úµã
-		tail->next = newnode;
-	}
-}
-
-void SListPushFront(SLTNode** pphead, SLTDataType x)
-{
-	SLTNode* newnode = BuySListNode(x);
-
-	newnode->next = *pphead;
-	*pphead = newnode;
-}
-
-void SListPopFront(SLTNode** pphead)
-{
-	SLTNode* next = (*pphead)->next;
-	free(*pphead);
-
-	*pphead = next;
-}
-
-void SListPopBack(SLTNode** pphead)
-{
-	// 1¡¢¿Õ
-	// 2¡¢Ò»¸ö½Úµã
-	// 3¡¢Ò»¸öÒÔÉÏµÄ½Úµã
-	if (*pphead == NULL)
-	{
-		return;
-	}
-	else if ((*pphead)->next == NULL)
-	{
-		free(*pphead);
-		*pphead = NULL;
-	}
-	else
-	{
-		SLTNode* prev = NULL;
-		SLTNode* tail = *pphead;
-		while (tail->next != NULL)
-		{
-			prev = tail;
-			tail = tail->next;
-		}
-
-		free(tail);
-		prev->next = NULL;
-	}
-}
-
-SLTNode* SListFind(SLTNode* phead, SLTDataType x)
-{
-	SListNode* cur = phead;
-	//while (cur != NULL)
-	while (cur)
-	{
-		if (cur->data == x)
-		{
-			return cur;
-		}
-
-		cur = cur->next;
-	}
-
-	return NULL;
-}
-
-// ÔÚposµÄÇ°Ãæ²åÈëx
-void SListInsert(SLTNode** pphead, SLTNode* pos, SLTDataType x)
-{
-	if (pos == *pphead)
-	{
-		SListPushFront(pphead, x);
-	}
-	else
-	{
-		SLTNode* newnode = BuySListNode(x);
-		SLTNode* prev = *pphead;
-		while (prev->next != pos)
-		{
-			prev = prev->next;
-		}
-
-		prev->next = newnode;
-		newnode->next = pos;
-	}
-}
-
-// É¾³ýposÎ»ÖÃµÄÖµ
-void SListErase(SLTNode** pphead, SLTNode* pos)
-{
-	if (pos == *pphead)
-	{
-		SListPopFront(pphead);
-	}
-	else
-	{
-		SLTNode* prev = *pphead;
-		while (prev->next != pos)
-		{
-			prev = prev->next;
-		}
-
-		prev->next = pos->next;
-		free(pos);
-	}
-}
-```
-3. main.cpp
-```cpp
-#include "../include/LinkList.h"
-
-void TestSList1()
-{
-	SLTNode* plist = NULL;
-	SListPushBack(&plist, 1);
-	SListPushBack(&plist, 2);
-	SListPushBack(&plist, 3);
-	SListPushBack(&plist, 4);
-	SListPushFront(&plist, 0);
-	SListPrint(plist);
-
-	SListPopFront(&plist);
-	SListPopFront(&plist);
-	SListPopFront(&plist);
-	SListPrint(plist);
-
-	SListPopFront(&plist);
-	SListPopFront(&plist);
-	SListPrint(plist);
-}
-
-void TestSList2()
-{
-	SLTNode* plist = NULL;
-	SListPushBack(&plist, 1);
-	SListPushBack(&plist, 2);
-	SListPushBack(&plist, 3);
-	SListPushBack(&plist, 4);
-	SListPrint(plist);
-
-	SListPopBack(&plist);
-	SListPopBack(&plist);
-	SListPopBack(&plist);
-	SListPopBack(&plist);
-	SListPopBack(&plist);
-	SListPrint(plist);
-}
-
-void TestSList3()
-{
-	SLTNode* plist = NULL;
-	SListPushBack(&plist, 1);
-	SListPushBack(&plist, 2);
-	SListPushBack(&plist, 3);
-	SListPushBack(&plist, 4);
-	SListPrint(plist);
-
-	// ÏëÔÚ3µÄÇ°Ãæ²åÈëÒ»¸ö30
-	SLTNode* pos = SListFind(plist, 1);
-	if (pos)
-	{
-		SListInsert(&plist, pos, 10);
-	}
-	SListPrint(plist);
-
-	pos = SListFind(plist, 3);
-	if (pos)
-	{
-		SListInsert(&plist, pos, 30);
-	}
-	SListPrint(plist);
-}
-
-void TestSList4()
-{
-	SLTNode* plist = NULL;
-	SListPushBack(&plist, 1);
-	SListPushBack(&plist, 2);
-	SListPushBack(&plist, 3);
-	SListPushBack(&plist, 4);
-	SListPrint(plist);
-
-	SLTNode* pos = SListFind(plist, 1);
-	if (pos)
-	{
-		SListErase(&plist, pos);
-	}
-	SListPrint(plist);
-
-	pos = SListFind(plist, 4);
-	if (pos)
-	{
-		SListErase(&plist, pos);
-	}
-	SListPrint(plist);
-
-	pos = SListFind(plist, 3);
-	if (pos)
-	{
-		SListErase(&plist, pos);
-	}
-	SListPrint(plist);
-
-	pos = SListFind(plist, 2);
-	if (pos)
-	{
-		SListErase(&plist, pos);
-	}
-	SListPrint(plist);
-}
-
-
-int main()
-{
-	TestSList4();
-
-	return 0;
+int main(){
+   Clink link;
+   srand(time(0));
+   for (int i = 0; i < 10; i++){
+      int val = rand() % 100;
+      link.InsertHead(val);
+      cout << val << " ";
+   }
+   cout << endl;
+   link.InsertTail(200);
+   link.Show();
+   link.Remove(200);
+   link.Show();
 }
 ```
 
