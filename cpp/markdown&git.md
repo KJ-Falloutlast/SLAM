@@ -285,7 +285,7 @@ markdown
 
 
 5. $\sum_{i=0}^{i = N}\frac{x_i}{x_i + {x_i}^2} = \frac{4}{7}$
-6. $\int_0^{x^2}{y^2}dxdy$
+6. $\iint_0^{x^2}{y^2}dxdy$
 
 
 
