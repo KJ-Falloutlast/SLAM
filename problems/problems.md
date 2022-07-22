@@ -641,6 +641,22 @@ ls -l | grep python
    2. >若是无法安装，登录[网址](https://marketplace.visualstudio.com/search?term=leetcode&target=VSCode&category=All%20categories&sortBy=Relevance)搜索扩展
    3. >点击右下角Download Extention, 下载得到.vsix文件
    4. >回到vscode，选择扩展，点击...,从vsix文件安装
+
+3. vscode配置sync的问题
+   1. 网址[网站](https://www.pudn.com/news/62ab53d4dfc5ee196875c7fb.html)
+   2. >使用:上传：Shift+Alt+U; 下载：Shift+Alt+D
+   3. >token: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
+   4. >gist:af8e2340076395acc25ba4124eaa70d4
+
+4. 关于扩展无法使用的问题
+   1. vscode
+   2. File
+   3. Preferences
+   4. settings
+   5. Proxy
+   6. 将Http Proxy置空
+
+
 ## 18.软件问题
 1. amd64 = x64
 
