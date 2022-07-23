@@ -1,0 +1,2 @@
+/home/kim-james/git/cpp/课程文件/演讲比赛/build/CMakeFiles/rebuild_cache.dir
+/home/kim-james/git/cpp/课程文件/演讲比赛/build/CMakeFiles/edit_cache.dir
