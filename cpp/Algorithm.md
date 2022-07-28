@@ -1726,3 +1726,27 @@ int main(){
 	ShowResult(p);
 }
 ```
+7. 旋转链表
+
+```cpp
+Node* rotateRight(Node* head, int k){
+   Node* p = head;
+   Node* q = head;
+   int number = 0;
+   for (Node* k = head;  k != NULL; k = k->next_){
+      number++;
+   }
+   k = k % number;
+   for (int i = 0; i < k; i++){
+      p = p->next_;
+   }
+   while (p->next_ != NULL){
+      q = q->next_;
+      p = p->next_;
+   }
+   p->next_ = head;
+   head = q->next_;
+   q->next_ = NULL;   
+   return head;
+}
+```
