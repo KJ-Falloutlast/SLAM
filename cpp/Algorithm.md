@@ -1625,176 +1625,6 @@ int main(){
 5. 是否存在相交节点
 ![相交节点](./../pictures/algorithm/Al-01单链表-05相交节点.jpg)
 ```cpp
-#include <iostream>
-#include <stdlib.h>
-#include <time.h>
-using namespace std;
-// 1.节点类型
-struct Node
-{
-    Node(int data = 0) :data_(data), next_(nullptr) {}
-    int data_;
-    Node* next_;
-};
-
-// 2.单链表代码实现
-class Clink
-{
-public:
-   Clink()
-   {
-      // 给head_初始化指向头节点
-      head_ = new Node();
-   }
-   ~Clink(){
-      Node* p = head_;
-      while (p != NULL){
-         /**
-          * @brief 
-          * head_用来遍历节点，p用来删除节点
-          * head_往后移，删除前一个节点p,将head_赋给p
-          */
-         head_ = head_->next_;
-         delete p;
-         p = head_;
-      }
-      
-   }
-
-public:
-   //1.单链表的插入和删除
-   // 1-1.链表尾插法 O(n)   head_:头节点    tail_:尾节点
-   void InsertTail(int val)
-   {
-      // 先找到当前链表的末尾节点
-      Node* p = head_;
-      while (p->next_ != nullptr)
-      {
-         p = p->next_;
-      }
-
-      // 生成新节点
-      Node* node = new Node(val);
-      // 把新节点挂在尾节点的后面
-      p->next_ = node;
-   }
-   // 1-2.链表的头插法  O(1)
-   void InsertHead(int val)
-   {
-      Node* node = new Node(val);
-      node->next_ = head_->next_;
-      head_->next_ = node;
-   }
-   //1-3.头删
-   void RemoveFront(){
-      Node* p = head_->next_;
-      head_->next_ = p->next_;
-      delete p;
-   }
-   //1-4.尾删
-   void RemoveBack(){
-      Node* q = head_;
-      Node* p = head_->next_;
-      while (p->next_ != NULL){
-         p = p->next_;
-         q = q->next_;
-      }
-      q->next_ = NULL;
-      delete p;
-   }
-   //3.按值删除
-   void Remove(int val){
-      Node* q = head_;//将q指向头节点，q的意义在于找到p的前驱节点，使得能够q->next = p->next
-      Node* p = head_->next_;//将p指向头节点的后1个节点，p的意义在于遍历节点
-      while (p != NULL){
-         if (p->data_ == val){
-            q->next_ = p->next_;
-            delete p;
-            return;
-         }
-         else{
-            q = p;//q = q->next;
-            p = p->next_;
-         }
-      }
-   }
-   //删除多个节点(删除所有值为val的节点)
-   void RemoveAll(int val){
-      Node* q = head_;
-      Node* p = head_->next_;
-      while (p != NULL){
-         if (p->data_ == val){
-            q->next_ = p->next_;
-            delete p;
-            //对指针p进行重置
-            p = q->next_;
-         }
-         else{
-            q = p;
-            p = p->next_;
-         }
-      }
-   }
-   //4.按位置插入
-   void InsertPos(int pos, int val){
-      if (pos < 1){
-         return;
-      }
-      Node* s = head_;
-      int i = 1;
-      while (s->next_ != NULL && i < pos){
-         s = s->next_;//寻找到目标位置的前一个位置节点
-         i++;
-      }
-      if (pos > i){
-         return;
-      }
-      Node* node = new Node(val);
-      node->next_ = s->next_;
-      s->next_ = node;    
-   }
-   //5.按值插入
-   void InsertVal(int pval, int val){
-      Node* node = new Node(val);//pval为值为pval的节点
-      Node* p = head_;
-      while (p != NULL){
-         if (p->data_ == pval){
-            //若是插在值为pval节点前面,则是p->next_->data_ = pval,此时p在pval节点的前面
-            //若是插在值为pval节点后面,则是p->data_ = pval,此时p在pval节点的位置
-            break;
-         }
-         p = p->next_;
-      }
-      node->next_ = p->next_;
-      p->next_ = node;
-   }
-   //6.搜索O(n)
-   bool Find(int val){
-      Node* p = head_->next_;
-      while (p != NULL){
-         if (p->data_ == val){
-            return true;
-         }
-         else{
-            p = p->next_;
-         }
-      }
-      return false;
-   }
-
-   void Show()
-   {
-      Node* p = head_->next_;
-      while (p != nullptr)
-      {
-         cout << p->data_ << " ";
-         p = p->next_;
-      }
-      cout << endl;
-   }
-public:
-    Node* head_; // 指向链表的头节点
-};
 bool IsLinkHasMerge(Node* head1, Node* head2, int& val){
 	int cnt1 = 0, cnt2 = 0;
 	Node* p = head1->next_;
@@ -1840,5 +1670,59 @@ bool IsLinkHasMerge(Node* head1, Node* head2, int& val){
 		q = q->next_;
 	}
 	return false;
+}
+```
+
+6. 删除第倒数第K个节点
+```cpp
+void ShowResult(Node* p){
+   Node* ptr = p->next_; 
+   while (p != NULL)
+   {
+      cout << p->data_ << " ";
+      p = p->next_;
+   }
+   cout << endl;
+}
+Node* removeKthFromEnd(Node* head, int k, int& val){
+	/**
+	 * @brief 
+	 * 1.在函数内部增加一个头节点head_,可以方便地解决问题
+	 * 2.执行步骤
+    *   2-1.定义p, q让他们指向头节点
+    *   2-2.让p走到第n个节点
+    *   2-3.然后p,q一起走，直至p到最后一个节点
+    *   2-4.此时q为倒数第n+1个节点
+    *   2-5.q->next = q->next->next, delete q->next;
+    *   2-6.return head
+	 */
+    Node* p = head;
+    Node* q = head;
+    int i = 0;
+    while (i < k){
+        p = p->next_;
+        k++;
+    }
+    while (p->next_ != NULL){
+        p = p->next_;
+        q = q->next_;
+    }
+    val = q->next_->data_;
+    q->next_ = q->next_->next_;
+    delete q->next_;
+    return head;
+}
+int main(){
+	Node head1;
+	Node n1(25), n2(67), n3(32), n4(18), n5(20);
+   head1.next_ = &n1;
+   n1.next_ = &n2;
+   n2.next_= &n3;
+   n3.next_ = &n4;
+   n4.next_ = &n5;
+	n5.next_ = NULL;
+   int val;
+	Node* p = removeKthFromEnd(&head1, 2, val);
+	ShowResult(p);
 }
 ```
