@@ -800,7 +800,7 @@ int main(){
 ```
  
 
-## 2-2.链表
+## 2-2.单链表
 ### 1.链表的特点
 1. 特点：每个节点都是在堆内存上独立new出来的，节点内存不连续
    1. 优点:
@@ -1749,4 +1749,163 @@ Node* rotateRight(Node* head, int k){
    q->next_ = NULL;   
    return head;
 }
+```
+
+## 2-3.单向循环链表
+1. 特点:p->next = head(末尾节点)
+```cpp
+#include <iostream>
+#include <stdlib.h>
+#include <time.h>
+using namespace std;
+
+class CircleLink
+{
+private:
+    struct Node{
+        Node(int data = 0): data_(data), next_(NULL){}
+        int data_;
+        Node* next_;
+    };
+    Node* head_;
+    Node* tail_;
+public:
+    CircleLink(){
+        head_ = new Node();
+        tail_ = head_;
+        head_->next_ = head_;
+    }
+    ~CircleLink(){
+        Node* p = head_->next_;
+        while (p != head_){
+            head_->next_ = p->next_;
+            delete p;
+            p = p->next_;
+        }
+        delete head_;
+    }
+
+public: 
+    //1.尾插法O(1)
+    void InsertTail(int val){
+        Node* node = new Node(val);
+        node->next_ = tail_->next_;
+        tail_->next_ = node;
+        tail_ = node;
+    }
+    //2.头插法
+    void InsertHead(int val){
+        Node* node = new Node(val);
+        node->next_ = head_->next_;
+        head_->next_ = node;
+        //如果插入的节点为第一个节点，则也是最后一个节点，所以此时插入完后要将tail置为node
+        if (node->next_ == head_){
+            tail_ = node;
+        }
+    }
+    void RemoveFront(){
+        Node* p = head_->next_;
+        head_->next_ = p->next_;
+        delete p;
+    }
+    void RemoveBack(){
+      Node* q = head_;
+      Node* p = head_->next_;
+      while (p->next_ != tail_){
+         p = p->next_;
+         q = q->next_;
+      }
+      q->next_ = head_;
+      delete p;
+      tail_ = q;//将tail置为q
+    }
+    //3.删除
+    //要对末尾节点进行重置
+    void Remove(int val){
+        Node* q = head_;
+        Node* p = head_->next_;
+        while (p != head_){//只有当判断尾节点的时候才需要判断p->next
+            if (p->data_ == val){
+                //找到删除节点
+                q->next_ = p->next_;
+                delete p;
+                if (q->next_ == head_){
+                    tail_ = q;
+                }
+                return;
+            }
+            else{
+                q = p;//q = q->next_;
+                p = p->next_;
+            }
+        }
+    }
+    /**
+     * 1.若是被删除节点刚好时tail节点，则删除后，要将tail_ =  q，
+     * 即将被删除节点的前一个节点置为末尾节点
+     * 2.无论是头插，尾插，删除，都要考虑tail节点的重置问题
+    */
+   //按位置插入
+	void InsertPos(int pos, int val){
+		if (pos < 1){
+			return;
+		}
+		Node* s = head_;
+		int i = 1;
+		while (s != tail_ && i < pos){
+			s = s->next_;//寻找到目标位置的前一个位置节点
+			i++;
+		}
+		if (pos > i){
+			return;
+		}
+		Node* node = new Node(val);
+		if (s == tail_){
+			node->next_ = s->next_;
+			s->next_ = node;
+			tail_ = node;
+		}
+		else{
+			node->next_ = s->next_;
+			s->next_ = node;
+		}
+
+	}
+
+   //3.查询
+   bool find(int val) const //将只读不写的方法都写为const方法
+   {
+        Node* p = head_->next_;
+        while (p != head_){//若是p==head,则单链表已经被遍历一次了，所以结束条件为p!= head_
+            if (p->data_ == val){
+                return true;   
+            }
+        }
+        return false;
+   }
+   void show() const{
+        Node* p = head_->next_;//第一个节点存有效的数据
+        while (p != head_){
+            cout << p->data_ << " ";
+            p = p->next_;
+        }
+        cout << endl;
+   }
+
+};
+
+
+int main(){
+    CircleLink clink;
+    srand(time(NULL));
+    for (int i = 0; i < 10; i++){
+        clink.InsertTail(rand() % 100);
+    }
+    clink.show();
+	// clink.RemoveBack();
+	// clink.RemoveFront();
+	clink.InsertPos(10, 10);
+    clink.show();
+
+} 
 ```
