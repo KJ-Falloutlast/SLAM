@@ -1752,6 +1752,8 @@ Node* rotateRight(Node* head, int k){
 ```
 
 ## 2-3.单向循环链表
+### 1.定义
+![循环链表的定义](../pictures/algorithm/Al-02循环链表-01循环链表的定义.jpg)
 1. 特点:p->next = head(末尾节点)
 ```cpp
 #include <iostream>
@@ -1764,7 +1766,7 @@ class CircleLink
 private:
     struct Node{
         Node(int data = 0): data_(data), next_(NULL){}
-        int data_;
+        int data_; 
         Node* next_;
     };
     Node* head_;
@@ -1811,7 +1813,7 @@ public:
     void RemoveBack(){
       Node* q = head_;
       Node* p = head_->next_;
-      while (p->next_ != tail_){
+      while (p != tail_){
          p = p->next_;
          q = q->next_;
       }
@@ -1909,3 +1911,94 @@ int main(){
 
 } 
 ```
+### 2.约瑟夫环
+1. 描述:约瑟夫问题：*n个人*围成一圈，从编号为k的人开始报数，数到m的人出列，它的下一个人又从1开始报数，数到m的那个人又出列，依次规律循环下去，直到圆桌周围的人全部出列，输出人的数列顺序。
+![约瑟夫环](../pictures/algorithm/Al-02循环链表-02约瑟夫环.jpg)
+```cpp
+#include <iostream>
+#include <stdlib.h>
+#include <time.h>
+using namespace std;
+struct Node{
+      Node(int data = 0) :data_(data), next_(nullptr) {}
+      int data_;
+      Node* next_;
+   };
+
+void Joseph(Node* head, int k, int m)
+{
+	/**
+	 * @brief 
+	 * 1.特点
+	 * k:从第K个人开始报数
+	 * m:每次报到第m个时，出列，下一个继续从1开始遍历
+	 * 2.执行步骤
+	 * 	2-1.利用双指针p, q,且p, q = head_, q = q, p = p->next,所以p一直走在q的后面
+	 *  2-2.利用循环for(int i = 1; i < k; i++)，将p指向第k个节点，
+	 * 	2-3.删除第k个节点，并让第k-1节点和第k+1节点联系起来:p->next_ = q->next_,
+	 * 	delete p, p = q->next_;  
+	 * 	2-4.判断p == q,若相等，则delete p, break循环
+     *        
+	 */
+    Node* p = head;
+    Node* q = head;
+
+    // 从第k个人开始报数的，移动k-1次，到达的第K个人的位置
+    for (int i = 1; i < k; i++)
+    {
+        q = p;
+        p = p->next_;
+    }
+
+    // p -> 第k个人
+    for (;;)//死循环
+    {
+        for (int i = 1; i < m; i++) //移动到m-1次位置,因为是从编号为1,数到m
+        {
+            q = p;
+            p = p->next_;
+        }
+
+        // 删除p指向的结点
+        // q p node
+        cout << p->data_ << " ";
+
+        if (p == q)
+		//当 p = q的时候， 代表只剩下一个节点
+        {
+            delete p;
+            break;
+        }
+        q->next_ = p->next_;
+        delete p;
+        p = q->next_;
+    }
+}
+
+int main(){
+	Node* head = new Node(1);
+	Node* n2 = new Node(2);
+	Node* n3 = new Node(3);
+	Node* n4 = new Node(4);
+	Node* n5 = new Node(5);
+	Node* n6 = new Node(6);
+	Node* n7 = new Node(7);
+	Node* n8 = new Node(8);
+	head->next_ = n2;
+	n2->next_ = n3;
+	n3->next_ = n4;
+	n4->next_ = n5;
+	n5->next_ = n6;
+	n6->next_ = n7;
+	n7->next_ = n8;
+	n8->next_ = head;
+	Joseph(head, 1, 3);
+} 
+```
+## 2-3.双向链表
+1. 双向链表特点 
+   1. 每个节点除了数据域，还有next指针域指向下一个节点，pre指针域指向前一个节点
+   2. 头节点的pre是NULL， 末尾节点的next是NUL
+2. 双向**循环**链表特点 
+   1. 每个节点除了数据域，还有next指针域指向下一个节点，pre指针域指向前一个节点
+   2. 头节点的pre是末尾节点， 末尾节点的next是头节点
