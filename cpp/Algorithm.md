@@ -2002,3 +2002,207 @@ int main(){
 2. 双向**循环**链表特点 
    1. 每个节点除了数据域，还有next指针域指向下一个节点，pre指针域指向前一个节点
    2. 头节点的pre是末尾节点， 末尾节点的next是头节点
+3. 案例
+![双向链表](../pictures/algorithm/Al-02双向链表-01定义.jpg)
+```cpp
+#include <iostream>
+#include <stdlib.h>
+#include <time.h>
+using namespace std;
+struct Node
+{
+    Node(int data = 0) : data_(data), pre_(NULL), next_(NULL){}
+    int data_;
+    Node* pre_;
+    Node* next_;
+};
+
+class DoubleLink
+{
+private:
+    Node* head_;
+public:
+    DoubleLink(){
+        head_ = new Node();
+        //创建类对象的时候会自动初始化头节点，使得p->data = 0, p->pre = NULL, p->next = NULL
+        //所以此时是head_ = new Node()，而非Node* node = new Node();否则会初始化失败 
+    }      
+    ~DoubleLink(){
+        Node* p = head_;
+        while (p != NULL)
+        {
+            head_ = head_->next_;
+            delete p;
+            p = head_;          
+        }
+    }
+public:
+    void InsertHead(int val)
+    {
+        Node* node = new Node(val);
+        node->next_ = head_->next_;
+        node->pre_ = head_;
+        if (head_->next_ != NULL){
+            head_->next_->pre_ = node;
+        }
+        head_->next_ = node;
+    }
+    void InsertTail(int val)
+    {
+        Node* p = head_;
+        while (p != NULL)
+        {
+            p = p->next_;
+        }
+        Node* node = new Node(val);
+        node->pre_ = p;
+        p->next_ = node;
+    }
+    void RemoveFront(){
+        Node* p = head_->next_;
+        head_->next_ = p->next_;//往后连
+        p->next_->pre_ = head_;//往前连
+        delete p;
+    }
+    void RemoveBack()
+    {
+        Node* p = head_->next_;
+        while (p->next_ != NULL)
+        {
+            p = p->next_;
+        }
+        p->pre_->next_ = NULL;//直接将末尾地址置空就行
+    }
+    void InsertPos(int pos, int val)
+    {
+        if (pos < 1){
+            return;
+        }
+        Node* s = head_;
+        int i = 1;
+        while (s->next_ != NULL && i < pos){
+            s = s->next_;//寻找到目标位置的前一个位置节点
+            i++;
+        }
+        if (pos > i){
+            return;
+        }
+        Node* node = new Node(val);
+        //插入部分
+        node->next_ = s->next_;
+        node->pre_ = s;
+        if (node->next_ != NULL)
+        {
+            s->next_->pre_ = node;            
+        }
+        s->next_ = node;
+        
+    }
+    void InsertVal(int pval, int val)//插入到后面
+    {
+        Node* node = new Node(val);//pval为值为pval的节点
+        Node* p = head_;
+        while (p != NULL){
+            if (p->data_ == pval){
+                //若是插在值为pval节点前面,则是p->next_->data_ = pval,此时p在pval节点的前面
+                //若是插在值为pval节点后面,则是p->data_ = pval,此时p在pval节点的位置
+                break;
+            }
+            p = p->next_;
+        }
+        node->next_ = p->next_;
+        node->pre_ = p;
+        if (p->next_ != NULL){
+            p->next_->pre_ = node;
+        }
+        p->next_ = node;
+        
+    }
+    
+    void RemovePos(int pos)
+    {
+        if (pos < 1){
+            return;
+        }
+        Node* s = head_;
+        int i = 1;
+        while (s->next_ != NULL && i <= pos){
+            s = s->next_;//寻找到目标位置的节点
+            i++;
+        }
+        if (pos > i){
+            return;
+        }
+        //删除部分
+        s->pre_->next_ = s->next_;//将s的前一个节点的后继指向s的后一个节点
+        s->next_->pre_ = s->pre_;//将s的后一个节点的前驱指向s的前一个节点
+        delete s;
+    }
+    void RemoveVal(int val)
+    {
+        Node* p = head_->next_;
+        while (p != NULL)
+        {
+            p->pre_->next_ = p->next_;
+            if (p->data_ == val)
+            {
+                //删除p指向的节点
+                p->pre_->next_ = p->next_;
+                if (p->next_ != NULL)
+                {
+                    p->next_->pre_ = p->pre_;
+                    delete p;
+                }
+            }
+            else
+            {
+                p = p->next_;
+            }
+        }
+    }
+
+    bool Find(int val){
+        Node* p = head_->next_;
+        while (p != NULL){
+            if (p->data_ == val){
+                return true;
+            }
+            else{
+                p = p->next_;
+            }
+        }
+        return false;
+   }
+    void show()
+    {
+        Node* p = head_->next_;
+        while (p != NULL)
+        {
+            cout << p->data_ << " ";
+            p = p->next_;
+        }
+        cout << endl;
+    }
+};
+
+int main()
+{
+    DoubleLink dlink;
+    dlink.InsertHead(1);
+    dlink.InsertHead(2);
+    dlink.InsertHead(3);
+    dlink.InsertHead(4);
+    dlink.InsertHead(5);
+    dlink.InsertPos(3, 10);
+    dlink.show();
+    dlink.InsertVal(3, 100);    
+    // dlink.RemoveFront();
+    // dlink.RemoveBack();
+    if (dlink.Find(10))
+    {
+       cout << "找到了" << endl; 
+    }
+    dlink.show();
+
+}
+```
