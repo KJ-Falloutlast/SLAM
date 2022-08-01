@@ -2050,7 +2050,7 @@ public:
     void InsertTail(int val)
     {
         Node* p = head_;
-        while (p != NULL)
+        while (p->next_ != NULL)
         {
             p = p->next_;
         }
@@ -2206,3 +2206,210 @@ int main()
 
 }
 ```
+
+
+## 2-4.双向循环链表
+1. 特点
+   1. 每一个节点除了数据域，还有next指针域指向下一个节点，pre指针域指向前一个节点
+   2. 头节点的p re指向末尾节点，末尾节点的next指向头节点
+2. demo
+![循环链表](../pictures/algorithm/Al-03双向循环链表-01定义.jpg)
+```cpp
+#include <iostream>
+#include <stdlib.h>
+#include <time.h>
+using namespace std;
+struct Node
+{
+    Node(int data = 0) : data_(data), pre_(NULL), next_(NULL){}
+    int data_;
+    Node* pre_;
+    Node* next_;
+};
+
+class DoubleCircleLink
+{
+private:
+    Node* head_;
+public:
+    DoubleCircleLink(){
+        head_ = new Node();
+        //双向链表的pre和next初始化都NULL,双向循环链表的pre和next都指向自己
+        head_->next_ = head_;
+        head_->pre_ = head_;
+    }      
+    ~DoubleCircleLink(){
+        /**
+         * @brief 
+         * 和单向循环链表的删除思路一样
+         * 
+         */
+        Node* p = head_->next_;
+        while (p != head_)
+        {
+            head_->next_ = p->next_;
+            p->next_->pre_ = head_;//由于是循环链表，所以没有数据域不为空
+            delete p;
+            p = head_->next_;//让p重新指向第一个节点，进行删除
+        }
+        delete head_;//p指向头节点，此时要删除头节点
+        head_ = NULL;//head置空
+    }
+public:
+    void InsertHead(int val)
+    {
+        Node* node = new Node(val);
+        node->next_ = head_->next_;
+        node->pre_ = head_;
+        head_->next_->pre_ = node;//不用判空，因为最后一个节点的next为第一个节点的pre
+        head_->next_ = node;
+    }
+    void InsertTail(int val)
+    {
+        Node* p = head_->pre_;//尾插法不用找尾节点了，因为head_->pre就是尾节点
+        Node* node = new Node(val);
+        node->pre_ = p;
+        node->next_ = head_;
+        p->next_ = node;
+        head_->pre_ = node;
+    } 
+    void RemoveFront(){
+        Node* p = head_->next_;
+        head_->next_ = p->next_;//往后连
+        p->next_->pre_ = head_;//往前连
+        delete p;
+    }
+    void RemoveBack()
+    {
+        Node* p = head_->pre_;//利用head_的pre就是末尾节点来找到末尾节点
+        p->pre_->next_ = head_;//直接将末尾节点的前一个节点置为第一个节点就行
+        
+    }
+    void InsertPos(int pos, int val)
+    {
+        if (pos < 1){
+            return;
+        }
+        Node* s = head_;
+        int i = 1;
+        while (s->next_ != head_ && i < pos){
+            s = s->next_;//寻找到目标位置的前一个位置节点
+            i++;
+        }
+        if (pos > i){
+            return;
+        }
+        Node* node = new Node(val);
+        //插入部分
+        node->next_ = s->next_;
+        node->pre_ = s;
+        s->next_->pre_ = node;//无需判空            
+        s->next_ = node;
+    }
+    void InsertVal(int pval, int val)//插入到后面
+    {
+        Node* node = new Node(val);//pval为值为pval的节点
+        Node* p = head_->next_;
+        while (p != head_){
+            if (p->data_ == pval){
+                //若是插在值为pval节点前面,则是p->next_->data_ = pval,此时p在pval节点的前面
+                //若是插在值为pval节点后面,则是p->data_ = pval,此时p在pval节点的位置
+                break;
+            }
+            p = p->next_;
+        }
+        node->next_ = p->next_;
+        node->pre_ = p;
+        p->next_->pre_ = node;
+        p->next_ = node;
+        
+    }
+    
+    void RemovePos(int pos)
+    {
+        if (pos < 1){
+            return;
+        }
+        Node* s = head_;
+        int i = 1;
+        while (s->next_ != head_ && i <= pos){
+            s = s->next_;//寻找到目标位置的节点
+            i++;
+        }
+        if (pos > i){
+            return;
+        }
+        //删除部分
+        s->pre_->next_ = s->next_;//将s的前一个节点的后继指向s的后一个节点
+        s->next_->pre_ = s->pre_;//将s的后一个节点的前驱指向s的前一个节点
+        delete s;
+    }
+    void RemoveVal(int val)
+    {
+        Node* p = head_->next_;
+        while (p != head_)//遍历到末尾节点，即是头结点的下一个节点
+        {
+            if (p->data_ == val)
+            {
+                //删除p指向的节点
+                p->pre_->next_ = p->next_;
+                p->next_->pre_ = p->pre_;
+                delete p;
+            }
+            else
+            {
+                p = p->next_;
+            }
+        }
+    }
+
+    bool Find(int val){
+        Node* p = head_->next_;
+        while (p != head_){//要遍历到尾节点的尾节点的下一个节点，也就是头节点
+            if (p->data_ == val){
+                return true;
+            }
+            else{
+                p = p->next_;
+            }
+        }
+        return false;
+   }
+    void show()
+    {
+        Node* p = head_->next_;
+        while (p != head_)
+        {
+            cout << p->data_ << " ";
+            p = p->next_;
+        }
+        cout << endl;
+    }
+};
+/**
+ * @brief 
+ * 双向循环链表的边界条件为p != head
+ * 
+ */
+int main()
+{
+    DoubleCircleLink dlink;
+    dlink.InsertHead(1);
+    dlink.InsertHead(2);
+    dlink.InsertHead(3);
+    dlink.InsertHead(4);
+    dlink.InsertHead(5); 
+    dlink.show();
+    // dlink.InsertPos(3, 11);
+    // dlink.InsertVal(4, 12);
+    // dlink.RemoveBack();
+    // dlink.RemoveFront();
+    // dlink.RemovePos(3);
+    dlink.RemoveVal(3);
+    if(dlink.Find(3)){
+        cout << "find " << endl;
+    }
+    dlink.show();
+
+}
+```                                                                                                             
