@@ -637,6 +637,28 @@ ls -l | grep python
     "version": 4
   }
 ```
+
+2. vscode的扩展安装问题
+   1. [安装方法](https://blog.csdn.net/aixueai/article/details/119536487?spm=1001.2101.3001.6650.5&utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7Edefault-5-119536487-blog-80684376.pc_relevant_sortByAnswer&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7Edefault-5-119536487-blog-80684376.pc_relevant_sortByAnswer&utm_relevant_index=8)
+   2. >若是无法安装，登录[网址](https://marketplace.visualstudio.com/search?term=leetcode&target=VSCode&category=All%20categories&sortBy=Relevance)搜索扩展
+   3. >点击右下角Download Extention, 下载得到.vsix文件
+   4. >回到vscode，选择扩展，点击...,从vsix文件安装
+
+3. vscode配置sync的问题
+   1. 网址[网站](https://www.pudn.com/news/62ab53d4dfc5ee196875c7fb.html)
+   2. >使用:上传：Shift+Alt+U; 下载：Shift+Alt+D
+   3. >token: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
+   4. >gist:af8e2340076395acc25ba4124eaa70d4
+
+4. 关于扩展无法使用的问题
+   1. vscode
+   2. File
+   3. Preferences
+   4. settings
+   5. Proxy
+   6. 将Http Proxy置空
+
+
 ## 18.软件问题
 1. amd64 = x64
 
@@ -742,8 +764,76 @@ ls -l | grep python
    1. Ctrl+Alt+U 编译并上传
    2. Ctrl+Alt+R 进⾏编译验
 
+## 26.git的学习问题
+1. github令牌：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
+2. 设置密码：git remote set-url origin https://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@github.com/KJ-Falloutlast/https://github.com/KJ-Falloutlast/SLAM_learn.git
+3. 初始化步骤：
+  * >1. git init 
+  * >2. git add .
+  * >3. git commit -m "注释语句"
+  * >4. git remote add origin https://github.com/KJ-Falloutlast/SLAM.git
+  * >5. git branch -M main | git pull origin master   
+  * >6. git push -u origin main | git push -u origin master
+  * 上传步骤：
+    * git add .
+    * git commit -m "xxxx"
+    * git push
 
-## 26.orbslam2的安装方法
+4. 创建阀仓库
+   1. 检查SSH公钥
+   cd ~/.ssh
+   1. 生成SSH公钥
+   ssh-keygen -t rsa -C "479875948@qq.com"**一路回车即可** 
+    
+   1. 添加SSH公钥到github
+    * cat id_rsa.pub 
+    * 在github上添加ssh公钥匙
+      * >settings-->SSH and GPG keys-->将生成的公钥匙保存到github中并加上标题
+      * 
+
+   2. 测试是否生效
+      ssh -T git@github.com当看到这些内容放入时候，直接yes
+
+      The authenticity of host 'github.com (207.97.227.239)' can't be established. 
+
+      RSA key fingerprint is 16:27:ac:a5:76:28:2d:36:63:1b:56:4d:eb:df:a6:48. 
+      Are you sure you want to continue connecting (yes/no)?看到这个内容放入时候，说明就成功了。
+
+      Hi username! 
+
+      You've successfully authenticated, but GitHub does not provide shell access.
+    1. 本地项目上传至github
+      mkdir demo
+      cd demo
+      echo "# demo" >> README.md
+      git init //把这个目录变成Git可以管理的仓库
+      git add README.md //文件添加到仓库
+      git add . //不但可以跟单一文件，还可以跟通配符，更可以跟目录。一个点就把当前目录下所有未追踪的文件全部add了（空目录不会被添加）
+      git status //查看当前工作区的状态（需提交的变更）
+      git commit -m "first commit" //把文件提交到仓库
+      git remote add origin git@github.com:hxf0663/demo.git //关联远程仓库
+      git push -u origin master //将本地主分支推到远程(如无远程主分支则创建，用于初始化远程仓库)
+      git push origin master //将本地主分支推到远程主分支
+      下载操作：
+      git pull origin master //把远程库更改拉到本地仓库
+      git clone git@github.com:hxf0663/demo.git //克隆远程仓库到本地
+      git clone https://github.com/hxf0663/demo.git //克隆远程仓库到本地
+      git clone https://github.com/hxf0663/demo //克隆远程仓库到本地
+
+
+
+  1. 问题分析：
+     1. 更新被拒绝
+      提示：更新被拒绝，因为您当前分支的最新提交落后于其对应的远程分支。
+      提示：再次推送前，先与远程变更合并（如 ‘git pull …’）。详见
+      提示：’git push –help’ 中的 ‘Note about fast-forwards’ 小节。
+
+      *解决方案：
+         $git fetch origin    //获取远程更新
+         $git merge origin/master -m "message" //把更新的内容合并到本地分支
+      1. 
+
+## 27.orbslam2的安装方法
 [安装教程](https://blog.csdn.net/weixin_56566649/article/details/124355140)
 1. *将原来安装opencv和pangolin卸载掉*,主要方法:
    1. >其他位置->计算机
@@ -768,8 +858,14 @@ ls -l | grep python
 ![网址](https://blog.csdn.net/weixin_49353816/article/details/123894843)
 1. >#include <opencv2/imgcodecs/legacy/constants_c.h>//解决‘CV_LOAD_IMAGE_UNCHANGED’没有declared的问题
 2. >CV_FM_8POINT’ was not declared in this scope，将CV_FM_8POINT该为FM_8POINT
-## 2. 
-## 1-5.杂项问题
+
+## 2.windows下cmake的配置方法
+1. 编译方法
+   1. >cmake -G "MinGW Makefiles"
+   2. >mingw32-make.exe all
+
+
+## 3.杂项问题
 1. endl的问题:
 加<<endl后会有一个换行,下次再用cout输出字符时就会在下一行开始输出，
 如果不加，就会跟在当前行的最后输出。
@@ -968,7 +1064,11 @@ https://suo.yt/sKW1OHL(**新节点**)
       4. 127.0.0.1 *忽略主机*
    5. 恢复至开机自启动
 
-
+3. windows网络代理的设置
+   1. >自动检测设置->关
+   2. >使用设置脚本->关
+   3. >使用代理服务器->开
+   4. >切换到自动使用节点的位置
 ## 5. wine的相关问题：
 1. 安装步骤
    1. >sudo dpkg --add-architecture i386 

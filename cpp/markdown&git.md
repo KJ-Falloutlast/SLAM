@@ -1,8 +1,14 @@
+<<<<<<< HEAD
 ---
 marp: false
 ---
 
 # 1.markdown
+=======
+
+# 1.markdown学习
+
+>>>>>>> 9ce2eae5b379cb47490bb58c1a80d8e5e5e7ba12
 1.标题使用
     # 一级标题
     ## 二级标题
@@ -290,6 +296,7 @@ markdown
 
 
 5. $\sum_{i=0}^{i = N}\frac{x_i}{x_i + {x_i}^2} = \frac{4}{7}$
+<<<<<<< HEAD
 6. $\int_0^{x^2}{y^2}dxdy$
 7. 矩阵插入
 $$\begin{bmatrix}
@@ -301,15 +308,22 @@ $$
 
 
 # git 学习
+=======
+6. $\iint_0^{x^2}{y^2}dxdy$
+
+
+
+# 2.git 学习
+>>>>>>> 9ce2eae5b379cb47490bb58c1a80d8e5e5e7ba12
 1. github令牌：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
 2. 设置密码：git remote set-url origin https://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@github.com/KJ-Falloutlast/https://github.com/KJ-Falloutlast/SLAM_learn.git
 3. 初始化步骤：
-  * 1. git init 
-  * 2. git add .
-  * 3. git commit -m "注释语句"
-  * 4. git remote add origin https://github.com/KJ-Falloutlast/SLAM.git
-  * 5. git branch -M main
-  * 6. git push -u origin main
+  * >1. git init 
+  * >2. git add .
+  * >3. git commit -m "注释语句"
+  * >4. git remote add origin https://github.com/KJ-Falloutlast/SLAM.git
+  * >5. git branch -M main | git pull origin master   
+  * >6. git push -u origin main | git push -u origin master
   * 上传步骤：
     * git add .
     * git commit -m "xxxx"
