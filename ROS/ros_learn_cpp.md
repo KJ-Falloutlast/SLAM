@@ -4035,7 +4035,7 @@ controllers: {
    1. 简介:是一组软件包，它包含了控制器接口，控制器管理器，传输和硬件接口。
    2. 运动控制的实现流程
       1. 为joint添加传动装置和控制器
-```cpp
+```xml
 <robot name="my_car_move" xmlns:xacro="http://wiki.ros.org/xacro">
 
     <!-- 传动实现:用于连接控制器与关节 -->

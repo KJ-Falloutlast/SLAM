@@ -13962,6 +13962,7 @@ int main(){
 1. 利用realloc来控制内存的管理和释放
    1. 若是有足够的空间追加，则直接返回原来ptr的地址
    2. 若是没有足够的空间，则将原来的
+
 ```cpp
 #include<stdio.h>
 #include<iostream>

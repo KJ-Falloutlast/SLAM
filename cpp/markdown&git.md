@@ -1,3 +1,8 @@
+---
+marp: false
+---
+
+# 1.markdown
 1.标题使用
     # 一级标题
     ## 二级标题
@@ -286,10 +291,16 @@ markdown
 
 5. $\sum_{i=0}^{i = N}\frac{x_i}{x_i + {x_i}^2} = \frac{4}{7}$
 6. $\int_0^{x^2}{y^2}dxdy$
+7. 矩阵插入
+$$\begin{bmatrix}
+1 & 2 & 3\\
+2 & 2 & 3 \\
+\end{bmatrix}
+$$
 
 
 
-## git 学习
+# git 学习
 1. github令牌：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
 2. 设置密码：git remote set-url origin https://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@github.com/KJ-Falloutlast/https://github.com/KJ-Falloutlast/SLAM_learn.git
 3. 初始化步骤：
@@ -356,4 +367,119 @@ markdown
       *解决方案：
          $git fetch origin    //获取远程更新
          $git merge origin/master -m "message" //把更新的内容合并到本地分支
-      1. 
+
+
+
+# 3.Marp学习
+---
+marp: true
+
+paginate: true
+
+theme: default
+
+style: |
+
+  section {
+    background-color: #eee;
+    color: #111;
+    width: 1280px;
+    height: 720px;
+    font-size: 32px;
+    padding: 80px;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 60px;
+    color: #000;
+  }
+
+  h2 {
+    text-align: center;
+    font-size: 50px;
+    color: #111;
+  }
+
+  p {
+    text-align: left;
+    font-size: 32px;
+    color: #111;
+  }
+
+  header,
+  footer {
+    font-size: 32px;
+    position: absolute;
+    left: 50px;
+    right: 50px;
+    height: 20px;
+  }
+
+  header {
+    top: 10px;
+  }
+
+  footer {
+    bottom: 40px;
+  }
+
+  section.封皮 h1 {
+    text-align: center;
+    background-color: #09c;
+    font-size: 60px;
+    color: #fff;
+  }
+
+  section.封皮 h2 {
+    text-align: center;
+    background-color: #09c;
+    font-size: 50px;
+    color: #eee;
+  }
+
+  section.封皮 p {
+    text-align: center;
+    font-size: 40px;
+    color: #000;
+  }
+
+  section.正文 h1 {
+    text-align: center;
+    font-size: 60px;
+    color: #000;
+  }
+
+  section.正文 h2 {
+    text-align: center;
+    font-size: 50px;
+    color: #111;
+  }
+
+  section.正文 p {
+    text-align: left;
+    font-size: 32px;
+    color: #111;
+  }
+
+
+header: 'Header content'
+footer: 'Footer content'
+
+
+
+math: katex
+---
+
+<!-- _header: '' -->
+<!-- _footer: '' -->
+<!-- _paginate: false -->
+<!-- _class: 封皮 -->
+
+
+---
+
+![bg cover 20%](../pictures/1-2数据结构三要素.png)
+dfsd
+
+---

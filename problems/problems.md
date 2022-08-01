@@ -198,7 +198,9 @@ cmakelists:project(model02)
    3. 试图把一个整数按照字符串的方式输出
 
 
-
+## 17. zsh: no matches found:
+1. >在.zshrc中写入setopt no_nomatch
+2. >source ~/.zshrc
 
 # 2.linux学习问题
 

@@ -1,5 +1,5 @@
-# 1.opencv基础
-## 1-1.加载修改和保存图像
+
+# 1.加载修改和保存图像
 ![1-1图像基本操作](../pictures/opencv-1-1-图像基本操作.png)
 1. imread
    1. 功能：加载图像文件，使得图像文件成为一个mat对象，其中第一个参数为图像文件名称
@@ -104,7 +104,7 @@ int main(){
 ```
 
 
-## 1-2.图像的掩膜操作
+# 2.图像的掩膜操作
 ![图像的掩膜操作](../pictures/图像的掩膜操作.png图像的)
 1. 获取图像像素指针
    1. CV_Assert(myImage.depth() == CV_8U);
@@ -121,6 +121,7 @@ int main(){
 4. 函数调用filter2D功能
    1. 定义掩膜: Mat kernel = (Mat_<char>(3, 3) << 0, -1, 0, -1, 5, -1, 0, -1, 0);
    2. filter2D(src, dst, src.depth(), kernel);其中src和dst是Mat,src.depth表示位图深度，有32， 24， 8
+
 ```cpp
 #include <opencv2/opencv.hpp>
 #include <iostream>
@@ -168,9 +169,8 @@ int main()
 	return 0;
 
 }
-
 ```
-## 1-3.Mat对象构造和常用方法
+# 3.Mat对象构造和常用方法
 1. 构造方法
    1. Mat()
    2. Mat(int rows, int cols, int type)
@@ -441,7 +441,7 @@ int main()
 }
 ```
 
-## 1-4图像的遍历方法
+# 4.图像的遍历方法
 ```cpp
 #include <../include/quickopencv.h>
 #include <opencv2/opencv.hpp>
@@ -558,7 +558,7 @@ int main()
 
 ```
 
-## 1-10.opencv基础
+## 4-1.opencv基础
 1. Mat基本结构
    1. header:头部|数据部分
    2. 赋值，克隆，拷贝
@@ -715,14 +715,97 @@ int main()
 ```
 
 
+# 5.图像的加减乘除
+1. 条件
+   1. 输入图像的大小和类型必须一致
+   2. 处理越界
+2. 实例
+```cpp
+#include <opencv2/opencv.hpp>
+#include <iostream>
+#include <opencv2/highgui/highgui.hpp>
+using namespace std;
+using namespace cv;
+int main(){
+    Mat src1 = imread("/home/kim-james/ROS_Space/opencv_ws/source/images/lena.png");
+    Mat src2 = imread("/home/kim-james/ROS_Space/opencv_ws/source/images/lena.png");
+    if (src1.empty() || src2.empty()){
+        printf("couldn't find image file");
+    }
+    imshow("input1", src1);
+    imshow("input2", src2);
+    
+    //1.图像的运算
+    // Mat dst1;
+    // add(src1, src2, dst1);
+    // imshow("add-demo", dst1);
+    
+    // Mat dst2;
+    // subtract(src1, src2, dst2);
+    // imshow("substract-demo", dst2);
+     
+    // Mat dst3;
+    // multiply(src1, src2, dst3);
+    // imshow("multiply-demo", dst3);
 
+    // Mat dst4;
+    // divide(src1, src2, dst4);
+    // imshow("divide-demo", dst4);
 
+    //2.
+    Mat src = imread("/home/kim-james/ROS_Space/opencv_ws/source/images/lena.png");
+    imshow("input", src);
+    Mat black = Mat::zeros(src.size(), src.type());
+    waitKey(0);
+    destroyAllWindows();
+    return 0;
+}
+```
+# 6.图像的位操作
 
-
-
-
-# 2.补充知识
-### 1.scalar
+```cpp
+#include <opencv2/opencv.hpp>
+#include <iostream>
+#include <opencv2/highgui/highgui.hpp>
+using namespace std;
+using namespace cv;
+int main(){
+    Mat src = imread("/home/kim-james/ROS_Space/opencv_ws/source/images/lena.png");
+    if (src.empty()){
+        printf("couldn't find image file");
+        return -1;
+    }
+    namedWindow("inputl", WINDOW_AUTOSIZE);
+    imshow("input1", src);
+    
+    //图像取反
+    Mat m1;
+    Mat mask = Mat::zeros(src.size(), CV_8UC1);//生成1个
+    int h = src.rows / 2;
+    int w = src.cols / 2;
+    //1.方法1
+    // bitwise_not(src, m1, Mat());//参照空Mat来进行取反
+    //2.方法2
+    // bitwise_not(src, m1,  mask);//参照mask进行取反
+    //3.方法3
+    for (int row = 0; row < h; row++){
+        for (int col = 0; col < w; col++){
+            mask.at<uchar>(row, col) = 255;
+        }
+    }
+    //表示左上角的区域是白色，其余区域是黑色的
+    imshow("mask", mask); 
+    bitwise_not(src, m1,  mask);//将src按照mask进行取反操作，结果保存在m1中
+    //先对图像取反，然后再让mask框柱指定区域
+    //若只是Mat(), 则所有区域都是取反的
+    imshow("bitwise_not", m1);
+    waitKey(0);
+    destroyAllWindows();   
+    return 0;
+}
+```
+# 10.补充知识
+## 1.scalar
 1. 例子1
 ```cpp
 #include <iostream>

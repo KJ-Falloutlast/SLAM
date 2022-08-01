@@ -1,4 +1,4 @@
-# 1.第一讲
+# 1.第1讲
 ### 1-1.基本命令
 #### 1.运行c++文件
 1. 过程
@@ -75,7 +75,7 @@ int main(int argc, char** argv){
     cout << "您的输出结果是:" << res << endl;
 }
 ```
-# 2.第二讲
+# 2.第2讲
 ## 1. eigen的使用
 1. >头文件路径：/usr/include/eigen3/Eigen/Core 
 2. 基本使用：
@@ -649,7 +649,7 @@ int main(int argc, char** argv) {
   return 0;
 }
 ```
-# 3.第三讲
+# 3.第3讲
 ## 3-1.Sophus的安装
 [Sophus1](https://blog.csdn.net/LW20211020/article/details/124204127)
 [Sophus2](https://blog.csdn.net/mine_1/article/details/117703483)
@@ -1609,7 +1609,7 @@ void DrawTrajectory(vector<Sophus::SE3> poses_est, vector<Sophus::SE3> poses_gd)
 ```
 
 # 3.第4讲
-## 3-1.点云的基本概 念
+## 3-1.点云的基本概念
 1. 概念：同一空间参考系下表达目标空间分布和目标表面特性的海量点集合，是在获取物体表面每个采样点的空间坐标后得到的点的集合，称为点云(Point Cloud)
 2. 数据类型
    1. 类型
@@ -2829,8 +2829,6 @@ VetexSBAPointXYZ,空间点的位置；顶点
 EdgeProjectXYZ2UV,表示投影方程的边；边
 */
 
-
-
 //1.定义顶点
 class CurveFittingVertex:public g2o::BaseVertex<3, Eigen::Vector3d>
 //定义曲线拟合顶点；继承基础顶点类;3表示顶点的待优化变量为3维;数据类型为Eign::Vector3d
@@ -2952,20 +2950,20 @@ public:
 ```cpp
 int main(int argc, char **argv)
 {
-		  double ar = 1.0, br = 2.0, cr = 1.0;  // 真实参数值
-		  double ae = 2.0, be = -1.0, ce = 5.0; // 估计参数值
-		  int N = 100;                          // 数据点
-		  double w_sigma = 1.0;                 // 噪声Sigma值
-		  double inv_sigma = 1.0 / w_sigma;
-		  cv::RNG rng; // OpenCV随机数产生器
-		
-		  vector<double> x_data, y_data; // 数据
-		  for (int i = 0; i < N; i++)
-		  {
-		    double x = i / 100.0;
-		    x_data.push_back(x);
-		    y_data.push_back(exp(ar * x * x + br * x + cr) + rng.gaussian(w_sigma * w_sigma));
-		  }
+    double ar = 1.0, br = 2.0, cr = 1.0;  // 真实参数值
+    double ae = 2.0, be = -1.0, ce = 5.0; // 估计参数值
+    int N = 100;                          // 数据点
+    double w_sigma = 1.0;                 // 噪声Sigma值
+    double inv_sigma = 1.0 / w_sigma;
+    cv::RNG rng; // OpenCV随机数产生器
+
+    vector<double> x_data, y_data; // 数据
+    for (int i = 0; i < N; i++)
+    {
+      double x = i / 100.0;
+      x_data.push_back(x);
+      y_data.push_back(exp(ar * x * x + br * x + cr) + rng.gaussian(w_sigma * w_sigma));
+}
 
 ```
 4. 构建图
@@ -2990,7 +2988,6 @@ for (int i = 0; i < N; i++){
     edge->setVertex(0, v);//设置连接的顶点
     edge->setMeasurement(y_data[i]);//观测数值
     edge->setInformation(Eigen::Matrix<double, 1, 1>::Identity() * 1 / (w_sigma * w_sigma));//信息矩阵，协方差矩阵之逆
-    
 } 
 ```
 ```cpp
@@ -3412,7 +3409,6 @@ int findCorrespondingPoints( const cv::Mat& img1, const cv::Mat& img2, vector<cv
 #include <g2o/core/base_unary_edge.h>
 #include <g2o/solvers/csparse/linear_solver_csparse.h>
 
-
 using namespace std;
 
 double errorOfSolution(int numPoints, Eigen::Vector2d* points, const Eigen::Vector3d& circle)
@@ -3670,7 +3666,7 @@ public:
     void computeError()
     {
         const MyVertex * v1= static_cast<const MyVertex*>(_vertices[0]);
-        //_vertices[1]表示第1个顶点，所以此行表示将第1个顶点转换为MyVertex*类型，并用v1接收
+        //_vertices[0]表示第1个顶点，所以此行表示将第1个顶点转换为MyVertex*类型，并用v1接收
         const MyVertex * v2 = static_cast<const MyVertex*>(_vertices[1]);
         //_vertices[1]表示第2顶点，所以此行表示将第2个顶点转换为MyVertex*类型，并用v2接收
         _error(0,0) = _measurement - (v2->estimate() - v1->estimate());
@@ -3859,7 +3855,6 @@ int main()
 ```
 
 # 5.第6讲
-
 ## 5-1.特征匹配
 ![特征点](../pictures/slam_FAST特征点.jpeg)
 1. 特征匹配
@@ -3874,7 +3869,7 @@ int main()
       1. 定义:ORB采用BRIEF算法来计算一个特征点的描述子。BRIEF算法的核心思想是在关键点P的周围以一定模式选取N个点对，把这N个点对的比较结果组合起来作为描述子。
       2. 计算特征描述子步骤
          1. 以关键点P为圆心,以d为半径做圆
-         2. 2.在圆O内某一模式选取N个点对。这里为方便说明，N=4，实际应用中N可以取512，假设当前选取的4个点对如上图所示分别标记为：**p1(A, B),p2(A, B),p3(A, B),p4(A, B)**
+         2. 2.在圆O内某一模式选取N个点对。这里为方便说明，N=4，实际用中N可以取512，假设当前选取的4个点对如上图所示分别标记为：**p1(A, B),p2(A, B),p3(A, B),p4(A, B)**
          3. 定义操作:**T(P(A, B)) = 1 (IA > IB) or 0(IA <= IB)**(n个点就有n个描述子)
          4. 分别对已选取的点对进行T操作，将得到的结果进行组合。假如:
             1. T(P1(A, B)) = 1;
@@ -3888,7 +3883,9 @@ int main()
    4. 特征点的匹配
       1. 设A：10101011，B：10101010。我们设定一个阈值，比如80%。当A和B的描述子的相似度大于90%时，我们判断A,B是相同的特征点，即这2个点匹配成功。在这个例子中A,B只有最后一位不同，相似度为87.5%，大于80%。则A和B是匹配的。
       2. 描述子的距离:A = 1100, B = 0011, d = 4(**不同加1，相同为0**)
-
+2. 运行orbslam2的方法:
+   1. >./Examples/Monocular/mono_tum Vocabulary/ORBvoc.txt Examples/Monocular/TUM1.yaml data/rgbd_dataset_freiburg1_xyz
+ 
 ```cpp
 #include <iostream>
 #include <opencv2/core/core.hpp>
@@ -3964,6 +3961,7 @@ int main(){
 }   
 
 ```
+## 5-2.2D-2D位姿估计
 1. pose_estimation_2d2d
 ```cpp
 #include <iostream>
@@ -4141,511 +4139,7 @@ void pose_estimation_2d2d ( std::vector<KeyPoint> keypoints_1,
     
 }
 ```
-
-3. pose_estimation_3d2d
-```cpp
-#include <iostream>
-#include <opencv2/core/core.hpp>
-#include <opencv2/features2d/features2d.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/calib3d/calib3d.hpp>
-#include <opencv2/imgcodecs/legacy/constants_c.h>//解决‘CV_LOAD_IMAGE_UNCHANGED’没有declared的问题
-// #include "extra.h" // use this if in OpenCV2 
-using namespace std;
-using namespace cv;
-
-/****************************************************
- * 本程序演示了如何使用2D-2D的特征匹配估计相机运动
- * **************************************************/
-
-void find_feature_matches (
-    const Mat& img_1, const Mat& img_2,
-    std::vector<KeyPoint>& keypoints_1,
-    std::vector<KeyPoint>& keypoints_2,
-    std::vector< DMatch >& matches );
-
-void pose_estimation_2d2d (
-    std::vector<KeyPoint> keypoints_1,
-    std::vector<KeyPoint> keypoints_2,
-    std::vector< DMatch > matches,
-    Mat& R, Mat& t );
-
-// 像素坐标转相机归一化坐标
-Point2d pixel2cam ( const Point2d& p, const Mat& K );
-
-int main ( int argc, char** argv )
-{
-    if ( argc != 3 )
-    {
-        cout<<"usage: pose_estimation_2d2d img1 img2"<<endl;
-        return 1;
-    }
-    //-- 读取图像
-    Mat img_1 = imread ( argv[1], CV_LOAD_IMAGE_COLOR );
-    Mat img_2 = imread ( argv[2], CV_LOAD_IMAGE_COLOR );
-
-    vector<KeyPoint> keypoints_1, keypoints_2;
-    vector<DMatch> matches;
-    find_feature_matches ( img_1, img_2, keypoints_1, keypoints_2, matches );
-    cout<<"一共找到了"<<matches.size() <<"组匹配点"<<endl;
-
-    //-- 估计两张图像间运动
-    Mat R,t;
-    pose_estimation_2d2d ( keypoints_1, keypoints_2, matches, R, t );
-
-    //-- 验证E=t^R*scale
-    Mat t_x = ( Mat_<double> ( 3,3 ) <<
-                0,                      -t.at<double> ( 2,0 ),     t.at<double> ( 1,0 ),
-                t.at<double> ( 2,0 ),      0,                      -t.at<double> ( 0,0 ),
-                -t.at<double> ( 1,0 ),     t.at<double> ( 0,0 ),      0 );
-
-    cout<<"t^R="<<endl<<t_x*R<<endl;
-
-    //-- 验证对极约束
-    Mat K = ( Mat_<double> ( 3,3 ) << 520.9, 0, 325.1, 0, 521.0, 249.7, 0, 0, 1 );
-    for ( DMatch m: matches )
-    {
-        Point2d pt1 = pixel2cam ( keypoints_1[ m.queryIdx ].pt, K );
-        Mat y1 = ( Mat_<double> ( 3,1 ) << pt1.x, pt1.y, 1 );
-        Point2d pt2 = pixel2cam ( keypoints_2[ m.trainIdx ].pt, K );
-        Mat y2 = ( Mat_<double> ( 3,1 ) << pt2.x, pt2.y, 1 );
-        Mat d = y2.t() * t_x * R * y1;
-        cout << "epipolar constraint = " << d << endl;
-    }
-    return 0;
-}
-
-void find_feature_matches ( const Mat& img_1, const Mat& img_2,
-                            std::vector<KeyPoint>& keypoints_1,
-                            std::vector<KeyPoint>& keypoints_2,
-                            std::vector< DMatch >& matches )
-{
-    //-- 初始化
-    Mat descriptors_1, descriptors_2;
-    // used in OpenCV3 
-    Ptr<FeatureDetector> detector = ORB::create();
-    Ptr<DescriptorExtractor> descriptor = ORB::create();
-    // use this if you are in OpenCV2 
-    // Ptr<FeatureDetector> detector = FeatureDetector::create ( "ORB" );
-    // Ptr<DescriptorExtractor> descriptor = DescriptorExtractor::create ( "ORB" );
-    Ptr<DescriptorMatcher> matcher  = DescriptorMatcher::create ( "BruteForce-Hamming" );
-    //-- 第一步:检测 Oriented FAST 角点位置
-    detector->detect ( img_1,keypoints_1 );
-    detector->detect ( img_2,keypoints_2 );
-
-    //-- 第二步:根据角点位置计算 BRIEF 描述子
-    descriptor->compute ( img_1, keypoints_1, descriptors_1 );
-    descriptor->compute ( img_2, keypoints_2, descriptors_2 );
-
-    //-- 第三步:对两幅图像中的BRIEF描述子进行匹配，使用 Hamming 距离
-    vector<DMatch> match;
-    //BFMatcher matcher ( NORM_HAMMING );
-    matcher->match ( descriptors_1, descriptors_2, match );
-
-    //-- 第四步:匹配点对筛选
-    double min_dist=10000, max_dist=0;
-
-    //找出所有匹配之间的最小距离和最大距离, 即是最相似的和最不相似的两组点之间的距离
-    for ( int i = 0; i < descriptors_1.rows; i++ )
-    {
-        double dist = match[i].distance;
-        if ( dist < min_dist ) min_dist = dist;
-        if ( dist > max_dist ) max_dist = dist;
-    }
-
-    printf ( "-- Max dist : %f \n", max_dist );
-    printf ( "-- Min dist : %f \n", min_dist );
-
-    //当描述子之间的距离大于两倍的最小距离时,即认为匹配有误.但有时候最小距离会非常小,设置一个经验值30作为下限.
-    for ( int i = 0; i < descriptors_1.rows; i++ )
-    {
-        if ( match[i].distance <= max ( 2*min_dist, 30.0 ) )
-        {
-            matches.push_back ( match[i] );
-        }
-    }
-}
-
-
-Point2d pixel2cam ( const Point2d& p, const Mat& K )
-{
-    return Point2d
-           (
-               ( p.x - K.at<double> ( 0,2 ) ) / K.at<double> ( 0,0 ),
-               ( p.y - K.at<double> ( 1,2 ) ) / K.at<double> ( 1,1 )
-           );
-}
-
-
-void pose_estimation_2d2d ( std::vector<KeyPoint> keypoints_1,
-                            std::vector<KeyPoint> keypoints_2,
-                            std::vector< DMatch > matches,
-                            Mat& R, Mat& t )
-{
-    // 相机内参,TUM Freiburg2
-    Mat K = ( Mat_<double> ( 3,3 ) << 520.9, 0, 325.1, 0, 521.0, 249.7, 0, 0, 1 );
-
-    //-- 把匹配点转换为vector<Point2f>的形式
-    vector<Point2f> points1;
-    vector<Point2f> points2;
-
-    for ( int i = 0; i < ( int ) matches.size(); i++ )
-    {
-        points1.push_back ( keypoints_1[matches[i].queryIdx].pt );
-        points2.push_back ( keypoints_2[matches[i].trainIdx].pt );
-    }
-
-    //-- 计算基础矩阵
-    Mat fundamental_matrix;
-    fundamental_matrix = findFundamentalMat ( points1, points2, FM_8POINT );//将CV_FM_8POINT改为FM_8POINT
-    cout<<"fundamental_matrix is "<<endl<< fundamental_matrix<<endl;
-
-    //-- 计算本质矩阵
-    Point2d principal_point ( 325.1, 249.7 );	//相机光心, TUM dataset标定值
-    double focal_length = 521;			//相机焦距, TUM dataset标定值
-    Mat essential_matrix;
-    essential_matrix = findEssentialMat ( points1, points2, focal_length, principal_point );
-    cout<<"essential_matrix is "<<endl<< essential_matrix<<endl;
-
-    //-- 计算单应矩阵
-    Mat homography_matrix;
-    homography_matrix = findHomography ( points1, points2, RANSAC, 3 );
-    cout<<"homography_matrix is "<<endl<<homography_matrix<<endl;
-
-    //-- 从本质矩阵中恢复旋转和平移信息.
-    recoverPose ( essential_matrix, points1, points2, R, t, focal_length, principal_point );
-    cout<<"R is "<<endl<<R<<endl;
-    cout<<"t is "<<endl<<t<<endl;
-    
-}
-```
-4. pose_estimation_3d3d
-```cpp
-#include <iostream>
-#include <opencv2/core/core.hpp>
-#include <opencv2/features2d/features2d.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/calib3d/calib3d.hpp>
-#include <Eigen/Core>
-#include <Eigen/Geometry>
-#include <Eigen/SVD>
-#include <g2o/core/base_vertex.h>
-#include <g2o/core/base_unary_edge.h>
-#include <g2o/core/block_solver.h>
-#include <g2o/core/optimization_algorithm_gauss_newton.h>
-#include <g2o/solvers/eigen/linear_solver_eigen.h>
-#include <g2o/types/sba/types_six_dof_expmap.h>
-#include <opencv2/imgcodecs/legacy/constants_c.h>//解决‘CV_LOAD_IMAGE_UNCHANGED’没有declared的问题
-#include <chrono>
-
-using namespace std;
-using namespace cv;
-
-void find_feature_matches (
-    const Mat& img_1, const Mat& img_2,
-    std::vector<KeyPoint>& keypoints_1,
-    std::vector<KeyPoint>& keypoints_2,
-    std::vector< DMatch >& matches );
-
-// 像素坐标转相机归一化坐标
-Point2d pixel2cam ( const Point2d& p, const Mat& K );
-
-void pose_estimation_3d3d (
-    const vector<Point3f>& pts1,
-    const vector<Point3f>& pts2,
-    Mat& R, Mat& t
-);
-
-void bundleAdjustment(
-    const vector<Point3f>& points_3d,
-    const vector<Point3f>& points_2d,
-    Mat& R, Mat& t
-);
-
-// g2o edge
-class EdgeProjectXYZRGBDPoseOnly : public g2o::BaseUnaryEdge<3, Eigen::Vector3d, g2o::VertexSE3Expmap>
-{
-public:
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
-    EdgeProjectXYZRGBDPoseOnly( const Eigen::Vector3d& point ) : _point(point) {}
-
-    virtual void computeError()
-    {
-        const g2o::VertexSE3Expmap* pose = static_cast<const g2o::VertexSE3Expmap*> ( _vertices[0] );
-        // measurement is p, point is p'
-        _error = _measurement - pose->estimate().map( _point );
-    }
-
-    virtual void linearizeOplus()
-    {
-        g2o::VertexSE3Expmap* pose = static_cast<g2o::VertexSE3Expmap *>(_vertices[0]);
-        g2o::SE3Quat T(pose->estimate());
-        Eigen::Vector3d xyz_trans = T.map(_point);
-        double x = xyz_trans[0];
-        double y = xyz_trans[1];
-        double z = xyz_trans[2];
-
-        _jacobianOplusXi(0,0) = 0;
-        _jacobianOplusXi(0,1) = -z;
-        _jacobianOplusXi(0,2) = y;
-        _jacobianOplusXi(0,3) = -1;
-        _jacobianOplusXi(0,4) = 0;
-        _jacobianOplusXi(0,5) = 0;
-
-        _jacobianOplusXi(1,0) = z;
-        _jacobianOplusXi(1,1) = 0;
-        _jacobianOplusXi(1,2) = -x;
-        _jacobianOplusXi(1,3) = 0;
-        _jacobianOplusXi(1,4) = -1;
-        _jacobianOplusXi(1,5) = 0;
-
-        _jacobianOplusXi(2,0) = -y;
-        _jacobianOplusXi(2,1) = x;
-        _jacobianOplusXi(2,2) = 0;
-        _jacobianOplusXi(2,3) = 0;
-        _jacobianOplusXi(2,4) = 0;
-        _jacobianOplusXi(2,5) = -1;
-    }
-
-    bool read ( istream& in ) {}
-    bool write ( ostream& out ) const {}
-protected:
-    Eigen::Vector3d _point;
-};
-
-int main ( int argc, char** argv )
-{
-    if ( argc != 5 )
-    {
-        cout<<"usage: pose_estimation_3d3d img1 img2 depth1 depth2"<<endl;
-        return 1;
-    }
-    //-- 读取图像
-    Mat img_1 = imread ( argv[1], CV_LOAD_IMAGE_COLOR );
-    Mat img_2 = imread ( argv[2], CV_LOAD_IMAGE_COLOR );
-
-    vector<KeyPoint> keypoints_1, keypoints_2;
-    vector<DMatch> matches;
-    find_feature_matches ( img_1, img_2, keypoints_1, keypoints_2, matches );
-    cout<<"一共找到了"<<matches.size() <<"组匹配点"<<endl;
-
-    // 建立3D点
-    Mat depth1 = imread ( argv[3], CV_LOAD_IMAGE_UNCHANGED );       // 深度图为16位无符号数，单通道图像
-    Mat depth2 = imread ( argv[4], CV_LOAD_IMAGE_UNCHANGED );       // 深度图为16位无符号数，单通道图像
-    Mat K = ( Mat_<double> ( 3,3 ) << 520.9, 0, 325.1, 0, 521.0, 249.7, 0, 0, 1 );
-    vector<Point3f> pts1, pts2;
-
-    for ( DMatch m:matches )
-    {
-        ushort d1 = depth1.ptr<unsigned short> ( int ( keypoints_1[m.queryIdx].pt.y ) ) [ int ( keypoints_1[m.queryIdx].pt.x ) ];
-        ushort d2 = depth2.ptr<unsigned short> ( int ( keypoints_2[m.trainIdx].pt.y ) ) [ int ( keypoints_2[m.trainIdx].pt.x ) ];
-        if ( d1==0 || d2==0 )   // bad depth
-            continue;
-        Point2d p1 = pixel2cam ( keypoints_1[m.queryIdx].pt, K );
-        Point2d p2 = pixel2cam ( keypoints_2[m.trainIdx].pt, K );
-        float dd1 = float ( d1 ) /5000.0;
-        float dd2 = float ( d2 ) /5000.0;
-        pts1.push_back ( Point3f ( p1.x*dd1, p1.y*dd1, dd1 ) );
-        pts2.push_back ( Point3f ( p2.x*dd2, p2.y*dd2, dd2 ) );
-    }
-
-    cout<<"3d-3d pairs: "<<pts1.size() <<endl;
-    Mat R, t;
-    pose_estimation_3d3d ( pts1, pts2, R, t );
-    cout<<"ICP via SVD results: "<<endl;
-    cout<<"R = "<<R<<endl;
-    cout<<"t = "<<t<<endl;
-    cout<<"R_inv = "<<R.t() <<endl;
-    cout<<"t_inv = "<<-R.t() *t<<endl;
-
-    cout<<"calling bundle adjustment"<<endl;
-
-    bundleAdjustment( pts1, pts2, R, t );
-
-    // verify p1 = R*p2 + t
-    for ( int i=0; i<5; i++ )
-    {
-        cout<<"p1 = "<<pts1[i]<<endl;
-        cout<<"p2 = "<<pts2[i]<<endl;
-        cout<<"(R*p2+t) = "<<
-            R * (Mat_<double>(3,1)<<pts2[i].x, pts2[i].y, pts2[i].z) + t
-            <<endl;
-        cout<<endl;
-    }
-}
-
-void find_feature_matches ( const Mat& img_1, const Mat& img_2,
-                            std::vector<KeyPoint>& keypoints_1,
-                            std::vector<KeyPoint>& keypoints_2,
-                            std::vector< DMatch >& matches )
-{
-    //-- 初始化
-    Mat descriptors_1, descriptors_2;
-    // used in OpenCV3
-    Ptr<FeatureDetector> detector = ORB::create();
-    Ptr<DescriptorExtractor> descriptor = ORB::create();
-    // use this if you are in OpenCV2
-    // Ptr<FeatureDetector> detector = FeatureDetector::create ( "ORB" );
-    // Ptr<DescriptorExtractor> descriptor = DescriptorExtractor::create ( "ORB" );
-    Ptr<DescriptorMatcher> matcher  = DescriptorMatcher::create("BruteForce-Hamming");
-    //-- 第一步:检测 Oriented FAST 角点位置
-    detector->detect ( img_1,keypoints_1 );
-    detector->detect ( img_2,keypoints_2 );
-
-    //-- 第二步:根据角点位置计算 BRIEF 描述子
-    descriptor->compute ( img_1, keypoints_1, descriptors_1 );
-    descriptor->compute ( img_2, keypoints_2, descriptors_2 );
-
-    //-- 第三步:对两幅图像中的BRIEF描述子进行匹配，使用 Hamming 距离
-    vector<DMatch> match;
-   // BFMatcher matcher ( NORM_HAMMING );
-    matcher->match ( descriptors_1, descriptors_2, match );
-
-    //-- 第四步:匹配点对筛选
-    double min_dist=10000, max_dist=0;
-
-    //找出所有匹配之间的最小距离和最大距离, 即是最相似的和最不相似的两组点之间的距离
-    for ( int i = 0; i < descriptors_1.rows; i++ )
-    {
-        double dist = match[i].distance;
-        if ( dist < min_dist ) min_dist = dist;
-        if ( dist > max_dist ) max_dist = dist;
-    }
-
-    printf ( "-- Max dist : %f \n", max_dist );
-    printf ( "-- Min dist : %f \n", min_dist );
-
-    //当描述子之间的距离大于两倍的最小距离时,即认为匹配有误.但有时候最小距离会非常小,设置一个经验值30作为下限.
-    for ( int i = 0; i < descriptors_1.rows; i++ )
-    {
-        if ( match[i].distance <= max ( 2*min_dist, 30.0 ) )
-        {
-            matches.push_back ( match[i] );
-        }
-    }
-}
-
-Point2d pixel2cam ( const Point2d& p, const Mat& K )
-{
-    return Point2d
-           (
-               ( p.x - K.at<double> ( 0,2 ) ) / K.at<double> ( 0,0 ),
-               ( p.y - K.at<double> ( 1,2 ) ) / K.at<double> ( 1,1 )
-           );
-}
-
-void pose_estimation_3d3d (
-    const vector<Point3f>& pts1,
-    const vector<Point3f>& pts2,
-    Mat& R, Mat& t
-)
-{
-    Point3f p1, p2;     // center of mass
-    int N = pts1.size();
-    for ( int i=0; i<N; i++ )
-    {
-        p1 += pts1[i];
-        p2 += pts2[i];
-    }
-    p1 = Point3f( Vec3f(p1) /  N);
-    p2 = Point3f( Vec3f(p2) / N);
-    vector<Point3f>     q1 ( N ), q2 ( N ); // remove the center
-    for ( int i=0; i<N; i++ )
-    {
-        q1[i] = pts1[i] - p1;
-        q2[i] = pts2[i] - p2;
-    }
-
-    // compute q1*q2^T
-    Eigen::Matrix3d W = Eigen::Matrix3d::Zero();
-    for ( int i=0; i<N; i++ )
-    {
-        W += Eigen::Vector3d ( q1[i].x, q1[i].y, q1[i].z ) * Eigen::Vector3d ( q2[i].x, q2[i].y, q2[i].z ).transpose();
-    }
-    cout<<"W="<<W<<endl;
-
-    // SVD on W
-    Eigen::JacobiSVD<Eigen::Matrix3d> svd ( W, Eigen::ComputeFullU|Eigen::ComputeFullV );
-    Eigen::Matrix3d U = svd.matrixU();
-    Eigen::Matrix3d V = svd.matrixV();
-    
-    if (U.determinant() * V.determinant() < 0)
-	{
-        for (int x = 0; x < 3; ++x)
-        {
-            U(x, 2) *= -1;
-        }
-	}
-    
-    cout<<"U="<<U<<endl;
-    cout<<"V="<<V<<endl;
-
-    Eigen::Matrix3d R_ = U* ( V.transpose() );
-    Eigen::Vector3d t_ = Eigen::Vector3d ( p1.x, p1.y, p1.z ) - R_ * Eigen::Vector3d ( p2.x, p2.y, p2.z );
-
-    // convert to cv::Mat
-    R = ( Mat_<double> ( 3,3 ) <<
-          R_ ( 0,0 ), R_ ( 0,1 ), R_ ( 0,2 ),
-          R_ ( 1,0 ), R_ ( 1,1 ), R_ ( 1,2 ),
-          R_ ( 2,0 ), R_ ( 2,1 ), R_ ( 2,2 )
-        );
-    t = ( Mat_<double> ( 3,1 ) << t_ ( 0,0 ), t_ ( 1,0 ), t_ ( 2,0 ) );
-}
-
-void bundleAdjustment (
-    const vector< Point3f >& pts1,
-    const vector< Point3f >& pts2,
-    Mat& R, Mat& t )
-{
-    // 初始化g2o
-    typedef g2o::BlockSolver< g2o::BlockSolverTraits<6,3> > Block;  // pose维度为 6, landmark 维度为 3
-    Block::LinearSolverType* linearSolver = new g2o::LinearSolverEigen<Block::PoseMatrixType>(); // 线性方程求解器
-    Block* solver_ptr = new Block( linearSolver );      // 矩阵块求解器
-    g2o::OptimizationAlgorithmGaussNewton* solver = new g2o::OptimizationAlgorithmGaussNewton( solver_ptr );
-    g2o::SparseOptimizer optimizer;
-    optimizer.setAlgorithm( solver );
-
-    // vertex
-    g2o::VertexSE3Expmap* pose = new g2o::VertexSE3Expmap(); // camera pose
-    pose->setId(0);
-    pose->setEstimate( g2o::SE3Quat(
-        Eigen::Matrix3d::Identity(),
-        Eigen::Vector3d( 0,0,0 )
-    ) );
-    optimizer.addVertex( pose );
-
-    // edges
-    int index = 1;
-    vector<EdgeProjectXYZRGBDPoseOnly*> edges;
-    for ( size_t i=0; i<pts1.size(); i++ )
-    {
-        EdgeProjectXYZRGBDPoseOnly* edge = new EdgeProjectXYZRGBDPoseOnly(
-            Eigen::Vector3d(pts2[i].x, pts2[i].y, pts2[i].z) );
-        edge->setId( index );
-        edge->setVertex( 0, dynamic_cast<g2o::VertexSE3Expmap*> (pose) );
-        edge->setMeasurement( Eigen::Vector3d(
-            pts1[i].x, pts1[i].y, pts1[i].z) );
-        edge->setInformation( Eigen::Matrix3d::Identity()*1e4 );
-        optimizer.addEdge(edge);
-        index++;
-        edges.push_back(edge);
-    }
-
-    chrono::steady_clock::time_point t1 = chrono::steady_clock::now();
-    optimizer.setVerbose( true );
-    optimizer.initializeOptimization();
-    optimizer.optimize(10);
-    chrono::steady_clock::time_point t2 = chrono::steady_clock::now();
-    chrono::duration<double> time_used = chrono::duration_cast<chrono::duration<double>>(t2-t1);
-    cout<<"optimization costs time: "<<time_used.count()<<" seconds."<<endl;
-
-    cout<<endl<<"after optimization:"<<endl;
-    cout<<"T="<<endl<<Eigen::Isometry3d( pose->estimate() ).matrix()<<endl;
-
-}
-```
-
-5. 三角测量
+2. 三角测量
 ```cpp
 #include <iostream>
 #include <opencv2/core/core.hpp>
@@ -4906,4 +4400,1099 @@ Point2f pixel2cam ( const Point2d& p, const Mat& K )
      * 
      */
 
+```
+## 5-3.3D-2D位姿估计
+1. 3D-2D位姿估计案例
+```cpp
+#include <iostream>
+#include <opencv2/core/core.hpp>
+#include <opencv2/features2d/features2d.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/calib3d/calib3d.hpp>
+#include <Eigen/Core>
+#include <Eigen/Geometry>
+#include <g2o/core/base_vertex.h>
+#include <g2o/core/base_unary_edge.h>
+#include <g2o/core/block_solver.h>
+#include <g2o/core/optimization_algorithm_levenberg.h>
+#include <g2o/solvers/csparse/linear_solver_csparse.h>
+#include <g2o/types/sba/types_six_dof_expmap.h>
+#include <chrono>
+
+using namespace std;
+using namespace cv;
+
+void find_feature_matches (
+    const Mat& img_1, const Mat& img_2,
+    std::vector<KeyPoint>& keypoints_1,
+    std::vector<KeyPoint>& keypoints_2,
+    std::vector< DMatch >& matches );
+
+// 像素坐标转相机归一化坐标
+Point2d pixel2cam ( const Point2d& p, const Mat& K );
+
+void bundleAdjustment (
+    const vector<Point3f> points_3d,
+    const vector<Point2f> points_2d,
+    const Mat& K,
+    Mat& R, Mat& t
+);
+
+int main ( int argc, char** argv )
+{
+    if ( argc != 5 )
+    {
+        cout<<"usage: pose_estimation_3d2d img1 img2 depth1 depth2"<<endl;
+        return 1;
+    }
+    //-- 读取图像
+    Mat img_1 = imread ( argv[1], CV_LOAD_IMAGE_COLOR );
+    Mat img_2 = imread ( argv[2], CV_LOAD_IMAGE_COLOR );
+
+    vector<KeyPoint> keypoints_1, keypoints_2;
+    vector<DMatch> matches;
+    find_feature_matches ( img_1, img_2, keypoints_1, keypoints_2, matches );
+    cout<<"一共找到了"<<matches.size() <<"组匹配点"<<endl;
+
+    // 建立3D点(使用Epnp来求解pnp问题)
+    Mat d1 = imread ( argv[3], CV_LOAD_IMAGE_UNCHANGED );       // 深度图为16位无符号数，单通道图像
+    Mat K = ( Mat_<double> ( 3,3 ) << 520.9, 0, 325.1, 0, 521.0, 249.7, 0, 0, 1 );
+    vector<Point3f> pts_3d;
+    vector<Point2f> pts_2d;
+    for ( DMatch m:matches )
+    {
+        ushort d = d1.ptr<unsigned short> (int ( keypoints_1[m.queryIdx].pt.y )) [ int ( keypoints_1[m.queryIdx].pt.x ) ];
+        if ( d == 0 )   // bad depth
+            continue;
+        float dd = d/5000.0;
+        Point2d p1 = pixel2cam ( keypoints_1[m.queryIdx].pt, K );
+        pts_3d.push_back ( Point3f ( p1.x*dd, p1.y*dd, dd ) );
+        pts_2d.push_back ( keypoints_2[m.trainIdx].pt );
+    }
+
+    cout<<"3d-2d pairs: "<<pts_3d.size() <<endl;
+    Mat r, t;
+    //利用opencv中的库求解
+    solvePnP ( pts_3d, pts_2d, K, Mat(), r, t, false ); // 调用OpenCV 的 PnP 求解，可选择EPNP，DLS等方法
+    Mat R;
+    cv::Rodrigues ( r, R ); // r为旋转向量形式，用Rodrigues公式转换为矩阵
+
+    cout<<"R="<<endl<<R<<endl;
+    cout<<"t="<<endl<<t<<endl;
+    //使用BA来求解pnp问题
+    cout<<"calling bundle adjustment"<<endl;
+
+    bundleAdjustment ( pts_3d, pts_2d, K, R, t );
+}
+
+void find_feature_matches ( const Mat& img_1, const Mat& img_2,
+                            std::vector<KeyPoint>& keypoints_1,
+                            std::vector<KeyPoint>& keypoints_2,
+                            std::vector< DMatch >& matches )
+{
+    //-- 初始化
+    Mat descriptors_1, descriptors_2;
+    // used in OpenCV3
+    Ptr<FeatureDetector> detector = ORB::create();
+    Ptr<DescriptorExtractor> descriptor = ORB::create();
+    // use this if you are in OpenCV2
+    // Ptr<FeatureDetector> detector = FeatureDetector::create ( "ORB" );
+    // Ptr<DescriptorExtractor> descriptor = DescriptorExtractor::create ( "ORB" );
+    Ptr<DescriptorMatcher> matcher  = DescriptorMatcher::create ( "BruteForce-Hamming" );
+    //-- 第一步:检测 Oriented FAST 角点位置
+    detector->detect ( img_1,keypoints_1 );
+    detector->detect ( img_2,keypoints_2 );
+
+    //-- 第二步:根据角点位置计算 BRIEF 描述子
+    descriptor->compute ( img_1, keypoints_1, descriptors_1 );
+    descriptor->compute ( img_2, keypoints_2, descriptors_2 );
+
+    //-- 第三步:对两幅图像中的BRIEF描述子进行匹配，使用 Hamming 距离
+    vector<DMatch> match;
+    // BFMatcher matcher ( NORM_HAMMING );
+    matcher->match ( descriptors_1, descriptors_2, match );
+
+    //-- 第四步:匹配点对筛选
+    double min_dist=10000, max_dist=0;
+
+    //找出所有匹配之间的最小距离和最大距离, 即是最相似的和最不相似的两组点之间的距离
+    for ( int i = 0; i < descriptors_1.rows; i++ )
+    {
+        double dist = match[i].distance;
+        if ( dist < min_dist ) min_dist = dist;
+        if ( dist > max_dist ) max_dist = dist;
+    }
+
+    printf ( "-- Max dist : %f \n", max_dist );
+    printf ( "-- Min dist : %f \n", min_dist );
+
+    //当描述子之间的距离大于两倍的最小距离时,即认为匹配有误.但有时候最小距离会非常小,设置一个经验值30作为下限.
+    for ( int i = 0; i < descriptors_1.rows; i++ )
+    {
+        if ( match[i].distance <= max ( 2*min_dist, 30.0 ) )
+        {
+            matches.push_back ( match[i] );
+        }
+    }
+}
+
+Point2d pixel2cam ( const Point2d& p, const Mat& K )
+{
+    return Point2d
+           (
+               ( p.x - K.at<double> ( 0,2 ) ) / K.at<double> ( 0,0 ),
+               ( p.y - K.at<double> ( 1,2 ) ) / K.at<double> ( 1,1 )
+           );
+}
+
+
+void bundleAdjustment (
+    const vector< Point3f > points_3d,
+    const vector< Point2f > points_2d,
+    const Mat& K,
+    Mat& R, Mat& t )
+{
+    // 1.初始化g2o
+    typedef g2o::BlockSolver< g2o::BlockSolverTraits<6,3> > Block;  // pose 维度为 6, landmark 维度为 3
+    Block::LinearSolverType* linearSolver = new g2o::LinearSolverCSparse<Block::PoseMatrixType>(); // 线性方程求解器
+    Block* solver_ptr = new Block ( linearSolver );     // 矩阵块求解器
+    g2o::OptimizationAlgorithmLevenberg* solver = new g2o::OptimizationAlgorithmLevenberg ( solver_ptr );
+    g2o::SparseOptimizer optimizer;
+    optimizer.setAlgorithm ( solver );
+
+    //2.添加顶点1
+    //2-1.定义顶点1
+    g2o::VertexSE3Expmap* pose = new g2o::VertexSE3Expmap(); // 李代数位姿
+    Eigen::Matrix3d R_mat;//
+    R_mat <<
+          R.at<double> ( 0,0 ), R.at<double> ( 0,1 ), R.at<double> ( 0,2 ),
+               R.at<double> ( 1,0 ), R.at<double> ( 1,1 ), R.at<double> ( 1,2 ),
+               R.at<double> ( 2,0 ), R.at<double> ( 2,1 ), R.at<double> ( 2,2 );
+    //2-2.添加顶点1的ID
+    pose->setId ( 0 );
+    //2-3.输入顶点1的观测值
+    pose->setEstimate ( g2o::SE3Quat (//SE3Quat是T
+                            R_mat,
+                            Eigen::Vector3d ( t.at<double> ( 0,0 ), t.at<double> ( 1,0 ), t.at<double> ( 2,0 ) )
+                        ) );
+    //2-4.添加顶点1
+    optimizer.addVertex ( pose );
+
+    int index = 1;
+
+    //3.添加顶点2
+    for ( const Point3f p:points_3d )   // landmarks
+    {
+        //3-1.定义顶点2(顶点2为空间点的位置, VetexSBAPointXYZ:  Space ,BA, Point)
+        g2o::VertexSBAPointXYZ* point = new g2o::VertexSBAPointXYZ();
+        //3-2.添加顶点2的ID
+        point->setId ( index++ );
+        //3-3.添加顶点的观测值
+        point->setEstimate ( Eigen::Vector3d ( p.x, p.y, p.z ) );
+        point->setMarginalized ( true ); // g2o 中必须设置 marg 参见第十讲内容
+        //添加顶点2
+        optimizer.addVertex ( point );
+    }
+    /**
+     * @brief 
+     * 总的来说，李代数位姿VertexSE3Expmap只有一个，空间点位置VertexSBAPointXYZ有多个
+     * 第i个空间点位置SBA和李代数位姿SE3构成了第i条边
+     */
+
+    //4.添加边
+    index = 1;
+    for ( const Point2f p:points_2d )
+    {
+        //4-1.定义一条2元边
+        g2o::EdgeProjectXYZ2UV* edge = new g2o::EdgeProjectXYZ2UV();
+        //4-2.定义边的ID
+        edge->setId ( index );
+        //4-3.添加顶点1(VertexSBAPointXYZ,空间点位置顶点有多个)
+        edge->setVertex ( 0, dynamic_cast<g2o::VertexSBAPointXYZ*> ( optimizer.vertex ( index ) ) );//顶点1有很多个，所以这是第i个顶点1
+        //4-4.添加顶点2(VertexSE3Expmap, 李代数位姿顶点有1个)
+        edge->setVertex ( 1, pose );
+        //4-5.输入观测值
+        edge->setMeasurement ( Eigen::Vector2d ( p.x, p.y ) );
+        //4-6.设置参数ID
+        edge->setParameterId ( 0,0 );
+        //4-7.设置信息矩阵
+        edge->setInformation ( Eigen::Matrix2d::Identity() );
+        //4-8.添加边
+        optimizer.addEdge ( edge );
+        index++;
+    }
+
+    chrono::steady_clock::time_point t1 = chrono::steady_clock::now();
+    optimizer.setVerbose ( true );
+    optimizer.initializeOptimization();
+    optimizer.optimize ( 100 );
+    chrono::steady_clock::time_point t2 = chrono::steady_clock::now();
+    chrono::duration<double> time_used = chrono::duration_cast<chrono::duration<double>> ( t2-t1 );
+    cout<<"optimization costs time: "<<time_used.count() <<" seconds."<<endl;
+
+    cout<<endl<<"after optimization:"<<endl;
+    cout<<"T="<<endl<<Eigen::Isometry3d ( pose->estimate() ).matrix() <<endl;
+}
+```
+
+2. 手写最小重投影误差(**方法1，利用BA**)
+```cpp
+void bundleAdjustmentGaussNewton(
+   const VecVector3d &points_3d,
+   const VecVector2d &points_2d,
+   const Mat &K,
+   Sophus::SE3d &pose) {
+   typedef Eigen::Matrix<double, 6, 1> Vector6d;
+   const int iterations = 10;
+   double cost = 0,
+   lastCost = 0;
+   //迭代次数
+   //代价
+   //上次迭代的代价
+   double fx = K.at<double>(0, 0); //内参系数
+   double fy = K.at<double>(1, 1);
+   double cx = K.at<double>(0, 2);
+   double cy = K.at<double>(1, 2);
+   for (int iter = 0; iter < iterations; iter++) {
+   Eigen::Matrix<double, 6, 6> H = Eigen::Matrix<double, 6, 6>::Zero();
+   Vector6d b = Vector6d::Zero();
+   cost = 0;
+   // compute cost
+   for (int i = 0; i < points_3d.size(); i++) {
+      Eigen::Vector3d pc = pose * points_3d[i];
+      // 位姿 * 世界坐标系坐标= 当前相机坐标系坐标
+      double inv_z = 1.0 / pc[2];
+      double inv_z2 = inv_z * inv_z;
+      Eigen::Vector2d proj(fx * pc[0] / pc[2] + cx, fy * pc[1] / pc[2] + cy); // 重投影： 相机坐标系 =>像素坐标系
+      Eigen::Vector2d e = points_2d[i] - proj; //重投影误差
+      cost += e.squaredNorm(); //误差的二范数
+      Eigen::Matrix<double, 2, 6> J; //2*6的雅可比矩阵
+      J << -fx * inv_z,
+      0,
+      fx * pc[0] * inv_z2,
+      fx * pc[0] * pc[1] * inv_z2,
+      -fx - fx * pc[0] * pc[0] * inv_z2,
+      fx * pc[1] * inv_z,
+      0,
+      -fy * inv_z,
+      fy * pc[1] * inv_z2,
+      fy + fy * pc[1] * pc[1] * inv_z2,
+      -fy * pc[0] * pc[1] * inv_z2,
+      -fy * pc[0] * inv_z;
+      H += J.transpose() * J;
+      b += -J.transpose() * e;
+   }
+   Vector6d dx;
+   dx = H.ldlt().solve(b);
+   //正定矩阵可以用cholesky分解求解 增量dx//当增量 not a number 立即停止迭代
+   if (isnan(dx[0])) {
+      cout << "result is nan!" << endl;
+      break;
+   }
+   if (iter > 0 && cost >= lastCost) {
+      //当前代价大于上一次代价，立即停止迭代
+      // cost increase, update is not good
+      cout << "cost: " << cost << ", last cost: " << lastCost << endl;
+      break;
+   }
+   // update your estimation
+   pose = Sophus::SE3d::exp(dx) * pose
+   // 优化位姿
+   lastCost = cost;
+   cout << "iteration " << iter << " cost=" << std::setprecision(12) << cost << endl;
+   if (dx.norm() < 1e-6) {
+      //增量已经太小，停止迭代
+      // converge
+   break;
+   }
+}
+cout << "pose by g-n: \n" << pose.matrix() << endl;
+```
+3. 利用G2O
+```cpp
+#include <iostream>
+#include <opencv2/core/core.hpp>
+#include <opencv2/features2d/features2d.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/calib3d/calib3d.hpp>
+#include <Eigen/Core>
+#include <Eigen/Geometry>
+#include <Eigen/SVD>
+#include <g2o/core/base_vertex.h>
+#include <g2o/core/base_unary_edge.h>
+#include <g2o/core/block_solver.h>
+#include <g2o/core/optimization_algorithm_gauss_newton.h>
+#include <g2o/solvers/eigen/linear_solver_eigen.h>
+#include <g2o/types/sba/types_six_dof_expmap.h>
+#include <chrono>
+#include <sophus/se3.hpp>
+using namespace std;
+using namespace Eigen;
+
+class VertexPose : public g2o::BaseVertex<6, Sophus::SE3d> {
+public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
+    //Eigen库为了使用SSE加速，在内存上分配了128位的指针，涉及字节对齐问题，出问题时在编译时不会报错，只在运行时报错。写下这一句能够让编译器自动将数据对齐。
+    //SSE指令集是英特尔提供的基于SIMD（单指令多数据，也就是说同一时间内，对多个不同的数据执行同一条命令）的硬件加速指令，通过使用寄存器来进行并行加速。
+    virtual void setToOriginImpl() override {
+        _estimate = Sophus::SE3d();
+        //初始化
+        //值得一提的是，Sophus::SE3 内部是以 SO3 + trans存储的
+        // SO3内部存储的是一个四元数
+    }
+    virtual void oplusImpl(const double *update) override {
+        // update增量
+        Eigen::Matrix<double, 6, 1> update_eigen;
+        update_eigen << update[0], update[1], update[2], update[3], update[4], update[5];
+        _estimate = Sophus::SE3d::exp(update_eigen) * _estimate;
+    }
+    virtual bool read(istream &in) override {}
+    virtual bool write(ostream &out) const override {}
+};
+    //定义 观测边， 继承单边的BaseUnaryEdge模板基类，模板参数为 观测值维度，观测值类型，顶点类型
+class EdgeProjection : public g2o::BaseUnaryEdge<2, Eigen::Vector2d, VertexPose> {
+    public:
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
+        //内存对齐
+        EdgeProjection(const Eigen::Vector3d &pos, const Eigen::Matrix3d &K) : _pos3d(pos), _K(K)
+        {}
+        //构造函数， 传入空间点，内参矩阵
+        virtual void computeError() override {
+            //计算重投影误差（约束）
+            const VertexPose *v = static_cast<VertexPose *> (_vertices[0]);
+            Sophus::SE3d T = v->estimate();
+            //单边的一端
+            //取出待优化点的位姿
+            Eigen::Vector3d pos_pixel = _K * (T * _pos3d);
+            //重投影投影
+            pos_pixel /= pos_pixel[2];
+            _error = _measurement - pos_pixel.head<2>();
+            // e = u-u'，这里_measurement就是u，通过setMeasurement传入观测值
+        }
+        virtual void linearizeOplus() override {
+            //计算雅可比矩阵
+            const VertexPose *v = static_cast<VertexPose *> (_vertices[0]);
+            Sophus::SE3d T = v->estimate();
+            Eigen::Vector3d pos_cam = T * _pos3d;
+            double fx = _K(0, 0);
+            double fy = _K(1, 1);
+            double cx = _K(0, 2);
+            double cy = _K(1, 2);
+            double X = pos_cam[0];
+            double Y = pos_cam[1];
+            double Z = pos_cam[2];
+            double Z2 = Z * Z;
+            //这里空间点投影成相机坐标
+            _jacobianOplusXi
+            << -fx / Z, 0, fx * X / Z2, fx * X * Y / Z2, -fx - fx * X * X / Z2, fx * Y / Z,
+            0, -fy / Z, fy * Y / (Z * Z), fy + fy * Y * Y / Z2, -fy * X * Y / Z2, -fy * X / Z;
+        }
+        virtual bool read(istream &in) override {}
+        virtual bool write(ostream &out) const override {}
+    private:
+        Eigen::Vector3d _pos3d;
+        Eigen::Matrix3d _K;
+};
+///////////////////////////////////////////////////////////////////////////////////////
+//g2o的使用
+/*
+1.创建BlockSolver，并用下面定义的线性求解器初始化。
+2.创建一个线性求解器LinearSolver。
+3.创建总求解器solver，并从GN/LM/DogLeg 中选一个作为迭代策略，再用上述块求解器BlockSolver初始化。
+4.创建图优化的核心：稀疏优化器（SparseOptimizer）。
+5.定义图的顶点和边，并添加到SparseOptimizer中。
+6.设置优化参数，开始执行优化。
+*/
+void bundleAdjustmentG2O(
+const Vector3d &points_3d,
+const Vector2d &points_2d,
+const Mat &K,
+Sophus::SE3d &pose) {
+    // 初始化，创建blocksolver并使用linearsolver对其进行初始化
+    //这里的模板参数是 优化变量维度，观测量维度
+    typedef g2o::BlockSolver<g2o::BlockSolverTraits<6, 3>> BlockSolverType;
+    // pose is 6,landmark is 3
+    typedef g2o::LinearSolverDense<BlockSolverType::PoseMatrixType> LinearSolverType; // 线性求解器类型
+    // 梯度下降方法，可以从GN, LM, DogLeg 中选
+    auto solver = new g2o::OptimizationAlgorithmGaussNewton(
+    g2o::make_unique<BlockSolverType>(g2o::make_unique<LinearSolverType>()));
+    g2o::SparseOptimizer optimizer;
+    // 图模型
+    optimizer.setAlgorithm(solver); // 设置求解器
+    optimizer.setVerbose(true); // 打开调试输出
+    // vertex
+    VertexPose *vertex_pose = new VertexPose(); // camera vertex_pose
+    vertex_pose->setId(0);
+    vertex_pose->setEstimate(Sophus::SE3d());
+    optimizer.addVertex(vertex_pose);
+    // K
+    Eigen::Matrix3d K_eigen;
+    K_eigen <<
+    K.at<double>(0, 0), K.at<double>(0, 1), K.at<double>(0, 2),
+    K.at<double>(1, 0), K.at<double>(1, 1), K.at<double>(1, 2),
+    K.at<double>(2, 0), K.at<double>(2, 1), K.at<double>(2, 2);// edges
+    int index = 1;
+    for (size_t i = 0; i < points_2d.size(); ++i) {
+        auto p2d = points_2d[i];
+        auto p3d = points_3d[i];
+        EdgeProjection *edge = new EdgeProjection(p3d, K_eigen);
+        edge->setId(index);
+        edge->setVertex(0, vertex_pose);
+        edge->setMeasurement(p2d);
+        edge->setInformation(Eigen::Matrix2d::Identity());
+        optimizer.addEdge(edge);
+        index++;
+    }
+    chrono::steady_clock::time_point t1 = chrono::steady_clock::now();
+    optimizer.setVerbose(true);
+    optimizer.initializeOptimization();
+    optimizer.optimize(10);
+    //初始化优化器
+    //开始优化
+    chrono::steady_clock::time_point t2 = chrono::steady_clock::now();
+    chrono::duration<double> time_used = chrono::duration_cast<chrono::duration<double>>(t2 -
+    t1);
+    cout << "optimization costs time: " << time_used.count() << " seconds." << endl;
+    cout << "pose estimated by g2o =\n" << vertex_pose->estimate().matrix() << endl;
+    pose = vertex_pose->estimate();
+}
+```
+
+
+## 5-4.3D-3D位姿估计
+
+```cpp
+#include <iostream>
+#include <opencv2/core/core.hpp>
+#include <opencv2/features2d/features2d.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/calib3d/calib3d.hpp>
+#include <Eigen/Core>
+#include <Eigen/Geometry>
+#include <Eigen/SVD>
+#include <g2o/core/base_vertex.h>
+#include <g2o/core/base_unary_edge.h>
+#include <g2o/core/block_solver.h>
+#include <g2o/core/optimization_algorithm_gauss_newton.h>
+#include <g2o/solvers/eigen/linear_solver_eigen.h>
+#include <g2o/types/sba/types_six_dof_expmap.h>
+#include <opencv2/imgcodecs/legacy/constants_c.h>//解决‘CV_LOAD_IMAGE_UNCHANGED’没有declared的问题
+#include <chrono>
+
+using namespace std;
+using namespace cv;
+
+void find_feature_matches (
+    const Mat& img_1, const Mat& img_2,
+    std::vector<KeyPoint>& keypoints_1,
+    std::vector<KeyPoint>& keypoints_2,
+    std::vector< DMatch >& matches );
+
+// 像素坐标转相机归一化坐标
+Point2d pixel2cam ( const Point2d& p, const Mat& K );
+
+void pose_estimation_3d3d (
+    const vector<Point3f>& pts1,
+    const vector<Point3f>& pts2,
+    Mat& R, Mat& t
+);
+
+void bundleAdjustment(
+    const vector<Point3f>& points_3d,
+    const vector<Point3f>& points_2d,
+    Mat& R, Mat& t
+);
+
+// g2o edge
+class EdgeProjectXYZRGBDPoseOnly : public g2o::BaseUnaryEdge<3, Eigen::Vector3d, g2o::VertexSE3Expmap>
+{
+public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
+    EdgeProjectXYZRGBDPoseOnly( const Eigen::Vector3d& point ) : _point(point) {}
+
+    virtual void computeError()
+    {
+        const g2o::VertexSE3Expmap* pose = static_cast<const g2o::VertexSE3Expmap*> ( _vertices[0] );
+        // measurement is p, point is p'
+        _error = _measurement - pose->estimate().map( _point );
+    }
+
+    virtual void linearizeOplus()
+    {
+        g2o::VertexSE3Expmap* pose = static_cast<g2o::VertexSE3Expmap *>(_vertices[0]);
+        g2o::SE3Quat T(pose->estimate());
+        Eigen::Vector3d xyz_trans = T.map(_point);
+        double x = xyz_trans[0];
+        double y = xyz_trans[1];
+        double z = xyz_trans[2];
+
+        _jacobianOplusXi(0,0) = 0;
+        _jacobianOplusXi(0,1) = -z;
+        _jacobianOplusXi(0,2) = y;
+        _jacobianOplusXi(0,3) = -1;
+        _jacobianOplusXi(0,4) = 0;
+        _jacobianOplusXi(0,5) = 0;
+
+        _jacobianOplusXi(1,0) = z;
+        _jacobianOplusXi(1,1) = 0;
+        _jacobianOplusXi(1,2) = -x;
+        _jacobianOplusXi(1,3) = 0;
+        _jacobianOplusXi(1,4) = -1;
+        _jacobianOplusXi(1,5) = 0;
+
+        _jacobianOplusXi(2,0) = -y;
+        _jacobianOplusXi(2,1) = x;
+        _jacobianOplusXi(2,2) = 0;
+        _jacobianOplusXi(2,3) = 0;
+        _jacobianOplusXi(2,4) = 0;
+        _jacobianOplusXi(2,5) = -1;
+    }
+
+    bool read ( istream& in ) {}
+    bool write ( ostream& out ) const {}
+protected:
+    Eigen::Vector3d _point;
+};
+
+int main ( int argc, char** argv )
+{
+    if ( argc != 5 )
+    {
+        cout<<"usage: pose_estimation_3d3d img1 img2 depth1 depth2"<<endl;
+        return 1;
+    }
+    //-- 读取图像
+    Mat img_1 = imread ( argv[1], CV_LOAD_IMAGE_COLOR );
+    Mat img_2 = imread ( argv[2], CV_LOAD_IMAGE_COLOR );
+
+    vector<KeyPoint> keypoints_1, keypoints_2;
+    vector<DMatch> matches;
+    find_feature_matches ( img_1, img_2, keypoints_1, keypoints_2, matches );
+    cout<<"一共找到了"<<matches.size() <<"组匹配点"<<endl;
+
+    // 建立3D点
+    Mat depth1 = imread ( argv[3], CV_LOAD_IMAGE_UNCHANGED );       // 深度图为16位无符号数，单通道图像
+    Mat depth2 = imread ( argv[4], CV_LOAD_IMAGE_UNCHANGED );       // 深度图为16位无符号数，单通道图像
+    Mat K = ( Mat_<double> ( 3,3 ) << 520.9, 0, 325.1, 0, 521.0, 249.7, 0, 0, 1 );
+    vector<Point3f> pts1, pts2;
+
+    for ( DMatch m:matches )
+    {
+        ushort d1 = depth1.ptr<unsigned short> ( int ( keypoints_1[m.queryIdx].pt.y ) ) [ int ( keypoints_1[m.queryIdx].pt.x ) ];
+        ushort d2 = depth2.ptr<unsigned short> ( int ( keypoints_2[m.trainIdx].pt.y ) ) [ int ( keypoints_2[m.trainIdx].pt.x ) ];
+        if ( d1==0 || d2==0 )   // bad depth
+            continue;
+        Point2d p1 = pixel2cam ( keypoints_1[m.queryIdx].pt, K );
+        Point2d p2 = pixel2cam ( keypoints_2[m.trainIdx].pt, K );
+        float dd1 = float ( d1 ) /5000.0;
+        float dd2 = float ( d2 ) /5000.0;
+        pts1.push_back ( Point3f ( p1.x*dd1, p1.y*dd1, dd1 ) );
+        pts2.push_back ( Point3f ( p2.x*dd2, p2.y*dd2, dd2 ) );
+    }
+
+    cout<<"3d-3d pairs: "<<pts1.size() <<endl;
+    Mat R, t;
+    pose_estimation_3d3d ( pts1, pts2, R, t );
+    cout<<"ICP via SVD results: "<<endl;
+    cout<<"R = "<<R<<endl;
+    cout<<"t = "<<t<<endl;
+    cout<<"R_inv = "<<R.t() <<endl;
+    cout<<"t_inv = "<<-R.t() *t<<endl;
+
+    cout<<"calling bundle adjustment"<<endl;
+
+    bundleAdjustment( pts1, pts2, R, t );
+
+    // verify p1 = R*p2 + t
+    for ( int i=0; i<5; i++ )
+    {
+        cout<<"p1 = "<<pts1[i]<<endl;
+        cout<<"p2 = "<<pts2[i]<<endl;
+        cout<<"(R*p2+t) = "<<
+            R * (Mat_<double>(3,1)<<pts2[i].x, pts2[i].y, pts2[i].z) + t
+            <<endl;
+        cout<<endl;
+    }
+}
+
+void find_feature_matches ( const Mat& img_1, const Mat& img_2,
+                            std::vector<KeyPoint>& keypoints_1,
+                            std::vector<KeyPoint>& keypoints_2,
+                            std::vector< DMatch >& matches )
+{
+    //-- 初始化
+    Mat descriptors_1, descriptors_2;
+    // used in OpenCV3
+    Ptr<FeatureDetector> detector = ORB::create();
+    Ptr<DescriptorExtractor> descriptor = ORB::create();
+    // use this if you are in OpenCV2
+    // Ptr<FeatureDetector> detector = FeatureDetector::create ( "ORB" );
+    // Ptr<DescriptorExtractor> descriptor = DescriptorExtractor::create ( "ORB" );
+    Ptr<DescriptorMatcher> matcher  = DescriptorMatcher::create("BruteForce-Hamming");
+    //-- 第一步:检测 Oriented FAST 角点位置
+    detector->detect ( img_1,keypoints_1 );
+    detector->detect ( img_2,keypoints_2 );
+
+    //-- 第二步:根据角点位置计算 BRIEF 描述子
+    descriptor->compute ( img_1, keypoints_1, descriptors_1 );
+    descriptor->compute ( img_2, keypoints_2, descriptors_2 );
+
+    //-- 第三步:对两幅图像中的BRIEF描述子进行匹配，使用 Hamming 距离
+    vector<DMatch> match;
+   // BFMatcher matcher ( NORM_HAMMING );
+    matcher->match ( descriptors_1, descriptors_2, match );
+
+    //-- 第四步:匹配点对筛选
+    double min_dist=10000, max_dist=0;
+
+    //找出所有匹配之间的最小距离和最大距离, 即是最相似的和最不相似的两组点之间的距离
+    for ( int i = 0; i < descriptors_1.rows; i++ )
+    {
+        double dist = match[i].distance;
+        if ( dist < min_dist ) min_dist = dist;
+        if ( dist > max_dist ) max_dist = dist;
+    }
+
+    printf ( "-- Max dist : %f \n", max_dist );
+    printf ( "-- Min dist : %f \n", min_dist );
+
+    //当描述子之间的距离大于两倍的最小距离时,即认为匹配有误.但有时候最小距离会非常小,设置一个经验值30作为下限.
+    for ( int i = 0; i < descriptors_1.rows; i++ )
+    {
+        if ( match[i].distance <= max ( 2*min_dist, 30.0 ) )
+        {
+            matches.push_back ( match[i] );
+        }
+    }
+}
+
+Point2d pixel2cam ( const Point2d& p, const Mat& K )
+{
+    return Point2d
+           (
+               ( p.x - K.at<double> ( 0,2 ) ) / K.at<double> ( 0,0 ),
+               ( p.y - K.at<double> ( 1,2 ) ) / K.at<double> ( 1,1 )
+           );
+}
+
+void pose_estimation_3d3d (
+    const vector<Point3f>& pts1,
+    const vector<Point3f>& pts2,
+    Mat& R, Mat& t
+)
+{
+    Point3f p1, p2;     // center of mass
+    int N = pts1.size();
+    for ( int i=0; i<N; i++ )
+    {
+        p1 += pts1[i];
+        p2 += pts2[i];
+    }
+    p1 = Point3f( Vec3f(p1) /  N);
+    p2 = Point3f( Vec3f(p2) / N);
+    vector<Point3f>     q1 ( N ), q2 ( N ); // remove the center
+    for ( int i=0; i<N; i++ )
+    {
+        q1[i] = pts1[i] - p1;
+        q2[i] = pts2[i] - p2;
+    }
+    
+    // compute q1*q2^T
+    Eigen::Matrix3d W = Eigen::Matrix3d::Zero();
+    for ( int i=0; i<N; i++ )
+    {
+        W += Eigen::Vector3d ( q1[i].x, q1[i].y, q1[i].z ) * Eigen::Vector3d ( q2[i].x, q2[i].y, q2[i].z ).transpose();
+    }
+    cout<<"W="<<W<<endl;
+
+    // SVD on W
+    Eigen::JacobiSVD<Eigen::Matrix3d> svd ( W, Eigen::ComputeFullU|Eigen::ComputeFullV );
+    Eigen::Matrix3d U = svd.matrixU();
+    Eigen::Matrix3d V = svd.matrixV();
+    
+    if (U.determinant() * V.determinant() < 0)
+	{
+        for (int x = 0; x < 3; ++x)
+        {
+            U(x, 2) *= -1;
+        }
+	}
+    
+    cout<<"U="<<U<<endl;
+    cout<<"V="<<V<<endl;
+
+    Eigen::Matrix3d R_ = U* ( V.transpose() );
+    Eigen::Vector3d t_ = Eigen::Vector3d ( p1.x, p1.y, p1.z ) - R_ * Eigen::Vector3d ( p2.x, p2.y, p2.z );
+
+    // convert to cv::Mat
+    R = ( Mat_<double> ( 3,3 ) <<
+          R_ ( 0,0 ), R_ ( 0,1 ), R_ ( 0,2 ),
+          R_ ( 1,0 ), R_ ( 1,1 ), R_ ( 1,2 ),
+          R_ ( 2,0 ), R_ ( 2,1 ), R_ ( 2,2 )
+        );
+    t = ( Mat_<double> ( 3,1 ) << t_ ( 0,0 ), t_ ( 1,0 ), t_ ( 2,0 ) );
+}
+
+void bundleAdjustment (
+    const vector< Point3f >& pts1,
+    const vector< Point3f >& pts2,
+    Mat& R, Mat& t )
+{
+    // 初始化g2o
+    typedef g2o::BlockSolver< g2o::BlockSolverTraits<6,3> > Block;  // pose维度为 6, landmark 维度为 3
+    Block::LinearSolverType* linearSolver = new g2o::LinearSolverEigen<Block::PoseMatrixType>(); // 线性方程求解器
+    Block* solver_ptr = new Block( linearSolver );      // 矩阵块求解器
+    g2o::OptimizationAlgorithmGaussNewton* solver = new g2o::OptimizationAlgorithmGaussNewton( solver_ptr );
+    g2o::SparseOptimizer optimizer;
+    optimizer.setAlgorithm( solver );
+
+    // vertex
+    g2o::VertexSE3Expmap* pose = new g2o::VertexSE3Expmap(); // camera pose
+    pose->setId(0);
+    pose->setEstimate( g2o::SE3Quat(
+        Eigen::Matrix3d::Identity(),
+        Eigen::Vector3d( 0,0,0 )
+    ) );
+    optimizer.addVertex( pose );
+
+    // edges
+    int index = 1;
+    vector<EdgeProjectXYZRGBDPoseOnly*> edges;
+    for ( size_t i=0; i<pts1.size(); i++ )
+    {
+        EdgeProjectXYZRGBDPoseOnly* edge = new EdgeProjectXYZRGBDPoseOnly(
+            Eigen::Vector3d(pts2[i].x, pts2[i].y, pts2[i].z) );
+        edge->setId( index );
+        edge->setVertex( 0, dynamic_cast<g2o::VertexSE3Expmap*> (pose) );
+        edge->setMeasurement( Eigen::Vector3d(
+            pts1[i].x, pts1[i].y, pts1[i].z) );
+        edge->setInformation( Eigen::Matrix3d::Identity()*1e4 );
+        optimizer.addEdge(edge);
+        index++;
+        edges.push_back(edge);
+    }
+
+    chrono::steady_clock::time_point t1 = chrono::steady_clock::now();
+    optimizer.setVerbose( true );
+    optimizer.initializeOptimization();
+    optimizer.optimize(10);
+    chrono::steady_clock::time_point t2 = chrono::steady_clock::now();
+    chrono::duration<double> time_used = chrono::duration_cast<chrono::duration<double>>(t2-t1);
+    cout<<"optimization costs time: "<<time_used.count()<<" seconds."<<endl;
+
+    cout<<endl<<"after optimization:"<<endl;
+    cout<<"T="<<endl<<Eigen::Isometry3d( pose->estimate() ).matrix()<<endl;
+
+}
+```
+
+## 5-5.g2o强化
+### 1.框架的搭建步骤
+1. 代码实例
+```cpp
+typedef g2o::BlockSolver< g2o::BlockSolverTraits<3,1> > Block;  // 每个误差项优化变量维度为3，误差值维度为1
+
+/*************** 第1步：创建一个线性求解器LinearSolver*************************/
+Block::LinearSolverType* linearSolver = new g2o::LinearSolverDense<Block::PoseMatrixType>(); 
+
+
+/*************** 第2步：创建BlockSolver。并用上面定义的线性求解器初始化**********/
+Block* solver_ptr = new Block( linearSolver );      
+
+
+/*************** 第3步：创建总求解器solver。并从GN, LM, DogLeg 中选一个，再用上述块求解器BlockSolver初始化****/
+g2o::OptimizationAlgorithmLevenberg* solver = new g2o::OptimizationAlgorithmLevenberg( solver_ptr );
+
+
+/*************** 第4步：创建图优化的核心：稀疏优化器（SparseOptimizer）**********/
+g2o::SparseOptimizer optimizer;     // 图模型
+optimizer.setAlgorithm( solver );   // 设置求解器
+optimizer.setVerbose( true );       // 打开调试输出
+
+
+/*************** 第5步：定义图的顶点和边。并添加到SparseOptimizer中**********/
+CurveFittingVertex* v = new CurveFittingVertex(); //往图中增加顶点
+v->setEstimate( Eigen::Vector3d(0,0,0) );
+v->setId(0);
+optimizer.addVertex( v );
+for ( int i=0; i<N; i++ )    // 往图中增加边
+{
+  CurveFittingEdge* edge = new CurveFittingEdge( x_data[i] );
+  edge->setId(i);
+  edge->setVertex( 0, v );                // 设置连接的顶点
+  edge->setMeasurement( y_data[i] );      // 观测数值
+  edge->setInformation( Eigen::Matrix<double,1,1>::Identity()*1/(w_sigma*w_sigma) ); // 信息矩阵：协方差矩阵之逆
+  optimizer.addEdge( edge );
+}
+
+/*************** 第6步：设置优化参数，开始执行优化**********/
+optimizer.initializeOptimization();
+optimizer.optimize(100);    //设置迭代次数
+```
+
+2. 步骤
+   1. 创建一个线性求解器:LinearSolver。我们可以选择不同的求解方式来求解 $$H{\delta}x = -b $$,g2o中提供的求解方式有   
+      1. *LinearSolverCholmod* ：使用 sparse cholesky 分解法，继承自 LinearSolverCCS。
+      2. *LinearSolverCSparse*：使用 CSparse 法，继承自 LinearSolverCCS。
+      3. *LinearSolverPCG* ：使用 preconditioned conjugate gradient 法，继承自 LinearSolver。
+      4. *LinearSolverDense* ：使用 dense cholesky 分解法，继承自 LinearSolver。
+      5. *LinearSolverEigen*：依赖项只有 eigen，使用 eigen 中 sparse Cholesky 求解，因此编译好后可以方便的在其他地方使用，性能和 CSparse 差不多，继承自 LinearSolver。
+   2. 创建一个BlockSolver,并用上面的定义的线性求解器初始化。BlockSolver有2种定义方式
+      1. 固定变量的 solver。p代表pose的维度，l表示landmark的维度:
+         * >BlockSolverPL = BlockSolver<BlockSolverTraits<p, 1>>;
+       2. 可变尺寸的solver。Pose和Landmark在程序开始时并不能确定，所有参数都在中间过程被确定
+          * >BlockSolverX = BlockSolverPL<Eigen::Dynamic, Eigen::Dynamic>;  
+       3. 此外g2o还预定义了以下几种常用类型
+          1. BlockSolver_6_3 ：表示 pose 是 6 维，观测点是 3 维，用于 BA。
+          2. BlockSolver_7_3：在 BlockSolver_6_3 的基础上多了一个 scale。
+          3. BlockSolver_3_2：表示 pose 是 3 维，观测点是 2 维。
+   3. 创建总求解器solver, 并从GN/LM/DogLeg中选1个作为迭代策略，再用上述块求解器BlockSolver初始化.
+      1. >g2o::OptimizationAlgorithmGaussNewton
+      2. >g2o::OptimizationAlgorithmLevenberg
+      3. >g2o::OptimizationAlgorithmDogleg
+   4. 创建图优化的核心:稀疏优化器:SparseOptimizer
+      1. >创建稀疏优化器:g2o::SparseOptimizer optimizer
+      2. >设置求解方法:SparseOptimizer::setAlgorithm(OptimizationAlgorithm* algorithm);
+      3. >设置优化过程输出信息:SparseOptimizer::setVerbose(bool verbose);
+   5. 定义图的**顶点和边**，并添加到SparseOptimizer中
+   6. 设置优化参数，开始执行优化
+      1. >初始化:SparseOptimizer::initializeOptimization(HyperGraph::EdgeSet& eset)；
+      2. >设置迭代次数:SparseOptimizer::optimize(int iterations,bool online)；
+
+
+### 2.设置顶点和边
+#### 2-1.设置顶点
+1. BaseVertex有2个参数D/T, 这2个参数非常重要 
+   1. D是int类型，表示vertex的最小维度，例如3D空间中旋转是3维的，D = 3
+   2. T是待估计vertex的数据类型，例如用四元数表达三维旋转，则T为Quaternion类型
+
+2. 如何定义vertex
+   1. >在定义自己的vertex前，可以看下g2o本身定义的常用顶点类型
+   2. >g2o中常见的顶点类型
+```cpp
+ertexSE2 : public BaseVertex<3, SE2>  
+//2D pose Vertex, (x,y,theta)
+
+VertexSE3 : public BaseVertex<6, Isometry3> //Isometry3使欧式变换矩阵T，实质是4*4矩阵
+//6d vector (x,y,z,qx,qy,qz) (note that we leave out the w part of the quaternion)
+
+VertexPointXY : public BaseVertex<2, Vector2>
+VertexPointXYZ : public BaseVertex<3, Vector3>
+VertexSBAPointXYZ : public BaseVertex<3, Vector3>
+
+// SE3 Vertex parameterized internally with a transformation matrix and externally with its exponential map
+VertexSE3Expmap : public BaseVertex<6, SE3Quat>
+
+// SBACam Vertex, (x,y,z,qw,qx,qy,qz),(x,y,z,qx,qy,qz) (note that we leave out the w part of the quaternion.
+// qw is assumed to be positive, otherwise there is an ambiguity in qx,qy,qz as a rotation
+VertexCam : public BaseVertex<6, SBACam>
+
+// Sim3 Vertex, (x,y,z,qw,qx,qy,qz),7d vector,(x,y,z,qx,qy,qz) (note that we leave out the w part of the quaternion.
+VertexSim3Expmap : public BaseVertex<7, Sim3>
+```
+   3. 但是如果使用中发现我们没有可用的Vertex,那就需要自己定义了。一般来说定义Vertex需要重写这几个函数。
+      1. >请注意里面的oplusImpl函数，它非常重要，主要用于优化过程中的增量$${\Delta}x$$的计算。通过增量方程计算出增量后，通过这个函数对估计值进行调整，因此该函数的内容要重视
+```cpp
+//1.需要重写的函数
+virtual bool read(std::istream& is);
+virtual bool write(std::ostream& os) const;
+// 分别是读盘、存盘函数，一般情况下不需要进行读/写操作的话，仅仅声明一下就可以
+
+virtual void oplusImpl(const number_t* update);
+//顶点更新函数
+
+virtual void setToOriginImpl();
+//顶点重置函数，设定被优化变量的原始值。
+
+
+
+//2.定义顶点的基本格式
+class myVertex: public g2o::BaseVertex<Dim, Type>
+  {
+      public:
+      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+      myVertex(){}
+
+      virtual void read(std::istream& is) {}
+      virtual void write(std::ostream& os) const {}
+
+      virtual void setOriginImpl()
+{
+          _estimate = Type();
+      }
+      virtual void oplusImpl(const double* update) override
+{
+          _estimate += update;
+      }
+  }
+
+
+//3.实例
+class CurveFittingVertex: public g2o::BaseVertex<3, Eigen::Vector3d>
+{
+    public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW  // 字节对齐
+
+    virtual void setToOriginImpl() // 重置，设定被优化变量的原始值
+{
+        _estimate << 0,0,0;
+    }
+
+    virtual void oplusImpl( const double* update ) // 更新
+{
+        _estimate += Eigen::Vector3d(update);   //update强制类型转换为Vector3d
+    }
+    // 存盘和读盘：留空
+    virtual bool read( istream& in ) {}
+    virtual bool write( ostream& out ) const {}
+};
+//值得注意的是，优化变量更新不是所有时候都可以像上面2个一样直接+=就可以，这要看优化变量的类型
+
+```
+
+   4. 向图中添加顶点
+```cpp
+CurveFittingVertex* v = new CurveFittingVertex();
+v->setEstimate(Eigen::Vector3d(0, 0, 0));//设定初始值
+v->setId(0);//定义节点
+optimizer.addVertex(v);//把节点添加到图中
+
+```
+
+#### 2-2.设置边
+1. 图优化的边:BaseUnaryEdge，BaseBinaryEdge，BaseMultiEdge 分别表示一元边，两元边，多元边。顾名思义，一元边可以理解为一条边只连接一个顶点，两元边理解为一条边连接两个顶点（常见），多元边理解为一条边可以连接多个（3 个以上）顶点。以最常见的*2元边*为例分析下他们的参数:*D, E, VertexXi, VertexXj*:
+   1. D是int型，表示测量值的维度
+   2. E表示测量值的数据类型
+   3. VertexXi, VertexXj分别表示不同顶点的类型:BaseBinaryEdge<2, Vector2D, VertexSBAPointXYZ, VertexSE3Expmap>
+      1. 上面这行代码表示2元边，参数1是说测量值是2维的;参数2对应测量值的类型是Vector2D,, 参数3和4表示2个顶点也就是优化变量分别是3维点VertexSBAPointXYZ,和李群位姿VertexSE3Expmap
+2. 如何定义1个边
+* demo01
+```cpp
+//demo01.框架1
+//1.除了上面那行定义语句，还有复写一些重要的成员函数
+virtual bool read(std::istream& is);
+virtual bool write(std::ostream& os) const;
+// 分别是读盘、存盘函数，一般情况下不需要进行读/写操作的话，仅仅声明一下就可以
+
+virtual void computeError();
+// 非常重要，是使用当前顶点值计算的测量值与真实测量值之间的误差
+
+virtual void linearizeOplus();
+// 非常重要，是在当前顶点的值下，该误差对优化变量的偏导数，也就是Jacobian矩阵
+
+//2.除了上面4个函数，还有几个重要的成员变量和函数
+
+_measurement；// 存储观测值
+_error;  // 存储computeError() 函数计算的误差
+_vertices[]; // 存储顶点信息，比如二元边，_vertices[]大小为2
+//存储顺序和调用setVertex(int, vertex) 和设定的int有关（0或1）
+
+setId(int);  // 定义边的编号（决定了在H矩阵中的位置）
+setMeasurement(type);  // 定义观测值
+setVertex(int, vertex);  // 定义顶点
+setInformation();  // 定义协方差矩阵的逆
+
+
+```
+* demo02
+```cpp
+//demo02.框架2
+class myEdge: public g2o::BaseBinaryEdge<errorDim, errorType, Vertex1Type, Vertex2Type>
+  {
+      public:
+      EIGEN_MAKE_ALIGNED_OPERATOR_NEW      
+
+      myEdge(){}     
+      virtual bool read(istream& in) {}
+      virtual bool write(ostream& out) const {}      
+      virtual void computeError() override
+{
+          // ...
+          _error = _measurement - Something;
+      }    
+
+      virtual void linearizeOplus() override  // 求误差对优化变量的偏导数，雅克比矩阵
+{
+          _jacobianOplusXi(pos, pos) = something;
+          // ...         
+          /*
+          _jocobianOplusXj(pos, pos) = something;
+          ...
+          */
+      }      
+      private:
+      data
+  }
+```
+* demo03
+
+```cpp
+//demo03
+// （误差）边的模型    模板参数：观测值维度，类型，连接顶点类型
+class CurveFittingEdge: public g2o::BaseUnaryEdge<1,double,CurveFittingVertex>
+{
+public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+    CurveFittingEdge( double x ): BaseUnaryEdge(), _x(x) {}
+    // 计算曲线模型误差
+    void computeError()
+    {
+        const CurveFittingVertex* v = static_cast<const CurveFittingVertex*> (_vertices[0]);
+        const Eigen::Vector3d abc = v->estimate();
+        _error(0,0) = _measurement - std::exp( abc(0,0)*_x*_x + abc(1,0)*_x + abc(2,0) ) ;
+    }
+    virtual bool read( istream& in ) {}
+    virtual bool write( ostream& out ) const {}
+public:
+    double _x;  // x 值， y 值为 _measurement
+};
+```
+* demo04:3D-2D的PnP问题，也就是最小化重投影误差问题
+```cpp
+//demo04
+//继承自BaseBinaryEdge类，观测值为2维， 类型是Vector2D,顶点分别是三维点和李群位姿
+class G2O_TYPES_SBA_API EdgeProjectXYZ2UV: public BaseBinaryEdge<2, Vector2D,VertexSBAPointXYZ, VectexSE3Expmap>
+{
+public:
+
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
+    //1. 默认初始化
+    EdgeProjectXYZ2UV();
+
+    //2. 计算误差
+    void computeError()  {
+    //李群相机位姿v1
+    const VertexSE3Expmap* v1 = static_cast<const VertexSE3Expmap*>(_vertices[1]);
+    // 顶点v2
+    const VertexSBAPointXYZ* v2 = static_cast<const VertexSBAPointXYZ*>(_vertices[0]);
+    //相机参数
+    const CameraParameters * cam
+          = static_cast<const CameraParameters *>(parameter(0));
+    //误差计算，测量值减去估计值，也就是重投影误差obs-cam
+    //估计值计算方法是T*p,得到相机坐标系下坐标，然后在利用camera2pixel()函数得到像素坐标。
+    Vector2D obs(_measurement);
+        _error = obs - cam->cam_map(v1->estimate().map(v2->estimate()));
+      }
+    //3.线性增量函数，也就是雅克比矩阵的计算方法
+     virtual void linearizeOplus();
+     //4.相机参数
+     CameraParameters* _cam;
+     bool read(std::istream& is);
+     bool write(std::ostream& is) const;
+}
+```
+* demo05:往图中增加边
+```cpp
+//1元边
+// 往图中增加边
+for ( int i=0; i<N; i++ )
+{
+    CurveFittingEdge* edge = new CurveFittingEdge( x_data[i] );
+    edge->setId(i);
+    edge->setVertex( 0, v );                // 设置连接的顶点
+    edge->setMeasurement( y_data[i] );      // 观测数值
+    edge->setInformation( Eigen::Matrix<double,1,1>::Identity()*1/(w_sigma*w_sigma) ); // 信息矩阵：协方差矩阵之逆
+    optimizer.addEdge( edge );
+}
 ```
