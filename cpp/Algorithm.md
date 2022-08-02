@@ -2590,5 +2590,129 @@ int main()
     cout << endl;
 }
 ```
-### 2.栈OJe
+### 2.栈OJ
+#### 2-1.括号匹配
+![阔号匹配](../pictures/algorithm/Al-04栈oj-01括号匹配.jpg)
+```cpp
+#include <iostream>
+#include <stdlib.h>
+#include <time.h>
+#include <stack>
+#include <string>
+using namespace std;
+bool isValid(string s){
+    stack<char> cs;
+    for (char ch : s)
+    {
+        if (ch == '(' || ch == '[' || ch == '{'){
+            cs.push(ch);
+        }
+        else{
+            //遇到右括号
+            char cmp = cs.top();//获取栈顶的字符
+            cs.pop();//把栈顶的字符pop出来,若是右括号比左括号多，也不匹配
+            //出栈的左括号和遍历的右括号不匹配
+            if (ch == ')' && cmp != '('
+                || ch == ']' && cmp != '[' 
+                || ch == '}' && cmp != '{')
+            {
+                return false;
+            }
+        }
+    }
+    //栈里面的括号没有匹配完
+    return cs.empty();//若是空的话，则括号是匹配的，否则不匹配
+}
 
+int main(){
+    string s = "{[(({{[]}}))]}";
+    if (isValid(s)){
+        cout << "匹配" << endl;
+    }
+    else
+    {
+        cout << "不匹配" << endl;
+    }
+}
+
+/**
+ * @brief 
+ * 1.遍历整个stack,将string中左括号push入栈
+ * 2.获取栈顶元素并让其出栈，与右括号进行比较，若是不匹配就返回false
+ * 3.遍历完后，返回s.empty(), 若是不为空，则必定存在不匹配的括号
+ * 
+ */
+```
+#### 2-2.逆波兰表达式
+![表达式](../pictures/algorithm/Al-04栈oj-02逆波兰表达式.jpg)
+```cpp
+#include <iostream>
+#include <string>
+#include <vector>
+#include <stack>
+#include <stdlib.h>
+#include <time.h>
+using namespace std;
+bool isNumber(string& token)
+{
+    return !(token == "+" || token == "-" || token == "*" || token == "/");//不为操作数，则为true,为操作数，则为false
+}
+int evalRPN(vector<string>& tokens)
+{
+    stack<int> stk;
+    int n = tokens.size();
+    for (int i = 0; i < n; i++)
+    {
+        string& token = tokens[i];
+        //将token作为tokens[i]的引用，改变token[i]就会改变token的值
+        if (isNumber(token)){
+            stk.push(atoi(token.c_str()));
+            //atoi:ascii to integer:将字符串转换为整型数的函数
+            //c_str()是string类中的函数,它返回当前字符串的首字符地址
+        }else{
+            int num2 = stk.top();//num2是栈顶元素，num1为栈顶-1个元素
+            stk.pop();
+            int num1 = stk.top();
+            stk.pop();
+            //将num1 和 num2弹出
+            switch(token[0])//取出第i个string的第1个字符
+            //将表达式的值和case i后的常量相比，若相等则执行case i后面的语句，必须要加break才能只执行1个case语句，否则会执行case后的所有语句
+            {
+                case '+':
+                    stk.push(num1 + num2);
+                    break;
+                case '-':
+                    stk.push(num1 - num2);
+                    break;
+                case '*':
+                    stk.push(num1 * num2);
+                    break;
+                case '/':
+                    stk.push(num1 / num2);
+                    break;
+            }
+        }
+    }
+    return stk.top();
+}
+
+
+int main()
+{
+    vector<string> v = {"10", "6", "9", "3", "+" };//n个数，必须有n-1个运算符, 才能使得栈元素为空
+    int a = evalRPN(v);
+    cout << a << endl;
+}
+
+// #include <iostream>
+// using namespace std;
+ 
+// int main ()
+// {
+//     int i = 1;
+//     // int b = i;改变i不会改变b
+//     int& b = i;//改变i会改变b
+//     cout << b << endl;
+//     i = 100;
+//     cout << b << endl;
+// }
