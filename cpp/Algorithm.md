@@ -2412,4 +2412,183 @@ int main()
     dlink.show();
 
 }
-```                                                                                                             
+```
+
+## 2-5.栈
+### 1.栈的相关概念
+1. 特点： *先进后出，后进先出*
+2. 分类：顺序栈(依赖数组实现)，链式栈(依赖链表实现)
+3. demo
+
+![定义](../pictures/algorithm/Al-04顺序栈-01顺序栈定义.jpg)
+```cpp
+//顺序栈
+#include <iostream>
+using namespace std;
+//顺序栈 STL: push, pop, top, empty, size
+class SeqStack
+{
+private:
+    int* mpStack;//顺序栈的初始地址
+    int mtop;//栈顶位置
+    int mcap;//栈的空间大小
+public:
+    SeqStack(int size = 10)
+        : mtop(0)
+        , mcap(size)
+    {
+        mpStack = new int[mcap];
+    }
+    ~SeqStack()
+    {
+        delete[] mpStack;
+        mpStack = NULL;
+    }
+private:    
+    void expand(int size)
+    {
+        int* p = new int[size];//申请一片新的内存空间
+        memcpy(p, mpStack, mtop * sizeof(int));//把mpStack中的元素以mtop * sizeof(int)字节大小拷贝过去
+        delete[] mpStack;//释放掉原来的旧内存
+        mpStack = p;//让成员变量指向新的内存
+        mcap = size;//容量还是size, 但是mtop还是不变
+    }
+public: 
+    //1.入栈
+    void push(int val)
+    {
+        if (mtop == mcap)//千万不要写了if就要加else，否则mtop++就会不执行
+        {
+            //栈扩容
+            expand(2 * mcap);//expand要写成私有接口,每次扩容为原来的2倍
+        }
+        mpStack[mtop++] = val;//先mpStack[mTop]后++
+    }
+    //2.出栈
+    void pop()
+    {
+        if (mtop == 0)
+        {
+            throw "stack is empty!";
+        }
+        mtop--;//访问不到相当于出栈
+    }
+    //3.获取栈顶元素
+    int top() const//这是一个只读的函数
+    {
+        if (mtop == 0)
+        {
+            throw "stack is empty!";//不要写return 0,否则会被误认为是返回栈顶
+        }
+        return mpStack[mtop - 1];//mtop指向当前元素的下一个元素，所以要mtop - 1
+    }
+    //4.栈空
+    bool empty() const
+    {
+        return mtop == 0;
+    }
+    //5.记录栈元素的个数
+    int size() const { return mtop;}
+
+};
+
+
+int main()
+{
+    int arr[] = {1, 2, 3, 5, 6}; 
+    SeqStack s;
+    for (int v : arr)
+    {
+        s.push(v);
+    }
+    while (!s.empty())
+    {
+        cout << s.top() << " ";//访问元素只能通过控制top来实现
+        s.pop();//打印栈顶，依次出栈
+    }
+    cout << endl;
+}
+```
+
+```cpp
+#include <iostream>
+#include <stdlib.h>
+#include <time.h>
+using namespace std;
+class LinkStack
+{
+private:
+   struct Node
+   {
+      Node(int data = 0) : data_(data), next_(NULL){}
+      int data_;
+      Node* next_;   
+   };
+   Node* head_;
+public:
+   LinkStack()
+   {
+      head_ = new Node;
+   }
+   ~LinkStack()
+   {
+      Node* p = head_;
+      while (p != NULL){
+         head_ = head_->next_;
+         delete p;
+         p = head_;
+      }
+   }
+public:
+   //1.入栈(无需考虑满的问题，可以无限插入)
+   //把链表头节点后面，第一个有效节点的位置，当作栈顶位置,类似于头插法,后面插入的节点都是位于栈顶
+   void push(int val)
+   {
+      Node* node = new Node(val);
+      node->next_ = head_->next_;
+      head_->next_ = node;
+   }
+   //2.出栈
+   void pop()
+   {
+      if (head_->next_ == NULL)
+      {
+         throw "stack is empty";
+      }
+      Node* p = head_->next_;
+      head_->next_ = p->next_;//不必删除
+   }
+   //3.获取栈顶元素
+   int top() const
+   {
+      if (head_->next_ == NULL)
+      {
+         throw "stack is empty";//抛出后直接结束程序
+      }
+      return head_->next_->data_;//只要能下来， head_->next_一定不为空
+   }
+   //4.判空
+   bool empty() const
+   {
+      return head_->next_ == NULL;
+   }
+};
+
+int main()
+{
+    int arr[] = {1, 2, 3, 5, 6}; 
+    LinkStack s;
+    for (int v : arr)
+    {
+        s.push(v);
+    }
+    while (!s.empty())
+    {
+        cout << s.top() << " ";//访问元素只能通过控制top来实现
+        s.pop();//打印栈顶，依次出栈
+    }
+    cout << endl;
+}
+```
+### 2.栈OJe
+
